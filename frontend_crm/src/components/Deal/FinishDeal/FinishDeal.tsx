@@ -243,7 +243,7 @@ export default function FinishDeal({
     }
 
     fetchDocumentationCost();
-  }, [isOpen, deal?.id, token]);
+  }, [isOpen, deal?.id, token, API]);
 
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
@@ -262,7 +262,7 @@ export default function FinishDeal({
     }
 
     fetchNote();
-  }, [isOpen, deal?.id, token]);
+  }, [isOpen, deal?.id, token, API]);
 
   if (!isOpen) return null;
 

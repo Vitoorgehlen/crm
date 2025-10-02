@@ -242,7 +242,7 @@ export default function Clients() {
 
     const timeout = setTimeout(fetchClientsData, 150);
     return () => clearTimeout(timeout);
-  }, [token, isLoading, search, teamClients, router]);
+  }, [token, isLoading, search, teamClients, router, fetchClientsData]);
 
   return (
     <div className={styles.page}>

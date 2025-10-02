@@ -377,7 +377,6 @@ export default function ClosedDeal({
       });
 
       if (!res.ok) throw new Error("Erro ao apagar valor de documentação");
-      const data = await res.json();
       setDocCost((prev) => prev.filter((item) => item.id !== docId));
     } catch (err) {
       console.error(err);
@@ -446,7 +445,6 @@ export default function ClosedDeal({
       });
 
       if (!res.ok) throw new Error("Erro ao apagar nota");
-      const data = await res.json();
       setNote((prev) => prev.filter((item) => item.id !== noteId));
     } catch (err) {
       console.error(err);
@@ -477,7 +475,7 @@ export default function ClosedDeal({
     return () => {
       mounted = false;
     };
-  }, [isOpen, token, isLoading]);
+  }, [isOpen, token, isLoading, API]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -553,7 +551,7 @@ export default function ClosedDeal({
     }
 
     fetchDocumentationCost();
-  }, [isOpen, deal?.id, token]);
+  }, [isOpen, deal?.id, token, API]);
 
   useEffect(() => {
     const total = docCost.reduce(
@@ -580,7 +578,7 @@ export default function ClosedDeal({
     }
 
     fetchNote();
-  }, [isOpen, deal?.id, token]);
+  }, [isOpen, deal?.id, token, API]);
 
   if (!isOpen) return null;
 

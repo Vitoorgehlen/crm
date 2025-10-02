@@ -33,7 +33,7 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error(data.error || "Erro ao fazer login");
 
-      const { token, userType } = data;
+      const { userType } = data;
       login(data.token, userType);
 
       if (userType === "user") {

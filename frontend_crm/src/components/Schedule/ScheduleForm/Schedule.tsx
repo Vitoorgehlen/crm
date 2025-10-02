@@ -21,7 +21,6 @@ export default function ScheduleForm({
   day,
   schedule,
   onClose,
-  onCreate,
   onDelete,
 }: ScheduleFormProps) {
   const router = useRouter();
@@ -188,6 +187,7 @@ export default function ScheduleForm({
         if (!mounted) return;
         setDeals(data);
       } catch (err) {
+        console.log(err);
         setError("Erro ao carregar lista de clientes");
       }
     }
@@ -196,7 +196,7 @@ export default function ScheduleForm({
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [isLoading, token, router, API]);
 
   useEffect(() => {
     if (isOpen) {

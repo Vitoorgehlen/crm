@@ -13,7 +13,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DeleteRequest() {
   const router = useRouter();
-  const { token, permissions, isLoading, logout } = useAuth();
+  const { token, permissions, isLoading } = useAuth();
   const [isRequestClient, setIsRequestClient] = useState(true);
   const [isRequestDeal, setIsRequestDeal] = useState(false);
 
@@ -216,7 +216,7 @@ export default function DeleteRequest() {
                       ? styles.btnSettingActive
                       : styles.btnSetting
                   }`}
-                  onClick={(e) => {
+                  onClick={() => {
                     setIsRequestClient(true);
                     setIsRequestDeal(false);
                   }}
@@ -231,7 +231,7 @@ export default function DeleteRequest() {
                         ? styles.btnSettingActive
                         : styles.btnSetting
                     }`}
-                    onClick={(e) => {
+                    onClick={() => {
                       setIsRequestClient(false);
                       setIsRequestDeal(true);
                     }}

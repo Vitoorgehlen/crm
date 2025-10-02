@@ -1,33 +1,46 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
 import styles from "./page.module.css";
-import { RolePermissions, RoleLabels, ConfigPermissionsProps, RolePermission, PermissionState, PermissionLabels, PermissionEnum} from "@/types";
+import {
+  RolePermissions,
+  RoleLabels,
+  ConfigPermissionsProps,
+  RolePermission,
+  PermissionState,
+  PermissionLabels,
+  PermissionEnum,
+} from "@/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Permissions({userRole, onClose}: ConfigPermissionsProps) {
+export default function Permissions({
+  userRole,
+  onClose,
+}: ConfigPermissionsProps) {
   const { token } = useAuth();
-  
-  const [usersRoles, setUsersRoles] = useState<RolePermission[]>([]);
-  const [permissionsByRole, setPermissionsByRole] = useState<Record<string, PermissionState>>({});
 
-  const [loading, setLoading] = useState<'save' | 'reset' | null>(null);
+  const [usersRoles, setUsersRoles] = useState<RolePermission[]>([]);
+  const [permissionsByRole, setPermissionsByRole] = useState<
+    Record<string, PermissionState>
+  >({});
+
+  const [loading, setLoading] = useState<"save" | "reset" | null>(null);
 
   useEffect(() => {
-    if (userRole === 'ADMIN' && token) {
+    if (userRole === "ADMIN" && token) {
       async function fetchUserRoles() {
-        setLoading('save');
+        setLoading("save");
         try {
           const res = await fetch(`${API}/role-permission`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           const data = await res.json();
-          if (!res.ok) throw new Error(data.error || 'Erro ao buscar regras dos usuários');
+          if (!res.ok)
+            throw new Error(data.error || "Erro ao buscar regras dos usuários");
           setUsersRoles(data);
         } catch (err: unknown) {
           console.error(err);
@@ -38,10 +51,10 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
 
       fetchUserRoles();
     }
-  }, [userRole, token])
+  }, [userRole, token, API]);
 
-  useEffect(() => {      
-    if (userRole === 'ADMIN' && token) {
+  useEffect(() => {
+    if (userRole === "ADMIN" && token) {
       if (usersRoles.length > 0) {
         const grouped: Record<string, PermissionState> = {};
 
@@ -54,7 +67,7 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
             state[perm] = rolePerm ? rolePerm.allowed : false;
           });
           grouped[role] = state;
-        }); 
+        });
         setPermissionsByRole(grouped);
       }
     }
@@ -71,7 +84,7 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
   };
 
   const handleSavePermissions = async () => {
-    setLoading('save');
+    setLoading("save");
     try {
       const currentMap: Record<string, Record<string, boolean>> = {};
       usersRoles.forEach((r: any) => {
@@ -84,7 +97,7 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       const roles = Object.keys(permissionsByRole);
       const requests: Promise<Response>[] = [];
 
-       for (const role of roles) {
+      for (const role of roles) {
         const desired = permissionsByRole[role] || {};
         const updates: { permission: string; allowed: boolean }[] = [];
 
@@ -99,14 +112,16 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
 
         if (updates.length === 0) continue;
 
-        requests.push(fetch(`${API}/role-permission`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ role, updates }),
-        }));
+        requests.push(
+          fetch(`${API}/role-permission`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({ role, updates }),
+          })
+        );
       }
 
       if (requests.length === 0) {
@@ -119,7 +134,9 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       for (const res of responses) {
         if (!res.ok) {
           const errBody = await res.json().catch(() => ({}));
-          const msg = errBody?.error || `Erro ao salvar permissões (status ${res.status})`;
+          const msg =
+            errBody?.error ||
+            `Erro ao salvar permissões (status ${res.status})`;
           throw new Error(msg);
         }
       }
@@ -128,7 +145,8 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
         headers: { Authorization: `Bearer ${token}` },
       });
       const newData = await refetch.json();
-      if (!refetch.ok) throw new Error(newData?.error || "Erro ao recarregar regras");
+      if (!refetch.ok)
+        throw new Error(newData?.error || "Erro ao recarregar regras");
 
       setUsersRoles(newData);
 
@@ -136,13 +154,14 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       Object.keys(RolePermissions).forEach((r) => {
         const state: PermissionState = {};
         Object.values(PermissionEnum).forEach((p) => {
-          const item = newData.find((x: any) => x.role === r && x.permission === p);
+          const item = newData.find(
+            (x: any) => x.role === r && x.permission === p
+          );
           state[p] = item ? !!item.allowed : false;
         });
         grouped[r] = state;
       });
       setPermissionsByRole(grouped);
-
     } catch (err: unknown) {
       console.error(err);
     } finally {
@@ -151,15 +170,22 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
   };
 
   const handleResetPermissions = async () => {
-    setLoading('reset');
+    setLoading("reset");
     try {
       const res = await fetch(`${API}/role-permission/reset`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      if (!res.ok) {
+        const errBody = await res.json().catch(() => ({}));
+        throw new Error(errBody?.error || "Erro ao resetar permissões");
+      }
+
       const refetch = await fetch(`${API}/role-permission`, {
         headers: { Authorization: `Bearer ${token}` },
       });
+
       const newData = await refetch.json();
       setUsersRoles(newData);
 
@@ -167,13 +193,14 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       Object.keys(RolePermissions).forEach((r) => {
         const state: PermissionState = {};
         Object.values(PermissionEnum).forEach((p) => {
-          const item = newData.find((x: any) => x.role === r && x.permission === p);
+          const item = newData.find(
+            (x: any) => x.role === r && x.permission === p
+          );
           state[p] = item ? !!item.allowed : false;
         });
         grouped[r] = state;
       });
       setPermissionsByRole(grouped);
-
     } catch (err: unknown) {
       console.error(err);
     } finally {
@@ -182,9 +209,13 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
   };
 
   return (
-    <form className={styles.overlay} 
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
-      <div className={styles.labelsSettingPermissions}>                
+    <form
+      className={styles.overlay}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div className={styles.labelsSettingPermissions}>
         {Object.entries(permissionsByRole).map(([role, state]) => (
           <div key={role} className={styles.btnPermissions}>
             <h3>{RoleLabels[role] || role}</h3>
@@ -198,10 +229,18 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
                 >
                   <p>{PermissionLabels[perm] || perm}</p>
                   <div className={styles.slideBtn}>
-                    <div className={allowed ? styles.slideBtnOff : styles.slideBtnOnOff}>
+                    <div
+                      className={
+                        allowed ? styles.slideBtnOff : styles.slideBtnOnOff
+                      }
+                    >
                       Off
                     </div>
-                    <div className={allowed ? styles.slideBtnOn : styles.slideBtnOff }>
+                    <div
+                      className={
+                        allowed ? styles.slideBtnOn : styles.slideBtnOff
+                      }
+                    >
                       On
                     </div>
                   </div>
@@ -212,15 +251,27 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
         ))}
       </div>
       <div className={styles.btnsEnd}>
-        <button 
-        className={styles.btnSave}
-        onClick={handleResetPermissions} type="button">
-          {loading === 'reset' ? <h3>Resetando...</h3> : <h3>Resetar as permissões</h3>}
+        <button
+          className={styles.btnSave}
+          onClick={handleResetPermissions}
+          type="button"
+        >
+          {loading === "reset" ? (
+            <h3>Resetando...</h3>
+          ) : (
+            <h3>Resetar as permissões</h3>
+          )}
         </button>
-        <button 
-        className={styles.btnSave}
-        onClick={handleSavePermissions} type="button">
-          {loading === 'save' ? <h3>Salvando...</h3> : <h3>Salvar as permissões</h3>}
+        <button
+          className={styles.btnSave}
+          onClick={handleSavePermissions}
+          type="button"
+        >
+          {loading === "save" ? (
+            <h3>Salvando...</h3>
+          ) : (
+            <h3>Salvar as permissões</h3>
+          )}
         </button>
       </div>
     </form>

@@ -140,7 +140,7 @@ export default function Deals() {
     } finally {
       setLoading(false);
     }
-  }, [token, isLoading, search, teamDeals, router]);
+  }, [token, search, teamDeals]);
 
   useEffect(() => {
     let mounted = true;
@@ -171,7 +171,7 @@ export default function Deals() {
     return () => {
       mounted = false;
     };
-  }, [token, isLoading, router]);
+  }, [token, isLoading, router, API]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -182,7 +182,7 @@ export default function Deals() {
 
     const t = setTimeout(fetchDealsData, 150);
     return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, token]);
+  }, [fetchDealsData, isLoading, token, router]);
 
   return (
     <div className={styles.page}>
@@ -268,7 +268,7 @@ export default function Deals() {
                   </header>
 
                   <div className={styles.methodWorkflow}>
-                    {steps.map((step, idx) => {
+                    {steps.map((step) => {
                       const columnDeals = dealsForMethod.filter(
                         (d) => d.currentStep === step
                       );

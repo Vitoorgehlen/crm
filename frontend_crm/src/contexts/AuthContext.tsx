@@ -82,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedToken && savedUserType) {
       setToken(savedToken);
       setUserType(savedUserType);
+      if (savedUserType === "user") fetchPermissions(savedToken);
     }
     setIsLoading(false);
   }, []);

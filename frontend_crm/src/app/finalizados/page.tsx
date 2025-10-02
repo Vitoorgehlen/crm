@@ -347,7 +347,7 @@ export default function FinishDeals() {
     } finally {
       setLoading(false);
     }
-  }, [token, isLoading, search, teamDeals, router]);
+  }, [token, search, teamDeals]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -358,7 +358,7 @@ export default function FinishDeals() {
 
     const t = setTimeout(fetchDealsData, 150);
     return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, token]);
+  }, [fetchDealsData, isLoading, token, router]);
 
   useEffect(() => {
     if (yearsSortedDesc.length > 0) {

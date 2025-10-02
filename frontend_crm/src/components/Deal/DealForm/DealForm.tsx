@@ -121,6 +121,7 @@ export default function DealForm({
       if (mode === "create") clearForm();
       onClose();
     } catch (err) {
+      console.log(err);
       setError("Erro ao enviar formuário");
     } finally {
       setLoading(null);
@@ -211,6 +212,7 @@ export default function DealForm({
         if (!mounted) return;
         setClients(data);
       } catch (err) {
+        console.log(err);
         setError("Erro ao carregar lista de clientes");
       } finally {
         setLoading(null);
@@ -221,7 +223,7 @@ export default function DealForm({
     return () => {
       mounted = false;
     };
-  }, [clientsProp]);
+  }, [isLoading, token, router, clientsProp, API]);
 
   useEffect(() => {
     if (deal) {
@@ -259,7 +261,7 @@ export default function DealForm({
     }
 
     fetchNote();
-  }, [isOpen, deal?.id, token]);
+  }, [isOpen, deal?.id, token, API]);
 
   if (!isOpen) return null;
 
@@ -286,7 +288,7 @@ export default function DealForm({
                   mode === "create" ? styles.closeBtn : styles.closeBtnEdit
                 }
                 type="button"
-                onClick={(e) => onClose()}
+                onClick={() => onClose()}
               >
                 <MdClose />
               </button>
@@ -535,7 +537,7 @@ export default function DealForm({
                   <button
                     className={styles.btnDelete}
                     type="button"
-                    onClick={(e) => deleteDeal()}
+                    onClick={() => deleteDeal()}
                   >
                     {loading === "del" ? "Apagando..." : "Apagar"}
                   </button>

@@ -172,7 +172,7 @@ export default function ScheduleLayout() {
     }
 
     fetchSchedules();
-  }, [selectedDay]);
+  }, [isLoading, token, router, selectedDay, API]);
 
   return (
     <div className={styles.calendar}>

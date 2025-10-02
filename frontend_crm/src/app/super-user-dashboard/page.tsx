@@ -30,7 +30,6 @@ export default function SuperUserPage() {
   const [companyUsers, setCompanyUsers] = useState<number | undefined>(
     undefined
   );
-  const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isOpenCreateUsers, setIsOpenCreateUsers] = useState(false);
 
@@ -195,7 +194,7 @@ export default function SuperUserPage() {
     };
 
     fetchCompanies();
-  }, [token]);
+  }, [token, API]);
 
   useEffect(() => {
     if (!selectedCompany) {

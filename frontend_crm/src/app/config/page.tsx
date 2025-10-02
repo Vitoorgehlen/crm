@@ -7,7 +7,6 @@ import {
   MdOutlinePowerOff,
   MdOutlineEdit,
   MdDeleteForever,
-  MdAutoDelete,
 } from "react-icons/md";
 
 import {
@@ -127,7 +126,9 @@ export default function Config() {
     }
 
     fetchMe();
-  }, [isLoading, token, router]);
+    console.log("User:", user);
+    console.log("Permissions:", permissions);
+  }, [isLoading, token, router, fetchMe]);
 
   return (
     <div className={styles.page}>
@@ -147,7 +148,7 @@ export default function Config() {
               className={`${
                 isConfigUser ? styles.btnSettingActive : styles.btnSetting
               }`}
-              onClick={(e) => {
+              onClick={() => {
                 setIsConfigUser(true);
                 setIsConfigTeam(false);
                 setIsOpenPermissions(false);
@@ -161,7 +162,7 @@ export default function Config() {
                 className={`${
                   isConfigTeam ? styles.btnSettingActive : styles.btnSetting
                 }`}
-                onClick={(e) => {
+                onClick={() => {
                   setIsConfigUser(false);
                   setIsConfigTeam(true);
                   setIsOpenPermissions(false);
@@ -178,7 +179,7 @@ export default function Config() {
                     ? styles.btnSettingActive
                     : styles.btnSetting
                 }`}
-                onClick={(e) => {
+                onClick={() => {
                   setIsConfigUser(false);
                   setIsConfigTeam(false);
                   setIsOpenPermissions(true);
