@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma/client";
+import { prisma } from "../prisma-client";
 import { checkUserPermission } from './rolePermissionRepository';
 
 // Pega todos os DealShare que é do User

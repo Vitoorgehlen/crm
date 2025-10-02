@@ -1,4 +1,4 @@
-import { prisma } from "../../prisma/client";
+import { prisma } from "../prisma-client";
 import { Prisma, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { isEmail } from 'validator';
