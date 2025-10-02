@@ -14,6 +14,7 @@ import dealShareRoutes from './routes/dealShareRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import tokenRoutes from './routes/tokenRoutes';
 
+const clientUrl = process.env.CLIENT_URL
 class App {
   public app: Application;
 
@@ -25,7 +26,7 @@ class App {
 
   middlewares() {
     this.app.use(cors({
-      origin: 'http://localhost:3000',
+      origin: clientUrl,
       credentials: true
     }));
     this.app.use(express.urlencoded({ extended: true }));
