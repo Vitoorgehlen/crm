@@ -107,8 +107,6 @@ export default function DealForm({
         setError("");
     }
 
-    if (!isOpen) return null;
-
     const handleSubmit = async (
         e: React.FormEvent, 
         submitFunction: (payload: Partial<Deal>) => Promise<void> | void,
@@ -246,6 +244,8 @@ export default function DealForm({
           setLoading(null);
         }
     };
+
+    if (!isOpen) return null;
 
   return (
     <form className={mode === 'create' ? styles.overlay : styles.overlayEdit} 

@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,41 +6,44 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FaUserEdit, FaUsersCog } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import { Client, ClientDeletedRequest, Deal, User } from "@/types";
+import { ClientDeletedRequest, Deal, User } from "@/types";
 import { formatDateForCards } from "@/utils/dateUtils";
-
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DeleteRequest() {
   const router = useRouter();
-  const { token, permissions, isLoading, logout} = useAuth();
+  const { token, permissions, isLoading, logout } = useAuth();
   const [isRequestClient, setIsRequestClient] = useState(true);
   const [isRequestDeal, setIsRequestDeal] = useState(false);
-  
-  const [clientRequest, setClientRequest] = useState<ClientDeletedRequest[]>([]);
+
+  const [clientRequest, setClientRequest] = useState<ClientDeletedRequest[]>(
+    []
+  );
   const [dealRequest, setDealRequest] = useState<Deal[]>([]);
 
-  const [loading, setLoading] = useState<'read' | 'canc' | 'del' | null>(null);
-  const [error, setError] = useState('');
+  const [loading, setLoading] = useState<"read" | "canc" | "del" | null>(null);
 
   useEffect(() => {
     if (isLoading) return;
-    if (!token) { router.push('/login'); return; }
-    
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
     fetchDeleteRequest();
-  }, [isLoading, token, router])
+  }, [isLoading, token, router]);
 
   async function fetchClientRequest() {
-    setLoading('read');
+    setLoading("read");
     try {
       const res = await fetch(`${API}/clients-deleted-request`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao buscar clientes');
-      console.log('clients-deleted-request parsed:', data);
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
+      console.log("clients-deleted-request parsed:", data);
       const clients = Array.isArray(data) ? data : data?.clients ?? [];
       setClientRequest(clients);
     } catch (err: unknown) {
@@ -51,14 +54,14 @@ export default function DeleteRequest() {
   }
 
   async function fetchDealRequest() {
-    setLoading('read');
+    setLoading("read");
     try {
       const res = await fetch(`${API}/deals-deleted-request`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao buscar negociações');
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar negociações");
       const deals = Array.isArray(data) ? data : data?.deals ?? [];
       setDealRequest(deals);
     } catch (err: unknown) {
@@ -74,16 +77,20 @@ export default function DeleteRequest() {
   }
 
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
-    const confirmDelete = window.confirm(`Tem certeza que deseja excluir ${client.name}?`)
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir ${client.name}?`
+    );
     if (!confirmDelete) return;
-    
+
     if (client.deals?.length) {
-      const confirmDelete = window.confirm(`${client.name} possui ${client.deals?.length} negociações em aberto`)
+      const confirmDelete = window.confirm(
+        `${client.name} possui ${client.deals?.length} negociações em aberto`
+      );
       if (!confirmDelete) return;
     }
-    
+
     if (loading !== null) return;
-    setLoading('del');
+    setLoading("del");
     try {
       const res = await fetch(`${API}/clients/${client.id}`, {
         method: "DELETE",
@@ -92,30 +99,25 @@ export default function DeleteRequest() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao excluir cliente";
-        setError(msg);
-        return;
-      }
-      
-      setError("");
+
+      if (!res.ok) return;
+
       await fetchClientRequest();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar o cliente");
     } finally {
       setLoading(null);
     }
   };
 
   const rejectedRequestClient = async (client: ClientDeletedRequest) => {
-    const confirmDelete = window.confirm(`Cancelar solicitação para excluir ${client.name}?`)
+    const confirmDelete = window.confirm(
+      `Cancelar solicitação para excluir ${client.name}?`
+    );
     if (!confirmDelete) return;
-    
+
     if (loading !== null) return;
-    setLoading('canc');
+    setLoading("canc");
     try {
       const res = await fetch(`${API}/clients/${client.id}`, {
         method: "PUT",
@@ -123,36 +125,31 @@ export default function DeleteRequest() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           deleteRequest: false,
           deleteRequestBy: null,
-          deleteRequestAt: null
+          deleteRequestAt: null,
         }),
       });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao atualizar cliente";
-        setError(msg);
-        return;
-      }
-      
-      setError("");
+
+      if (!res.ok) return;
+
       await fetchClientRequest();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao atualizar o cliente");
     } finally {
       setLoading(null);
     }
   };
 
   const approvedRequestDeal = async (deal: Deal) => {
-    const confirmDelete = window.confirm(`Tem certeza que deseja excluir ${deal.client?.name}?`)
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir ${deal.client?.name}?`
+    );
     if (!confirmDelete) return;
-    
+
     if (loading !== null) return;
-    setLoading('del');
+    setLoading("del");
     try {
       const res = await fetch(`${API}/deal/${deal.id}`, {
         method: "DELETE",
@@ -161,29 +158,24 @@ export default function DeleteRequest() {
           Authorization: `Bearer ${token}`,
         },
       });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao excluir negociação";
-        setError(msg);
-        return;
-      }
-      
-      setError("");
+
+      if (!res.ok) return;
+
       await fetchDealRequest();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar a negociação");
     } finally {
       setLoading(null);
     }
   };
 
   const rejectedRequestDeal = async (client: Deal) => {
-    const confirmDelete = window.confirm(`Cancelar solicitação para excluir ${client.client?.name}?`)
+    const confirmDelete = window.confirm(
+      `Cancelar solicitação para excluir ${client.client?.name}?`
+    );
     if (!confirmDelete) return;
-    
-    setLoading('canc');
+
+    setLoading("canc");
     try {
       const res = await fetch(`${API}/deals/${client.id}`, {
         method: "PUT",
@@ -191,154 +183,171 @@ export default function DeleteRequest() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           deleteRequest: false,
           deleteRequestBy: null,
-          deleteRequestAt: null
-         }),
+          deleteRequestAt: null,
+        }),
       });
-      
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao atualizar a negociação";
-        setError(msg);
-        return;
-      }
-      
-      setError("");
+
+      if (!res.ok) return;
+
       await fetchDealRequest();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao atualizar a negociação");
     } finally {
       setLoading(null);
     }
   };
 
-
   return (
     <div className={styles.page}>
-      {permissions.includes('ALL_DEAL_DELETE') && <>
-      <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Apagar{isRequestClient ? ' Clientes' : ' Negociações'}</h1>
-        </div>
+      {permissions.includes("ALL_DEAL_DELETE") && (
+        <>
+          <main className={styles.main}>
+            <div className={styles.header}>
+              <h1>Apagar{isRequestClient ? " Clientes" : " Negociações"}</h1>
+            </div>
 
-        <div className={styles.headerContent}>
-          <div className={styles.headerIcons}>
-          <button 
-            className={`${isRequestClient ? styles.btnSettingActive : styles.btnSetting}`}
-            onClick={(e) => {
-              setIsRequestClient(true);
-              setIsRequestDeal(false);
-              
-            }}
-            >
-            <FaUserEdit />
-            <h3>Clientes</h3>
-          </button>
-          {permissions.includes('USER_UPDATE') && 
-            <button 
-              className={`${isRequestDeal ? styles.btnSettingActive : styles.btnSetting}`}
-              onClick={(e) => {
-                setIsRequestClient(false);
-                setIsRequestDeal(true);
-              }}
-            >
-              <FaUsersCog  />
-              <h3>Negociações</h3>
-            </button>
-          }
-          </div>
-        </div>
+            <div className={styles.headerContent}>
+              <div className={styles.headerIcons}>
+                <button
+                  className={`${
+                    isRequestClient
+                      ? styles.btnSettingActive
+                      : styles.btnSetting
+                  }`}
+                  onClick={(e) => {
+                    setIsRequestClient(true);
+                    setIsRequestDeal(false);
+                  }}
+                >
+                  <FaUserEdit />
+                  <h3>Clientes</h3>
+                </button>
+                {permissions.includes("USER_UPDATE") && (
+                  <button
+                    className={`${
+                      isRequestDeal
+                        ? styles.btnSettingActive
+                        : styles.btnSetting
+                    }`}
+                    onClick={(e) => {
+                      setIsRequestClient(false);
+                      setIsRequestDeal(true);
+                    }}
+                  >
+                    <FaUsersCog />
+                    <h3>Negociações</h3>
+                  </button>
+                )}
+              </div>
+            </div>
 
-        <div className={styles.content}>
-          {isRequestClient &&
-            <div className={styles.list}>
-              {clientRequest.length === 0 ? (
-                <p>Nenhum cliente para apagar</p>
-              ) : (
-                clientRequest.slice().reverse().map((c) => (
-                    <div key={c.id} className={styles.deleteItem}>
-                      <div className={styles.deleteItemLabels}>
-                        <div className={styles.title}>
-                          <h3>{c.name || 'Cliente não encontrado'}</h3>
+            <div className={styles.content}>
+              {isRequestClient && (
+                <div className={styles.list}>
+                  {clientRequest.length === 0 ? (
+                    <p>Nenhum cliente para apagar</p>
+                  ) : (
+                    clientRequest
+                      .slice()
+                      .reverse()
+                      .map((c) => (
+                        <div key={c.id} className={styles.deleteItem}>
+                          <div className={styles.deleteItemLabels}>
+                            <div className={styles.title}>
+                              <h3>{c.name || "Cliente não encontrado"}</h3>
+                            </div>
+                            <div className={styles.box}>
+                              <p>Negociações ativas:</p>
+                              <h3>{c.deals?.length ?? 0}</h3>
+                            </div>
+                            <div className={styles.box}>
+                              <p>
+                                Solicitação feita por: {c.deleteRequester?.name}
+                              </p>
+                            </div>
+                            <div className={styles.box}>
+                              <h6>{formatDateForCards(c.deleteRequestAt)}</h6>
+                            </div>
+                          </div>
+                          <div className={styles.boxBtns}>
+                            <button
+                              className={styles.btnDelClient}
+                              type="button"
+                              onClick={() => approvedRequestClient(c)}
+                            >
+                              {loading === "del" ? "Apagando..." : "Apagar"}
+                            </button>
+                            <button
+                              className={styles.btnCancelClient}
+                              type="button"
+                              onClick={() => rejectedRequestClient(c)}
+                            >
+                              {loading === "canc"
+                                ? "Cancelando..."
+                                : "Cancelar"}
+                            </button>
+                          </div>
                         </div>
-                        <div className={styles.box}>
-                          <p>Negociações ativas:</p>
-                          <h3>{c.deals?.length ?? 0}</h3>
+                      ))
+                  )}
+                </div>
+              )}
+
+              {isRequestDeal && (
+                <div className={styles.list}>
+                  {dealRequest.length === 0 ? (
+                    <p>Nenhuma negociação para apagar</p>
+                  ) : (
+                    dealRequest
+                      .slice()
+                      .reverse()
+                      .map((d) => (
+                        <div key={d.id} className={styles.deleteItem}>
+                          <div className={styles.deleteItemLabels}>
+                            <div className={styles.title}>
+                              <h3>
+                                {d.client?.name || "Negociação não encontrada"}
+                              </h3>
+                            </div>
+                            <div className={styles.box}>
+                              <p>
+                                Solicitação feita por: {d.deleteRequester?.name}
+                              </p>
+                            </div>
+                            <div className={styles.box}>
+                              <h6>{formatDateForCards(d.deleteRequestAt)}</h6>
+                            </div>
+                          </div>
+                          <div className={styles.boxBtns}>
+                            <button
+                              className={styles.btnDelClient}
+                              type="button"
+                              onClick={() => approvedRequestDeal(d)}
+                            >
+                              {loading === "del" ? "Apagando..." : "Apagar"}
+                            </button>
+                            <button
+                              className={styles.btnCancelClient}
+                              type="button"
+                              onClick={() => rejectedRequestDeal(d)}
+                            >
+                              {loading === "canc"
+                                ? "Cancelando..."
+                                : "Cancelar"}
+                            </button>
+                          </div>
                         </div>
-                        <div className={styles.box}>
-                          <p>Solicitação feita por: {c.deleteRequester?.name}</p>
-                        </div>
-                        <div className={styles.box}>
-                          <h6>{formatDateForCards(c.deleteRequestAt)}</h6>
-                        </div>
-                      </div>
-                      <div className={styles.boxBtns}>
-                        <button 
-                        className={styles.btnDelClient} 
-                        type="button" 
-                        onClick={() => approvedRequestClient(c)}
-                        >
-                          {loading === 'del' ? 'Apagando...' : 'Apagar'}
-                        </button>
-                        <button 
-                        className={styles.btnCancelClient} 
-                        type="button" 
-                        onClick={() => rejectedRequestClient(c)}
-                        >
-                          {loading === 'canc' ? 'Cancelando...' : 'Cancelar'}
-                        </button>
-                      </div>
-                  </div>
-                ))
+                      ))
+                  )}
+                </div>
               )}
             </div>
-          }            
-                     
-          {isRequestDeal &&
-            <div className={styles.list}>
-              {dealRequest.length === 0 ? (
-                <p>Nenhuma negociação para apagar</p>
-              ) : (
-                dealRequest.slice().reverse().map((d) => (
-                  <div key={d.id} className={styles.deleteItem}>
-                    <div className={styles.deleteItemLabels}>
-                      <div className={styles.title}>
-                        <h3>{d.client?.name || 'Negociação não encontrada'}</h3>
-                      </div>
-                      <div className={styles.box}>
-                          <p>Solicitação feita por: {d.deleteRequester?.name}</p>
-                        </div>
-                        <div className={styles.box}>
-                          <h6>{formatDateForCards(d.deleteRequestAt)}</h6>
-                        </div>
-                    </div>
-                    <div className={styles.boxBtns}>
-                      <button 
-                      className={styles.btnDelClient} 
-                      type="button" 
-                      onClick={() => approvedRequestDeal(d)}
-                      >
-                        {loading === 'del' ? 'Apagando...' : 'Apagar'}
-                      </button>
-                      <button 
-                      className={styles.btnCancelClient} 
-                      type="button" 
-                      onClick={() => rejectedRequestDeal(d)}
-                      >
-                        {loading === 'canc' ? 'Cancelando...' : 'Cancelar'}
-                      </button>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          }            
-        </div>
-      </main>
-      </>}
+          </main>
+        </>
+      )}
       <footer className={styles.footer}></footer>
     </div>
   );

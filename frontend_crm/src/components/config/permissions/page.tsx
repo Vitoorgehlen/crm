@@ -10,14 +10,12 @@ import { RolePermissions, RoleLabels, ConfigPermissionsProps, RolePermission, Pe
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Permissions({userRole, onClose}: ConfigPermissionsProps) {
-  const router = useRouter();
-  const { token, isLoading } = useAuth();
+  const { token } = useAuth();
   
   const [usersRoles, setUsersRoles] = useState<RolePermission[]>([]);
   const [permissionsByRole, setPermissionsByRole] = useState<Record<string, PermissionState>>({});
 
   const [loading, setLoading] = useState<'save' | 'reset' | null>(null);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (userRole === 'ADMIN' && token) {
@@ -113,7 +111,6 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
 
       if (requests.length === 0) {
         setLoading(null);
-        setError("");
         return;
       }
 
@@ -146,10 +143,8 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       });
       setPermissionsByRole(grouped);
 
-      setError("");
     } catch (err: unknown) {
       console.error(err);
-      setError((err as Error).message || "Erro ao salvar permissões");
     } finally {
       setLoading(null);
     }
@@ -179,10 +174,8 @@ export default function Permissions({userRole, onClose}: ConfigPermissionsProps)
       });
       setPermissionsByRole(grouped);
 
-      setError("");
     } catch (err: unknown) {
       console.error(err);
-      setError((err as Error).message || "Erro ao resetar permissões");
     } finally {
       setLoading(null);
     }

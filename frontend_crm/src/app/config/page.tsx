@@ -30,7 +30,6 @@ export default function Config() {
   const [users, setUsers] = useState<User[]>([]);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (isLoading) return;
@@ -93,18 +92,11 @@ export default function Config() {
         },
       });
       
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao atualizar usuário";
-        setError(msg);
-        return;
-      }
+      if (!res.ok) return;
       
-      setError("");
       handleUpdate();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar o usuário");
     } finally {
       setLoading(false);
     }

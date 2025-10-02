@@ -11,7 +11,6 @@ import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
 import { fetchDeals } from "@/utils/fetchDeals";
 import { IoStar, IoStarOutline  } from "react-icons/io5";
-import DeleteRequest from "../requisicoes/page";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -24,7 +23,6 @@ export default function Deals() {
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isCloseOpen, setIsCloseOpen] = useState(false);
   const [teamDeals, setTeamDeals] = useState(false);
 
   const [loading, setLoading] = useState(false);
@@ -154,7 +152,6 @@ export default function Deals() {
 
       setDeals(prev => prev.map(d => (d.id === data.id ? data : d)));
       await fetchDealsData();
-      setIsCloseOpen(false);
       setSelectedDeal(null);
       router.push('/fechados'); return;
   };

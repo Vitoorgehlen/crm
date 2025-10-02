@@ -1,26 +1,23 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { redirect, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
 import { Deal } from '@/types/index'
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { IoMdSearch } from "react-icons/io";
-import { HiUserGroup } from "react-icons/hi2";
 import { formatDateForFinish } from "@/utils/dateUtils";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function FinishDeals() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, isLoading } = useAuth();
 
   const [deals, setDeals] = useState<Deal[]>([]);
-  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
-  const [isCloseOpen, setIsCloseOpen] = useState(false);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
@@ -64,7 +61,6 @@ export default function FinishDeals() {
 
   function openCreate() {
     setIsCreateOpen(true);
-    setSelectedDeal(null);
   }
   
   const handleCreate = async (payload: Partial<Deal>) => {
@@ -364,7 +360,7 @@ export default function FinishDeals() {
             mode='create'
             isOpen={isCreateOpen}
             deal={undefined}
-            onClose={() => { setIsCreateOpen(false); setSelectedDeal(null); }}
+            onClose={() => { setIsCreateOpen(false) }}
             onSubmit={handleCreate}
             />
           )}

@@ -11,12 +11,10 @@ import ScheduleLayout from "@/components/Schedule/ScheduleLayout/ScheduleLayout"
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
-  const { token, permissions, isLoading} = useAuth();
+  const { token, isLoading} = useAuth();
   const router = useRouter();
 
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (isLoading) return;
@@ -26,7 +24,6 @@ export default function Home() {
   }, [isLoading, token, router])
 
   async function fetchMe() {
-    setLoading(true);
     try {
       const res = await fetch(`${API}/me`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -37,9 +34,7 @@ export default function Home() {
       setUser(data);
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setLoading(false);
-    }
+    } 
   }
 
   return (

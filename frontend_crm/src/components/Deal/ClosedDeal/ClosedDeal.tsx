@@ -61,90 +61,6 @@ export default function ClosedDeal({
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    useEffect(() => {
-        let mounted = true;
-        if (!isOpen) return;
-        if (isLoading) return;
-
-        async function loadUsers() {
-            if (!token) return;
-            setLoadingUsers(true);
-            try {
-                const res = await fetch(`${API}/users`, {
-                headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error('Erro ao buscar usuários');
-                const data = await res.json();
-                if (!mounted) return;
-                setCompanyUsers(data || []);
-            } catch (err) {
-                console.error(err);
-            } finally {
-                if (mounted) setLoadingUsers(false);
-            }
-        }
-
-        loadUsers();
-        return () => { mounted = false; };
-    }, [isOpen, token, isLoading, API]);
-
-    useEffect(() => {
-        if (!isOpen) return;
-        setCommissionAmount(Number(deal.commissionAmount ?? 0));
-        
-        if (deal.DealShare && deal.DealShare.length > 0) {
-            const shares = deal.DealShare.map(ds => ({
-                userId: ds.userId ?? null,
-                isCompany: !!ds.isCompany,
-                amount: Number(ds.amount ?? 0),
-                received: Number(ds.received ?? 0),
-                isPaid: !!ds.isPaid,
-                percentage: 0,
-                notes: ds.notes ?? ''
-            })) as CommissionSplit[];
-
-            const comAmt = Number(deal.commissionAmount ?? 0);
-            if (comAmt > 0) {
-                shares.forEach(s => {
-                    s.percentage = +( (s.amount ?? 0) / comAmt * 100 );
-                });
-                        
-                const hasInstallmentValue = Number(installmentValue ?? 0) > 0;
-                setInstallment(hasInstallmentValue)
-                setSplitMethod('percentage'); 
-            } else {
-                setSplitMethod('percentage');
-            }
-
-            setSplits(shares);
-            return;
-        }
-
-        const initial: CommissionSplit[] = [];
-        if (deal.createdBy) {
-            initial.push({
-            userId: Number(deal.createdBy),
-            isCompany: false,
-            percentage: 100,
-            amount: 0,
-            received: 0,
-            isPaid: false,
-            notes: ''
-            });
-        }
-        initial.push({
-            userId: null,
-            isCompany: true,
-            percentage: 0,
-            amount: 0,
-            received: 0,
-            isPaid: false,
-            notes: ''
-        });
-        setSplits(initial);
-
-    }, [isOpen, deal]);
-
     const totalPercentage = useMemo(() => {
         return splits.reduce((acc, s) => acc + (s.percentage ?? 0), 0);
     }, [splits]);
@@ -326,35 +242,6 @@ export default function ClosedDeal({
     setIsFirstStep(currentIndex === 0);
     setIsLastStep(currentIndex === steps.length - 1);
   }
-
-    if (!isOpen) return null;
-
-    useEffect(() => {
-        if (!isOpen || !deal?.id || !token) return;
-        calculateStepPosition();
-
-        async function fetchDocumentationCost() {
-            try {
-                const res = await fetch(`${API}/documentationcost/${deal.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error('Erro ao buscar valores de documentação');
-                const data = await res.json();
-                setDocCost(data);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        fetchDocumentationCost();
-    }, [isOpen, deal?.id, token]);
-
-    useEffect(() => {
-        const total = docCost.reduce((sum: number, item: DocumentationCost) =>
-            sum + Number(item.value ?? 0), 0);
-        setDocCostTotal(total);
-    }, [docCost]);
-
     async function handleAddDocCost() {
         if (!docCostLabel.trim()) return
 
@@ -437,25 +324,6 @@ export default function ClosedDeal({
         }
     }
 
-    useEffect(() => {
-        if (!isOpen || !deal?.id || !token) return;
-
-        async function fetchNote() {
-            try {
-                const res = await fetch(`${API}/note/${deal.id}`, {
-                headers: { Authorization: `Bearer ${token}` },
-                });
-                if (!res.ok) throw new Error('Erro ao buscar notas');
-                const data = await res.json();
-                setNote(data);
-            } catch (err) {
-                console.error(err);
-            }
-        }
-
-        fetchNote();
-    }, [isOpen, deal?.id, token]);
-
     async function handleAddNote() {
         if (!newNote.trim()) return
 
@@ -524,6 +392,137 @@ export default function ClosedDeal({
             console.error(err);
         }
     }
+
+    useEffect(() => {
+        let mounted = true;
+        if (!isOpen) return;
+        if (isLoading) return;
+
+        async function loadUsers() {
+            if (!token) return;
+            setLoadingUsers(true);
+            try {
+                const res = await fetch(`${API}/users`, {
+                headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Erro ao buscar usuários');
+                const data = await res.json();
+                if (!mounted) return;
+                setCompanyUsers(data || []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                if (mounted) setLoadingUsers(false);
+            }
+        }
+
+        loadUsers();
+        return () => { mounted = false; };
+    }, [isOpen, token, isLoading]);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        setCommissionAmount(Number(deal.commissionAmount ?? 0));
+        
+        if (deal.DealShare && deal.DealShare.length > 0) {
+            const shares = deal.DealShare.map(ds => ({
+                userId: ds.userId ?? null,
+                isCompany: !!ds.isCompany,
+                amount: Number(ds.amount ?? 0),
+                received: Number(ds.received ?? 0),
+                isPaid: !!ds.isPaid,
+                percentage: 0,
+                notes: ds.notes ?? ''
+            })) as CommissionSplit[];
+
+            const comAmt = Number(deal.commissionAmount ?? 0);
+            if (comAmt > 0) {
+                shares.forEach(s => {
+                    s.percentage = +( (s.amount ?? 0) / comAmt * 100 );
+                });
+                        
+                const hasInstallmentValue = Number(installmentValue ?? 0) > 0;
+                setInstallment(hasInstallmentValue)
+                setSplitMethod('percentage'); 
+            } else {
+                setSplitMethod('percentage');
+            }
+
+            setSplits(shares);
+            return;
+        }
+
+        const initial: CommissionSplit[] = [];
+        if (deal.createdBy) {
+            initial.push({
+            userId: Number(deal.createdBy),
+            isCompany: false,
+            percentage: 100,
+            amount: 0,
+            received: 0,
+            isPaid: false,
+            notes: ''
+            });
+        }
+        initial.push({
+            userId: null,
+            isCompany: true,
+            percentage: 0,
+            amount: 0,
+            received: 0,
+            isPaid: false,
+            notes: ''
+        });
+        setSplits(initial);
+
+    }, [isOpen, deal]);
+
+    useEffect(() => {
+        if (!isOpen || !deal?.id || !token) return;
+        calculateStepPosition();
+
+        async function fetchDocumentationCost() {
+            try {
+                const res = await fetch(`${API}/documentationcost/${deal.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Erro ao buscar valores de documentação');
+                const data = await res.json();
+                setDocCost(data);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        fetchDocumentationCost();
+    }, [isOpen, deal?.id, token]);
+
+    useEffect(() => {
+        const total = docCost.reduce((sum: number, item: DocumentationCost) =>
+            sum + Number(item.value ?? 0), 0);
+        setDocCostTotal(total);
+    }, [docCost]);
+
+    useEffect(() => {
+        if (!isOpen || !deal?.id || !token) return;
+
+        async function fetchNote() {
+            try {
+                const res = await fetch(`${API}/note/${deal.id}`, {
+                headers: { Authorization: `Bearer ${token}` },
+                });
+                if (!res.ok) throw new Error('Erro ao buscar notas');
+                const data = await res.json();
+                setNote(data);
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        fetchNote();
+    }, [isOpen, deal?.id, token]);
+
+    if (!isOpen) return null;
 
     return (
         <div className={styles.overlay} onClick={(e) => { if (e.target === e.currentTarget) handleSubmit();}}>
