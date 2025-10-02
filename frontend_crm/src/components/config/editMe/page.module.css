@@ -1,0 +1,80 @@
+.overlay {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.labelsSetting {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  width: 100%;
+  max-width: 600px;
+}
+
+.labelSetting {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 5px;
+  width: 80%;
+  max-width: 500px;
+  border: 1px solid var(--cor--principal);
+  background-color: var(--cor--branco-2);
+  transition: 200ms;
+  margin-top: 20px;
+}
+
+.btnSetting {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--escura-escuro);
+  background-color: var(--cor--branco-4);
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}
+
+.btnSettingActive {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal-claro);
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}
+
+.btnSave {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal);
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}

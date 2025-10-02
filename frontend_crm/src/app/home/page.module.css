@@ -1,0 +1,25 @@
+.main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 20px;
+  background-color: var(--cor--branco-2);
+}
+
+.title {
+  width: 100%;
+  display: flex;
+  justify-content: end;
+  padding-right: 50px;
+}
+
+.calendar {
+  width: 90%;
+  max-width: 1300px;
+  border-radius: 10px;
+  border: 1px solid var(--cor--branco-4);
+  background: var(--cor--branco-1);
+  margin-bottom: 5px;
+}

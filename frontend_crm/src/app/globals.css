@@ -1,0 +1,62 @@
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
+
+:root {
+  --cor--branco-1: #ffffff;
+  --cor--branco-2: #f7f7f7;
+  --cor--branco-3: #eaeaea;
+  --cor--branco-4: #e0e0e0;
+  --cor--branco-5: #d8d7d7;
+  --cor--branco-6: #d1cfcf;
+  --cor--branco-7: #c4c4c4;
+  --cor--branco-8: #b9b8b8;
+  --cor--branco-9: #b0aeae;
+  --cor--branco-10: #959595;
+
+  --cor--escura-claro-RGB: rgb(48, 62, 65);
+  --cor--escura-claro: #303e41;
+  --cor--escura: #1b2325;
+  --cor--escura-escuro: #121719;
+
+  --cor--principal-claro: #4d704c;
+  --cor--principal: #324a31;
+  --cor--principal-escuro: #1b291a;
+
+  --cor--secundaria-claro: #d87518;
+  --cor--secundaria: #c66b16;
+  --cor--secundaria-escuro: #ae5e14;
+
+  --cor--alerta-verde: rgba(137, 157, 122, 0.5);
+  --cor--alerta-amarelo: rgba(217, 200, 119, 0.5);
+  --cor--alerta-laranja: rgba(197, 138, 92, 0.5);
+  --cor--alerta-azul: rgba(122, 140, 157, 0.5);
+  --cor--alerta-vermelho: rgba(166, 106, 106, 0.5);
+  --cor--alerta-cinza: rgba(108, 117, 125, 0.5);
+
+  --cor--alerta-verde-forte: rgba(137, 157, 122);
+  --cor--alerta-amarelo-forte: rgba(217, 200, 119);
+  --cor--alerta-laranja-forte: rgba(197, 138, 92);
+  --cor--alerta-azul-forte: rgba(122, 140, 157);
+  --cor--alerta-vermelho-forte: rgba(166, 106, 106);
+  --cor--alerta-cinza-forte: rgba(108, 117, 125);
+
+  --font--1: 3rem;
+  --font--2: 2rem;
+  --font--3: 1rem;
+  --font--4: 0.875rem;
+  --font--5: 0.75rem;
+
+  --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  background-color: var(--cor--gelo);
+  font-family: var(--font);
+}
+
+.main-base {
+  margin-left: 60px;
+}

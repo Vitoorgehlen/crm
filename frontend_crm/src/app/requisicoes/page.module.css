@@ -1,0 +1,166 @@
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cor--branco-2);
+  overflow-y: auto;
+
+  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 10px 10px 10px;
+  color: var(--cor--escura-escuro);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.submit:hover {
+  color: var(--cor--principal);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.headerIcons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.content {
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+.btnSetting {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--escura-escuro);
+  background-color: var(--cor--branco-4);
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}
+
+.btnSettingActive {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal-claro);
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 5px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+}
+
+.list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.deleteItem {
+  display: flex;
+  justify-content: space-between;
+  margin: 20px 0;
+  width: 80%;
+  max-width: 850px;
+  padding: 10px;
+  background-color: var(--cor--branco-4);
+  border-radius: 5px;
+}
+
+.deleteItemLabels {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
+.title {
+  width: 100%;
+  text-align: start;
+}
+
+.box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.box h6 {
+  font-weight: 400;
+}
+
+.boxBtns {
+  display: flex;
+  flex-direction: column;
+  width: 80px;
+  gap: 3px;
+  margin: 3px;
+  justify-content: center;
+}
+
+.btnDelClient {
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--alerta-vermelho-forte);
+  font-size: 1rem;
+  border: none;
+  border-radius: 3px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.btnDelClient:hover {
+  background-color: var(--cor--alerta-vermelho);
+}
+
+.btnCancelClient {
+  padding: 5px;
+  color: var(--cor--escura-escuro);
+  background-color: var(--cor--branco-9);
+  font-size: 1rem;
+  border: none;
+  border-radius: 3px;
+  width: 100%;
+  cursor: pointer;
+}
+
+.btnCancelClient:hover {
+  background-color: var(--cor--branco-3);
+}

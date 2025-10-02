@@ -1,0 +1,388 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  z-index: 999;
+}
+
+.overlay h2 {
+  color: var(--cor--branco-1);
+}
+
+.overlay h3 {
+  color: var(--cor--branco-2);
+  align-items: start;
+  font-size: var(--font--5);
+  font-weight: 400;
+  width: 100%;
+}
+
+.overlay h6 {
+  color: var(--cor--branco-10);
+  font-size: var(--font--5);
+  font-weight: 400;
+}
+
+.overlay input,
+.overlay select {
+  padding: 8px;
+  margin: 3px;
+  border-radius: 5px;
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: var(--cor--branco-2);
+}
+
+.overlay input:focus,
+.overlay input:active,
+.overlay input:hover {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.overlay label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  margin: 3px;
+  border-radius: 5px;
+  width: 100%;
+  border: 1px solid var(--cor--principal);
+  background-color: var(--cor--branco-2);
+}
+
+.modal {
+  display: flex;
+  justify-content: space-between;
+  background: var(--cor--principal);
+  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  border-radius: 10px;
+  width: 1000px;
+  height: 650px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 25px 10px 0;
+  overflow-y: auto;
+  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+}
+
+.modalRed {
+  display: flex;
+  justify-content: space-between;
+  background: var(--cor--alerta-verde-forte);
+  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  border-radius: 10px;
+  width: 1000px;
+  height: 650px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 25px 10px 0;
+  overflow-y: auto;
+  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+}
+
+.innerModal {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.modalLeft {
+  padding: 0 1rem 1rem 1.8rem;
+  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  justify-content: space-between;
+}
+
+.modalRight {
+  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  background-color: var(--cor--branco-2);
+  border-radius: 10px;
+  gap: 4px;
+  width: 500px;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.overlay .modalRight input {
+  padding: 8px;
+  margin: 3px;
+  border-radius: 5px;
+  width: 100%;
+  border: none;
+  outline: none;
+  background-color: var(--cor--branco-3);
+}
+
+.closeBtn {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--cor--branco-1);
+  cursor: pointer;
+}
+
+.error {
+  color: red;
+  font-size: var(--font--5);
+}
+
+.paymentTitle {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.paymentBox {
+  margin: 10px 0;
+  text-align: center;
+}
+
+.paymentMethodStyle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.modalLeft h4 {
+  color: var(--cor--branco-2);
+}
+
+.docCostSection h3,
+.noteSection h3 {
+  color: var(--cor--escura-escuro);
+}
+
+.docCostSection h2,
+.noteSection h2 {
+  color: var(--cor--principal);
+}
+
+.docCostSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+  color: var(--cor--principal-claro);
+  justify-content: flex-start;
+  height: 45%;
+  margin-bottom: 10px;
+}
+
+.docCost {
+  width: 100%;
+  text-align: start;
+}
+
+.addDoc {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.btnSave {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--cor--principal-claro);
+  cursor: pointer;
+}
+
+.btnSave:hover {
+  color: var(--cor--secundaria-claro);
+}
+
+.addDoc,
+.addNote {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.docItem h3 {
+  text-align: start;
+}
+
+.noteSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  justify-content: flex-start;
+  height: 45%;
+  margin-top: 10px;
+}
+
+.addDoc,
+.addNote {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.docList,
+.noteList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  overflow-y: auto;
+  max-height: 150px;
+  padding: 5px;
+  border-radius: 5px;
+  background-color: var(--cor--branco-3);
+  justify-content: space-between;
+  scrollbar-color: var(--cor--secundaria-claro) var(--cor--branco-2);
+}
+
+.docItem,
+.noteItem {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+  border-bottom: solid 1px rgb(95, 164, 1777);
+}
+
+.btnDeal {
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal-claro);
+  font-size: 1.5rem;
+  border: none;
+  border-radius: 20px;
+  width: 250px;
+  cursor: pointer;
+}
+
+.btnUpdateAndStep {
+  display: flex;
+  margin: 0 auto;
+  flex-direction: row;
+  align-items: center;
+  gap: 30px;
+  margin-top: auto;
+}
+
+.btnBackStep,
+.btnUpdate,
+.btnNextStep {
+  text-align: center;
+  padding: 5px;
+  color: var(--cor--branco-2);
+  font-size: 0.8rem;
+  border: none;
+  border-radius: 20px;
+  width: 150px;
+  cursor: pointer;
+}
+
+.btnBackStep {
+  background-color: var(--cor--alerta-vermelho-forte);
+}
+
+.btnUpdate {
+  background-color: var(--cor--principal-claro);
+}
+
+.btnNextStep {
+  background-color: var(--cor--secundaria-claro);
+}
+
+.footerCard {
+  display: flex;
+  gap: 20px;
+  margin-top: 1rem;
+}
+
+.footerCard h6 {
+  color: var(--cor--branco-5);
+  font-size: xx-small;
+}
+
+.btnCommission {
+  padding: 8px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal-claro);
+  font-size: var(--font--5);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.btnActive {
+  padding: 8px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--secundaria-claro);
+  font-size: var(--font--5);
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.boxCommissionShare {
+  margin-top: 25px;
+  width: 100%;
+}
+
+.splitCommissionTitle {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.addSplit {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--cor--branco-2);
+  cursor: pointer;
+}
+
+.border {
+  border-bottom: solid 1px var(--cor--branco-2);
+  margin-bottom: 10px;
+}
+
+.removeSplit {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--cor--branco-2);
+  cursor: pointer;
+}
+
+.boxSplitCommission {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}

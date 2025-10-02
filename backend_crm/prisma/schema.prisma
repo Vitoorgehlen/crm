@@ -1,0 +1,312 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SuperUser {
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  password String
+
+  @@map("super_users")
+}
+
+model Company {
+  id       Int     @id @default(autoincrement())
+  name     String
+  maxUsers Int?
+  isActive Boolean @default(true)
+
+  users           User[]
+  clients         Client[]
+  deals           Deal[]
+  expenses        Expense[]
+  dealShares      DealShare[]
+  rolePermissions RolePermission[]
+  Schedule        Schedule[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  companyId    Int
+  email        String   @unique
+  password     String
+  name         String?
+  role         UserRole
+  supervisorId Int?
+  amount       Decimal  @db.Decimal(10, 2)
+
+  //Company
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Clients
+  clients         Client[] @relation("UserClients")
+  clientsUpdated  Client[] @relation("UserClientUpdates")
+  deleteRequestsC Client[] @relation("ClientDeleteRequestUser")
+
+  // Deals
+  deals           Deal[] @relation("UserDeals")
+  dealsUpdated    Deal[] @relation("UserDealsUpdates")
+  deleteRequestsD Deal[] @relation("DealDeleteRequestUser")
+
+  // Notes
+  notes        Note[] @relation("UserNotes")
+  notesUpdated Note[] @relation("UserNotesUpdates")
+
+  // Documentation Costs
+  documentationCosts        DocumentationCost[] @relation("UserDocumentations")
+  documentationCostsUpdated DocumentationCost[] @relation("UserDocumentationsUpdates")
+
+  // Schedule
+  schedule        Schedule[] @relation("UserSchedule")
+  scheduleUpdated Schedule[] @relation("UserScheduleUpdates")
+
+  // Hierarchy
+  supervisor   User?  @relation("UserHierarchy", fields: [supervisorId], references: [id])
+  subordinates User[] @relation("UserHierarchy")
+
+  // Commissions
+  commissionsReceived DealShare[] @relation("UserCommissions")
+  dealSharesCreated   DealShare[] @relation("UserDealSharesCreated")
+  dealSharesUpdated   DealShare[] @relation("UserDealSharesUpdated")
+  Deal                Deal[]
+  Client              Client[]
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  BROKER
+  ASSISTANT
+  SECRETARY
+}
+
+model RolePermission {
+  id         Int        @id @default(autoincrement())
+  companyId  Int
+  role       UserRole
+  permission Permission
+  allowed    Boolean    @default(false)
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, role, permission])
+}
+
+enum Permission {
+  USER_CREATE
+  USER_UPDATE
+
+  DEAL_CREATE
+  DEAL_READ
+  DEAL_UPDATE
+  DEAL_DELETE
+
+  ALL_DEAL_CREATE
+  ALL_DEAL_READ
+  ALL_DEAL_UPDATE
+  ALL_DEAL_DELETE
+
+  DEAL_CLOSE
+  DEAL_CLOSE_DELETE
+  ALL_DEAL_CLOSE
+  ALL_DEAL_CLOSE_DELETE
+
+  EXPENSE_CREATE
+  EXPENSE_READ
+  EXPENSE_UPDATE
+  EXPENSE_DELETE
+}
+
+model Client {
+  id              Int       @id @default(autoincrement())
+  name            String
+  phone           String?
+  dateOfBirth     DateTime?
+  isInvestor      Boolean   @default(false)
+  isPriority      Boolean   @default(false)
+  deleteRequest   Boolean   @default(false)
+  deleteRequestBy Int?
+  deleteRequestAt DateTime?
+  companyId       Int
+  createdBy       Int
+  updatedBy       Int
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  creator         User  @relation("UserClients", fields: [createdBy], references: [id])
+  updater         User  @relation("UserClientUpdates", fields: [updatedBy], references: [id])
+  deleteRequester User? @relation("ClientDeleteRequestUser", fields: [deleteRequestBy], references: [id])
+
+  deals  Deal[] @relation("ClientDeals")
+  User   User?  @relation(fields: [userId], references: [id])
+  userId Int?
+}
+
+model Deal {
+  id                    Int           @id @default(autoincrement())
+  companyId             Int
+  clientId              Int
+  status                DealStatus    @default(POTENTIAL_CLIENTS)
+  statusClient          ClientStatus  @default(INTERESTED)
+  searchProfile         String?
+  reminder              DateTime?
+  paymentMethod         PaymentMethod
+  currentStep           DealStepType?
+  cashValue             Decimal?      @db.Decimal(10, 2)
+  fgtsValue             Decimal?      @db.Decimal(10, 2)
+  financingValue        Decimal?      @db.Decimal(10, 2)
+  creditLetterValue     Decimal?      @db.Decimal(10, 2)
+  installmentValue      Decimal?      @db.Decimal(10, 2)
+  installmentCount      Int?
+  bonusInstallmentValue Decimal?      @db.Decimal(10, 2)
+  bonusInstallmentCount Int?
+  propertyValue         Decimal?      @db.Decimal(10, 2)
+  commissionAmount      Decimal?      @db.Decimal(10, 2)
+  deleteRequest         Boolean       @default(false)
+  deleteRequestBy       Int?
+  deleteRequestAt       DateTime?
+  createdBy             Int
+  updatedBy             Int
+  createdAt             DateTime      @default(now())
+  updatedAt             DateTime      @updatedAt
+  closedAt              DateTime?
+  finalizedAt           DateTime?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  client  Client  @relation("ClientDeals", fields: [clientId], references: [id])
+
+  creator         User  @relation("UserDeals", fields: [createdBy], references: [id])
+  updater         User  @relation("UserDealsUpdates", fields: [updatedBy], references: [id])
+  deleteRequester User? @relation("DealDeleteRequestUser", fields: [deleteRequestBy], references: [id])
+
+  notes             Note[]
+  schedule          Schedule[]
+  documentationCost DocumentationCost[]
+  DealShare         DealShare[]
+  User              User?               @relation(fields: [userId], references: [id])
+  userId            Int?
+}
+
+enum PaymentMethod {
+  CASH
+  FINANCING
+  CREDIT_LETTER
+}
+
+enum DealStatus {
+  OLD_CLIENTS
+  POTENTIAL_CLIENTS
+  CLOSED
+  FINISHED
+}
+
+enum ClientStatus {
+  APPROVED
+  UNDER_REVIEW
+  MISSING_DOCUMENTS
+  INTERESTED
+  REJECTED
+  DROPPED_OUT
+}
+
+enum DealStepType {
+  CONTRACT_SIGNING
+  ITBI
+  NOTARY_SIGNING
+  REGISTRATION
+  AWAITING_PAYMENT
+  ENGINEERING_REVIEW
+  BANK_APPROVAL
+}
+
+model DealShare {
+  id        Int       @id @default(autoincrement())
+  dealId    Int
+  companyId Int
+  userId    Int?
+  isCompany Boolean   @default(false)
+  amount    Decimal   @db.Decimal(10, 2)
+  received  Decimal   @db.Decimal(10, 2)
+  notes     String?
+  isPaid    Boolean   @default(false)
+  paidAt    DateTime?
+  createdBy Int
+  updatedBy Int
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  deal    Deal    @relation(fields: [dealId], references: [id])
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  user    User?   @relation("UserCommissions", fields: [userId], references: [id])
+
+  creator User @relation("UserDealSharesCreated", fields: [createdBy], references: [id])
+  updater User @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id])
+}
+
+model DocumentationCost {
+  id        Int      @id @default(autoincrement())
+  dealId    Int
+  label     String
+  value     Decimal  @db.Decimal(10, 2)
+  notes     String?
+  createdBy Int
+  updatedBy Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deal    Deal @relation(fields: [dealId], references: [id])
+  creator User @relation("UserDocumentations", fields: [createdBy], references: [id])
+  updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id])
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  dealId    Int
+  content   String
+  createdBy Int
+  updatedBy Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  deal    Deal @relation(fields: [dealId], references: [id])
+  creator User @relation("UserNotes", fields: [createdBy], references: [id])
+  updater User @relation("UserNotesUpdates", fields: [updatedBy], references: [id])
+}
+
+model Expense {
+  id        Int      @id @default(autoincrement())
+  companyId Int
+  company   Company  @relation(fields: [companyId], references: [id])
+  label     String
+  value     Decimal  @db.Decimal(10, 2)
+  notes     String?
+  createdBy Int
+  updatedBy Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Schedule {
+  id         Int       @id @default(autoincrement())
+  dealId     Int?
+  label      String
+  finish     Boolean?
+  reminderAt DateTime?
+  companyId  Int
+  createdBy  Int
+  updatedBy  Int
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  deal    Deal?   @relation(fields: [dealId], references: [id])
+  creator User    @relation("UserSchedule", fields: [createdBy], references: [id])
+  updater User    @relation("UserScheduleUpdates", fields: [updatedBy], references: [id])
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}

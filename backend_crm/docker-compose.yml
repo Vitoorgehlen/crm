@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  cloop_crm:
+    container_name: cloop_crm
+    hostname: cloop_crm
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: senha
+      POSTGRES_DB: cloop_crm_bd
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - /e/Deverson/cloop_crm/docker:/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"

@@ -1,0 +1,284 @@
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+  align-items: center;
+
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cor--branco-2);
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 10px 10px 10px;
+  color: var(--cor--escura-escuro);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.serchDeal {
+  display: flex;
+  flex-direction: row;
+  width: 400px;
+  padding-right: 15px;
+  padding-left: 3px;
+  border-radius: 50px;
+  background-color: var(--cor--branco-5);
+}
+
+.serchDeal input {
+  border: none;
+  outline: none;
+  background-color: var(--cor--branco-5);
+  color: var(--cor--escura-escuro);
+}
+
+.serchDeal input::placeholder {
+  color: var(--cor--branco-9);
+  opacity: 1;
+}
+
+.serchDeal input:focus,
+.serchDeal input:active,
+.serchDeal input:hover {
+  border: none !important; /* Garante que nenhuma borda apareça */
+  box-shadow: none !important; /* Remove sombras (caso existam) */
+}
+
+.btnSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  color: var(--cor--branco-9);
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.submit:hover {
+  color: var(--cor--principal);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.headerIcons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.btnFilter {
+  background-color: var(--cor--branco-5);
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  color: var(--cor--branco-1);
+  font-size: 1.3rem;
+}
+
+.btnFilterActive {
+  background-color: var(--cor--principal);
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  color: var(--cor--branco-1);
+  font-size: 1.3rem;
+}
+
+.btnActive {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cor--principal);
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  color: var(--cor--branco-1);
+  font-size: 1.3rem;
+}
+
+.btnDisable {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--cor--branco-4);
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  color: var(--cor--branco-1);
+  font-size: 1.3rem;
+}
+
+.boxSteps {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - 30px);
+  margin: 10px 15px;
+  padding: 10px;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.finishedDealsByYearWrap {
+  width: 100%;
+}
+
+.cardLeft {
+  background-color: var(--cor--branco-2);
+  width: 150px;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.yearButtons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.yearBtn {
+  text-align: center;
+  padding: 8px 12px;
+  background-color: var(--cor--branco-5);
+  color: var(--cor--branco-10);
+  font-size: 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.yearBtnActive {
+  background-color: var(--cor--principal-claro);
+  color: var(--cor--branco-2);
+}
+
+.monthsList {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 5px;
+  background-color: var(--cor--branco-5);
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+}
+
+.monthToggle,
+.monthToggleActive {
+  background-color: var(--cor--branco-2);
+  border-radius: 8px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.monthToggleActive {
+  background-color: var(--cor--principal-claro);
+  color: var(--cor--branco-2);
+}
+
+.dealsOfMonth {
+  display: grid;
+  gap: 15px;
+  width: 100%;
+  margin: 20px auto;
+  padding: 0 20px;
+
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+@media (min-width: 768px) {
+  .clientList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .clientList {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.dealsOfMonth {
+  background-color: var(--cor--branco-2);
+}
+
+.card {
+  width: 150px;
+  background-color: var(--cor--branco-5);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.card:hover {
+  background-color: var(--cor--branco-9);
+}
+
+.cardRed {
+  width: 150px;
+  background-color: var(--cor--alerta-amarelo-forte);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+}
+
+.cardRed:hover {
+  background-color: var(--cor--alerta-amarelo);
+}
+
+.pendingSection {
+  width: 35%;
+  background-color: var(--cor--principal-claro);
+  color: var(--cor--branco-2);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.cashStatsCardDiv {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}

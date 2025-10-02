@@ -1,0 +1,77 @@
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.box {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 560px;
+  height: 300px;
+  border-radius: 20px;
+  border: 1px solid var(--cor--principal);
+  background-color: var(--cor--principal-claro);
+}
+
+.box h1 {
+  color: var(--cor--branco-1);
+  font-size: var(--font--1);
+  margin: 0 0 20px 40px;
+}
+
+.erro {
+  color: red;
+  font-size: var(--font--5);
+}
+
+.form {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 80%;
+}
+
+.box input {
+  padding: 8px;
+  margin: 3px;
+  border-radius: 5px;
+  width: 100%;
+  border: 1px solid var(--cor--principal);
+  background-color: var(--cor--branco-2);
+}
+
+.esqueceuSenha {
+  color: var(--cor--branco-1);
+  font-size: var(--font--4);
+  text-decoration: none;
+  margin-bottom: 15px;
+}
+
+.esqueceuSenha:hover {
+  color: var(--cor--principal-escuro);
+}
+
+.form button {
+  padding: 8px;
+  margin: 0 auto;
+  width: 50%;
+  color: var(--cor--branco-1);
+  font-size: var(--font--3);
+  border: 1px solid var(--cor--principal);
+  border-radius: 5px;
+  background-color: var(--cor--principal-escuro);
+  cursor: pointer;
+}
+
+.form button:hover {
+  border: 1px solid var(--cor--principal-claro);
+  background-color: var(--cor--principal);
+}
