@@ -1,9 +1,9 @@
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 import { Prisma, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { isEmail } from 'validator';
 import { checkUserPermission } from './rolePermissionRepository';
-import { sameCompany } from '../src/utils/sameCompany';
+import { sameCompany } from '../utils/sameCompany';
 
 
 export async function addUser(

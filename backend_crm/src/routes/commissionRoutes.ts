@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCommission } from '../../repositories/commissionRepository'
+import { getCommission } from '../repositories/commissionRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { addCompany, deleteCompany, getCompany, getMaxUsersCompany, updateCompany } from '../../repositories/companyRepository';
-import { createDefaultRolePermissions, deleteRolePermissions } from '../../repositories/rolePermissionRepository';
+import { addCompany, deleteCompany, getCompany, getMaxUsersCompany, updateCompany } from '../repositories/companyRepository';
+import { createDefaultRolePermissions, deleteRolePermissions } from '../repositories/rolePermissionRepository';
 import superUserOnly from '../middlewares/superUserOnly';
 import loginRequired from '../middlewares/loginRequired';
 import { AuthenticatedRequest } from '../types/express';

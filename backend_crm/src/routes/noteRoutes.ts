@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addNote, deleteNote, getNote, updateNote } from '../../repositories/noteRepository'
+import { addNote, deleteNote, getNote, updateNote } from '../repositories/noteRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 

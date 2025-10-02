@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 import { Permission, Prisma, UserRole } from '@prisma/client';
 
 const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {

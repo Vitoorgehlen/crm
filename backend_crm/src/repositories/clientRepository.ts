@@ -1,4 +1,4 @@
-import { prisma } from "../prisma/client";
+import { prisma } from "../../prisma/client";
 import { Prisma, UserRole } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { tokenIndex } from '../../repositories/tokenRepository';
+import { tokenIndex } from '../repositories/tokenRepository';
 
 const router = Router();
 

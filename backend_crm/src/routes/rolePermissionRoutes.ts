@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
-import { getMyRolePermissions, getRolePermissionsByCompany, resetRolePermissionsDefault, updateRolePermission } from '../../repositories/rolePermissionRepository';
+import { getMyRolePermissions, getRolePermissionsByCompany, resetRolePermissionsDefault, updateRolePermission } from '../repositories/rolePermissionRepository';
 
 const router = Router();
 

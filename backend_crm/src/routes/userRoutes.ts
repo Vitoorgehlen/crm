@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addUser, deleteTeamMember, getMe, getUser, updateTeamUser, updateUser } from '../../repositories/userRepository';
+import { addUser, deleteTeamMember, getMe, getUser, updateTeamUser, updateUser } from '../repositories/userRepository';
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 

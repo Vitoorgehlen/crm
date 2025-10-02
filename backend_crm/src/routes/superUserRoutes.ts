@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addUserAdmin, getUsersCompany } from '../../repositories/superUserRepository';
+import { addUserAdmin, getUsersCompany } from '../repositories/superUserRepository';
 import superUserOnly from '../middlewares/superUserOnly';
 
 const router = Router();

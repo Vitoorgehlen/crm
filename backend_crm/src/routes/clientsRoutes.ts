@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addClient, deleteClient, getClientById, getClientDeletedRequest, getMyClients, getMyClientsBySearch, getTeamClients, getTeamClientsBySearch, updateClient} from '../../repositories/clientRepository'
+import { addClient, deleteClient, getClientById, getClientDeletedRequest, getMyClients, getMyClientsBySearch, getTeamClients, getTeamClientsBySearch, updateClient} from '../repositories/clientRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';

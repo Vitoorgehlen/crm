@@ -7,7 +7,7 @@ import {
   deleteDeal,
   getDealsByClient,
   getDealDeletedRequest,
-} from '../../repositories/dealRepository'
+} from '../repositories/dealRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';

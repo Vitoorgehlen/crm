@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addSchedule, deleteSchedule, editSchedule, getSchedules } from '../../repositories/scheduleRepository'
+import { addSchedule, deleteSchedule, editSchedule, getSchedules } from '../repositories/scheduleRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 

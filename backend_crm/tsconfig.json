@@ -16,5 +16,5 @@
     "esModuleInterop": true,
     "typeRoots": ["./node_modules/@types", "./src/@types"]
   },
-  "include": ["src", "repositories/clientRepository.ts"]
+  "include": ["src", "src/repositories/clientRepository.ts"]
 }

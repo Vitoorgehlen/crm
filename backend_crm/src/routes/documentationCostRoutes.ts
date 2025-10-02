@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addDocumentationCost, deleteDocumentationCost, getDocumentationCost, updateDocumentationCost } from '../../repositories/documentationCostRepository'
+import { addDocumentationCost, deleteDocumentationCost, getDocumentationCost, updateDocumentationCost } from '../repositories/documentationCostRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';

@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { closeDeal, deleteAllDealShare, updateDealShare, updateStep } from '../../repositories/dealShareRepository'
+import { closeDeal, deleteAllDealShare, updateDealShare, updateStep } from '../repositories/dealShareRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';
