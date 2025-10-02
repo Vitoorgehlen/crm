@@ -53,8 +53,11 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  background-color: var(--cor--gelo);
   font-family: var(--font);
+}
+
+body {
+  background-color: var(--cor--gelo);
 }
 
 .main-base {

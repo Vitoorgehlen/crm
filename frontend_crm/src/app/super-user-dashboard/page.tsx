@@ -9,7 +9,7 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import { IoMdCheckmark, IoMdClose } from "react-icons/io";
 import { User } from "@/types";
 import { IoMdPersonAdd } from "react-icons/io";
-import AddAdmin from "./addUser/page";
+import { AddAdmin } from "./add-admin";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -26,13 +26,15 @@ export default function SuperUserPage() {
 
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
-  const [companyName, setCompanyName] = useState('');
-  const [companyUsers, setCompanyUsers] = useState<number | undefined>(undefined);
+  const [companyName, setCompanyName] = useState("");
+  const [companyUsers, setCompanyUsers] = useState<number | undefined>(
+    undefined
+  );
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
   const [isOpenCreateUsers, setIsOpenCreateUsers] = useState(false);
 
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!token) return;
@@ -46,7 +48,11 @@ export default function SuperUserPage() {
         if (!res.ok) return;
 
         const data = await res.json();
-        const list = Array.isArray(data) ? data : (Array.isArray(data.companies) ? data.companies : []);
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data.companies)
+          ? data.companies
+          : [];
         setCompanies(list);
       } catch (err) {
         console.log(err);
@@ -70,52 +76,53 @@ export default function SuperUserPage() {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const payload = { 
-        name: companyName, 
-        maxUsers: companyUsers
-       };
+      const payload = {
+        name: companyName,
+        maxUsers: companyUsers,
+      };
 
       let response: Response;
       if (selectedCompany && selectedCompany.id) {
         response = await fetch(`${API}/company/${selectedCompany.id}`, {
-          method: 'PUT',
+          method: "PUT",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         });
       } else {
         response = await fetch(`${API}/company`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify(payload),
         });
       }
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Erro ao salvar o empresa');
+      if (!response.ok)
+        throw new Error(data.error || "Erro ao salvar o empresa");
 
       if (selectedCompany) {
-        setCompanies(prev => prev.map(c => (c.id === data.id ? data : c)));
+        setCompanies((prev) => prev.map((c) => (c.id === data.id ? data : c)));
         setSelectedCompany(null);
       } else {
-        setCompanies(prev => [...prev, data]);
+        setCompanies((prev) => [...prev, data]);
       }
 
-      setCompanyName('');
+      setCompanyName("");
       setCompanyUsers(undefined);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-          setError("Erro inesperado");
+        setError("Erro inesperado");
       }
     } finally {
       setLoading(false);
@@ -125,43 +132,45 @@ export default function SuperUserPage() {
   async function handleDelete(company: Company) {
     if (loading) return;
 
-    const confirmDelete = window.confirm(`Tem certeza que deseja excluir ${company.name}?`)
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir ${company.name}?`
+    );
     if (!confirmDelete) return;
 
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await fetch(`${API}/company/${company.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
       });
-      
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Erro ao apagar a empresa');
+      if (!response.ok)
+        throw new Error(data.error || "Erro ao apagar a empresa");
 
-      setCompanies(prev => prev.filter(c => c.id !== company.id));
+      setCompanies((prev) => prev.filter((c) => c.id !== company.id));
       setSelectedCompany(null);
 
-      setCompanyName('');
+      setCompanyName("");
       setCompanyUsers(undefined);
     } catch (err: unknown) {
-    if (err instanceof Error) {
+      if (err instanceof Error) {
         setError(err.message);
-    } else {
+      } else {
         setError("Erro inesperado");
-    }
+      }
     } finally {
       setLoading(false);
     }
   }
 
   async function fetchUsers() {
-    if(!selectedCompany) return;
+    if (!selectedCompany) return;
     setLoading(true);
 
     try {
@@ -170,8 +179,12 @@ export default function SuperUserPage() {
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Erro ao buscar Usuários');
-      const list = Array.isArray(data) ? data : (Array.isArray(data.users) ? data.users : []);
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar Usuários");
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data.users)
+        ? data.users
+        : [];
       setUsers(list);
     } catch (err: unknown) {
       console.error(err);
@@ -184,11 +197,11 @@ export default function SuperUserPage() {
     if (loading) return;
     setLoading(true);
     try {
-        logout();
+      logout();
 
-        router.push('/login');
+      router.push("/login");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   }
 
@@ -207,26 +220,27 @@ export default function SuperUserPage() {
                 type="text"
                 placeholder="Nome"
                 onChange={(e) => setCompanyName(e.target.value)}
-                />   
+              />
               <input
                 className={styles.labelCreateCompany}
                 type="number"
                 placeholder="MaxUsers"
                 onChange={(e) => setCompanyUsers(Number(e.target.value))}
-                />   
-                                
-              <button 
+              />
+
+              <button
                 className={styles.btnSave}
-                onClick={(e) => handleSubmit(e) }>
+                onClick={(e) => handleSubmit(e)}
+              >
                 <h4>Criar compania</h4>
               </button>
             </div>
             {error && <p className={styles.error}>{error}</p>}
           </div>
           <div className={styles.companies}>
-            {companies.length === 0 ?
-              <p>Nenhuma empresa cadastrada</p> 
-            : (
+            {companies.length === 0 ? (
+              <p>Nenhuma empresa cadastrada</p>
+            ) : (
               companies.map((company) => {
                 const isSelected = selectedCompany?.id === company.id;
 
@@ -235,29 +249,31 @@ export default function SuperUserPage() {
                     <div key={company.id} className={styles.companyContent}>
                       <div className={styles.companyInfos}>
                         <input
-                        className={styles.labelCreateCompany}
-                        type="text"
-                        placeholder="Nome"
-                        value={companyName}
-                        onChange={(e) => setCompanyName(e.target.value)}
-                        />   
+                          className={styles.labelCreateCompany}
+                          type="text"
+                          placeholder="Nome"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                        />
                         <input
                           className={styles.labelCreateCompany}
                           type="number"
                           placeholder="MaxUsers"
                           value={companyUsers}
-                          onChange={(e) => setCompanyUsers(Number(e.target.value))}
+                          onChange={(e) =>
+                            setCompanyUsers(Number(e.target.value))
+                          }
                         />
                       </div>
                       <button
-                      className={styles.btnOpenCompany}
-                      onClick={(e) => handleSubmit(e)}
+                        className={styles.btnOpenCompany}
+                        onClick={(e) => handleSubmit(e)}
                       >
                         <IoMdCheckmark />
                       </button>
                       <button
-                      className={styles.btnOpenCompany}
-                      onClick={() => setSelectedCompany(null)}
+                        className={styles.btnOpenCompany}
+                        onClick={() => setSelectedCompany(null)}
                       >
                         <IoMdClose />
                       </button>
@@ -265,14 +281,14 @@ export default function SuperUserPage() {
                         className={styles.btnOpenCompany}
                         type="button"
                         onClick={() => setIsOpenCreateUsers(true)}
-                        >
-                          <IoMdPersonAdd />
-                        </button>
+                      >
+                        <IoMdPersonAdd />
+                      </button>
                     </div>
                     <div className={styles.companyContent}>
                       <div className={styles.companyInfos}>
                         {Array.isArray(users) && users.length > 0 ? (
-                          users.map(u => <h3 key={u.id}>{u.name}</h3>)
+                          users.map((u) => <h3 key={u.id}>{u.name}</h3>)
                         ) : (
                           <p>Nenhum usuário</p>
                         )}
@@ -287,32 +303,36 @@ export default function SuperUserPage() {
                         <h3>{company.maxUsers}</h3>
                       </div>
                       <button
-                      className={styles.btnOpenCompany}
-                      onClick={() => {
-                        setSelectedCompany(company)
-                        setCompanyName(company.name)
-                        setCompanyUsers(company.maxUsers)
-                      }}
+                        className={styles.btnOpenCompany}
+                        onClick={() => {
+                          setSelectedCompany(company);
+                          setCompanyName(company.name);
+                          setCompanyUsers(company.maxUsers);
+                        }}
                       >
                         <MdEdit />
                       </button>
                       <button
-                      className={styles.btnOpenCompany}
-                      onClick={() => handleDelete(company)}
+                        className={styles.btnOpenCompany}
+                        onClick={() => handleDelete(company)}
                       >
                         <FaRegTrashCan />
                       </button>
                     </div>
                   </div>
-                )
+                );
               })
             )}
           </div>
 
-          <button 
+          <button
             className={styles.btnLogout}
-            onClick={handleLogout} type="button">
-              <h3><MdOutlinePowerOff /> Desconectar</h3>
+            onClick={handleLogout}
+            type="button"
+          >
+            <h3>
+              <MdOutlinePowerOff /> Desconectar
+            </h3>
           </button>
 
           {isOpenCreateUsers && (
@@ -325,4 +345,4 @@ export default function SuperUserPage() {
       </main>
     </div>
   );
-}                
+}
