@@ -21,18 +21,7 @@ export default function DeleteRequest() {
     []
   );
   const [dealRequest, setDealRequest] = useState<Deal[]>([]);
-
   const [loading, setLoading] = useState<"read" | "canc" | "del" | null>(null);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    fetchDeleteRequest();
-  }, [isLoading, token, router]);
 
   async function fetchClientRequest() {
     setLoading("read");
@@ -199,6 +188,16 @@ export default function DeleteRequest() {
       setLoading(null);
     }
   };
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    fetchDeleteRequest();
+  }, [isLoading, token, router]);
 
   return (
     <div className={styles.page}>

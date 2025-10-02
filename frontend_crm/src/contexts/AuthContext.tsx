@@ -1,94 +1,106 @@
-'use client';
+"use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 interface AuthContextType {
-    token: string | null;
-    userType: 'user' | 'superuser'| null;
-    login: (token: string, userType: 'user' | 'superuser') => void;
-    permissions: string[];
-    logout: () => void;
-    isLoading: boolean;
+  token: string | null;
+  userType: "user" | "superuser" | null;
+  login: (token: string, userType: "user" | "superuser") => void;
+  permissions: string[];
+  logout: () => void;
+  isLoading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-export function AuthProvider({children} : {children: ReactNode}) {
-    const [token, setToken] = useState<string | null>(null);
-    const [userType, setUserType] = useState<'user' | 'superuser' | null>(null);
-    const [permissions, setPermissions] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [token, setToken] = useState<string | null>(null);
+  const [userType, setUserType] = useState<"user" | "superuser" | null>(null);
+  const [permissions, setPermissions] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-    useEffect(() => {
-        setIsLoading(true);
-        const savedToken = localStorage.getItem('token');
-        const savedUserType = localStorage.getItem('userType') as 'user' | 'superuser' | null;
-        if (savedToken && savedUserType) {
-            setToken(savedToken);
-            setUserType(savedUserType);
-        }
-        setIsLoading(false);
-    }, []);
+  async function fetchPermissions(token: string) {
+    setIsLoading(true);
+    try {
+      const res = await fetch(`${API}/my-role-permission`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    async function fetchPermissions(token: string) {
-        setIsLoading(true);
-        try {
-            const res = await fetch(`${API}/my-role-permission`, {
-                headers: { Authorization: `Bearer ${token}`},
-            });
+      if (!res.ok) throw new Error("Falha ao carregar usuário");
 
-            if (!res.ok) throw new Error('Falha ao carregar usuário');
+      const data = await res.json();
 
-            const data = await res.json();
+      const perms: string[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.permissions)
+        ? data.permissions
+        : [];
 
-            const perms: string[] = Array.isArray(data)
-                ? data
-                : Array.isArray(data?.permissions)
-                ? data.permissions
-                : [];
-
-            setPermissions(perms);
-        } catch (err) {
-            console.error(err);
-            setToken(null);
-            setUserType(null);
-            setPermissions([]);
-            localStorage.removeItem('token');
-            localStorage.removeItem('userType');
-        } finally {
-            setIsLoading(false);
-        }
+      setPermissions(perms);
+    } catch (err) {
+      console.error(err);
+      setToken(null);
+      setUserType(null);
+      setPermissions([]);
+      localStorage.removeItem("token");
+      localStorage.removeItem("userType");
+    } finally {
+      setIsLoading(false);
     }
+  }
 
-    const login = (newToken: string, newUserType: 'user' | 'superuser') => {
-        setToken(newToken);
-        setUserType(newUserType);
-        localStorage.setItem('token', newToken);
-        localStorage.setItem('userType', newUserType);
-        if (newUserType === 'user') fetchPermissions(newToken);
-    };
+  const login = (newToken: string, newUserType: "user" | "superuser") => {
+    setToken(newToken);
+    setUserType(newUserType);
+    localStorage.setItem("token", newToken);
+    localStorage.setItem("userType", newUserType);
+    if (newUserType === "user") fetchPermissions(newToken);
+  };
 
-    const logout = () => {
-        setToken(null);
-        setUserType(null);
-        setPermissions([]);
-        localStorage.removeItem('token');
-        localStorage.removeItem('userType');
-    };
+  const logout = () => {
+    setToken(null);
+    setUserType(null);
+    setPermissions([]);
+    localStorage.removeItem("token");
+    localStorage.removeItem("userType");
+  };
 
-    return (
-        <AuthContext.Provider value={{ token, userType, login, permissions, logout, isLoading }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  useEffect(() => {
+    setIsLoading(true);
+    const savedToken = localStorage.getItem("token");
+    const savedUserType = localStorage.getItem("userType") as
+      | "user"
+      | "superuser"
+      | null;
+    if (savedToken && savedUserType) {
+      setToken(savedToken);
+      setUserType(savedUserType);
+    }
+    setIsLoading(false);
+  }, []);
+
+  return (
+    <AuthContext.Provider
+      value={{ token, userType, login, permissions, logout, isLoading }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {
-    const context = useContext(AuthContext);
-    if (context === undefined) throw new Error("useAuth deve ser usado dentro de um AuthProvider");
+  const context = useContext(AuthContext);
+  if (context === undefined)
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
 
-    return context;
+  return context;
 }
 
 export function useAuthFetch() {

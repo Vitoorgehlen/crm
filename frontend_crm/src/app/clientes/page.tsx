@@ -33,17 +33,6 @@ export default function Clients() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    const timeout = setTimeout(fetchClientsData, 150);
-    return () => clearTimeout(timeout);
-  }, [token, isLoading, search, teamClients, router]);
-
   async function fetchClientsData() {
     setLoading(true);
     try {
@@ -243,6 +232,17 @@ export default function Clients() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const timeout = setTimeout(fetchClientsData, 150);
+    return () => clearTimeout(timeout);
+  }, [token, isLoading, search, teamClients, router]);
 
   return (
     <div className={styles.page}>

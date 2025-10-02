@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -6,14 +6,13 @@ import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
 import FinishDeal from "@/components/Deal/FinishDeal/FinishDeal";
-import { Deal, CloseDealPayload } from '@/types/index'
+import { Deal, CloseDealPayload } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
 import { fetchDeals } from "@/utils/fetchDeals";
 import { formatDateForFinish } from "@/utils/dateUtils";
 import { IoHourglassOutline } from "react-icons/io5";
-
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,105 +31,110 @@ export default function FinishDeals() {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const fetchDealsData = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const data = await fetchDeals(API!, token, { team: teamDeals, search, status: ['FINISHED', 'CLOSED'] });
-      setDeals(data);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, isLoading, search, teamDeals, router]);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) { router.push('/login'); return; }
-    
-    const t = setTimeout(fetchDealsData, 150);
-    return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, token]);
+  const [search, setSearch] = useState("");
 
   function openCreate() {
     setIsCreateOpen(true);
     setSelectedDeal(null);
   }
-  
+
   function openEdit(deal: Deal) {
     setIsCloseOpen(true);
     setSelectedDeal(deal);
   }
-  
-  const handleCreate = async (payload: Partial<Deal>) => {
-    if (!token) { router.push('/login'); return; }
 
-    const res = await fetch(`${API}/deals`, { 
-      method: 'POST', 
+  const handleCreate = async (payload: Partial<Deal>) => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/deals`, {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json", 
-        Authorization: `Bearer ${token}`
-      }, 
-      body: JSON.stringify(payload) });
-      
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
-    
-    setDeals(prev => [...prev, data]);
+
+    setDeals((prev) => [...prev, data]);
     await fetchDealsData();
   };
 
   const closeDealShares = async (payload: CloseDealPayload) => {
     if (!selectedDeal?.id) return;
-    if (!token) { router.push('/login'); return; }
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-    const res = await fetch(`${API}/deals-close/${selectedDeal.id}`, { 
-      method: 'PUT', 
+    const res = await fetch(`${API}/deals-close/${selectedDeal.id}`, {
+      method: "PUT",
       headers: {
-        "Content-Type": "application/json", 
-        Authorization: `Bearer ${token}`
-      }, 
-      body: JSON.stringify({ dealData: payload }) 
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ dealData: payload }),
     });
-      
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao fechar negociação");
 
-    setDeals(prev => prev.map(d => (d.id === data.id ? data : d)));
+    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
     await fetchDealsData();
     setIsCloseOpen(false);
     setSelectedDeal(null);
-    router.push('/fechados'); return;
+    router.push("/fechados");
+    return;
   };
 
   const handleChangeStep = async (step: string) => {
     if (!selectedDeal?.id) return;
-    if (!token) { router.push('/login'); return; }
+    if (!token) {
+      router.push("/login");
+      return;
+    }
 
-    const res = await fetch(`${API}/deals-close-change-step/${selectedDeal.id}`, { 
-      method: 'PUT', 
-      headers: {
-        "Content-Type": "application/json", 
-        Authorization: `Bearer ${token}`
-      }, 
-      body: JSON.stringify({ changeStep: step }) 
-    });
+    const res = await fetch(
+      `${API}/deals-close-change-step/${selectedDeal.id}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ changeStep: step }),
+      }
+    );
 
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao mudar de passo");
 
-    setDeals(prev => prev.map(d => (d.id === data.id ? data : d)));
+    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
     await fetchDealsData();
     setIsCloseOpen(false);
     setSelectedDeal(null);
-    router.push('/fechados'); return;
+    router.push("/fechados");
+    return;
   };
-  
+
   const monthNames = [
-    'JAN','FEV','MAR','ABR','MAI','JUN', 'JUL','AGO','SET','OUT','NOV','DEZ'
+    "JAN",
+    "FEV",
+    "MAR",
+    "ABR",
+    "MAI",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SET",
+    "OUT",
+    "NOV",
+    "DEZ",
   ];
 
   function parseDealDate(deal: Deal) {
@@ -139,18 +143,18 @@ export default function FinishDeals() {
   }
 
   const filteredDeals = useMemo(() => {
-    const q = (search ?? '').trim().toLocaleLowerCase();
-    const onlyFinished = deals.filter(d => {
-      const s = (d.status ?? '').toString().toUpperCase();
-      return s === 'FINISHED' || s === 'CLOSED';
+    const q = (search ?? "").trim().toLocaleLowerCase();
+    const onlyFinished = deals.filter((d) => {
+      const s = (d.status ?? "").toString().toUpperCase();
+      return s === "FINISHED" || s === "CLOSED";
     });
 
     if (!q) return onlyFinished;
 
-    return onlyFinished.filter(d => {
-      const clientName = (d.client?.name ?? '').toString().toLowerCase();
-      return (clientName.includes(q));
-    })
+    return onlyFinished.filter((d) => {
+      const clientName = (d.client?.name ?? "").toString().toLowerCase();
+      return clientName.includes(q);
+    });
   }, [deals, search]);
 
   const groupedByYearMonth = useMemo(() => {
@@ -164,7 +168,7 @@ export default function FinishDeals() {
       acc[y][m] = acc[y][m] || [];
       acc[y][m].push(d);
     }
-    return acc
+    return acc;
   }, [deals]);
 
   const yearsSortedDesc = useMemo(() => {
@@ -173,13 +177,6 @@ export default function FinishDeals() {
       .sort((a, b) => a + b);
   }, [groupedByYearMonth]);
 
-  useEffect(() => {
-    if (yearsSortedDesc.length > 0) {
-      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
-      setSelectedYear(lastYear);
-    }
-  }, [yearsSortedDesc]);
-
   function toggleYear(year: number) {
     if (selectedYear === year) {
       setSelectedYear(null);
@@ -187,43 +184,46 @@ export default function FinishDeals() {
       setSelectedYear(year);
     }
   }
-  
+
   function toggleMonth(year: number, month: number) {
     if (selectedYear !== year) {
       setSelectedYear(year);
       setSelectedMonth(month);
       return;
     }
-    setSelectedMonth(prev => (prev === month ?null : month));
+    setSelectedMonth((prev) => (prev === month ? null : month));
   }
-  
+
   const statsCash = useMemo(() => {
     let total = 0;
     let totalReceived = 0;
     let totalToReceive = 0;
 
-    const yearlyStats: Record<number, { 
-      propertysValue: number;
-      propertyMaxValue: number;
-      propertyMinValue: number;
-      propertyTotal: number;
-      timeMax: number;
-      timeMin: number;
-      dealsFinish: number;
-      dealsToFinish: number;
-    }> = {};
+    const yearlyStats: Record<
+      number,
+      {
+        propertysValue: number;
+        propertyMaxValue: number;
+        propertyMinValue: number;
+        propertyTotal: number;
+        timeMax: number;
+        timeMin: number;
+        dealsFinish: number;
+        dealsToFinish: number;
+      }
+    > = {};
 
     const ensureYear = (y: number) => {
       if (!yearlyStats[y]) {
-        yearlyStats[y] = { 
-          propertysValue: 0, 
-          propertyMaxValue: 0, 
-          propertyMinValue: Number.MAX_SAFE_INTEGER, 
-          propertyTotal: 0, 
-          timeMax: 0, 
-          timeMin: Number.MAX_SAFE_INTEGER, 
-          dealsFinish: 0, 
-          dealsToFinish: 0 
+        yearlyStats[y] = {
+          propertysValue: 0,
+          propertyMaxValue: 0,
+          propertyMinValue: Number.MAX_SAFE_INTEGER,
+          propertyTotal: 0,
+          timeMax: 0,
+          timeMin: Number.MAX_SAFE_INTEGER,
+          dealsFinish: 0,
+          dealsToFinish: 0,
         };
       }
       return yearlyStats[y];
@@ -234,32 +234,44 @@ export default function FinishDeals() {
 
       const startDate = new Date(String(deal.createdAt));
       const endDate = new Date(String(deal.updatedAt));
-      const durationDays = Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      const durationDays = Math.floor(
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+      );
 
       const dealYear = endDate.getFullYear();
       ensureYear(dealYear);
 
-      if (deal.status === 'FINISHED') {
+      if (deal.status === "FINISHED") {
         yearlyStats[dealYear].dealsFinish += 1;
-        yearlyStats[dealYear].timeMax = Math.max(yearlyStats[dealYear].timeMax, durationDays);
-        yearlyStats[dealYear].timeMin = yearlyStats[dealYear].timeMin === 0 ? durationDays : Math.min(yearlyStats[dealYear].timeMin, durationDays);
+        yearlyStats[dealYear].timeMax = Math.max(
+          yearlyStats[dealYear].timeMax,
+          durationDays
+        );
+        yearlyStats[dealYear].timeMin =
+          yearlyStats[dealYear].timeMin === 0
+            ? durationDays
+            : Math.min(yearlyStats[dealYear].timeMin, durationDays);
         yearlyStats[dealYear].propertysValue += Number(deal.propertyValue) ?? 0;
         yearlyStats[dealYear].propertyTotal += 1;
-        
-        if (typeof deal.propertyValue === 'number' || typeof deal.propertyValue === 'string') {
-          if (deal.propertyValue > yearlyStats[dealYear].propertyMaxValue || yearlyStats[dealYear].propertyMaxValue === 0) {
+
+        if (
+          typeof deal.propertyValue === "number" ||
+          typeof deal.propertyValue === "string"
+        ) {
+          if (
+            deal.propertyValue > yearlyStats[dealYear].propertyMaxValue ||
+            yearlyStats[dealYear].propertyMaxValue === 0
+          ) {
             yearlyStats[dealYear].propertyMaxValue = deal.propertyValue;
           }
-          
+
           if (deal.propertyValue < yearlyStats[dealYear].propertyMinValue) {
             yearlyStats[dealYear].propertyMinValue = deal.propertyValue;
           }
         }
-
       } else {
         yearlyStats[dealYear].dealsToFinish += 1;
       }
-
 
       for (const share of deal.DealShare) {
         const amount = Number(share.amount) || 0;
@@ -273,7 +285,8 @@ export default function FinishDeals() {
 
       for (const year of Object.keys(yearlyStats).map(Number)) {
         const stats = yearlyStats[year];
-        if (stats.propertyMinValue === Number.MAX_SAFE_INTEGER) stats.propertyMinValue = 0;
+        if (stats.propertyMinValue === Number.MAX_SAFE_INTEGER)
+          stats.propertyMinValue = 0;
         if (stats.timeMin === Number.MAX_SAFE_INTEGER) stats.timeMin = 0;
       }
     }
@@ -289,7 +302,11 @@ export default function FinishDeals() {
   const selectedYearStats = useMemo(() => {
     const year = selectedYear ?? new Date().getFullYear();
     const stats = statsCash.yearlyStats[year] || {
-      total: 0, received: 0, toReceived: 0, dealsFinish: 0, dealsToFinish: 0
+      total: 0,
+      received: 0,
+      toReceived: 0,
+      dealsFinish: 0,
+      dealsToFinish: 0,
     };
 
     return {
@@ -311,20 +328,59 @@ export default function FinishDeals() {
   }, [groupedByYearMonth, selectedYear, selectedMonth]);
 
   function real(v: number | undefined | null): string {
-      if (typeof v !== 'number' || !Number.isFinite(v)) return 'R$ 0,00';
-      return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
+    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
+
+  const fetchDealsData = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const data = await fetchDeals(API!, token, {
+        team: teamDeals,
+        search,
+        status: ["FINISHED", "CLOSED"],
+      });
+      setDeals(data);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, isLoading, search, teamDeals, router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const t = setTimeout(fetchDealsData, 150);
+    return () => clearTimeout(t);
+  }, [fetchDealsData, isLoading, token]);
+
+  useEffect(() => {
+    if (yearsSortedDesc.length > 0) {
+      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
+      setSelectedYear(lastYear);
+    }
+  }, [yearsSortedDesc]);
 
   return (
     <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1>Negociações finalizadas{teamDeals ? ' da equipe' : ''}</h1>
+          <h1>Negociações finalizadas{teamDeals ? " da equipe" : ""}</h1>
         </div>
 
         <div className={styles.headerContent}>
           <div className={styles.serchDeal}>
-            <button className={styles.btnSearch} type="button" disabled={loading}>
+            <button
+              className={styles.btnSearch}
+              type="button"
+              disabled={loading}
+            >
               <IoMdSearch />
             </button>
             <input
@@ -336,24 +392,29 @@ export default function FinishDeals() {
           </div>
 
           <div className={styles.headerIcons}>
-            {permissions.includes('ALL_DEAL_READ') && (
-              <button 
-              className={`${styles.btnFilter} ${teamDeals ? styles.btnFilterActive : ''}`}
-              onClick={() => setTeamDeals(prev => !prev)} 
-              type="button">
+            {permissions.includes("ALL_DEAL_READ") && (
+              <button
+                className={`${styles.btnFilter} ${
+                  teamDeals ? styles.btnFilterActive : ""
+                }`}
+                onClick={() => setTeamDeals((prev) => !prev)}
+                type="button"
+              >
                 <HiUserGroup />
               </button>
             )}
-            <button 
-            className={progressDeals ? styles.btnActive : styles.btnDisable} 
-            onClick={() => setProgressDeals(prev => !prev)} 
-            type="button">
+            <button
+              className={progressDeals ? styles.btnActive : styles.btnDisable}
+              onClick={() => setProgressDeals((prev) => !prev)}
+              type="button"
+            >
               <IoHourglassOutline />
             </button>
-            <button 
-            className={styles.btnActive} 
-            onClick={openCreate} 
-            type="button">
+            <button
+              className={styles.btnActive}
+              onClick={openCreate}
+              type="button"
+            >
               <BsFileEarmarkPlus />
             </button>
           </div>
@@ -361,12 +422,15 @@ export default function FinishDeals() {
 
         <div className={styles.box}>
           {isCreateOpen && (
-            <DealForm 
-            mode='create'
-            isOpen={isCreateOpen}
-            deal={undefined}
-            onClose={() => { setIsCreateOpen(false); setSelectedDeal(null); }}
-            onSubmit={handleCreate}
+            <DealForm
+              mode="create"
+              isOpen={isCreateOpen}
+              deal={undefined}
+              onClose={() => {
+                setIsCreateOpen(false);
+                setSelectedDeal(null);
+              }}
+              onSubmit={handleCreate}
             />
           )}
         </div>
@@ -374,16 +438,23 @@ export default function FinishDeals() {
         <div className={styles.boxSteps}>
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
-              {yearsSortedDesc.length === 0 && <p>Nenhuma negociação finalizada.</p>}
-              {yearsSortedDesc.map(year => {
+              {yearsSortedDesc.length === 0 && (
+                <p>Nenhuma negociação finalizada.</p>
+              )}
+              {yearsSortedDesc.map((year) => {
                 const monthsObj = groupedByYearMonth[year] || {};
-                const total = Object.values(monthsObj).reduce((s, arr) => s + arr.length, 0);
+                const total = Object.values(monthsObj).reduce(
+                  (s, arr) => s + arr.length,
+                  0
+                );
                 const active = selectedYear === year;
                 return (
                   <button
                     key={year}
                     type="button"
-                    className={`${styles.yearBtn} ${active ? styles.yearBtnActive : ''}`}
+                    className={`${styles.yearBtn} ${
+                      active ? styles.yearBtnActive : ""
+                    }`}
                     onClick={() => toggleYear(year)}
                   >
                     {year} ({total})
@@ -396,22 +467,26 @@ export default function FinishDeals() {
               <>
                 <div className={styles.monthsList}>
                   {Object.keys(groupedByYearMonth[selectedYear])
-                    .map(k => Number(k))
-                    .sort((a,b) => a - b)
-                    .map(monthIndex => {
-                      const list = groupedByYearMonth[selectedYear][monthIndex] || [];
+                    .map((k) => Number(k))
+                    .sort((a, b) => a - b)
+                    .map((monthIndex) => {
+                      const list =
+                        groupedByYearMonth[selectedYear][monthIndex] || [];
                       const active = selectedMonth === monthIndex;
                       return (
                         <div key={monthIndex} className={styles.monthItem}>
                           <div className={styles.monthHeader}>
                             <button
                               type="button"
-                              onClick={() => toggleMonth(selectedYear, monthIndex)}
-                              className={`${styles.monthToggle} ${active ? styles.monthToggleActive : ''}`}
+                              onClick={() =>
+                                toggleMonth(selectedYear, monthIndex)
+                              }
+                              className={`${styles.monthToggle} ${
+                                active ? styles.monthToggleActive : ""
+                              }`}
                             >
                               <h3>{monthNames[monthIndex]}</h3>
                               <h5>({list.length})</h5>
-                               
                             </button>
                           </div>
                         </div>
@@ -422,31 +497,37 @@ export default function FinishDeals() {
                 {selectedMonth !== null && (
                   <div className={styles.dealsOfMonth}>
                     {dealsForSelectedMonth
-                      .filter(d => {
+                      .filter((d) => {
                         if (progressDeals) return true;
-                        return d.status === 'FINISHED';
+                        return d.status === "FINISHED";
                       })
                       .sort((a, b) => {
-                        const dateA = new Date(a.closedAt || '').getTime();
-                        const dateB = new Date(a.updatedAt || '').getTime();
+                        const dateA = new Date(a.closedAt || "").getTime();
+                        const dateB = new Date(a.updatedAt || "").getTime();
 
                         return dateB - dateA;
-                      }).map(d => (
+                      })
+                      .map((d) => (
                         <button
                           key={d.id}
                           type="button"
-                          className={`${styles.card} ${d.status === 'CLOSED' ? styles.cardRed : ''}`}
+                          className={`${styles.card} ${
+                            d.status === "CLOSED" ? styles.cardRed : ""
+                          }`}
                           onClick={() => openEdit(d)}
                         >
                           <div>
-                            <h3>{d.client?.name ?? '— Cliente'}</h3>
-                            {d.status === 'FINISHED' ? 
-                            <div>{formatDateForFinish(d.closedAt)}</div> 
-                            : <div>Em andamento</div>
-                            }
-                            { teamDeals && 
-                              <h6>{d.creator?.name || 'Usuário não encontrado'}</h6>
-                            }
+                            <h3>{d.client?.name ?? "— Cliente"}</h3>
+                            {d.status === "FINISHED" ? (
+                              <div>{formatDateForFinish(d.closedAt)}</div>
+                            ) : (
+                              <div>Em andamento</div>
+                            )}
+                            {teamDeals && (
+                              <h6>
+                                {d.creator?.name || "Usuário não encontrado"}
+                              </h6>
+                            )}
                           </div>
                         </button>
                       ))}
@@ -460,24 +541,58 @@ export default function FinishDeals() {
           </div>
           <div className={styles.pendingSection}>
             <div className={styles.cashStatsCardDiv}>
-              <p><strong>Negociações finalizadas:</strong> {selectedYearStats.dealsFinish}</p>
-              {selectedYearStats.dealsToFinish > 1 ? 
-                <p><strong>Negociações em aberto:</strong> {selectedYearStats.dealsToFinish}</p>
-                : ''}
-              <p><strong>Valor de venda ano:</strong> {real(Number(selectedYearStats.propertysValue))}</p>
-              <p><strong>Imóvel mais caro:</strong> {real(Number(selectedYearStats.propertyMaxValue))}</p>
-              <p><strong>Imóvel mais barato:</strong> {real(Number(selectedYearStats.propertyMinValue))}</p>
-              <p><strong>Média dos imóveis:</strong>  {real(Number(selectedYearStats.propertysValue / selectedYearStats.propertyTotal))}</p>
-              <p><strong>Venda mais rápida:</strong> {selectedYearStats.timeMin} dias</p>
-              <p><strong>Venda mais demorada:</strong> {selectedYearStats.timeMax} dias</p>
+              <p>
+                <strong>Negociações finalizadas:</strong>{" "}
+                {selectedYearStats.dealsFinish}
+              </p>
+              {selectedYearStats.dealsToFinish > 1 ? (
+                <p>
+                  <strong>Negociações em aberto:</strong>{" "}
+                  {selectedYearStats.dealsToFinish}
+                </p>
+              ) : (
+                ""
+              )}
+              <p>
+                <strong>Valor de venda ano:</strong>{" "}
+                {real(Number(selectedYearStats.propertysValue))}
+              </p>
+              <p>
+                <strong>Imóvel mais caro:</strong>{" "}
+                {real(Number(selectedYearStats.propertyMaxValue))}
+              </p>
+              <p>
+                <strong>Imóvel mais barato:</strong>{" "}
+                {real(Number(selectedYearStats.propertyMinValue))}
+              </p>
+              <p>
+                <strong>Média dos imóveis:</strong>{" "}
+                {real(
+                  Number(
+                    selectedYearStats.propertysValue /
+                      selectedYearStats.propertyTotal
+                  )
+                )}
+              </p>
+              <p>
+                <strong>Venda mais rápida:</strong> {selectedYearStats.timeMin}{" "}
+                dias
+              </p>
+              <p>
+                <strong>Venda mais demorada:</strong>{" "}
+                {selectedYearStats.timeMax} dias
+              </p>
             </div>
           </div>
-                    
+
           {selectedDeal && (
             <FinishDeal
               isOpen={isCloseOpen}
               deal={selectedDeal}
-              onClose={() => { setIsCloseOpen(false); setSelectedDeal(null); }}
+              onClose={() => {
+                setIsCloseOpen(false);
+                setSelectedDeal(null);
+              }}
               onSubmit={closeDealShares}
               newStep={handleChangeStep}
             />

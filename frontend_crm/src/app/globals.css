@@ -54,10 +54,11 @@
   padding: 0;
   margin: 0;
   font-family: var(--font);
+  background-color: transparent;
 }
 
 body {
-  background-color: var(--cor--gelo);
+  background-color: var(--cor--branco-2);
 }
 
 .main-base {

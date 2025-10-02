@@ -12,10 +12,12 @@ import {
   CommissionSplit,
   CloseDealFormProps,
 } from "@/types";
-import { MdOutlineAddCircle } from "react-icons/md";
 import { IoRemoveCircle } from "react-icons/io5";
-import { MdCheckBoxOutlineBlank } from "react-icons/md";
-import { MdCheckBox } from "react-icons/md";
+import {
+  MdOutlineAddCircle,
+  MdCheckBoxOutlineBlank,
+  MdCheckBox,
+} from "react-icons/md";
 
 export default function CloseDealForm({
   isOpen,
@@ -40,7 +42,6 @@ export default function CloseDealForm({
   const [companyUsers, setCompanyUsers] = useState<
     Array<{ id: number; name?: string }>
   >([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
 
   const [propertyValue, setPropertyValue] = useState<number>(
     Number(deal.propertyValue ?? 0)
@@ -84,93 +85,6 @@ export default function CloseDealForm({
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-    if (!isOpen) return;
-    if (isLoading) return;
-
-    async function loadUsers() {
-      if (!token) return;
-      setLoadingUsers(true);
-      try {
-        const res = await fetch(`${API}/users`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Erro ao buscar usuários");
-        const data = await res.json();
-        if (!mounted) return;
-        setCompanyUsers(data || []);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        if (mounted) setLoadingUsers(false);
-      }
-    }
-
-    loadUsers();
-    return () => {
-      mounted = false;
-    };
-  }, [isOpen, token, isLoading, API]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const initial: CommissionSplit[] = [];
-
-    if (deal.createdBy) {
-      initial.push({
-        userId: Number(deal.createdBy),
-        isCompany: false,
-        percentage: 0,
-        amount: 0,
-        notes: "",
-        isPaid: false,
-      });
-    }
-
-    initial.push({
-      userId: null,
-      isCompany: true,
-      percentage: 0,
-      amount: 0,
-      notes: "",
-      isPaid: false,
-    });
-
-    setSplits(initial);
-    setPaymentMethod(
-      typeof initialPaymentMethod !== "undefined"
-        ? initialPaymentMethod
-        : deal.paymentMethod ?? "FINANCING"
-    );
-    setPropertyValue(Number(initialPropertyValue ?? deal.propertyValue ?? 0));
-    setCommissionAmount(
-      Number(initialCommissionAmount ?? deal.commissionAmount ?? 0)
-    );
-    setCashValue(Number(initialCashValue ?? deal.cashValue ?? 0));
-    setFgtsValue(Number(initialFgtsValue ?? deal.fgtsValue ?? 0));
-    setFinancingValue(
-      Number(initialFinancingValue ?? deal.financingValue ?? 0)
-    );
-    setCreditLetterValue(
-      Number(initialCreditLetterValue ?? deal.creditLetterValue ?? 0)
-    );
-    setInstallmentValue(
-      Number(initialInstallmentValue ?? deal.installmentValue ?? 0)
-    );
-    setInstallmentCount(
-      Number(initialInstallmentCount ?? deal.installmentCount ?? 1)
-    );
-    setBonusInstallmentValue(
-      Number(initialBonusInstallmentValue ?? deal.bonusInstallmentValue ?? 0)
-    );
-    setBonusInstallmentCount(
-      Number(initialBonusInstallmentCount ?? deal.bonusInstallmentCount ?? 1)
-    );
-
-    setError(null);
-  }, [isOpen, deal]);
 
   const totalPercentage = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.percentage ?? 0), 0);
@@ -382,6 +296,90 @@ export default function CloseDealForm({
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    let mounted = true;
+    if (!isOpen) return;
+    if (isLoading) return;
+
+    async function loadUsers() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Erro ao buscar usuários");
+        const data = await res.json();
+        if (!mounted) return;
+        setCompanyUsers(data || []);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadUsers();
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen, token, isLoading, API]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const initial: CommissionSplit[] = [];
+
+    if (deal.createdBy) {
+      initial.push({
+        userId: Number(deal.createdBy),
+        isCompany: false,
+        percentage: 0,
+        amount: 0,
+        notes: "",
+        isPaid: false,
+      });
+    }
+
+    initial.push({
+      userId: null,
+      isCompany: true,
+      percentage: 0,
+      amount: 0,
+      notes: "",
+      isPaid: false,
+    });
+
+    setSplits(initial);
+    setPaymentMethod(
+      typeof initialPaymentMethod !== "undefined"
+        ? initialPaymentMethod
+        : deal.paymentMethod ?? "FINANCING"
+    );
+    setPropertyValue(Number(initialPropertyValue ?? deal.propertyValue ?? 0));
+    setCommissionAmount(
+      Number(initialCommissionAmount ?? deal.commissionAmount ?? 0)
+    );
+    setCashValue(Number(initialCashValue ?? deal.cashValue ?? 0));
+    setFgtsValue(Number(initialFgtsValue ?? deal.fgtsValue ?? 0));
+    setFinancingValue(
+      Number(initialFinancingValue ?? deal.financingValue ?? 0)
+    );
+    setCreditLetterValue(
+      Number(initialCreditLetterValue ?? deal.creditLetterValue ?? 0)
+    );
+    setInstallmentValue(
+      Number(initialInstallmentValue ?? deal.installmentValue ?? 0)
+    );
+    setInstallmentCount(
+      Number(initialInstallmentCount ?? deal.installmentCount ?? 1)
+    );
+    setBonusInstallmentValue(
+      Number(initialBonusInstallmentValue ?? deal.bonusInstallmentValue ?? 0)
+    );
+    setBonusInstallmentCount(
+      Number(initialBonusInstallmentCount ?? deal.bonusInstallmentCount ?? 1)
+    );
+
+    setError(null);
+  }, [isOpen, deal]);
 
   if (!isOpen) return null;
 

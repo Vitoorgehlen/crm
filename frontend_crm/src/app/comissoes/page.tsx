@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
-import { Deal } from '@/types/index'
+import { Deal } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { IoMdSearch } from "react-icons/io";
 import { formatDateForFinish } from "@/utils/dateUtils";
@@ -23,76 +23,57 @@ export default function FinishDeals() {
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
-
-  const fetchDealsData = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-
-    try {
-      const basePath = '/commissions';
-      const params = new URLSearchParams();
-      if (search.trim()) params.set('name', search.trim());
-  
-      const url = `${API!}${basePath}${params.toString() ? `?${params.toString()}` : ''}`;
-      
-      const response = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}`, 'Content-Type' : 'application/json' },
-        });
-
-      if (!response.ok) throw new Error('Erro ao buscar as comissões.')
-      const data = await response.json();
-
-      setDeals(data);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, isLoading, search, router]);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) { router.push('/login'); return; }
-    
-    const t = setTimeout(fetchDealsData, 150);
-    return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, token]);
+  const [search, setSearch] = useState("");
 
   function openCreate() {
     setIsCreateOpen(true);
   }
-  
-  const handleCreate = async (payload: Partial<Deal>) => {
-    if (!token) { router.push('/login'); return; }
 
-    const res = await fetch(`${API}/deals`, { 
-      method: 'POST', 
+  const handleCreate = async (payload: Partial<Deal>) => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/deals`, {
+      method: "POST",
       headers: {
-        "Content-Type": "application/json", 
-        Authorization: `Bearer ${token}`
-      }, 
-      body: JSON.stringify(payload) });
-      
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
-    
-    setDeals(prev => [...prev, data]);
+
+    setDeals((prev) => [...prev, data]);
     await fetchDealsData();
   };
-  
+
   const monthNames = [
-    'JAN','FEV','MAR','ABR','MAI','JUN', 'JUL','AGO','SET','OUT','NOV','DEZ'
+    "JAN",
+    "FEV",
+    "MAR",
+    "ABR",
+    "MAI",
+    "JUN",
+    "JUL",
+    "AGO",
+    "SET",
+    "OUT",
+    "NOV",
+    "DEZ",
   ];
 
-    function getDealPaidTimestamp(deal: Deal): number | null {
+  function getDealPaidTimestamp(deal: Deal): number | null {
     const dates = (deal.DealShare ?? [])
-      .map(s => s.paidAt)
+      .map((s) => s.paidAt)
       .filter(Boolean)
-      .map(d => new Date(d as string).getTime());
+      .map((d) => new Date(d as string).getTime());
 
     if (dates.length === 0) return null;
-    return Math.max(...dates); 
+    return Math.max(...dates);
   }
 
   const { paidDeals, pendingDeals } = useMemo(() => {
@@ -102,7 +83,7 @@ export default function FinishDeals() {
     for (const d of deals) {
       const ts = getDealPaidTimestamp(d);
       if (ts !== null) paid.push(d);
-      else pend.push(d)
+      else pend.push(d);
     }
 
     return { paidDeals: paid, pendingDeals: pend };
@@ -121,7 +102,7 @@ export default function FinishDeals() {
       acc[y][m] = acc[y][m] || [];
       acc[y][m].push(d);
     }
-    return acc
+    return acc;
   }, [paidDeals]);
 
   const yearsSortedDesc = useMemo(() => {
@@ -130,13 +111,6 @@ export default function FinishDeals() {
       .sort((a, b) => a + b);
   }, [groupedByYearMonth]);
 
-  useEffect(() => {
-    if (yearsSortedDesc.length > 0) {
-      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
-      setSelectedYear(lastYear);
-    }
-  }, [yearsSortedDesc]);
-
   function toggleYear(year: number) {
     if (selectedYear === year) {
       setSelectedYear(null);
@@ -144,14 +118,14 @@ export default function FinishDeals() {
       setSelectedYear(year);
     }
   }
-  
+
   function toggleMonth(year: number, month: number) {
     if (selectedYear !== year) {
       setSelectedYear(year);
       setSelectedMonth(month);
       return;
     }
-    setSelectedMonth(prev => (prev === month ?null : month));
+    setSelectedMonth((prev) => (prev === month ? null : month));
   }
 
   const dealsForSelectedMonth = useMemo(() => {
@@ -159,26 +133,25 @@ export default function FinishDeals() {
     return groupedByYearMonth[selectedYear]?.[selectedMonth] ?? [];
   }, [groupedByYearMonth, selectedYear, selectedMonth]);
 
-
   const translateDealStep = (step: string | null | undefined): string => {
-    if (!step) return '— Etapa';
-    
+    if (!step) return "— Etapa";
+
     const stepTranslations: Record<string, string> = {
-      'CONTRACT_SIGNING': 'Assinatura do Contrato',
-      'ENGINEERING_REVIEW': 'Engenharia',
-      'BANK_APPROVAL': 'Dossiê',
-      'ITBI': 'ITBI',
-      'NOTARY_SIGNING': 'Assinatura da Escritura',
-      'REGISTRATION': 'Registro de Imóveis',
-      'AWAITING_PAYMENT': 'Aguardando pagamento'
+      CONTRACT_SIGNING: "Assinatura do Contrato",
+      ENGINEERING_REVIEW: "Engenharia",
+      BANK_APPROVAL: "Dossiê",
+      ITBI: "ITBI",
+      NOTARY_SIGNING: "Assinatura da Escritura",
+      REGISTRATION: "Registro de Imóveis",
+      AWAITING_PAYMENT: "Aguardando pagamento",
     };
-    
+
     return stepTranslations[step] || step;
   };
 
   function real(v: number | undefined | null): string {
-    if (typeof v !== 'number' || !Number.isFinite(v)) return 'R$ 0,00';
-    return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
+    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
 
   const statsCash = useMemo(() => {
@@ -186,17 +159,26 @@ export default function FinishDeals() {
     let totalReceived = 0;
     let totalToReceive = 0;
 
-    const yearlyStats: Record<number, { 
-      total: number; 
-      received: number; 
-      toReceived: number; 
-    }> = {};
+    const yearlyStats: Record<
+      number,
+      {
+        total: number;
+        received: number;
+        toReceived: number;
+      }
+    > = {};
 
-    const monthlyStats: Record<number, Record<number, { 
-      total: number; 
-      received: number; 
-      toReceived: number; 
-    }>> = {};
+    const monthlyStats: Record<
+      number,
+      Record<
+        number,
+        {
+          total: number;
+          received: number;
+          toReceived: number;
+        }
+      >
+    > = {};
 
     const ensureYear = (y: number) => {
       if (!yearlyStats[y]) {
@@ -209,7 +191,7 @@ export default function FinishDeals() {
     };
 
     const ensureMonth = (y: number, m: number) => {
-      if (!monthlyStats[y]) monthlyStats[y] = {}
+      if (!monthlyStats[y]) monthlyStats[y] = {};
       if (!monthlyStats[y][m]) {
         monthlyStats[y][m] = { total: 0, received: 0, toReceived: 0 };
       }
@@ -222,7 +204,7 @@ export default function FinishDeals() {
 
       const endDate = new Date(String(deal.updatedAt));
       const dealYear = endDate.getFullYear();
-      ensureYear(dealYear);        
+      ensureYear(dealYear);
 
       for (const share of deal.DealShare) {
         const amount = Number(share.amount) || 0;
@@ -233,7 +215,8 @@ export default function FinishDeals() {
         totalReceived += received;
         totalToReceive += toReceive;
 
-        const dateStr = share.paidAt ?? deal.updatedAt ?? deal.createdAt ?? null;
+        const dateStr =
+          share.paidAt ?? deal.updatedAt ?? deal.createdAt ?? null;
         const date = dateStr ? new Date(dateStr) : endDate;
         const year = date.getFullYear();
         const month = date.getMonth();
@@ -264,16 +247,25 @@ export default function FinishDeals() {
     const currentMonth = new Date().getMonth();
     const year = selectedYear ?? new Date().getFullYear();
     const stats = statsCash.yearlyStats[year] || {
-      total: 0, received: 0, toReceived: 0, dealsFinish: 0, dealsToFinish: 0
+      total: 0,
+      received: 0,
+      toReceived: 0,
+      dealsFinish: 0,
+      dealsToFinish: 0,
     };
 
     const lastYearStats = statsCash.yearlyStats[year - 1] || {
-      total: 0, received: 0, toReceived: 0, dealsFinish: 0, dealsToFinish: 0
+      total: 0,
+      received: 0,
+      toReceived: 0,
+      dealsFinish: 0,
+      dealsToFinish: 0,
     };
 
-    const comparStats = lastYearStats.total > 0 
-    ? (Number(stats.total) * 100 / Number(lastYearStats.total))
-    : 0;
+    const comparStats =
+      lastYearStats.total > 0
+        ? (Number(stats.total) * 100) / Number(lastYearStats.total)
+        : 0;
 
     let comparStatsFair = 0;
 
@@ -282,23 +274,30 @@ export default function FinishDeals() {
       let lastYearSum = 0;
       for (let month = 0; month <= currentMonth; month++) {
         const currentMonthData = statsCash.monthlyStats[year]?.[month] || {
-          total: 0, received: 0, toReceived: 0, dealsFinish: 0, dealsToFinish: 0
+          total: 0,
+          received: 0,
+          toReceived: 0,
+          dealsFinish: 0,
+          dealsToFinish: 0,
         };
         const lastMonthData = statsCash.monthlyStats[year - 1]?.[month] || {
-          total: 0, received: 0, toReceived: 0, dealsFinish: 0, dealsToFinish: 0
+          total: 0,
+          received: 0,
+          toReceived: 0,
+          dealsFinish: 0,
+          dealsToFinish: 0,
         };
 
         currentYearSum += Number(currentMonthData.total || 0);
         lastYearSum += Number(lastMonthData.total || 0);
 
-        comparStatsFair = lastYearSum > 0
-          ? (currentYearSum * 100 / lastYearSum)
-          : 0;
+        comparStatsFair =
+          lastYearSum > 0 ? (currentYearSum * 100) / lastYearSum : 0;
       }
     }
 
     const isCurrentYear = year === new Date().getFullYear();
-    const monthsInYear = isCurrentYear ? (new Date().getMonth() + 1) : 12;
+    const monthsInYear = isCurrentYear ? new Date().getMonth() + 1 : 12;
     const monthAverage = stats.received / Math.max(1, monthsInYear);
 
     return {
@@ -310,7 +309,56 @@ export default function FinishDeals() {
       comparStatsFair,
       monthAverage,
     };
-  }, [statsCash.yearlyStats, statsCash.monthlyStats,selectedYear]);
+  }, [statsCash.yearlyStats, statsCash.monthlyStats, selectedYear]);
+
+  const fetchDealsData = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+
+    try {
+      const basePath = "/commissions";
+      const params = new URLSearchParams();
+      if (search.trim()) params.set("name", search.trim());
+
+      const url = `${API!}${basePath}${
+        params.toString() ? `?${params.toString()}` : ""
+      }`;
+
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) throw new Error("Erro ao buscar as comissões.");
+      const data = await response.json();
+
+      setDeals(data);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, isLoading, search, router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const t = setTimeout(fetchDealsData, 150);
+    return () => clearTimeout(t);
+  }, [fetchDealsData, isLoading, token]);
+
+  useEffect(() => {
+    if (yearsSortedDesc.length > 0) {
+      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
+      setSelectedYear(lastYear);
+    }
+  }, [yearsSortedDesc]);
 
   return (
     <div className={styles.page}>
@@ -322,7 +370,11 @@ export default function FinishDeals() {
 
         <div className={styles.headerContent}>
           <div className={styles.serchDeal}>
-            <button className={styles.btnSearch} type="button" disabled={loading}>
+            <button
+              className={styles.btnSearch}
+              type="button"
+              disabled={loading}
+            >
               <IoMdSearch />
             </button>
             <input
@@ -333,7 +385,7 @@ export default function FinishDeals() {
             />
           </div>
           <div className={styles.cashStatsCardRight}>
-                <h2>{selectedYear ?? selectedYearStats.year}</h2>
+            <h2>{selectedYear ?? selectedYearStats.year}</h2>
           </div>
 
           <div className={styles.headerIcons}>
@@ -345,10 +397,11 @@ export default function FinishDeals() {
                 <HiUserGroup />
               </button>
             )} */}
-            <button 
-            className={styles.addDeal} 
-            onClick={openCreate} 
-            type="button">
+            <button
+              className={styles.addDeal}
+              onClick={openCreate}
+              type="button"
+            >
               <BsFileEarmarkPlus />
             </button>
           </div>
@@ -356,12 +409,14 @@ export default function FinishDeals() {
 
         <div className={styles.box}>
           {isCreateOpen && (
-            <DealForm 
-            mode='create'
-            isOpen={isCreateOpen}
-            deal={undefined}
-            onClose={() => { setIsCreateOpen(false) }}
-            onSubmit={handleCreate}
+            <DealForm
+              mode="create"
+              isOpen={isCreateOpen}
+              deal={undefined}
+              onClose={() => {
+                setIsCreateOpen(false);
+              }}
+              onSubmit={handleCreate}
             />
           )}
         </div>
@@ -384,31 +439,43 @@ export default function FinishDeals() {
                     <p>{real(Number(selectedYearStats.toReceived))}</p>
                   </div>
                   <div className={styles.cardLeft}>
-                    <strong>Média mensal:</strong> 
+                    <strong>Média mensal:</strong>
                     <p>{real(Number(selectedYearStats.monthAverage))}</p>
                   </div>
                   <div className={styles.cardLeft}>
-                    <strong>Comparação com {new Date().getFullYear() - 1}:</strong>
+                    <strong>
+                      Comparação com {new Date().getFullYear() - 1}:
+                    </strong>
                     <p>{selectedYearStats.comparStats.toFixed(2)}%</p>
                   </div>
                   <div className={styles.cardLeft}>
-                    <strong>Comparação até {monthNames[new Date().getMonth()]} de {new Date().getFullYear() - 1}:</strong>
+                    <strong>
+                      Comparação até {monthNames[new Date().getMonth()]} de{" "}
+                      {new Date().getFullYear() - 1}:
+                    </strong>
                     <p>{selectedYearStats.comparStatsFair.toFixed(2)}%</p>
                   </div>
                 </div>
               </div>
             </div>
             <div className={styles.yearButtons}>
-              {yearsSortedDesc.length === 0 && <p>Nenhuma comissão encontrada.</p>}
-              {yearsSortedDesc.map(year => {
+              {yearsSortedDesc.length === 0 && (
+                <p>Nenhuma comissão encontrada.</p>
+              )}
+              {yearsSortedDesc.map((year) => {
                 const monthsObj = groupedByYearMonth[year] || {};
-                const total = Object.values(monthsObj).reduce((s, arr) => s + arr.length, 0);
+                const total = Object.values(monthsObj).reduce(
+                  (s, arr) => s + arr.length,
+                  0
+                );
                 const active = selectedYear === year;
                 return (
                   <button
                     key={year}
                     type="button"
-                    className={`${styles.yearBtn} ${active ? styles.yearBtnActive : ''}`}
+                    className={`${styles.yearBtn} ${
+                      active ? styles.yearBtnActive : ""
+                    }`}
                     onClick={() => toggleYear(year)}
                   >
                     {year} ({total})
@@ -421,21 +488,26 @@ export default function FinishDeals() {
               <>
                 <div className={styles.monthsList}>
                   {Object.keys(groupedByYearMonth[selectedYear])
-                    .map(k => Number(k))
-                    .sort((a,b) => a - b)
-                    .map(monthIndex => {
-                      const list = groupedByYearMonth[selectedYear][monthIndex] || [];
+                    .map((k) => Number(k))
+                    .sort((a, b) => a - b)
+                    .map((monthIndex) => {
+                      const list =
+                        groupedByYearMonth[selectedYear][monthIndex] || [];
                       const active = selectedMonth === monthIndex;
                       return (
                         <div key={monthIndex} className={styles.monthItem}>
                           <div className={styles.monthHeader}>
                             <button
                               type="button"
-                              onClick={() => toggleMonth(selectedYear, monthIndex)}
-                              className={`${styles.monthToggle} ${active ? styles.monthToggleActive : ''}`}
+                              onClick={() =>
+                                toggleMonth(selectedYear, monthIndex)
+                              }
+                              className={`${styles.monthToggle} ${
+                                active ? styles.monthToggleActive : ""
+                              }`}
                             >
                               <h3>{monthNames[monthIndex]}</h3>
-                              <h5>({list.length})</h5> 
+                              <h5>({list.length})</h5>
                             </button>
                           </div>
                         </div>
@@ -450,16 +522,21 @@ export default function FinishDeals() {
                         const paidAtA = getDealPaidTimestamp(a);
                         const paidAtB = getDealPaidTimestamp(b);
 
-                        if ( paidAtA !== null && paidAtB === null ) return 1;
-                        if ( paidAtA === null && paidAtB !== null ) return -1;
+                        if (paidAtA !== null && paidAtB === null) return 1;
+                        if (paidAtA === null && paidAtB !== null) return -1;
 
-                        if ( paidAtA !== null && paidAtB !== null ) {
+                        if (paidAtA !== null && paidAtB !== null) {
                           return paidAtB - paidAtA;
                         }
-                        const updatedAtA = new Date(a.updatedAt || a.createdAt || '').getTime();
-                        const updatedAtB = new Date(b.updatedAt || b.createdAt || '').getTime();
+                        const updatedAtA = new Date(
+                          a.updatedAt || a.createdAt || ""
+                        ).getTime();
+                        const updatedAtB = new Date(
+                          b.updatedAt || b.createdAt || ""
+                        ).getTime();
                         return updatedAtB - updatedAtA;
-                      }).map(d => (
+                      })
+                      .map((d) => (
                         <button
                           key={d.id}
                           type="button"
@@ -467,15 +544,20 @@ export default function FinishDeals() {
                           onClick={() => router.push("/finalizados")}
                         >
                           <div>
-                            <h3>{d.client?.name ?? '— Cliente'}</h3>
-                            <div>{formatDateForFinish(d.DealShare?.[0]?.paidAt)}</div>
+                            <h3>{d.client?.name ?? "— Cliente"}</h3>
                             <div>
-                            {d.DealShare?.map(share => (
-                              <div key={share.id}>
-                                <p><strong>Recebido:</strong> {real(Number(share.amount))}</p>
-                              </div>
-                            ))}
-                          </div>
+                              {formatDateForFinish(d.DealShare?.[0]?.paidAt)}
+                            </div>
+                            <div>
+                              {d.DealShare?.map((share) => (
+                                <div key={share.id}>
+                                  <p>
+                                    <strong>Recebido:</strong>{" "}
+                                    {real(Number(share.amount))}
+                                  </p>
+                                </div>
+                              ))}
+                            </div>
                           </div>
                         </button>
                       ))}
@@ -495,27 +577,40 @@ export default function FinishDeals() {
             ) : (
               <div className={styles.pendingList}>
                 {pendingDeals
-                  .sort((a, b) => new Date(b.createdAt || b.updatedAt || 0).getTime()
-                                - new Date(a.createdAt || a.updatedAt || 0).getTime())
-                  .map(d => (
-                    <div key={d.id} 
-                    className={styles.pendingCard}
-                    onClick={() => router.push("/fechados")}
+                  .sort(
+                    (a, b) =>
+                      new Date(b.createdAt || b.updatedAt || 0).getTime() -
+                      new Date(a.createdAt || a.updatedAt || 0).getTime()
+                  )
+                  .map((d) => (
+                    <div
+                      key={d.id}
+                      className={styles.pendingCard}
+                      onClick={() => router.push("/fechados")}
                     >
                       <div>
-                        <h4>{d.client?.name ?? '— Cliente'}</h4>
-                        <p><strong>Etapa:</strong> {translateDealStep(d.currentStep)}</p>
+                        <h4>{d.client?.name ?? "— Cliente"}</h4>
+                        <p>
+                          <strong>Etapa:</strong>{" "}
+                          {translateDealStep(d.currentStep)}
+                        </p>
                         <div>
-                          {d.DealShare?.map(share => (
+                          {d.DealShare?.map((share) => (
                             <div key={share.id}>
-                              <h6><strong>Total:</strong> {real(Number(share.amount))}</h6>
-                              <h6><strong>Recebido:</strong> {real(Number(share.received))}</h6>
+                              <h6>
+                                <strong>Total:</strong>{" "}
+                                {real(Number(share.amount))}
+                              </h6>
+                              <h6>
+                                <strong>Recebido:</strong>{" "}
+                                {real(Number(share.received))}
+                              </h6>
                             </div>
                           ))}
                         </div>
                       </div>
                     </div>
-                ))}
+                  ))}
               </div>
             )}
           </div>

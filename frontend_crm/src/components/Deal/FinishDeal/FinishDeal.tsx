@@ -82,6 +82,90 @@ export default function FinishDeal({
     return m;
   }, [users]);
 
+  function computedAmountFor(index: number) {
+    const s = splits[index];
+    if (!s) return 0;
+    if (splitMethod === "percentage") {
+      const pct = s.percentage ?? 0;
+      const valueNumber = (Number(deal.commissionAmount) * pct) / 100;
+      const valueString = real(valueNumber);
+      return valueString;
+    }
+    return +(s.amount ?? 0);
+  }
+
+  function real(v: number | undefined | null): string {
+    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
+    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  async function handleChangeStep(e: React.FormEvent, step: string) {
+    if (e) e.preventDefault();
+    setError(null);
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      await newStep(step);
+      onClose();
+    } catch (err: any) {
+      console.error(err);
+      setError(err?.message ?? "Erro ao atualizar passo da negociação.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleAddDocCost() {
+    if (!docCostLabel.trim()) return;
+
+    try {
+      const res = await fetch(`${API}/documentationcost/${deal.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          label: docCostLabel,
+          value: docCostValue,
+          notes: docCostNote,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao criar valores de documentação");
+      const data = await res.json();
+      setDocCost((prev) => [data, ...prev]);
+      setDocCostLabel("");
+      setDocCostValue(0);
+      setDocCostNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleAddNote() {
+    if (!newNote.trim()) return;
+
+    try {
+      const res = await fetch(`${API}/note/${deal.id}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: newNote }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao criar nota");
+      const data = await res.json();
+      setNote((prev) => [data, ...prev]);
+      setNewNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -136,40 +220,6 @@ export default function FinishDeal({
     setSplits(initial);
   }, [isOpen, deal]);
 
-  function computedAmountFor(index: number) {
-    const s = splits[index];
-    if (!s) return 0;
-    if (splitMethod === "percentage") {
-      const pct = s.percentage ?? 0;
-      const valueNumber = (Number(deal.commissionAmount) * pct) / 100;
-      const valueString = real(valueNumber);
-      return valueString;
-    }
-    return +(s.amount ?? 0);
-  }
-
-  function real(v: number | undefined | null): string {
-    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
-    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
-
-  async function handleChangeStep(e: React.FormEvent, step: string) {
-    if (e) e.preventDefault();
-    setError(null);
-    if (loading) return;
-
-    setLoading(true);
-    try {
-      await newStep(step);
-      onClose();
-    } catch (err: any) {
-      console.error(err);
-      setError(err?.message ?? "Erro ao atualizar passo da negociação.");
-    } finally {
-      setLoading(false);
-    }
-  }
-
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
 
@@ -195,34 +245,6 @@ export default function FinishDeal({
     fetchDocumentationCost();
   }, [isOpen, deal?.id, token]);
 
-  async function handleAddDocCost() {
-    if (!docCostLabel.trim()) return;
-
-    try {
-      const res = await fetch(`${API}/documentationcost/${deal.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          label: docCostLabel,
-          value: docCostValue,
-          notes: docCostNote,
-        }),
-      });
-
-      if (!res.ok) throw new Error("Erro ao criar valores de documentação");
-      const data = await res.json();
-      setDocCost((prev) => [data, ...prev]);
-      setDocCostLabel("");
-      setDocCostValue(0);
-      setDocCostNote("");
-    } catch (err) {
-      console.error(err);
-    }
-  }
-
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
 
@@ -241,28 +263,6 @@ export default function FinishDeal({
 
     fetchNote();
   }, [isOpen, deal?.id, token]);
-
-  async function handleAddNote() {
-    if (!newNote.trim()) return;
-
-    try {
-      const res = await fetch(`${API}/note/${deal.id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ content: newNote }),
-      });
-
-      if (!res.ok) throw new Error("Erro ao criar nota");
-      const data = await res.json();
-      setNote((prev) => [data, ...prev]);
-      setNewNote("");
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   if (!isOpen) return null;
 

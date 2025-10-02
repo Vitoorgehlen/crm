@@ -2,12 +2,12 @@
 
 import React, { useEffect, useState } from "react";
 import {
-  Client,
   CreateSchedulePayload,
+  Deal,
+  DealStatus,
   Schedule,
   ScheduleFormProps,
 } from "@/types";
-import { MdClose } from "react-icons/md";
 import { IoTrashOutline } from "react-icons/io5";
 import styles from "./Schedule.module.css";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,25 +21,21 @@ export default function ScheduleForm({
   day,
   schedule,
   onClose,
-  onSubmit,
+  onCreate,
   onDelete,
 }: ScheduleFormProps) {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, isLoading } = useAuth();
 
-  const [clients, setClients] = useState<Client[]>([]);
-  const [loadingClients, setLoadingClients] = useState(false);
+  const [deals, setDeals] = useState<Deal[]>([]);
 
-  const [clientId, setClientId] = useState<number | undefined>(undefined);
+  const [dealId, setDealId] = useState<number | undefined>(undefined);
   const [newLabel, setNewLabel] = useState("");
   const [newFinish, setNewFinish] = useState(false);
   const [newDate, setNewDate] = useState<Date | undefined>(
     schedule?.reminderAt ? new Date(schedule.reminderAt) : undefined
   );
 
-  const [loading, setLoading] = useState<
-    "read" | "create" | "del" | "addNote" | null
-  >(null);
   const [error, setError] = useState("");
 
   function formatDateForInput(date: Date | undefined): string {
@@ -49,60 +45,8 @@ export default function ScheduleForm({
     return local.toISOString().slice(0, 16);
   }
 
-  useEffect(() => {
-    let mounted = true;
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    async function fetchClients() {
-      setLoading("read");
-      try {
-        const res = await fetch(`${API}/clients`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Erro ao buscar clientes");
-        const data = await res.json();
-        if (!mounted) return;
-        setClients(data);
-      } catch (err) {
-        setError("Erro ao carregar lista de clientes");
-      } finally {
-        if (mounted) setLoadingClients(false);
-        setLoading(null);
-      }
-    }
-
-    fetchClients();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      if (schedule) {
-        setClientId(schedule.clientId || undefined);
-        setNewLabel(schedule.label || "");
-        setNewFinish(schedule.finish || false);
-        setNewDate(
-          schedule.reminderAt ? new Date(schedule.reminderAt) : undefined
-        );
-      } else {
-        setClientId(undefined);
-        setNewLabel("");
-        setNewFinish(false);
-        setNewDate(day ? new Date(day) : undefined);
-      }
-      setError("");
-    }
-  }, [schedule, day, isOpen]);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading("create");
     if (!newLabel.trim()) {
       setError('O campo "label" é obrigatório.');
       return;
@@ -111,7 +55,7 @@ export default function ScheduleForm({
 
     try {
       const payload: CreateSchedulePayload = {
-        clientId: clientId ? clientId : undefined,
+        dealId: dealId ? dealId : undefined,
         label: newLabel,
         finish: newFinish,
         reminderAt: newDate ? newDate.toISOString() : undefined,
@@ -129,8 +73,6 @@ export default function ScheduleForm({
       } else {
         setError("Erro inesperado");
       }
-    } finally {
-      setLoading(null);
     }
   }
 
@@ -187,7 +129,6 @@ export default function ScheduleForm({
     );
     if (!confirmDelete) return;
 
-    setLoading("del");
     try {
       const res = await fetch(`${API}/schedule/${schedule.id}`, {
         method: "DELETE",
@@ -214,8 +155,6 @@ export default function ScheduleForm({
     } catch (err) {
       console.error(err);
       setError("Erro inesperado ao apagar o compromisso");
-    } finally {
-      setLoading(null);
     }
   };
 
@@ -230,6 +169,53 @@ export default function ScheduleForm({
       }
     }
   };
+
+  useEffect(() => {
+    let mounted = true;
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    async function fetchDeals() {
+      try {
+        const res = await fetch(`${API}/deals`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Erro ao buscar clientes");
+        const data = await res.json();
+        if (!mounted) return;
+        setDeals(data);
+      } catch (err) {
+        setError("Erro ao carregar lista de clientes");
+      }
+    }
+
+    fetchDeals();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (schedule) {
+        setDealId(schedule.dealId || undefined);
+        setNewLabel(schedule.label || "");
+        setNewFinish(schedule.finish || false);
+        setNewDate(
+          schedule.reminderAt ? new Date(schedule.reminderAt) : undefined
+        );
+      } else {
+        setDealId(undefined);
+        setNewLabel("");
+        setNewFinish(false);
+        setNewDate(day ? new Date(day) : undefined);
+      }
+      setError("");
+    }
+  }, [schedule, day, isOpen]);
 
   if (!isOpen) return null;
 
@@ -267,16 +253,17 @@ export default function ScheduleForm({
             {error && <p className={styles.error}>{error}</p>}
 
             <select
-              onChange={(e) => setClientId(Number(e.target.value))}
-              value={clientId || ""}
+              onChange={(e) => setDealId(Number(e.target.value))}
+              value={dealId || ""}
             >
               <option value="">Selecione um cliente</option>
-              {clients
+              {deals
                 .slice()
                 .reverse()
-                .map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name || "Cliente não encontrado"}
+                .map((deal) => (
+                  <option key={deal.id} value={deal.id}>
+                    {deal.client?.name || "Cliente não encontrado"} -{" "}
+                    {DealStatus[deal.status].label || ""}
                   </option>
                 ))}
             </select>

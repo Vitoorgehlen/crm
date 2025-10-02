@@ -36,42 +36,6 @@ export default function SuperUserPage() {
 
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!token) return;
-
-    const fetchCompanies = async () => {
-      try {
-        const res = await fetch(`${API}/company`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!res.ok) return;
-
-        const data = await res.json();
-        const list = Array.isArray(data)
-          ? data
-          : Array.isArray(data.companies)
-          ? data.companies
-          : [];
-        setCompanies(list);
-      } catch (err) {
-        console.log(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCompanies();
-  }, [token]);
-
-  useEffect(() => {
-    if (!selectedCompany) {
-      setUsers([]);
-      return;
-    }
-    fetchUsers();
-  }, [selectedCompany]);
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (loading) return;
@@ -204,6 +168,42 @@ export default function SuperUserPage() {
       setLoading(false);
     }
   }
+
+  useEffect(() => {
+    if (!token) return;
+
+    const fetchCompanies = async () => {
+      try {
+        const res = await fetch(`${API}/company`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) return;
+
+        const data = await res.json();
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data.companies)
+          ? data.companies
+          : [];
+        setCompanies(list);
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCompanies();
+  }, [token]);
+
+  useEffect(() => {
+    if (!selectedCompany) {
+      setUsers([]);
+      return;
+    }
+    fetchUsers();
+  }, [selectedCompany]);
 
   return (
     <div className={styles.page}>

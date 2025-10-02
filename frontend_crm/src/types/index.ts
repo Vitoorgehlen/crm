@@ -504,7 +504,7 @@ export type Note = {
 
 export type Schedule = {
     id: number;
-    clientId?: number;
+    dealId?: number;
     label: string;
     finish: boolean;
     reminderAt?: string;
@@ -525,7 +525,7 @@ export type Schedule = {
 };
 
 export type CreateSchedulePayload = {
-    clientId?: number;
+    dealId?: number;
     label: string;
     finish: boolean;
     reminderAt?: string;
@@ -536,6 +536,7 @@ export type ScheduleFormProps = {
     day: Date | null; 
     schedule: Schedule | null; 
     onClose: () => void;
+    onCreate: (newSchedule: Schedule) => void;
     onSubmit: (payload: Partial<Schedule>) => Promise<void> | void;
     onDelete?: (scheduleId: number) => void;
 };
@@ -543,7 +544,7 @@ export type ScheduleFormProps = {
 export const DealStatus = {
     OLD_CLIENTS: {
         dbValue: 'OLD_CLIENTS',
-        label: 'Arquivados'
+        label: 'Arquivado'
     },
     POTENTIAL_CLIENTS: {
         dbValue: 'POTENTIAL_CLIENTS',
@@ -551,11 +552,11 @@ export const DealStatus = {
     },
     CLOSED: {
         dbValue: 'CLOSED',
-        label: 'Fechados'
+        label: 'Fechado'
     },
     FINISHED: {
         dbValue: 'FINISHED',
-        label: 'Terminados'
+        label: 'Finalizado'
     }
 } as const;
 export type DealStatus = keyof typeof DealStatus;
