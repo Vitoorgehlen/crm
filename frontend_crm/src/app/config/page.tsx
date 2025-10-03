@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -40,7 +40,7 @@ export default function Config() {
 
   const [loading, setLoading] = useState(false);
 
-  async function fetchMe() {
+  const fetchMe = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/me`, {
@@ -55,7 +55,7 @@ export default function Config() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [token]);
 
   const handleUpdate = async () => {
     await fetchMe();
@@ -126,9 +126,8 @@ export default function Config() {
     }
 
     fetchMe();
-    console.log("User:", user);
-    console.log("Permissions:", permissions);
-  }, [isLoading, token, router, fetchMe]);
+    fetchUsers();
+  }, [isLoading, token, router, fetchMe, permissions, user]);
 
   return (
     <div className={styles.page}>

@@ -39,7 +39,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
       router.push("/super-user-dashboard");
       return;
     }
-  }, [token, userType, isLoading, pathname, router]);
+  }, [SUPaths, publicPaths, token, userType, isLoading, pathname, router]);
 
   if (isLoading) {
     return <div className="loading">Carregando...</div>;

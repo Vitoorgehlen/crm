@@ -169,7 +169,7 @@ export default function FinishDeals() {
       acc[y][m].push(d);
     }
     return acc;
-  }, [deals]);
+  }, [deals, filteredDeals]);
 
   const yearsSortedDesc = useMemo(() => {
     return Object.keys(groupedByYearMonth)
@@ -501,7 +501,7 @@ export default function FinishDeals() {
                         if (progressDeals) return true;
                         return d.status === "FINISHED";
                       })
-                      .sort((a, b) => {
+                      .sort((a) => {
                         const dateA = new Date(a.closedAt || "").getTime();
                         const dateB = new Date(a.updatedAt || "").getTime();
 

@@ -223,7 +223,7 @@ export default function DealForm({
     return () => {
       mounted = false;
     };
-  }, [isLoading, token, router, clientsProp, API]);
+  }, [isLoading, token, router, clientsProp]);
 
   useEffect(() => {
     if (deal) {
@@ -261,7 +261,7 @@ export default function DealForm({
     }
 
     fetchNote();
-  }, [isOpen, deal?.id, token, API]);
+  }, [isOpen, deal?.id, token]);
 
   if (!isOpen) return null;
 
@@ -623,7 +623,7 @@ export default function DealForm({
             initialFgtsValue={fgtsValue}
             initialFinancingValue={financingValue}
             initialCreditLetterValue={creditLetterValue}
-            newStep={async (step: string) => {
+            newStep={async () => {
               /* noop */
             }}
           />

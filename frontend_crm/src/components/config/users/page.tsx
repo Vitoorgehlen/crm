@@ -86,7 +86,7 @@ export default function ConfigUsers({
 
     fetchMe();
     fetchCompany();
-  }, [isLoading, token, router, u, API]);
+  }, [isLoading, token, router, u]);
 
   const handleCreateUser = async () => {
     setLoading(true);

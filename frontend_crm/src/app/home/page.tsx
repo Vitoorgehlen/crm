@@ -38,7 +38,7 @@ export default function Home() {
     }
 
     fetchMe();
-  }, [isLoading, token, router]);
+  }, [isLoading, token, router, fetchMe]);
 
   return (
     <main className={styles.main}>

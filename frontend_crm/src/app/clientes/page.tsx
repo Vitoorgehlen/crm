@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Client, ClientPayload } from "@/types/index";
@@ -33,7 +33,7 @@ export default function Clients() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
-  async function fetchClientsData() {
+  const fetchClientsData = useCallback(async () => {
     setLoading(true);
     try {
       let url = "";
@@ -64,7 +64,7 @@ export default function Clients() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [token, teamClients, search]);
 
   async function fetchDealByClient(client: Client) {
     setLoading(true);

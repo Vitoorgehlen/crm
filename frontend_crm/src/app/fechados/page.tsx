@@ -171,7 +171,7 @@ export default function Deals() {
     return () => {
       mounted = false;
     };
-  }, [token, isLoading, router, API]);
+  }, [token, isLoading, router]);
 
   useEffect(() => {
     if (isLoading) return;

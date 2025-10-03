@@ -531,7 +531,7 @@ export default function ClosedDeal({
       notes: "",
     });
     setSplits(initial);
-  }, [isOpen, deal]);
+  }, [isOpen, deal, installmentValue]);
 
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
@@ -551,7 +551,7 @@ export default function ClosedDeal({
     }
 
     fetchDocumentationCost();
-  }, [isOpen, deal?.id, token, API]);
+  }, [isOpen, deal?.id, token, API, calculateStepPosition]);
 
   useEffect(() => {
     const total = docCost.reduce(

@@ -7,7 +7,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { formatDateForCards } from "@/utils/dateUtils";
 import {
   PaymentMethod,
-  Deal,
   CloseDealPayload,
   CommissionSplit,
   CloseDealFormProps,
@@ -379,7 +378,21 @@ export default function CloseDealForm({
     );
 
     setError(null);
-  }, [isOpen, deal]);
+  }, [
+    isOpen,
+    deal,
+    initialBonusInstallmentCount,
+    initialBonusInstallmentValue,
+    initialCashValue,
+    initialCommissionAmount,
+    initialCreditLetterValue,
+    initialFgtsValue,
+    initialFinancingValue,
+    initialInstallmentCount,
+    initialInstallmentValue,
+    initialPaymentMethod,
+    initialPropertyValue,
+  ]);
 
   if (!isOpen) return null;
 

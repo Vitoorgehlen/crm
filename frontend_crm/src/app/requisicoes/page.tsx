@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FaUserEdit, FaUsersCog } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import { ClientDeletedRequest, Deal, User } from "@/types";
+import { ClientDeletedRequest, Deal } from "@/types";
 import { formatDateForCards } from "@/utils/dateUtils";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -197,7 +197,7 @@ export default function DeleteRequest() {
     }
 
     fetchDeleteRequest();
-  }, [isLoading, token, router]);
+  }, [isLoading, token, router, fetchDeleteRequest]);
 
   return (
     <div className={styles.page}>

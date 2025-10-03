@@ -51,7 +51,7 @@ export default function Permissions({
 
       fetchUserRoles();
     }
-  }, [userRole, token, API]);
+  }, [userRole, token]);
 
   useEffect(() => {
     if (userRole === "ADMIN" && token) {
@@ -71,7 +71,7 @@ export default function Permissions({
         setPermissionsByRole(grouped);
       }
     }
-  }, [usersRoles]);
+  }, [usersRoles, token, userRole]);
 
   const togglePermissionForRole = (role: string, perm: string) => {
     setPermissionsByRole((prev) => ({
