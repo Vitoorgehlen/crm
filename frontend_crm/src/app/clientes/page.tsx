@@ -3,15 +3,13 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Client, ClientPayload } from "@/types/index";
-import { formatDateForCards, formatDateForInput } from "@/utils/dateUtils";
+import { Client } from "@/types/index";
 import { AiOutlineUserAdd } from "react-icons/ai";
-import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
-
 import styles from "./page.module.css";
+import ClientsForm from "@/components/clients/ClientForm";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,19 +20,12 @@ export default function Clients() {
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isEditOpen, setIsEditOpen] = useState(false);
   const [teamClients, setTeamClients] = useState(false);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
-  const [isInvestor, setIsInvestor] = useState(false);
-  const [isPriority, setIsPriority] = useState(false);
   const [isPriorityBtn, setIsPriorityBtn] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
 
   const fetchClientsData = useCallback(async () => {
-    setLoading(true);
     try {
       let url = "";
 
@@ -61,31 +52,8 @@ export default function Clients() {
       setClients(data);
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   }, [token, teamClients, search]);
-
-  async function fetchDealByClient(client: Client) {
-    setLoading(true);
-    try {
-      const res = await fetch(`${API}/deals-by-client/${client.id}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
-      return data;
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
 
   const displayClients = isPriorityBtn
     ? [...clients]
@@ -101,137 +69,54 @@ export default function Clients() {
           new Date(a.createdAt ?? 0).getTime()
       );
 
-  function clearForm() {
-    setName("");
-    setPhone("");
-    setDateOfBirth("");
-    setIsInvestor(false);
-    setIsPriority(false);
-    setError("");
+  const handleCreate = async (payload: Partial<Client>) => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/clients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro");
+
+    setClients((prev) => [...prev, data]);
+    await fetchClientsData();
+  };
+
+  const handleEdit = async (payload: Partial<Client>) => {
+    if (!selectedClient?.id) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/clients/${selectedClient.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro");
+
+    setClients((prev) => prev.map((c) => (c.id === data.id ? data : c)));
+    await fetchClientsData();
+  };
+
+  function handleDeleteDeal() {
+    fetchClientsData();
+    setIsEditOpen(false);
     setSelectedClient(null);
   }
-
-  function openCreateForm() {
-    clearForm();
-    setIsCreateOpen(true);
-  }
-
-  function openEditClient(client: Client) {
-    setSelectedClient(client);
-    setName(client.name || "");
-    setPhone(client.phone || "");
-    setDateOfBirth(formatDateForInput(client.dateOfBirth));
-    setIsInvestor(Boolean(client.isInvestor));
-    setIsPriority(Boolean(client.isPriority));
-  }
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (loading) return;
-    setLoading(true);
-    setError("");
-
-    try {
-      const payload: ClientPayload = {
-        name,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
-        isInvestor,
-        isPriority,
-      };
-
-      if (phone.trim() !== "") payload.phone = phone;
-      if (dateOfBirth.trim() !== "") payload.dateOfBirth = dateOfBirth;
-
-      let response: Response;
-      if (selectedClient && selectedClient.id) {
-        response = await fetch(`${API}/clients/${selectedClient.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        response = await fetch(`${API}/clients`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
-        });
-      }
-
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.error || "Erro ao salvar o cliente");
-
-      if (selectedClient && selectedClient.id) {
-        setClients((prev) =>
-          prev.map((c) => (c.id === selectedClient.id ? data : c))
-        );
-        setSelectedClient(null);
-      } else {
-        setClients((prev) => [...prev, data]);
-        setIsCreateOpen(false);
-      }
-
-      clearForm();
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Erro inesperado");
-      }
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const deleteClient = async (client: Client) => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${client.name}?`
-    );
-    if (!confirmDelete) return;
-    const deals = await fetchDealByClient(client);
-    if (deals.length > 0) {
-      const confirm2Delete = window.confirm(
-        `O ${client.name} possui ${deals.length} negociação que vai ser apagado juntos com ele.`
-      );
-      if (!confirm2Delete) return;
-    }
-
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`${API}/clients/${client.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        const msg = data?.error || "Erro ao excluir client";
-        setError(msg);
-        return;
-      }
-
-      setError("");
-      fetchClientsData();
-      setIsCreateOpen(false);
-
-      clearForm();
-    } catch (err) {
-      console.error(err);
-      setError("Erro inesperado ao apagar o usuário");
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -253,11 +138,7 @@ export default function Clients() {
 
         <div className={styles.headerContent}>
           <div className={styles.serchClient}>
-            <button
-              className={styles.btnSearch}
-              type="button"
-              disabled={loading}
-            >
+            <button className={styles.btnSearch} type="button">
               <IoMdSearch />
             </button>
             <input
@@ -293,96 +174,12 @@ export default function Clients() {
             </button>
             <button
               className={styles.addClient}
-              onClick={openCreateForm}
+              onClick={() => setIsCreateOpen(true)}
               type="button"
             >
               <AiOutlineUserAdd />
             </button>
           </div>
-        </div>
-
-        <div className={styles.box}>
-          {isCreateOpen && (
-            <form
-              className={styles.overlay}
-              onClick={() => {
-                setIsCreateOpen(false);
-                clearForm();
-              }}
-              onSubmit={handleSubmit}
-            >
-              <div
-                className={styles.modal}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className={styles.titleForm}>
-                  <button
-                    type="button"
-                    className={styles.btnPriority}
-                    onClick={() => setIsPriority(!isPriority)}
-                  >
-                    {isPriority ? (
-                      <IoStar className={styles.btnPriorityActive} />
-                    ) : (
-                      <IoStarOutline />
-                    )}
-                  </button>
-                  <h2>Adicionar novo cliente</h2>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsCreateOpen(false);
-                    clearForm();
-                  }}
-                  className={styles.closeBtn}
-                >
-                  <MdClose />
-                </button>
-
-                {error && <p className={styles.erro}>{error}</p>}
-
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                  required
-                />
-
-                <input
-                  type="tel"
-                  placeholder="Contato (opcional)"
-                  onChange={(e) => setPhone(e.target.value)}
-                  value={phone}
-                />
-
-                <input
-                  type="date"
-                  placeholder="Data de nascimento (opcional)"
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  value={dateOfBirth}
-                />
-
-                <label>
-                  <h3>Investidor?</h3>
-                  <input
-                    type="checkbox"
-                    checked={isInvestor}
-                    onChange={(e) => setIsInvestor(e.target.checked)}
-                  />
-                </label>
-
-                <button
-                  className={styles.btnAddClient}
-                  type="submit"
-                  disabled={loading}
-                >
-                  {loading ? "Enviando..." : "Enviar"}
-                </button>
-              </div>
-            </form>
-          )}
         </div>
 
         <div className={styles.clientList}>
@@ -399,7 +196,10 @@ export default function Clients() {
                       : ""
                   }
                 `}
-                onClick={() => openEditClient(client)}
+                onClick={() => {
+                  setIsEditOpen(true);
+                  setSelectedClient(client);
+                }}
               >
                 {client.isPriority ? (
                   <IoStar className={styles.btnPriorityActiveCard} />
@@ -416,111 +216,30 @@ export default function Clients() {
           ) : (
             <p>Nenhum cliente encontrado</p>
           )}
-
-          {selectedClient && (
-            <form
-              className={styles.overlay}
-              onClick={(e) => handleSubmit(e)}
-              onSubmit={handleSubmit}
-            >
-              <div
-                className={styles.modal}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className={styles.titleForm}>
-                  <button
-                    type="button"
-                    className={styles.btnPriority}
-                    onClick={() => setIsPriority(!isPriority)}
-                  >
-                    {isPriority ? (
-                      <IoStar className={styles.btnPriorityActive} />
-                    ) : (
-                      <IoStarOutline />
-                    )}
-                  </button>
-                  <h2>Editar: {selectedClient.name}</h2>
-                </div>
-
-                <button
-                  type="button"
-                  className={styles.closeBtn}
-                  onClick={(e) => handleSubmit(e)}
-                >
-                  <MdClose />
-                </button>
-
-                {error && <p className={styles.erro}>{error}</p>}
-
-                <input
-                  type="text"
-                  placeholder="Nome"
-                  onChange={(e) => setName(e.target.value)}
-                  value={name}
-                  required
-                />
-
-                <input
-                  type="tel"
-                  placeholder="Contato (opcional)"
-                  onChange={(e) => setPhone(e.target.value)}
-                  value={phone}
-                />
-
-                <input
-                  type="date"
-                  placeholder="Data de nascimento (opcional)"
-                  onChange={(e) => setDateOfBirth(e.target.value)}
-                  value={dateOfBirth}
-                />
-
-                <label>
-                  <h3>Investidor?</h3>
-                  <input
-                    type="checkbox"
-                    checked={isInvestor}
-                    onChange={(e) => setIsInvestor(e.target.checked)}
-                  />
-                </label>
-                <div className={styles.btnDelAndUp}>
-                  {selectedClient.deleteRequest ? (
-                    <div className={styles.DelClient}>Solicitação enviada</div>
-                  ) : (
-                    <button
-                      className={styles.btnDelClient}
-                      type="button"
-                      disabled={loading}
-                      onClick={() => deleteClient(selectedClient)}
-                    >
-                      {loading ? "Apagando..." : "Apagar"}
-                    </button>
-                  )}
-                  <button
-                    className={styles.btnAddClient}
-                    type="submit"
-                    disabled={loading}
-                  >
-                    {loading ? "Atualizando..." : "Atualizar"}
-                  </button>
-                </div>
-
-                <div className={styles.footerCard}>
-                  <h6>
-                    Atualizado a última vez por:{" "}
-                    {selectedClient.updater?.name ?? "—"}.{" "}
-                    {formatDateForCards(selectedClient.updatedAt)}
-                  </h6>
-                  <h6>
-                    Criado por: {selectedClient.creator?.name ?? "—"}.{" "}
-                    {formatDateForCards(selectedClient.createdAt)}
-                  </h6>
-                </div>
-              </div>
-            </form>
+        </div>
+        <div className={styles.box}>
+          {isCreateOpen && (
+            <ClientsForm
+              mode="create"
+              client={undefined}
+              onSubmit={handleCreate}
+              onClose={() => setIsCreateOpen(false)}
+            />
+          )}
+          {isEditOpen && selectedClient && (
+            <ClientsForm
+              mode="edit"
+              client={selectedClient}
+              onClose={() => {
+                setIsEditOpen(false);
+                setSelectedClient(null);
+              }}
+              onSubmit={handleEdit}
+              onDelete={handleDeleteDeal}
+            />
           )}
         </div>
       </main>
-
       <footer className={styles.footer}></footer>
     </div>
   );

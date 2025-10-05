@@ -169,7 +169,7 @@ export default function FinishDeals() {
       acc[y][m].push(d);
     }
     return acc;
-  }, [deals, filteredDeals]);
+  }, [filteredDeals]);
 
   const yearsSortedDesc = useMemo(() => {
     return Object.keys(groupedByYearMonth)

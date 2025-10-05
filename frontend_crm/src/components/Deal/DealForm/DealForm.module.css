@@ -46,13 +46,24 @@
 }
 
 .overlay input,
-.overlay select,
 .overlayEdit input,
+.overlay select,
 .overlayEdit select {
   padding: 8px;
   margin: 3px;
   border-radius: 5px;
   width: 100%;
+  border: none;
+  outline: none;
+  background-color: var(--cor--branco-2);
+}
+
+.overlay select.changeClient {
+  padding: 8px;
+  margin: 3px;
+  border-radius: 5px 0 0 5px;
+  width: 100%;
+  height: 100%;
   border: none;
   outline: none;
   background-color: var(--cor--branco-2);
@@ -195,6 +206,34 @@
   color: red;
   font-size: var(--font--5);
 }
+.box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+  height: 35px;
+}
+
+.addClient {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 100%;
+  padding: 5px;
+  font-size: 1.5rem;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--principal-claro);
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+}
+
+.addClient:hover {
+  background-color: var(--cor--principal-escuro);
+}
 
 .paymentTitle {
   display: flex;
@@ -217,6 +256,7 @@
   border: none;
   border-radius: 20px;
   width: 250px;
+  margin-top: 20px;
   cursor: pointer;
 }
 
@@ -293,6 +333,7 @@
   flex-direction: row;
   align-items: center;
   gap: 30px;
+  margin-top: 50px;
 }
 
 .deleteRequest {

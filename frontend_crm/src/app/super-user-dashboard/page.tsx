@@ -194,7 +194,7 @@ export default function SuperUserPage() {
     };
 
     fetchCompanies();
-  }, [token, API]);
+  }, [token, fetchUsers]);
 
   useEffect(() => {
     if (!selectedCompany) {

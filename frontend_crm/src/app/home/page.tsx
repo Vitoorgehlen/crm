@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import styles from "./page.module.css";
@@ -16,7 +16,7 @@ export default function Home() {
 
   const [user, setUser] = useState<User | null>(null);
 
-  async function fetchMe() {
+  const fetchMe = useCallback(async () => {
     try {
       const res = await fetch(`${API}/me`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -28,7 +28,7 @@ export default function Home() {
     } catch (err: unknown) {
       console.error(err);
     }
-  }
+  }, [token]);
 
   useEffect(() => {
     if (isLoading) return;

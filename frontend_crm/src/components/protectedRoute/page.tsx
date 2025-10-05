@@ -2,15 +2,15 @@
 
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token, userType, isLoading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicPaths = ["/login"];
-  const SUPaths = ["/super-user-dashboard"];
+  const publicPaths = useMemo(() => ["/login"], []);
+  const SUPaths = useMemo(() => ["/super-user-dashboard"], []);
 
   useEffect(() => {
     if (isLoading) return;

@@ -12,12 +12,15 @@ import {
 } from "@/types";
 import { MdClose } from "react-icons/md";
 import { formatDateForCards } from "@/utils/dateUtils";
+import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import styles from "./DealForm.module.css";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import CloseDealForm from "@/components/Deal/CloseDeal/CloseDealForm";
-import { RiSave3Fill } from "react-icons/ri";
 import { IoStar, IoStarOutline } from "react-icons/io5";
+import { FaTimes, FaCheck } from "react-icons/fa";
+import ClientsForm from "@/components/clients/ClientForm";
+import { AiOutlineUserAdd } from "react-icons/ai";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,6 +39,7 @@ export default function DealForm({
   const { token, isLoading } = useAuth();
 
   const [clients, setClients] = useState<Client[]>(clientsProp ?? []);
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
 
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -50,6 +54,7 @@ export default function DealForm({
   const [financingValue, setFinancingValue] = useState<number>(0);
   const [creditLetterValue, setCreditLetterValue] = useState<number>(0);
 
+  const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
   const [note, setNote] = useState<Array<Note>>([]);
 
@@ -71,6 +76,26 @@ export default function DealForm({
     setCreditLetterValue(0);
     setError("");
   }
+
+  const handleCreateClient = async (payload: Partial<Client>) => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/clients`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro");
+
+    setClients((prev) => [...prev, data]);
+  };
 
   const handleSubmit = async (
     e: React.FormEvent,
@@ -130,11 +155,10 @@ export default function DealForm({
 
   async function handleAddNote() {
     if (!newNote.trim()) return;
+    if (!deal) return;
 
-    if (loading !== null) return;
-    setLoading("addNote");
     try {
-      const res = await fetch(`${API}/note/${deal?.id}`, {
+      const res = await fetch(`${API}/note/${deal.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -149,8 +173,52 @@ export default function DealForm({
       setNewNote("");
     } catch (err) {
       console.error(err);
-    } finally {
-      setLoading(null);
+    }
+  }
+
+  async function handleEditNote(noteId?: number) {
+    if (typeof noteId !== "number") return;
+
+    try {
+      const res = await fetch(`${API}/note/${noteId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: newNote }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao editar valores de documentação");
+      const data = await res.json();
+      setNote((prev) => prev.map((item) => (item.id === noteId ? data : item)));
+      setIsOpenNote(undefined);
+      setNewNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleDeleteNote(noteId?: number) {
+    if (typeof noteId !== "number") return;
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir essa nota?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API}/note/${noteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar nota");
+      setNote((prev) => prev.filter((item) => item.id !== noteId));
+    } catch (err) {
+      console.error(err);
     }
   }
 
@@ -319,20 +387,32 @@ export default function DealForm({
 
             {error && <p className={styles.error}>{error}</p>}
 
-            <select
-              onChange={(e) => setClientId(Number(e.target.value))}
-              value={clientId || ""}
-            >
-              <option value="">Selecione um cliente</option>
-              {clients
-                .slice()
-                .reverse()
-                .map((client) => (
-                  <option key={client.id} value={client.id}>
-                    {client.name || "Cliente não encontrado"}
-                  </option>
-                ))}
-            </select>
+            <div className={styles.box}>
+              <select
+                className={styles.changeClient}
+                onChange={(e) => setClientId(Number(e.target.value))}
+                value={clientId || ""}
+              >
+                <option value="">Selecione um cliente</option>
+                {clients
+                  .slice()
+                  .reverse()
+                  .map((client) => (
+                    <option key={client.id} value={client.id}>
+                      {client.name || "Cliente não encontrado"}
+                    </option>
+                  ))}
+              </select>
+              {mode === "create" && (
+                <button
+                  className={styles.addClient}
+                  onClick={() => setIsCreateOpen(true)}
+                  type="button"
+                >
+                  <AiOutlineUserAdd />
+                </button>
+              )}
+            </div>
 
             <h3>Status do cliente</h3>
             <select
@@ -340,11 +420,17 @@ export default function DealForm({
               onChange={(e) => setStatusClient(e.target.value as ClientStatus)}
               required
             >
-              {Object.entries(ClientStatus).map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
+              {Object.entries(ClientStatus)
+                .filter(([key]) => {
+                  if (mode === "create")
+                    return key !== "REJECTED" && key !== "DROPPED_OUT";
+                  return true;
+                })
+                .map(([key, { label }]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
             </select>
 
             <h3>Imóvel desejado</h3>
@@ -567,31 +653,89 @@ export default function DealForm({
             <div className={styles.modalRight}>
               <div className={styles.noteSection}>
                 <h2>Notas</h2>
-                <div className={styles.addNote}>
-                  <input
-                    type="text"
-                    placeholder="Nota"
-                    value={newNote}
-                    onChange={(e) => setNewNote(e.target.value)}
-                  />
 
-                  <button
-                    type="button"
-                    className={styles.btnSave}
-                    onClick={handleAddNote}
-                    disabled={!newNote.trim()}
-                  >
-                    <RiSave3Fill />
-                  </button>
+                <div className={styles.addNote}>
+                  {isOpenNote ? (
+                    <>
+                      <h3>Editando</h3>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        placeholder="Nota"
+                        value={newNote}
+                        onChange={(e) => setNewNote(e.target.value)}
+                      />
+
+                      <button
+                        type="button"
+                        className={styles.btnSave}
+                        onClick={handleAddNote}
+                        disabled={!newNote.trim()}
+                      >
+                        <RiSave3Fill />
+                      </button>
+                    </>
+                  )}
                 </div>
 
                 <div className={styles.noteList}>
                   {note.length === 0 && (
                     <p>Nenhuma nota do cliente encontrada.</p>
                   )}
-                  {note.map((nota) => (
-                    <div key={nota.id} className={styles.noteItem}>
-                      <h3>{nota.content}</h3>
+                  {note.map((note) => (
+                    <div key={note.id} className={styles.noteItem}>
+                      {isOpenNote === note.id ? (
+                        <>
+                          <input
+                            type="text"
+                            placeholder="Nota"
+                            value={newNote}
+                            onChange={(e) => setNewNote(e.target.value)}
+                          />
+
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => handleEditNote(note.id)}
+                          >
+                            <FaCheck />
+                          </button>
+                          <button
+                            className={styles.btnDelDocValue}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(undefined);
+                              setNewNote("");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </>
+                      ) : (
+                        <>
+                          <h3>{note.content}</h3>
+
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(note.id);
+                              setNewNote(note.content);
+                            }}
+                          >
+                            <RiPencilFill />
+                          </button>
+                          <button
+                            className={styles.btnDelDocValue}
+                            type="button"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            <RiEraserFill />
+                          </button>
+                        </>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -600,17 +744,19 @@ export default function DealForm({
           )}
         </div>
 
-        <div className={styles.footerCard}>
-          <h6>
-            Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
-            {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-          </h6>
-          <h6>
-            {" "}
-            Criado por: {deal?.creator?.name ?? "—"} ·{" "}
-            {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-          </h6>
-        </div>
+        {mode === "edit" && (
+          <div className={styles.footerCard}>
+            <h6>
+              Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
+              {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
+            </h6>
+            <h6>
+              {" "}
+              Criado por: {deal?.creator?.name ?? "—"} ·{" "}
+              {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
+            </h6>
+          </div>
+        )}
 
         {isCloseOpen && deal && (
           <CloseDealForm
@@ -626,6 +772,14 @@ export default function DealForm({
             newStep={async () => {
               /* noop */
             }}
+          />
+        )}
+        {isCreateOpen && (
+          <ClientsForm
+            mode="create"
+            client={undefined}
+            onSubmit={handleCreateClient}
+            onClose={() => setIsCreateOpen(false)}
           />
         )}
       </div>

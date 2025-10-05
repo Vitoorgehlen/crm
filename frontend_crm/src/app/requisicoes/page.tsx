@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { FaUserEdit, FaUsersCog } from "react-icons/fa";
@@ -60,10 +60,10 @@ export default function DeleteRequest() {
     }
   }
 
-  async function fetchDeleteRequest() {
+  const fetchDeleteRequest = useCallback(async () => {
     await fetchClientRequest();
     await fetchDealRequest();
-  }
+  }, []);
 
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
     const confirmDelete = window.confirm(

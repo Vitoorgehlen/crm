@@ -18,7 +18,6 @@ import {
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
-
 import { IoRemoveCircle } from "react-icons/io5";
 import {
   MdOutlineAddCircle,
@@ -269,9 +268,9 @@ export default function ClosedDeal({
   async function handleChangeStep(e: React.FormEvent, step: string) {
     if (e) e.preventDefault();
     setError(null);
+    await handleSubmit();
 
     if (step === "next" && isLastStep) {
-      await handleSubmit();
       const hasUnpaidCommission = splits.some((s) => !s.isPaid);
       if (hasUnpaidCommission) {
         setError(
@@ -551,7 +550,7 @@ export default function ClosedDeal({
     }
 
     fetchDocumentationCost();
-  }, [isOpen, deal?.id, token, API, calculateStepPosition]);
+  }, [isOpen, deal?.id, token, calculateStepPosition]);
 
   useEffect(() => {
     const total = docCost.reduce(

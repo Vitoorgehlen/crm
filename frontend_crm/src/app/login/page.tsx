@@ -62,7 +62,7 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="E-mail"
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => setEmail(e.target.value.toLocaleLowerCase())}
               required
             />
             <input

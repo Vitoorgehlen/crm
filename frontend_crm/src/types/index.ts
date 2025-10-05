@@ -169,6 +169,14 @@ export const WORKFLOW_BY_METHOD: Record<PaymentMethod, DealStepType[]> = {
   ]
 };
 
+export type ClientFormProps = {
+    mode: "create" | "edit";
+    client?: Client | null;
+    onClose: () => void;
+    onSubmit: (payload: Partial<Client>) => Promise<void> | void;
+    onDelete?: (clientId: number) => void;
+};
+
 export type DealFormProps = {
     mode: "create" | "edit";
     isOpen: boolean;

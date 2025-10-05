@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import Sidebar from "@/components/sidebar/page";
+import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 import Footer from "@/components/footer/page";
 import ProtectedRoute from "@/components/protectedRoute/page";
-import { AuthProvider } from "@/contexts/AuthContext"; 
+import { AuthProvider } from "@/contexts/AuthContext";
 
 export const metadata: Metadata = {
   title: "Cloop CRM",
@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
         <AuthProvider>
           <ProtectedRoute>
-            <Sidebar />
+            <SidebarWrapper />
             <main className="main-base">{children}</main>
             <Footer />
           </ProtectedRoute>
