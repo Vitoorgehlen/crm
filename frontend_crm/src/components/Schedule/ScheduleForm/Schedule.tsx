@@ -196,7 +196,7 @@ export default function ScheduleForm({
     return () => {
       mounted = false;
     };
-  }, [isLoading, token, router, API]);
+  }, [isLoading, token, router]);
 
   useEffect(() => {
     if (isOpen) {

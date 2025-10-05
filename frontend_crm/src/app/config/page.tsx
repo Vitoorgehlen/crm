@@ -62,7 +62,7 @@ export default function Config() {
     await fetchUsers();
   };
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch(`${API}/users`, {
@@ -77,7 +77,7 @@ export default function Config() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [token]);
 
   const deleteUser = async (UserDelete: User) => {
     const confirmDelete = window.confirm(

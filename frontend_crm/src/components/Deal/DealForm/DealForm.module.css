@@ -286,6 +286,29 @@
   margin-bottom: 10px;
 }
 
+.btnEditDocValue {
+  border: none;
+  color: var(--cor--principal-claro);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnEditDocValue:hover {
+  color: var(--cor--secundaria-claro);
+}
+
+.btnDelDocValue {
+  border: none;
+  margin-left: 5px;
+  color: var(--cor--alerta-vermelho-forte);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnDelDocValue:hover {
+  color: var(--cor--secundaria-claro);
+}
+
 .noteSection {
   display: flex;
   flex-direction: column;

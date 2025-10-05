@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Client, ClientFormProps, ClientPayload } from "@/types/index";
+import { Client, ClientFormProps } from "@/types/index";
 import { formatDateForCards } from "@/utils/dateUtils";
 import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
@@ -16,7 +16,6 @@ export default function ClientsForm({
   client = null,
   onClose,
   onSubmit,
-  onDelete,
 }: ClientFormProps) {
   const { token } = useAuth();
 
@@ -276,7 +275,7 @@ export default function ClientsForm({
           ) : (
             <div className={styles.btnDelAndUp}>
               {client && client.deleteRequest ? (
-                <div className={styles.DelClient}>Solicitação enviada</div>
+                <div className={styles.delClient}>Solicitação enviada</div>
               ) : (
                 <button
                   className={styles.btnDelClient}

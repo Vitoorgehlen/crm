@@ -550,7 +550,7 @@ export default function ClosedDeal({
     }
 
     fetchDocumentationCost();
-  }, [isOpen, deal?.id, token, calculateStepPosition]);
+  }, [API, isOpen, deal?.id, token, calculateStepPosition]);
 
   useEffect(() => {
     const total = docCost.reduce(

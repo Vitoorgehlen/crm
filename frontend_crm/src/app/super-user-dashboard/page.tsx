@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
@@ -132,7 +132,7 @@ export default function SuperUserPage() {
     }
   }
 
-  async function fetchUsers() {
+  const fetchUsers = useCallback(async () => {
     if (!selectedCompany) return;
     setLoading(true);
 
@@ -154,7 +154,7 @@ export default function SuperUserPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [selectedCompany, token]);
 
   async function handleLogout() {
     if (loading) return;
@@ -202,7 +202,7 @@ export default function SuperUserPage() {
       return;
     }
     fetchUsers();
-  }, [selectedCompany]);
+  }, [fetchUsers, selectedCompany]);
 
   return (
     <div className={styles.page}>

@@ -63,7 +63,7 @@ export default function DeleteRequest() {
   const fetchDeleteRequest = useCallback(async () => {
     await fetchClientRequest();
     await fetchDealRequest();
-  }, []);
+  }, [fetchClientRequest, fetchDealRequest]);
 
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
     const confirmDelete = window.confirm(

@@ -240,7 +240,6 @@ export default function Clients() {
           )}
         </div>
       </main>
-      <footer className={styles.footer}></footer>
     </div>
   );
 }
