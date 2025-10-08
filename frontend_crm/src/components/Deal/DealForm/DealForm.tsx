@@ -49,6 +49,9 @@ export default function DealForm({
   const [searchProfile, setSearchProfile] = useState("");
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("FINANCING");
+  const [financialInstitution, setFinancialInstitution] = useState("");
+  const [subsidyValue, setSubsidyValue] = useState<number>(0);
+  const [downPaymentValue, setDownPaymentValue] = useState<number>(0);
   const [cashValue, setCashValue] = useState<number>(0);
   const [fgtsValue, setFgtsValue] = useState<number>(0);
   const [financingValue, setFinancingValue] = useState<number>(0);
@@ -70,6 +73,9 @@ export default function DealForm({
     setSearchProfile("");
     setIsPriority(false);
     setPaymentMethod("FINANCING");
+    setFinancialInstitution("");
+    setDownPaymentValue(0);
+    setSubsidyValue(0);
     setCashValue(0);
     setFgtsValue(0);
     setFinancingValue(0);
@@ -113,6 +119,9 @@ export default function DealForm({
         statusClient,
         searchProfile,
         paymentMethod,
+        financialInstitution,
+        downPaymentValue: downPaymentValue ?? 0,
+        subsidyValue: subsidyValue ?? 0,
         cashValue: cashValue ?? 0,
         fgtsValue: fgtsValue ?? 0,
         financingValue: financingValue ?? 0,
@@ -301,6 +310,9 @@ export default function DealForm({
       setSearchProfile(deal.searchProfile ?? "");
       setIsPriority(deal.client?.isPriority ?? false);
       setPaymentMethod(deal.paymentMethod ?? "FINANCING");
+      setFinancialInstitution(deal.financialInstitution ?? "");
+      setDownPaymentValue(Number(deal.downPaymentValue ?? 0));
+      setSubsidyValue(Number(deal.subsidyValue ?? 0));
       setCashValue(Number(deal.cashValue ?? 0));
       setFgtsValue(Number(deal.fgtsValue ?? 0));
       setFinancingValue(Number(deal.financingValue ?? 0));
@@ -442,19 +454,30 @@ export default function DealForm({
             />
 
             <h3>Método de pagamento</h3>
-            <select
-              value={paymentMethod}
-              onChange={(e) =>
-                setPaymentMethod(e.target.value as PaymentMethod)
-              }
-              required
-            >
-              {Object.entries(PaymentMethod).map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <div className={styles.payment}>
+              <select
+                value={paymentMethod}
+                onChange={(e) =>
+                  setPaymentMethod(e.target.value as PaymentMethod)
+                }
+                required
+              >
+                {Object.entries(PaymentMethod).map(([key, { label }]) => (
+                  <option key={key} value={key}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+
+              {paymentMethod === "FINANCING" && (
+                <input
+                  type="text"
+                  placeholder="Banco do financiamento"
+                  onChange={(e) => setSearchProfile(e.target.value)}
+                  value={financialInstitution}
+                />
+              )}
+            </div>
 
             {paymentMethod === "CASH" && (
               <>
@@ -497,21 +520,35 @@ export default function DealForm({
               <>
                 <div className={styles.paymentTitle}>
                   <h3>Valor de entrada </h3>
+                  <h3>Subsídio</h3>
                   <h3>FGTS</h3>
-                  <h3>Valor de financiamento</h3>
+                  <h3>Financiamento</h3>
                 </div>
                 <div className={styles.payment}>
                   <input
                     type="text"
                     placeholder="Valor de entrada"
-                    value={cashValue.toLocaleString("pt-BR", {
+                    value={downPaymentValue.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                     onChange={(e) => {
                       const numeric =
                         Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCashValue(numeric);
+                      setDownPaymentValue(numeric);
+                    }}
+                  />
+                  <input
+                    type="text"
+                    placeholder="Valor de subsídio"
+                    value={subsidyValue.toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                    onChange={(e) => {
+                      const numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+                      setSubsidyValue(numeric);
                     }}
                   />
                   <input
@@ -555,14 +592,14 @@ export default function DealForm({
                   <input
                     type="text"
                     placeholder="Valor de entrada"
-                    value={cashValue.toLocaleString("pt-BR", {
+                    value={downPaymentValue.toLocaleString("pt-BR", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
                     onChange={(e) => {
                       const numeric =
                         Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCashValue(numeric);
+                      setDownPaymentValue(numeric);
                     }}
                   />
                   <input
@@ -597,7 +634,9 @@ export default function DealForm({
 
             <h2>
               {(
+                (Number(downPaymentValue) || 0) +
                 (Number(cashValue) || 0) +
+                (Number(subsidyValue) || 0) +
                 (Number(fgtsValue) || 0) +
                 (Number(financingValue) || 0) +
                 (Number(creditLetterValue) || 0)
@@ -765,6 +804,9 @@ export default function DealForm({
             onClose={() => setIsCloseOpen(false)}
             onSubmit={onCloseDeal!}
             initialPaymentMethod={paymentMethod}
+            initialFinancialInstitution={financialInstitution}
+            initialDownPaymentValue={downPaymentValue}
+            initialSubsidyValue={subsidyValue}
             initialCashValue={cashValue}
             initialFgtsValue={fgtsValue}
             initialFinancingValue={financingValue}

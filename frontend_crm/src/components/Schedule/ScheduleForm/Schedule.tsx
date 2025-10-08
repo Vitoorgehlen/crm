@@ -160,7 +160,6 @@ export default function ScheduleForm({
   const handleOverlayClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       if (schedule) {
-        // Converte MouseEvent para FormEvent para o handleSubmit
         const formEvent = e as unknown as React.FormEvent;
         handleSubmit(formEvent);
       } else {

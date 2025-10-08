@@ -46,6 +46,15 @@ export default function ClosedDeal({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
     deal.paymentMethod ?? "FINANCING"
   );
+  const [financialInstitution, setFinancialInstitution] = useState(
+    deal.financialInstitution ?? ""
+  );
+  const [downPaymentValue, setDownPaymentValue] = useState<number>(
+    Number(deal.downPaymentValue ?? 0)
+  );
+  const [subsidyValue, setSubsidyValue] = useState<number>(
+    Number(deal.subsidyValue ?? 0)
+  );
   const [cashValue, setCashValue] = useState<number>(
     Number(deal.cashValue ?? 0)
   );
@@ -228,6 +237,9 @@ export default function ClosedDeal({
 
     return {
       paymentMethod,
+      financialInstitution,
+      downPaymentValue,
+      subsidyValue,
       cashValue,
       fgtsValue,
       financingValue,
@@ -604,7 +616,7 @@ export default function ClosedDeal({
 
             {error && <p className={styles.error}>{error}</p>}
 
-            <div className={styles.paymentTitle}>
+            <div className={styles.paymentMethodStyle}>
               <div className={styles.paymentBox}>
                 <h3>Valor do imóvel</h3>
                 <input
@@ -636,6 +648,18 @@ export default function ClosedDeal({
                 </select>
               </div>
 
+              {paymentMethod === "FINANCING" && (
+                <div className={styles.paymentBox}>
+                  <h3>Banco</h3>
+                  <input
+                    type="text"
+                    value={financialInstitution}
+                    placeholder="Banco"
+                    onChange={(e) => setFinancialInstitution(e.target.value)}
+                  />
+                </div>
+              )}
+
               <div className={styles.paymentBox}>
                 <h3> Valor total da comissão </h3>
                 <input
@@ -654,6 +678,19 @@ export default function ClosedDeal({
             {paymentMethod === "CASH" && (
               <>
                 <div className={styles.paymentMethodStyle}>
+                  <div className={styles.paymentBox}>
+                    <h3>Entrada</h3>
+                    <input
+                      type="text"
+                      placeholder="Valor de entrada"
+                      value={real(downPaymentValue)}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setDownPaymentValue(numeric);
+                      }}
+                    />
+                  </div>
                   <div className={styles.paymentBox}>
                     <h3>Em dinheiro</h3>
                     <input
@@ -771,11 +808,24 @@ export default function ClosedDeal({
                     <input
                       type="text"
                       placeholder="Valor de entrada"
-                      value={real(cashValue)}
+                      value={real(downPaymentValue)}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCashValue(numeric);
+                        setDownPaymentValue(numeric);
+                      }}
+                    />
+                  </div>
+                  <div className={styles.paymentBox}>
+                    <h3>Subsídio</h3>
+                    <input
+                      type="text"
+                      placeholder="Valor de entrada"
+                      value={real(subsidyValue)}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setSubsidyValue(numeric);
                       }}
                     />
                   </div>
@@ -817,11 +867,11 @@ export default function ClosedDeal({
                     <input
                       type="text"
                       placeholder="Valor de entrada"
-                      value={real(cashValue)}
+                      value={real(downPaymentValue)}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCashValue(numeric);
+                        setDownPaymentValue(numeric);
                       }}
                     />
                   </div>

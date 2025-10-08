@@ -324,6 +324,12 @@ export default function FinishDeal({
             {deal.paymentMethod === "CASH" && (
               <>
                 <div className={styles.paymentMethodStyle}>
+                  {deal.downPaymentValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>Entrada</h3>
+                      <h4>{real(Number(deal.downPaymentValue))}</h4>
+                    </div>
+                  )}
                   <div className={styles.paymentBox}>
                     <h3>Em dinheiro</h3>
                     <h4>{real(Number(deal.cashValue))}</h4>
@@ -339,14 +345,24 @@ export default function FinishDeal({
             {deal.paymentMethod === "FINANCING" && (
               <>
                 <div className={styles.paymentMethodStyle}>
-                  <div className={styles.paymentBox}>
-                    <h3>Entrada</h3>
-                    <h4>{real(Number(deal.cashValue))}</h4>
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
-                    <h4>{real(Number(deal.fgtsValue))}</h4>
-                  </div>
+                  {deal.downPaymentValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>Entrada</h3>
+                      <h4>{real(Number(deal.downPaymentValue))}</h4>
+                    </div>
+                  )}
+                  {deal.subsidyValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>Subsídio</h3>
+                      <h4>{real(Number(deal.subsidyValue))}</h4>
+                    </div>
+                  )}
+                  {deal.fgtsValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>FGTS</h3>
+                      <h4>{real(Number(deal.fgtsValue))}</h4>
+                    </div>
+                  )}
                   <div className={styles.paymentBox}>
                     <h3>Financiado</h3>
                     <h4>{real(Number(deal.financingValue))}</h4>
@@ -358,14 +374,18 @@ export default function FinishDeal({
             {deal.paymentMethod === "CREDIT_LETTER" && (
               <>
                 <div className={styles.paymentMethodStyle}>
-                  <div className={styles.paymentBox}>
-                    <h3>Entrada</h3>
-                    <h4>{real(Number(deal.cashValue))}</h4>
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
-                    <h4>{real(Number(deal.fgtsValue))}</h4>
-                  </div>
+                  {deal.downPaymentValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>Entrada</h3>
+                      <h4>{real(Number(deal.downPaymentValue))}</h4>
+                    </div>
+                  )}
+                  {deal.fgtsValue && (
+                    <div className={styles.paymentBox}>
+                      <h3>FGTS</h3>
+                      <h4>{real(Number(deal.fgtsValue))}</h4>
+                    </div>
+                  )}
                   <div className={styles.paymentBox}>
                     <h3>Carta de crédito</h3>
                     <h4>{real(Number(deal.creditLetterValue))}</h4>

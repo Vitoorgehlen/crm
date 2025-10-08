@@ -24,6 +24,9 @@ export default function CloseDealForm({
   onClose,
   onSubmit,
   initialPaymentMethod,
+  initialFinancialInstitution,
+  initialDownPaymentValue,
+  initialSubsidyValue,
   initialCashValue,
   initialFgtsValue,
   initialFinancingValue,
@@ -48,8 +51,17 @@ export default function CloseDealForm({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
     deal.paymentMethod ?? "FINANCING"
   );
+  const [financialInstitution, setFinancialInstitution] = useState(
+    deal.financialInstitution ?? ""
+  );
   const [cashValue, setCashValue] = useState<number>(
     Number(deal.cashValue ?? 0)
+  );
+  const [subsidyValue, setSubsidyValue] = useState<number>(
+    Number(deal.subsidyValue ?? 0)
+  );
+  const [downPaymentValue, setDownPaymentValue] = useState<number>(
+    Number(deal.downPaymentValue ?? 0)
   );
   const [fgtsValue, setFgtsValue] = useState<number>(
     Number(deal.fgtsValue ?? 0)
@@ -148,6 +160,7 @@ export default function CloseDealForm({
     let total = 0;
     if (paymentMethod === "CASH") {
       total =
+        safeNumber(downPaymentValue) +
         safeNumber(cashValue) +
         safeNumber(fgtsValue) +
         safeNumber(installmentValue) * installmentCount +
@@ -155,7 +168,8 @@ export default function CloseDealForm({
       return total;
     } else if (paymentMethod === "FINANCING") {
       total =
-        safeNumber(cashValue) +
+        safeNumber(downPaymentValue) +
+        safeNumber(subsidyValue) +
         safeNumber(fgtsValue) +
         safeNumber(financingValue) +
         safeNumber(installmentValue) * installmentCount +
@@ -163,7 +177,7 @@ export default function CloseDealForm({
       return total;
     } else if (paymentMethod === "CREDIT_LETTER") {
       total =
-        safeNumber(cashValue) +
+        safeNumber(downPaymentValue) +
         safeNumber(fgtsValue) +
         safeNumber(creditLetterValue) +
         safeNumber(installmentValue) * installmentCount +
@@ -259,7 +273,10 @@ export default function CloseDealForm({
 
     return {
       paymentMethod,
+      financialInstitution,
       cashValue: cashValue ?? null,
+      downPaymentValue: downPaymentValue ?? null,
+      subsidyValue: subsidyValue ?? null,
       fgtsValue: fgtsValue ?? null,
       financingValue: financingValue ?? null,
       creditLetterValue: creditLetterValue ?? null,
@@ -356,7 +373,13 @@ export default function CloseDealForm({
     setCommissionAmount(
       Number(initialCommissionAmount ?? deal.commissionAmount ?? 0)
     );
-    setCashValue(Number(initialCashValue ?? deal.cashValue ?? 0));
+    setFinancialInstitution(
+      initialFinancialInstitution ?? deal.financialInstitution ?? ""
+    );
+    setDownPaymentValue(
+      Number(initialDownPaymentValue ?? deal.downPaymentValue ?? 0)
+    );
+    setSubsidyValue(Number(initialSubsidyValue ?? deal.subsidyValue ?? 0));
     setFgtsValue(Number(initialFgtsValue ?? deal.fgtsValue ?? 0));
     setFinancingValue(
       Number(initialFinancingValue ?? deal.financingValue ?? 0)
@@ -383,6 +406,9 @@ export default function CloseDealForm({
     deal,
     initialBonusInstallmentCount,
     initialBonusInstallmentValue,
+    initialFinancialInstitution,
+    initialDownPaymentValue,
+    initialSubsidyValue,
     initialCashValue,
     initialCommissionAmount,
     initialCreditLetterValue,
@@ -480,10 +506,24 @@ export default function CloseDealForm({
         {paymentMethod === "CASH" && (
           <>
             <div className={styles.paymentTitle}>
+              <h3>Entrada</h3>
               <h3>Valor a vista</h3>
               <h3>FGTS</h3>
             </div>
             <div className={styles.payment}>
+              <input
+                type="text"
+                placeholder="Valor de entrada"
+                value={downPaymentValue.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setDownPaymentValue(numeric);
+                }}
+              />
               <input
                 type="text"
                 placeholder="Valor a vista"
@@ -586,7 +626,8 @@ export default function CloseDealForm({
         {paymentMethod === "FINANCING" && (
           <>
             <div className={styles.paymentTitle}>
-              <h3>Valor de entrada </h3>
+              <h3>Valor de entrada</h3>
+              <h3>Subsídio</h3>
               <h3>FGTS</h3>
               <h3>Valor de financiamento</h3>
             </div>
@@ -594,14 +635,27 @@ export default function CloseDealForm({
               <input
                 type="text"
                 placeholder="Valor de entrada"
-                value={cashValue.toLocaleString("pt-BR", {
+                value={downPaymentValue.toLocaleString("pt-BR", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
                 onChange={(e) => {
                   const numeric =
                     Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setCashValue(numeric);
+                  setDownPaymentValue(numeric);
+                }}
+              />
+              <input
+                type="text"
+                placeholder="Valor de subsídio"
+                value={subsidyValue.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setSubsidyValue(numeric);
                 }}
               />
               <input
@@ -714,14 +768,14 @@ export default function CloseDealForm({
               <input
                 type="text"
                 placeholder="Valor de entrada"
-                value={cashValue.toLocaleString("pt-BR", {
+                value={downPaymentValue.toLocaleString("pt-BR", {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
                 })}
                 onChange={(e) => {
                   const numeric =
                     Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setCashValue(numeric);
+                  setDownPaymentValue(numeric);
                 }}
               />
               <input
@@ -883,11 +937,23 @@ export default function CloseDealForm({
                       type="type"
                       style={{ width: 90 }}
                       value={s.percentage === 0 ? "" : s.percentage}
-                      onChange={(e) =>
-                        updateSplit(i, {
-                          percentage: Number(e.target.value),
-                        })
-                      }
+                      onChange={(e) => {
+                        let value = e.target.value;
+                        value = value.replace(",", ".");
+
+                        if (value === "") {
+                          updateSplit(i, { percentage: 0 });
+                          return;
+                        }
+
+                        const parsed = parseFloat(value);
+
+                        if (!isNaN(parsed)) {
+                          updateSplit(i, {
+                            percentage: Math.min(parseFloat(value), 100),
+                          });
+                        }
+                      }}
                       placeholder="%"
                     />
                     <h3 className={styles.textSplit}>

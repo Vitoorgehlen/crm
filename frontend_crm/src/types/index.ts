@@ -64,7 +64,10 @@ export type Deal = {
     searchProfile?: string;
     reminder?: string;
     paymentMethod: PaymentMethod;
+    financialInstitution?: string;
     currentStep?: DealStepType;
+    subsidyValue?: number;
+    downPaymentValue?: number;
     cashValue?: number;
     fgtsValue?: number;
     financingValue?: number;
@@ -195,6 +198,9 @@ export type DealPayload = {
     statusClient: ClientStatus;
     searchProfile?: string;
     paymentMethod: PaymentMethod;
+    financialInstitution?: string;
+    subsidyValue?: number;
+    downPaymentValue?: number;
     cashValue?: number;
     fgtsValue?: number;
     financingValue?: number;
@@ -217,6 +223,9 @@ export interface CommissionSplit {
 }
 
 export interface CloseDealPayload {
+    financialInstitution?: string;
+    subsidyValue?: number;
+    downPaymentValue?: number;
     cashValue?: number | null;
     fgtsValue?: number | null;
     financingValue?: number | null;
@@ -247,6 +256,9 @@ export interface CloseDealFormProps {
     newStep: (step: string) => Promise<void>;
 
     initialPaymentMethod?: PaymentMethod;
+    initialFinancialInstitution?: string | undefined | null;
+    initialSubsidyValue?: number | undefined | null;
+    initialDownPaymentValue?: number | undefined | null;
     initialCashValue?: number | undefined | null;
     initialFgtsValue?: number | undefined | null;
     initialFinancingValue?: number | undefined | null;
