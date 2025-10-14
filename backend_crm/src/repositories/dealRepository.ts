@@ -302,6 +302,8 @@ export async function deleteDeal(
       }
     }
 
+    await tx.note.deleteMany({ where: { dealId: id } })
+
     return tx.deal.delete({ where: { id } });
   })
 }

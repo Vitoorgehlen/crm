@@ -19,7 +19,7 @@ export async function addCompany(
   return prisma.company.create({
     data: {
       name: name,
-      maxUsers: maxUsers ?? DEFAULT_MAX_USERS,
+      maxUsers: maxUsers = maxUsers && maxUsers > 0 ? maxUsers : DEFAULT_MAX_USERS,
       isActive: DEFAULT_ACTIVE,
     },
   });

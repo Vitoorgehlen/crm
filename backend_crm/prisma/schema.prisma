@@ -158,7 +158,10 @@ model Deal {
   searchProfile         String?
   reminder              DateTime?
   paymentMethod         PaymentMethod
+  financialInstitution  String?
   currentStep           DealStepType?
+  subsidyValue               Decimal?      @db.Decimal(10, 2)
+  downPaymentValue      Decimal?      @db.Decimal(10, 2)
   cashValue             Decimal?      @db.Decimal(10, 2)
   fgtsValue             Decimal?      @db.Decimal(10, 2)
   financingValue        Decimal?      @db.Decimal(10, 2)
@@ -242,7 +245,7 @@ model DealShare {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
-  deal    Deal    @relation(fields: [dealId], references: [id])
+  deal    Deal    @relation(fields: [dealId], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user    User?   @relation("UserCommissions", fields: [userId], references: [id])
 
@@ -261,7 +264,7 @@ model DocumentationCost {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  deal    Deal @relation(fields: [dealId], references: [id])
+  deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
   creator User @relation("UserDocumentations", fields: [createdBy], references: [id])
   updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id])
 }
@@ -275,7 +278,7 @@ model Note {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  deal    Deal @relation(fields: [dealId], references: [id])
+  deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
   creator User @relation("UserNotes", fields: [createdBy], references: [id])
   updater User @relation("UserNotesUpdates", fields: [updatedBy], references: [id])
 }

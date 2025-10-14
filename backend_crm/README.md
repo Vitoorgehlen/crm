@@ -11,3 +11,6 @@ npx prisma generate
 
 npm run dev -> Rodar o servidor
 npx prisma studio -> Interface visual do Prisma
+
+Para migrações
+npx prisma migrate dev --create-only -> Cria uma migration customizada

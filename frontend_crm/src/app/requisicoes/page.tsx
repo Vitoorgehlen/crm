@@ -23,48 +23,6 @@ export default function DeleteRequest() {
   const [dealRequest, setDealRequest] = useState<Deal[]>([]);
   const [loading, setLoading] = useState<"read" | "canc" | "del" | null>(null);
 
-  async function fetchClientRequest() {
-    setLoading("read");
-    try {
-      const res = await fetch(`${API}/clients-deleted-request`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
-      console.log("clients-deleted-request parsed:", data);
-      const clients = Array.isArray(data) ? data : data?.clients ?? [];
-      setClientRequest(clients);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  async function fetchDealRequest() {
-    setLoading("read");
-    try {
-      const res = await fetch(`${API}/deals-deleted-request`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao buscar negociações");
-      const deals = Array.isArray(data) ? data : data?.deals ?? [];
-      setDealRequest(deals);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(null);
-    }
-  }
-
-  const fetchDeleteRequest = useCallback(async () => {
-    await fetchClientRequest();
-    await fetchDealRequest();
-  }, [fetchClientRequest, fetchDealRequest]);
-
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
     const confirmDelete = window.confirm(
       `Tem certeza que deseja excluir ${client.name}?`
@@ -188,6 +146,48 @@ export default function DeleteRequest() {
       setLoading(null);
     }
   };
+
+  const fetchClientRequest = useCallback(async () => {
+    setLoading("read");
+    try {
+      const res = await fetch(`${API}/clients-deleted-request`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
+      console.log("clients-deleted-request parsed:", data);
+      const clients = Array.isArray(data) ? data : data?.clients ?? [];
+      setClientRequest(clients);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(null);
+    }
+  }, [token]);
+
+  const fetchDealRequest = useCallback(async () => {
+    setLoading("read");
+    try {
+      const res = await fetch(`${API}/deals-deleted-request`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar negociações");
+      const deals = Array.isArray(data) ? data : data?.deals ?? [];
+      setDealRequest(deals);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(null);
+    }
+  }, [token]);
+
+  const fetchDeleteRequest = useCallback(async () => {
+    await fetchClientRequest();
+    await fetchDealRequest();
+  }, [fetchClientRequest, fetchDealRequest]);
 
   useEffect(() => {
     if (isLoading) return;

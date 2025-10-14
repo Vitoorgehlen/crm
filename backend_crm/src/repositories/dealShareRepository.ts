@@ -151,9 +151,12 @@ export async function closeDeal(
     const updatedDeal = await tx.deal.update({
         where: { id },
         data: {
+          downPaymentValue: newData.downPaymentValue,
           cashValue: newData.cashValue,
           fgtsValue: newData.fgtsValue,
           financingValue: newData.financingValue,
+          financialInstitution: newData.financialInstitution,
+          subsidyValue: newData.subsidyValue,
           creditLetterValue: newData.creditLetterValue,
           installmentValue: newData.installmentValue,
           installmentCount: newData.installmentCount,

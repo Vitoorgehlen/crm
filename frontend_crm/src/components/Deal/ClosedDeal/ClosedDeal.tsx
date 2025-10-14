@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { MdClose } from "react-icons/md";
 import styles from "./ClosedDeal.module.css";
 import { useAuth } from "@/contexts/AuthContext";
@@ -305,12 +305,6 @@ export default function ClosedDeal({
     }
   }
 
-  function calculateStepPosition() {
-    const steps = WORKFLOW_BY_METHOD[deal.paymentMethod];
-    const currentIndex = steps.indexOf(deal.currentStep!);
-    setIsFirstStep(currentIndex === 0);
-    setIsLastStep(currentIndex === steps.length - 1);
-  }
   async function handleAddDocCost() {
     if (!docCostLabel.trim()) return;
 
@@ -461,6 +455,13 @@ export default function ClosedDeal({
       console.error(err);
     }
   }
+
+  const calculateStepPosition = useCallback(() => {
+    const steps = WORKFLOW_BY_METHOD[deal.paymentMethod];
+    const currentIndex = steps.indexOf(deal.currentStep!);
+    setIsFirstStep(currentIndex === 0);
+    setIsLastStep(currentIndex === steps.length - 1);
+  }, [deal.paymentMethod, deal.currentStep]);
 
   useEffect(() => {
     let mounted = true;
