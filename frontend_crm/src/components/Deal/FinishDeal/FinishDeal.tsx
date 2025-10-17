@@ -291,9 +291,7 @@ export default function FinishDeal({
             <button
               className={styles.closeBtn}
               type="button"
-              onClick={() => {
-                onClose();
-              }}
+              onClick={() => onClose()}
             >
               <MdClose />
             </button>

@@ -25,6 +25,7 @@ import {
   MdCheckBox,
 } from "react-icons/md";
 import { GiCheckMark } from "react-icons/gi";
+import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 
 export default function ClosedDeal({
   isOpen,
@@ -604,13 +605,20 @@ export default function ClosedDeal({
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
           <div className={styles.modalLeft}>
-            <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
-            <h2>{deal?.client?.name ?? ""}</h2>
+            <div className={styles.titleCard}>
+              <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
+              <h2>{deal?.client?.name ?? ""}</h2>
+              <h6>{`Último contato: ${getDaysSinceLastContact(
+                deal?.updatedAt ?? deal?.createdAt ?? ""
+              )}`}</h6>
+            </div>
 
             <button
               className={styles.closeBtn}
               type="button"
-              onClick={(e) => handleSubmit(e)}
+              onClick={() => {
+                onClose();
+              }}
             >
               <MdClose />
             </button>

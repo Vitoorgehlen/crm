@@ -16,6 +16,7 @@ export default function ClientsForm({
   client = null,
   onClose,
   onSubmit,
+  onDelete,
 }: ClientFormProps) {
   const { token } = useAuth();
 
@@ -58,58 +59,6 @@ export default function ClientsForm({
       setLoading(null);
     }
   }
-
-  // async function handleSubmit(e: React.FormEvent) {
-  //   e.preventDefault();
-  //   if (loading) return;
-  //   setLoading("save");
-  //   setError("");
-
-  //   try {
-  //     const payload: ClientPayload = {
-  //       name,
-  //       dateOfBirth: dateOfBirth ? new Date(dateOfBirth).toISOString() : null,
-  //       isInvestor,
-  //       isPriority,
-  //     };
-
-  //     if (phone.trim() !== "") payload.phone = phone;
-  //     if (dateOfBirth.trim() !== "") payload.dateOfBirth = dateOfBirth;
-
-  //     let response: Response;
-  //     if (client && client.id) {
-  //       response = await fetch(`${API}/clients/${client.id}`, {
-  //         method: "PUT",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify(payload),
-  //       });
-  //     } else {
-  //       response = await fetch(`${API}/clients`, {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: `Bearer ${token}`,
-  //         },
-  //         body: JSON.stringify(payload),
-  //       });
-  //     }
-
-  //     const data = await response.json();
-  //     if (!response.ok)
-  //       throw new Error(data.error || "Erro ao salvar o cliente");
-  //   } catch (err: unknown) {
-  //     if (err instanceof Error) {
-  //       setError(err.message);
-  //     } else {
-  //       setError("Erro inesperado");
-  //     }
-  //   } finally {
-  //     setLoading(null);
-  //   }
-  // }
 
   const handleSubmit = async (
     e: React.FormEvent,
@@ -179,6 +128,8 @@ export default function ClientsForm({
       }
 
       setError("");
+      onDelete?.(client?.id!);
+      onClose();
     } catch (err) {
       console.error(err);
       setError("Erro inesperado ao apagar o usuário");

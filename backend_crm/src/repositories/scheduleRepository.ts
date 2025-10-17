@@ -169,3 +169,17 @@ export async function deleteSchedule(
 
   return await prisma.schedule.delete({ where: { id }})
 }
+
+export async function deleteOldsSchedule(
+  firstDayOfLastMonth: Date,
+  lastDayOfLastMonth: Date
+ ) {
+  return await prisma.schedule.deleteMany({
+    where: {
+      reminderAt: {
+        gte: firstDayOfLastMonth,
+        lte: lastDayOfLastMonth
+      }
+    }
+  })
+}

@@ -11,6 +11,7 @@ import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
 import { fetchDeals } from "@/utils/fetchDeals";
 import { IoStar, IoStarOutline } from "react-icons/io5";
+import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -286,10 +287,29 @@ export default function Deals() {
                           onClick={() => openEdit(deal)}
                         >
                           {deal.client?.isPriority ? (
-                            <IoStar className={styles.btnPriorityActiveCard} />
+                            <div className={styles.titleCard}>
+                              <IoStar
+                                className={styles.btnPriorityActiveCard}
+                              />
+                              <h4 className={styles.lastContact}>
+                                {getDaysSinceLastContact(
+                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                )}
+                              </h4>
+                            </div>
                           ) : (
-                            <IoStarOutline className={styles.btnPriorityCard} />
+                            <div className={styles.titleCard}>
+                              <IoStarOutline
+                                className={styles.btnPriorityCard}
+                              />
+                              <h4 className={styles.lastContact}>
+                                {getDaysSinceLastContact(
+                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                )}
+                              </h4>
+                            </div>
                           )}
+
                           <h3>
                             {deal.client?.name || "Cliente não informado"}
                           </h3>

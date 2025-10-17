@@ -1018,9 +1018,7 @@ export default function CloseDealForm({
           <button
             className={styles.btnCancel}
             type="button"
-            onClick={() => {
-              onClose();
-            }}
+            onClick={() => onClose()}
           >
             Cancelar
           </button>

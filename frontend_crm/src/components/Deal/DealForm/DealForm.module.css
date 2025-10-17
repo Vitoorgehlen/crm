@@ -107,15 +107,15 @@
 
 .modalEdit {
   background: var(--cor--principal);
-  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  padding: 1rem 1.8rem 1rem 0;
   border-radius: 10px;
   width: 1000px;
   height: 600px;
-  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0 25px 10px 0;
+  justify-content: space-between;
   overflow-y: auto;
   scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
 }

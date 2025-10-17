@@ -86,7 +86,7 @@ export default function Clients() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
 
-    setClients((prev) => [...prev, data]);
+    // setClients((prev) => [...prev, data]);
     await fetchClientsData();
   };
 

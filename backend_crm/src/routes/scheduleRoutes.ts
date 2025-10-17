@@ -1,7 +1,8 @@
 import { Router } from 'express';
-import { addSchedule, deleteSchedule, editSchedule, getSchedules } from '../repositories/scheduleRepository'
+import { addSchedule, deleteOldsSchedule, deleteSchedule, editSchedule, getSchedules } from '../repositories/scheduleRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
+import { cronOnly } from '../middlewares/cronOnly';
 
 const router = Router();
 
@@ -81,6 +82,21 @@ router.delete('/schedule/:id', loginRequired, async (req, res) => {
     console.error(err);
     return res.status(500).json({ error: 'Erro ao deletar o compromisso' });
   }
+});
+
+router.post("/cleanupSchedules", cronOnly, async (req, res) => {
+  try {
+  const today = new Date();
+  const firstDayOfLastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+  const lastDayOfLastMonth = new Date(today.getFullYear(), today.getMonth(), 0)
+
+  const result = await deleteOldsSchedule(firstDayOfLastMonth, lastDayOfLastMonth)
+
+  console.log(`${result.count} schedules do mês passado foram apagados.`);
+  } catch(err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro ao apagar schedules antigos" });
+  };
 });
 
 export default router;

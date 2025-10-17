@@ -610,17 +610,54 @@ export const ClientStatus = {
 export type ClientStatus = keyof typeof ClientStatus;
 
 export const PaymentMethod = {
-    CASH: {
-        dbValue: 'CASH',
-        label: 'À vista'
-    },
-    FINANCING: {
-        dbValue: 'FINANCING',
-        label: 'Financiamento'
-    },
-    CREDIT_LETTER: {
-        dbValue: 'CREDIT_LETTER',
-        label: 'Carta de crédito'
-    }
+  CASH: {
+      dbValue: 'CASH',
+      label: 'À vista'
+  },
+  FINANCING: {
+      dbValue: 'FINANCING',
+      label: 'Financiamento'
+  },
+  CREDIT_LETTER: {
+      dbValue: 'CREDIT_LETTER',
+      label: 'Carta de crédito'
+  }
 } as const;
 export type PaymentMethod = keyof typeof PaymentMethod;
+
+export type Tasks = {
+  id: number,
+  priority: TasksPriority,
+  content: string,
+  isFinish: boolean,
+  createdBy: number,
+  updatedBy: number,
+}
+
+export const priorityOrder = {
+  URGENT: 1,
+  NORMAL: 2,
+  LOW: 3,
+}
+
+export enum TasksPriority {
+  URGENT = 'URGENT',
+  NORMAL = 'NORMAL',
+  LOW = 'LOW',
+}
+
+export const TaskPriority = {
+  URGENT: {
+      dbValue: 'URGENT',
+      label: 'Urgente'
+  },
+  NORMAL: {
+    dbValue: 'NORMAL',
+    label: 'Normal'
+  },
+  LOW: {
+      dbValue: 'LOW',
+      label: 'Baixo'
+  }
+} as const;
+export type TaskPriority = keyof typeof TaskPriority;

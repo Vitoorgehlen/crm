@@ -21,6 +21,7 @@ import { IoStar, IoStarOutline } from "react-icons/io5";
 import { FaTimes, FaCheck } from "react-icons/fa";
 import ClientsForm from "@/components/clients/ClientForm";
 import { AiOutlineUserAdd } from "react-icons/ai";
+import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -380,6 +381,12 @@ export default function DealForm({
                   <>
                     <h4>Editar negociação</h4>
                     <h2>{deal?.client?.name ?? ""}</h2>
+                    <h6 className={styles.lastContact}>
+                      {`Último contato:
+                      ${getDaysSinceLastContact(
+                        deal?.updatedAt ?? deal?.createdAt ?? ""
+                      )}`}
+                    </h6>
                   </>
                 )}
               </div>

@@ -112,6 +112,16 @@
   cursor: pointer;
 }
 
+.titleCard {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.lastContact {
+  color: var(--cor--secundaria-claro);
+}
+
 .btnPriorityActiveCard {
   background: transparent;
   border: none;
@@ -188,18 +198,6 @@
   grid-template-columns: repeat(1, 1fr);
 }
 
-@media (min-width: 768px) {
-  .dealList {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .dealList {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
 .deal {
   background-color: var(--cor--branco-5);
   border-radius: 8px;
@@ -230,4 +228,16 @@
 
 .dealDelete:hover {
   background-color: var(--cor--alerta-vermelho);
+}
+
+@media (min-width: 768px) {
+  .dealList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .dealList {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }

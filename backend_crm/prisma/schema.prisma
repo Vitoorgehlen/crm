@@ -73,8 +73,12 @@ model User {
   commissionsReceived DealShare[] @relation("UserCommissions")
   dealSharesCreated   DealShare[] @relation("UserDealSharesCreated")
   dealSharesUpdated   DealShare[] @relation("UserDealSharesUpdated")
-  Deal                Deal[]
-  Client              Client[]
+
+  // Commissions
+  tasks Tasks[] @relation("UserTasks")
+
+  Deal   Deal[]
+  Client Client[]
 }
 
 enum UserRole {
@@ -160,7 +164,7 @@ model Deal {
   paymentMethod         PaymentMethod
   financialInstitution  String?
   currentStep           DealStepType?
-  subsidyValue               Decimal?      @db.Decimal(10, 2)
+  subsidyValue          Decimal?      @db.Decimal(10, 2)
   downPaymentValue      Decimal?      @db.Decimal(10, 2)
   cashValue             Decimal?      @db.Decimal(10, 2)
   fgtsValue             Decimal?      @db.Decimal(10, 2)
@@ -312,4 +316,21 @@ model Schedule {
   creator User    @relation("UserSchedule", fields: [createdBy], references: [id])
   updater User    @relation("UserScheduleUpdates", fields: [updatedBy], references: [id])
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model Tasks {
+  id        Int          @id @default(autoincrement())
+  priority  TaskPriority @default(NORMAL)
+  content   String
+  isFinish  Boolean      @default(true)
+  createdBy Int
+  updatedAt DateTime     @updatedAt
+
+  creator User @relation("UserTasks", fields: [createdBy], references: [id])
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  URGENT
 }
