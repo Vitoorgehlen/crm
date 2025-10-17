@@ -128,7 +128,7 @@ export default function ClientsForm({
       }
 
       setError("");
-      onDelete?.(client?.id!);
+      onDelete?.(client?.id || 0);
       onClose();
     } catch (err) {
       console.error(err);

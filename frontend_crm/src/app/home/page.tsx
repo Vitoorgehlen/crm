@@ -23,9 +23,7 @@ export default function Home() {
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Tasks[]>();
-  const [selectedtasks, setSelectedTasks] = useState<Tasks | undefined>(
-    undefined
-  );
+
   const [isOpenEditTask, setIsOpenEditTask] = useState<number | undefined>(
     undefined
   );
@@ -75,7 +73,6 @@ export default function Home() {
   }, [token]);
 
   async function resetTask() {
-    setSelectedTasks(undefined);
     setIsOpenEditTask(undefined);
     setTaskContent("");
     setTaskPriority(TasksPriority.NORMAL);
@@ -318,7 +315,7 @@ export default function Home() {
                                     ? styles.divButtonFinish
                                     : styles.divButton
                                 }
-                                onClick={(e) => toggleTaskFinish(task)}
+                                onClick={() => toggleTaskFinish(task)}
                               >
                                 {task.isFinish ? (
                                   <MdCheckBox />
@@ -335,7 +332,6 @@ export default function Home() {
                                 type="button"
                                 onClick={() => {
                                   setIsOpenEditTask(task.id);
-                                  setSelectedTasks(task);
                                   setTaskContent(task.content);
                                 }}
                               >

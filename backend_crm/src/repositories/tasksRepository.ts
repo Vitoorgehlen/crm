@@ -12,7 +12,6 @@ export async function addTasks(
       priority: newData.priority ?? 'NORMAL',
       isFinish: false,
       createdBy: userId,
-      updatedBy: userId
     },
   });
 }
