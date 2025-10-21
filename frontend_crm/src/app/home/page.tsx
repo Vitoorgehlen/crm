@@ -127,7 +127,7 @@ export default function Home() {
         body: JSON.stringify({ content: payload }),
       });
 
-      if (!res.ok) throw new Error("Erro ao criar tarefa");
+      if (!res.ok) throw new Error("Erro ao editar tarefa");
       await res.json();
       fetchTasks();
     } catch (err) {
@@ -156,7 +156,7 @@ export default function Home() {
         },
       });
 
-      if (!res.ok) throw new Error("Erro ao criar tarefa");
+      if (!res.ok) throw new Error("Erro ao apagar tarefa");
       await res.json();
       fetchTasks();
     } catch (err) {

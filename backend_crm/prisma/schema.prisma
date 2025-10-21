@@ -334,3 +334,13 @@ enum TaskPriority {
   NORMAL
   URGENT
 }
+
+model Goals {
+  id        Int      @id @default(autoincrement())
+  isCompany Boolean  @default(false)
+  userId    Int
+  value     Decimal  @db.Decimal(10, 2)
+  year      Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

@@ -11,9 +11,10 @@ import dealRoutes from './routes/dealRoutes';
 import documentationCostRoutes from './routes/documentationCostRoutes';
 import noteRoutes from './routes/noteRoutes';
 import dealShareRoutes from './routes/dealShareRoutes';
+import goalsRoutes from './routes/goalsRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
-import tokenRoutes from './routes/tokenRoutes';
 import tasksRoutes from './routes/tasksRoutes';
+import tokenRoutes from './routes/tokenRoutes';
 
 const clientUrl = process.env.CLIENT_URL
 class App {
@@ -45,6 +46,7 @@ class App {
     this.app.use('/', documentationCostRoutes);
     this.app.use('/', noteRoutes);
     this.app.use('/', dealShareRoutes);
+    this.app.use('/', goalsRoutes);
     this.app.use('/', scheduleRoutes);
     this.app.use('/', tasksRoutes);
     this.app.use('/', tokenRoutes);

@@ -161,6 +161,72 @@
   gap: 5px;
 }
 
+.cardGoal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--cor--branco-2);
+  width: 150px;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+}
+
+.cardGoal input {
+  border: none;
+  outline: none;
+  width: 90%;
+  border: 1px solid var(--cor--branco-9);
+  border-radius: 2px;
+  padding: 2px 5px;
+}
+
+.cardGoal input::placeholder {
+  border: 1px solid var(--cor--branco-9);
+  border-radius: 2px;
+  padding: 2px;
+}
+
+.cardGoal input:focus,
+.cardGoal input:active,
+.cardGoal input:hover {
+  border: 1px solid var(--cor--secundaria-claro);
+  border-radius: 2px;
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: row;
+  font-size: 1rem;
+}
+
+.infoCard button {
+  font-size: 1rem;
+}
+
+.btnGoal {
+  border: none;
+  color: var(--cor--principal-claro);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnGoal:hover {
+  color: var(--cor--secundaria-claro);
+}
+
+.btnDelGoal {
+  border: none;
+  color: var(--cor--alerta-vermelho);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnDelGoal:hover {
+  color: var(--cor--alerta-vermelho-forte);
+}
+
 .cardLeft {
   background-color: var(--cor--branco-2);
   width: 150px;

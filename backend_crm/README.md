@@ -14,3 +14,4 @@ npx prisma studio -> Interface visual do Prisma
 
 Para migrações
 npx prisma migrate dev --create-only -> Cria uma migration customizada
+npx prisma migrate dev --name (nome da migração aqui) --> cria uma migração

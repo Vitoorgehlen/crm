@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
-import { Deal } from "@/types/index";
+import { Deal, Goals } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { IoMdSearch } from "react-icons/io";
+import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
+import { MdCancel } from "react-icons/md";
 import { formatDateForFinish } from "@/utils/dateUtils";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -21,6 +23,13 @@ export default function FinishDeals() {
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+
+  const [goals, setGoals] = useState<Goals[]>([]);
+  const [editGoal, setEditGoal] = useState(false);
+  const [annualGoal, setAnnualGoal] = useState(
+    goals.find((goal) => goal.year === new Date().getFullYear())
+  );
+  const [annualGoalValue, setAnnualGoalValue] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -116,6 +125,9 @@ export default function FinishDeals() {
       setSelectedYear(null);
     } else {
       setSelectedYear(year);
+      const goal = goals.find((goal) => goal.year === year);
+      setAnnualGoal(goal);
+      setAnnualGoalValue(goal?.value ?? 0);
     }
   }
 
@@ -311,6 +323,100 @@ export default function FinishDeals() {
     };
   }, [statsCash.yearlyStats, statsCash.monthlyStats, selectedYear]);
 
+  async function handleAddGoal(isCompany: boolean) {
+    if (annualGoalValue === 0) throw new Error("Meta não pode ser 0");
+
+    try {
+      const payload: Partial<Goals> = {
+        isCompany: isCompany,
+        value: annualGoalValue,
+      };
+
+      const res = await fetch(`${API}/goals`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: payload }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao criar meta");
+      await res.json();
+      fetchGoals();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleEditGoal(goal: Goals, isCompany: boolean) {
+    if (annualGoalValue === 0) throw new Error("Meta não pode ser 0");
+    if (!goal) throw new Error("Meta não selecionada");
+
+    try {
+      const payload: Partial<Goals> = {
+        isCompany: isCompany,
+        value: annualGoalValue,
+      };
+
+      const res = await fetch(`${API}/goals/${goal.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: payload }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao editar meta");
+      await res.json();
+      fetchGoals();
+      setEditGoal(false);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleDeleteGoal(goal: Goals) {
+    if (goal.year !== new Date().getFullYear()) {
+      throw new Error("Uma meta antiga não pode ser apagada");
+    }
+
+    if (!goal) return;
+
+    try {
+      const res = await fetch(`${API}/goals/${goal.id}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar a meta");
+      await res.json();
+      fetchGoals();
+      setAnnualGoal(undefined);
+      setAnnualGoalValue(0);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  const fetchGoals = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/goals`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar metas");
+      setGoals(data);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  }, [token]);
+
   const fetchDealsData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -359,6 +465,27 @@ export default function FinishDeals() {
       setSelectedYear(lastYear);
     }
   }, [yearsSortedDesc]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    fetchGoals();
+  }, [isLoading, token, router, fetchGoals]);
+
+  useEffect(() => {
+    if (goals.length > 0) {
+      const currentYearGoal = goals.find(
+        (goal) => goal.year === new Date().getFullYear()
+      );
+
+      setAnnualGoal(currentYearGoal);
+      setAnnualGoalValue(currentYearGoal?.value ?? 0);
+    }
+  }, [goals]);
 
   return (
     <div className={styles.page}>
@@ -425,6 +552,113 @@ export default function FinishDeals() {
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.cashStatsCard}>
               <div className={styles.cashStatsCardLeft}>
+                <div className={styles.cashStatsCardDiv}>
+                  <div className={styles.cardGoal}>
+                    {selectedYear === new Date().getFullYear() ? (
+                      <div className={styles.infoCard}>
+                        <strong>Meta anual:</strong>
+                        {annualGoal !== undefined ? (
+                          <>
+                            {editGoal ? (
+                              <button
+                                type="button"
+                                className={styles.btnGoal}
+                                onClick={() =>
+                                  handleEditGoal(annualGoal, false)
+                                }
+                              >
+                                <RiSave3Fill />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.btnGoal}
+                                onClick={() => setEditGoal(true)}
+                              >
+                                <RiPencilFill />
+                              </button>
+                            )}
+
+                            {editGoal ? (
+                              <button
+                                type="button"
+                                className={styles.btnDelGoal}
+                                onClick={() => setEditGoal(false)}
+                              >
+                                <MdCancel />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                className={styles.btnDelGoal}
+                                onClick={() => handleDeleteGoal(annualGoal)}
+                              >
+                                <RiEraserFill />
+                              </button>
+                            )}
+                          </>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.btnGoal}
+                            onClick={() => handleAddGoal(false)}
+                          >
+                            <RiSave3Fill />
+                          </button>
+                        )}
+                      </div>
+                    ) : (
+                      <div className={styles.cardGoal}>
+                        <div className={styles.infoCard}>
+                          <strong>Meta de {selectedYear}:</strong>
+                        </div>
+                      </div>
+                    )}
+                    {(editGoal || annualGoal === undefined) &&
+                    selectedYear === new Date().getFullYear() ? (
+                      <input
+                        type="text"
+                        value={real(Number(annualGoalValue))}
+                        onChange={(e) => {
+                          const numeric =
+                            Number(e.target.value.replace(/\D/g, "")) / 100;
+                          setAnnualGoalValue(numeric);
+                        }}
+                      />
+                    ) : (
+                      <p>{real(Number(annualGoalValue))}</p>
+                    )}
+                  </div>
+                  {annualGoalValue > 0 && (
+                    <>
+                      <div className={styles.cardLeft2}>
+                        <strong>P/ bater a meta:</strong>
+                        <p>
+                          {real(
+                            Number(annualGoalValue - selectedYearStats.total)
+                          )}
+                        </p>
+                      </div>
+                      <div className={styles.cardLeft}>
+                        <strong>Média desejada:</strong>
+                        <p>{real(Number(annualGoalValue / 12))}</p>
+                      </div>
+                      {selectedYear === new Date().getFullYear() && (
+                        <div className={styles.cardLeft}>
+                          <strong>Média até Dezembro p/ bater meta</strong>
+                          <p>
+                            {real(
+                              Number(
+                                (annualGoalValue - selectedYearStats.total) /
+                                  (12 - new Date().getMonth())
+                              )
+                            )}
+                          </p>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
                 <div className={styles.cashStatsCardDiv}>
                   <div className={styles.cardLeft}>
                     <strong>Total de comissões: </strong>

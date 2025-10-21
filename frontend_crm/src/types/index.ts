@@ -634,6 +634,16 @@ export type Tasks = {
   updatedBy: number,
 }
 
+export type Goals = {
+  id: number,
+  isCompany: boolean,
+  userId: number,
+  value: number,
+  year: number,
+  createdAt: string,
+  updatedAt: string,
+}
+
 export const priorityOrder = {
   URGENT: 1,
   NORMAL: 2,
