@@ -43,6 +43,7 @@ export default function DealForm({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
 
+  const [searchClient, setSearchClient] = useState("");
   const [clientId, setClientId] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState<DealStatus>("POTENTIAL_CLIENTS");
   const [statusClient, setStatusClient] = useState<ClientStatus>("INTERESTED");
@@ -325,6 +326,15 @@ export default function DealForm({
   }, [deal, mode]);
 
   useEffect(() => {
+    if (clientId) {
+      const selected = clients.find((c) => c.id === clientId);
+      if (selected && selected.name !== searchClient) {
+        setSearchClient(selected.name);
+      }
+    }
+  }, [clientId, clients]);
+
+  useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
 
     async function fetchNote() {
@@ -407,21 +417,34 @@ export default function DealForm({
             {error && <p className={styles.error}>{error}</p>}
 
             <div className={styles.box}>
-              <select
+              <input
+                list="clients"
                 className={styles.changeClient}
-                onChange={(e) => setClientId(Number(e.target.value))}
-                value={clientId || ""}
-              >
-                <option value="">Selecione um cliente</option>
+                placeholder="Buscar cliente..."
+                value={searchClient}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchClient(value);
+
+                  const foundClient = clients.find(
+                    (client) =>
+                      client.name.toLowerCase() === value.toLowerCase()
+                  );
+                  setClientId(foundClient ? foundClient.id : undefined);
+                }}
+              />
+
+              <datalist id="clients">
                 {clients
                   .slice()
                   .reverse()
                   .map((client) => (
-                    <option key={client.id} value={client.id}>
-                      {client.name || "Cliente não encontrado"}
-                    </option>
+                    <option
+                      key={client.id}
+                      value={client.name || "Cliente não encontrado"}
+                    />
                   ))}
-              </select>
+              </datalist>
               {mode === "create" && (
                 <button
                   className={styles.addClient}

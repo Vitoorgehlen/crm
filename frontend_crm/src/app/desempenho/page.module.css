@@ -1,0 +1,135 @@
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+  background-color: var(--cor--branco-2);
+  overflow-y: auto;
+
+  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+}
+
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 10px 10px 10px;
+  color: var(--cor--escura-escuro);
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.submit:hover {
+  color: var(--cor--principal);
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.headerBtns {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.headerBtns input {
+  padding: 8px;
+  margin: 3px;
+  border: 1px solid var(--cor--branco-6);
+  border-radius: 5px;
+  width: 100%;
+  outline: none;
+}
+
+.headerBtns input:focus,
+.headerBtns input:active,
+.headerBtns input:hover {
+  border: 1px solid var(--cor--principal-claro);
+  box-shadow: none !important;
+}
+
+.btnSetting {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  width: 300px;
+  height: 100%;
+  border-radius: 5px;
+  background: var(--cor--principal-claro);
+  border: 1px solid var(--cor--principal);
+  text-decoration: none;
+  color: var(--cor--branco-2);
+  cursor: pointer;
+}
+
+.btnSetting:hover {
+  background: var(--cor--principal);
+  border: 1px solid var(--cor--principal-claro);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.clientList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.dealsTable {
+  width: 90%;
+  max-width: 1200px;
+  border-collapse: collapse;
+  border: 1px solid var(--cor--branco-6);
+  border-radius: 5px;
+}
+
+.dealsTable thead {
+  background-color: var(--cor--branco-4);
+}
+
+.dealsTable th {
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid var(--cor--branco-4);
+  font-weight: 600;
+}
+
+.dealsTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--cor--branco-6);
+}
+
+.dealsTable tbody tr:nth-child(even) {
+  background-color: var(--cor--branco-3);
+}
+/* 
+.dealsTable tbody tr:hover {
+  background-color: var(--cor--branco-9);
+  color: var(--cor--branco-2);
+  transition: background-color 0.5;
+} */

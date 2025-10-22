@@ -1,5 +1,5 @@
 import { prisma } from "../prisma-client";
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
 
@@ -98,6 +98,64 @@ export async function getDeals(
       createdAt: 'desc',
     },
   });
+}
+
+export async function getTeamPerformace(
+  userId: number,
+  startDate: string,
+  endDate: string,
+  selectedUser?: number,
+) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('Usuário não encontrado.');
+
+  const canReadPerformance = await checkUserPermission(userId, 'ALL_DEAL_READ');
+  if (!canReadPerformance) throw new Error('Você não tem permissão para visualizar a performace');
+
+  const dealsWhere: any = {
+    companyId: user.companyId,
+  }
+
+  if (selectedUser) {
+    dealsWhere.createdBy = selectedUser
+  }
+
+  if (startDate && endDate) {
+    dealsWhere.createdAt = {
+      gte: new Date(startDate),
+      lte: new Date(endDate),
+    }
+  }
+
+  const dealsAndClients = await prisma.deal.findMany({
+    where: dealsWhere,
+    include: {
+      client: { select: { name: true } },
+      creator: { select: { id: true, name: true } },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  const clientWhere = {
+    ...dealsWhere,
+    deals: {
+      none: {}
+    }
+  }
+
+  const clientsWithoutDeals = await prisma.client.findMany({
+    where: clientWhere,
+    include: {
+      creator: { select: { id: true, name: true } },
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+  });
+
+  return { dealsAndClients, clientsWithoutDeals };
 }
 
 export async function getDealsByClient(id: number, userId: number) {

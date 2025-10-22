@@ -7,6 +7,7 @@ import {
   deleteDeal,
   getDealsByClient,
   getDealDeletedRequest,
+  getTeamPerformace,
 } from '../repositories/dealRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
@@ -57,6 +58,27 @@ router.get('/deals', loginRequired, async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
+router.get('/team-performace', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  const { startDate, endDate, selectedUser } = req.query;
+
+  try {
+    const deal = await getTeamPerformace(
+      userId,
+      startDate as string,
+      endDate as string,
+      selectedUser ? Number(selectedUser) : undefined
+    );
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar performace da equipe.' });
   }
 });
 

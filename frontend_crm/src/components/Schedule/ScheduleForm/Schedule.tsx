@@ -27,6 +27,7 @@ export default function ScheduleForm({
   const { token, isLoading } = useAuth();
 
   const [deals, setDeals] = useState<Deal[]>([]);
+  const [searchClient, setSearchClient] = useState("");
 
   const [dealId, setDealId] = useState<number | undefined>(undefined);
   const [newLabel, setNewLabel] = useState("");
@@ -250,22 +251,35 @@ export default function ScheduleForm({
             </div>
 
             {error && <p className={styles.error}>{error}</p>}
+            <input
+              list="deals"
+              placeholder="Buscar cliente..."
+              value={searchClient}
+              onChange={(e) => {
+                const value = e.target.value;
+                setSearchClient(value);
 
-            <select
-              onChange={(e) => setDealId(Number(e.target.value))}
-              value={dealId || ""}
-            >
-              <option value="">Selecione um cliente</option>
+                const foundDeal = deals.find(
+                  (deal) => deal.client?.name === value
+                );
+                if (foundDeal) setDealId(foundDeal.id);
+              }}
+            />
+
+            <datalist id="deals">
               {deals
                 .slice()
                 .reverse()
                 .map((deal) => (
-                  <option key={deal.id} value={deal.id}>
-                    {deal.client?.name || "Cliente não encontrado"} -{" "}
+                  <option
+                    key={deal.id}
+                    value={deal.client?.name || "Cliente não encontrado"}
+                  >
                     {DealStatus[deal.status].label || ""}
                   </option>
                 ))}
-            </select>
+            </datalist>
+
             <input
               type="datetime-local"
               onChange={(e) => setNewDate(new Date(e.target.value))}

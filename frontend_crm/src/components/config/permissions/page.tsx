@@ -16,10 +16,7 @@ import {
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-export default function Permissions({
-  userRole,
-  onClose,
-}: ConfigPermissionsProps) {
+export default function Permissions({ userRole }: ConfigPermissionsProps) {
   const { token } = useAuth();
 
   const [usersRoles, setUsersRoles] = useState<RolePermission[]>([]);
@@ -209,50 +206,41 @@ export default function Permissions({
   };
 
   return (
-    <form
-      className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
-    >
-      <div className={styles.labelsSettingPermissions}>
-        {Object.entries(permissionsByRole).map(([role, state]) => (
-          <div key={role} className={styles.btnPermissions}>
-            <h3>{RoleLabels[role] || role}</h3>
-            <div className={styles.permissions}>
-              {Object.entries(state).map(([perm, allowed]) => (
-                <button
-                  key={perm}
-                  type="button"
-                  className={styles.permissionBtn}
-                  onClick={() => togglePermissionForRole(role, perm)}
-                >
-                  <p>{PermissionLabels[perm] || perm}</p>
-                  <div className={styles.slideBtn}>
-                    <div
-                      className={
-                        allowed ? styles.slideBtnOff : styles.slideBtnOnOff
-                      }
-                    >
-                      Off
-                    </div>
-                    <div
-                      className={
-                        allowed ? styles.slideBtnOn : styles.slideBtnOff
-                      }
-                    >
-                      On
-                    </div>
-                  </div>
-                </button>
+    <div className={styles.allTable}>
+      <table className={styles.table}>
+        <thead>
+          <tr>
+            <th>Permissão</th>
+            {Object.keys(RolePermissions)
+              .filter((role) => role !== "ADMIN")
+              .map((role) => (
+                <th key={role}>{RoleLabels[role]}</th>
               ))}
-            </div>
-          </div>
-        ))}
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {Object.values(PermissionEnum).map((perm) => (
+            <tr key={perm}>
+              <td>{PermissionLabels[perm]}</td>
+
+              {Object.keys(RoleLabels)
+                .filter((role) => role !== "ADMIN")
+                .map((role) => (
+                  <td key={role}>
+                    <input
+                      type="checkbox"
+                      checked={permissionsByRole[role]?.[perm] || false}
+                      onChange={() => togglePermissionForRole(role, perm)}
+                    />
+                  </td>
+                ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
       <div className={styles.btnsEnd}>
         <button
-          className={styles.btnSave}
+          className={styles.btnReset}
           onClick={handleResetPermissions}
           type="button"
         >
@@ -274,6 +262,6 @@ export default function Permissions({
           )}
         </button>
       </div>
-    </form>
+    </div>
   );
 }

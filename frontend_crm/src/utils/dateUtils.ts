@@ -1,3 +1,4 @@
+// ANO-MÊS-DIA
 export function formatDateForInput(dateStr?: string) {
   if (!dateStr) return '';
   if (dateStr.includes('T')) return dateStr.split('T')[0];
@@ -7,6 +8,7 @@ export function formatDateForInput(dateStr?: string) {
   return d.toISOString().slice(0, 10);
 }
 
+// HORA:MINUTO
 export function formatDateForSchedules(dateStr?: string) {
   if (!dateStr) return '';
   try {
@@ -32,6 +34,7 @@ export function formatDateForSchedules(dateStr?: string) {
   }
 }
 
+// HORA:MINUTO DIA/MÊS/DIA
 export function formatDateForCards(dateStr?: string) {
   if (!dateStr) return '';
   try {
@@ -63,6 +66,7 @@ export function formatDateForCards(dateStr?: string) {
   }
 }
 
+// DIA/MÊS/ANO
 export function formatDateForFinish(dateStr?: string) {
   if (!dateStr) return '';
   try {
@@ -90,6 +94,7 @@ export function formatDateForFinish(dateStr?: string) {
   }
 }
 
+// Calcula diferença de datas
 export function calculateDuration(startDateStr?: string, endDateStr?: string): string {
   if (!startDateStr || !endDateStr) return '';
   

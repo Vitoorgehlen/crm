@@ -1,23 +1,70 @@
-.overlay {
+.allTable {
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 40px;
 }
 
-.labelsSettingPermissions {
-  display: grid;
-  gap: 20px;
-  width: 100%;
+.table {
+  width: 90%;
   max-width: 1200px;
-  margin: 0 auto;
-
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  justify-items: center;
+  border-collapse: collapse;
+  border: 1px solid var(--cor--branco-6);
+  border-radius: 5px;
 }
 
-.btnPermissions {
-  margin-top: 20px;
-  padding: 10px;
-  color: var(--cor--escura-escuro);
+.table thead {
   background-color: var(--cor--branco-4);
+}
+
+.table th {
+  text-align: center;
+  padding: 10px;
+  border-bottom: 1px solid var(--cor--branco-4);
+  font-weight: 600;
+}
+
+.table td {
+  text-align: center;
+}
+
+.table td:first-child {
+  text-align: left;
+}
+
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--cor--branco-6);
+}
+
+.table tbody tr:nth-child(even) {
+  background-color: var(--cor--branco-3);
+}
+
+.table td input[type="checkbox"] {
+  margin: 0;
+  transform: scale(1.1);
+  cursor: pointer;
+}
+
+.btnsEnd {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  width: 90%;
+  max-width: 1200px;
+  padding: 10px 0;
+  gap: 20px;
+}
+
+.btnReset {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--cor--branco-2);
+  background-color: var(--cor--alerta-vermelho-forte);
   font-size: 0.9rem;
   border: none;
   border-radius: 5px;
@@ -25,88 +72,9 @@
   width: 80%;
   cursor: pointer;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   transition: 200ms;
-  justify-content: space-around;
-}
-
-.permissions {
-  display: flex;
-  flex-direction: column;
-  max-width: 300px;
-  width: 80%;
-  gap: 3px;
-}
-
-.permissionBtn {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  padding: 0 0 0 10px;
-  align-items: center;
-
-  color: var(--cor--escura-escuro);
-  background-color: var(--cor--branco-2);
-  border: 1px solid var(--cor--branco-5);
-  border-radius: 5px;
-  box-shadow: 1px 1px var(--cor--branco-9);
-  cursor: pointer;
-  transition: 200ms;
-}
-
-.slideBtn {
-  display: flex;
-  background-color: var(--cor--branco-4);
-  border-radius: 5px;
-  width: 60px;
-  height: 26px;
-  margin: 5px 0;
-  border: 1px solid var(--cor--branco-7);
-  align-items: center;
-  text-align: center;
-  justify-content: center;
-}
-
-.slideBtnOff {
-  background-color: var(--cor--branco-4);
-  border-radius: 5px;
-  color: var(--cor--branco-7);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.slideBtnOn {
-  background-color: var(--cor--principal);
-  border-radius: 5px;
-  color: var(--cor--branco-2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.slideBtnOnOff {
-  background-color: var(--cor--alerta-vermelho-forte);
-  border-radius: 5px;
-  color: var(--cor--branco-2);
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.btnsEnd {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 40px;
 }
 
 .btnSave {

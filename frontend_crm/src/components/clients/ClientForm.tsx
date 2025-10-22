@@ -149,7 +149,7 @@ export default function ClientsForm({
   }, [client]);
 
   return (
-    <form
+    <div
       className={styles.overlay}
       onClick={(e) => {
         if (mode === "edit") {
@@ -259,6 +259,6 @@ export default function ClientsForm({
           </div>
         )}
       </div>
-    </form>
+    </div>
   );
 }

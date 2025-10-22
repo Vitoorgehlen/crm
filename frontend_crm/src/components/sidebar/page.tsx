@@ -13,6 +13,8 @@ import {
 import { FaRegFolderOpen } from "react-icons/fa";
 import { FiUserX } from "react-icons/fi";
 import { GrCompliance } from "react-icons/gr";
+import { MdOutlineQueryStats } from "react-icons/md";
+
 import Image from "next/image";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -83,6 +85,16 @@ const Sidebar = () => {
               <TbPigMoney className={styles.logos} />
             </span>
           </Link>
+          {permissions.includes("ALL_DEAL_DELETE") && (
+            <Link href="/desempenho">
+              <span
+                className={`${styles.iconContainer} 
+                            ${pathname === "/desempenho" ? styles.active : ""}`}
+              >
+                <MdOutlineQueryStats className={styles.logos} />
+              </span>
+            </Link>
+          )}
           {permissions.includes("ALL_DEAL_DELETE") && (
             <Link href="/requisicoes">
               <span
