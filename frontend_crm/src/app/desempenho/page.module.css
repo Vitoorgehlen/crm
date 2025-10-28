@@ -6,10 +6,8 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
   overflow-y: auto;
-
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
 }
 
 .header {
@@ -18,14 +16,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
-}
-
-.submit:hover {
-  color: var(--cor--principal);
 }
 
 .headerContent {
@@ -50,17 +44,40 @@
 .headerBtns input {
   padding: 8px;
   margin: 3px;
-  border: 1px solid var(--cor--branco-6);
+  border: 1px solid var(--shadowColor);
   border-radius: 5px;
   width: 100%;
   outline: none;
+  color: var(--primaryText);
+  background: var(--cardBackground);
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.headerBtns input {
+  padding: 8px;
+  margin: 3px;
+  border: 1px solid var(--shadowColor);
+  border-radius: 5px;
+  width: 100%;
+  outline: none;
+  color: var(--primaryText);
+  background: var(--cardBackground);
+}
+
+.headerBtns input::placeholder {
+  color: var(--sidebarBackground);
 }
 
 .headerBtns input:focus,
 .headerBtns input:active,
 .headerBtns input:hover {
-  border: 1px solid var(--cor--principal-claro);
+  border: 1px solid var(--primaryColor);
   box-shadow: none !important;
+  background: var(--cardBackgroundHover);
 }
 
 .btnSetting {
@@ -70,16 +87,21 @@
   width: 300px;
   height: 100%;
   border-radius: 5px;
-  background: var(--cor--principal-claro);
-  border: 1px solid var(--cor--principal);
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
   text-decoration: none;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   cursor: pointer;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnSetting:hover {
-  background: var(--cor--principal);
-  border: 1px solid var(--cor--principal-claro);
+  background: var(--cardBackgroundHover);
+  border: 1px solid var(--primaryColor);
+  color: var(--primaryColor);
 }
 
 .list {
@@ -89,6 +111,15 @@
   align-items: center;
   justify-content: center;
   margin: 20px 0;
+  border-radius: 50px;
+}
+
+.list p {
+  color: var(--primaryText);
+}
+
+.list h2 {
+  color: var(--tercearyText);
 }
 
 .clientList {
@@ -104,32 +135,35 @@
   width: 90%;
   max-width: 1200px;
   border-collapse: collapse;
-  border: 1px solid var(--cor--branco-6);
   border-radius: 5px;
+  color: var(--primaryText);
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .dealsTable thead {
-  background-color: var(--cor--branco-4);
+  background: var(--cardBackground2);
 }
 
 .dealsTable th {
   text-align: left;
   padding: 12px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid var(--shadowColor);
   font-weight: 600;
 }
 
 .dealsTable td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--cor--branco-6);
+  border-bottom: 1px solid var(--shadowColor);
+}
+
+.dealsTable tbody tr:nth-child(odd) {
+  background: var(--sidebarBackground);
 }
 
 .dealsTable tbody tr:nth-child(even) {
-  background-color: var(--cor--branco-3);
+  background: var(--cardBackgroundHover);
 }
-/* 
-.dealsTable tbody tr:hover {
-  background-color: var(--cor--branco-9);
-  color: var(--cor--branco-2);
-  transition: background-color 0.5;
-} */

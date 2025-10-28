@@ -12,11 +12,11 @@
 }
 
 .overlay h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay h3 {
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   align-items: start;
   font-size: var(--font--5);
   font-weight: 400;
@@ -24,7 +24,7 @@
 }
 
 .overlay h6 {
-  color: var(--cor--branco-10);
+  color: var(--sidebarBackground);
   font-size: var(--font--5);
   font-weight: 400;
 }
@@ -35,32 +35,45 @@
   margin: 3px;
   border-radius: 5px;
   width: 100%;
-  border: none;
+  border: 1px solid var(--shadowColor);
   outline: none;
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background: var(--cardBackground);
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .overlay input:focus,
 .overlay input:active,
 .overlay input:hover {
-  border: none !important;
-  box-shadow: none !important;
+  background: var(--cardBackgroundHover);
 }
 
-.overlay label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+.overlay select option {
+  background: var(--mainBackground);
+}
+
+.overlay select option:checked,
+.overlay select option:focus {
+  background: var(--tercearyText);
+  color: var(--sidebarBackground);
+}
+
+.overlay input::placeholder {
+  color: var(--sidebarBackground);
+}
+
+.overlay select:hover,
+.overlay input:focus,
+.overlay input:active,
+.overlay input:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   border-radius: 10px;
   width: 1100px;
@@ -71,7 +84,7 @@
   align-items: center;
   margin: 0 25px 10px 0;
   overflow-y: auto;
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+  scrollbar-color: var(--primaryColor) var(--sidebarBackground);
 }
 
 .innerModal {
@@ -101,12 +114,12 @@
 }
 
 .modalLeft h1 {
-  color: var(--cor--secundaria-claro);
+  color: var(--tercearyText);
 }
 
 .modalRight {
   padding: 1.8rem 1.8rem 1rem 1.8rem;
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackground2);
   border-radius: 10px;
   gap: 4px;
   width: 500px;
@@ -123,7 +136,7 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-3);
+  background: var(--cardBackground);
 }
 
 .closeBtn {
@@ -133,12 +146,12 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .error {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
 }
 
@@ -165,14 +178,14 @@
 .btnInstallment {
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-5);
+  color: var(--primaryText);
   font-size: 1rem;
 }
 
 .btnInstallmentActive {
   border: none;
   cursor: pointer;
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryText);
   font-size: 1rem;
 }
 
@@ -185,17 +198,17 @@
 }
 
 .modalLeft h4 {
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
+}
+
+.addDoc input::placeholder,
+.addNote input::placeholder {
+  color: var(--primaryText);
 }
 
 .docCostSection h3,
 .noteSection h3 {
-  color: var(--cor--escura-escuro);
-}
-
-.docCostSection h2,
-.noteSection h2 {
-  color: var(--cor--principal);
+  color: var(--primaryText);
 }
 
 .docCostSection {
@@ -204,7 +217,7 @@
   align-items: center;
   width: 100%;
   text-align: center;
-  color: var(--cor--principal-claro);
+  color: var(--primaryText);
   justify-content: flex-start;
   height: 45%;
   margin-bottom: 10px;
@@ -226,12 +239,12 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--principal-claro);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .btnSave:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
 }
 
 .addDoc,
@@ -246,25 +259,25 @@
 
 .btnEditDocValue {
   border: none;
-  color: var(--cor--principal-claro);
+  color: var(--tercearyText);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnEditDocValue:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
 }
 
 .btnDelDocValue {
   border: none;
   margin-left: 5px;
-  color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDelDocValue:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--errorColor2);
 }
 
 .noteSection {
@@ -296,9 +309,12 @@
   max-height: 150px;
   padding: 5px;
   border-radius: 5px;
-  background-color: var(--cor--branco-3);
+  background: var(--cardBackground);
   justify-content: space-between;
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--branco-2);
+scrollbar-color: var(--primaryColor) var(--sidebarBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .docItem,
@@ -308,18 +324,7 @@
   align-items: center;
   width: 100%;
   justify-content: space-between;
-  border-bottom: solid 1px rgb(95, 164, 1777);
-}
-
-.btnDeal {
-  padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 20px;
-  width: 250px;
-  cursor: pointer;
+  border-bottom: solid 1px var(--shadowColor);
 }
 
 .btnBackStep,
@@ -327,24 +332,31 @@
 .btnNextStep {
   text-align: center;
   padding: 5px;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   font-size: 0.8rem;
-  border: none;
+  border: 1px solid var(--shadowColor);
   border-radius: 20px;
   width: 150px;
   cursor: pointer;
+  background: var(--cardBackground);
 }
 
-.btnBackStep {
-  background-color: var(--cor--alerta-vermelho-forte);
+.btnBackStep:hover {
+  background: var(--cardBackgroundHover);
+  color: var(--errorColor2);
+  border: 1px solid var(--errorColor2);
 }
 
-.btnUpdate {
-  background-color: var(--cor--principal-claro);
+.btnUpdate:hover {
+  background: var(--cardBackgroundHover);
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
 }
 
-.btnNextStep {
-  background-color: var(--cor--secundaria-claro);
+.btnNextStep:hover {
+  background: var(--cardBackgroundHover);
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
 }
 
 .footerCard {
@@ -372,27 +384,42 @@
 }
 
 .updateBox h6 {
-  font-size: xx-small;
+  font-size: x-small;
 }
 
 .btnCommission {
   padding: 8px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
   font-size: var(--font--5);
-  border: none;
   border-radius: 20px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnActive {
   padding: 8px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
   font-size: var(--font--5);
-  border: none;
   border-radius: 20px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnCommission:hover,
+.btnActive:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .btnIsPaid {
@@ -400,8 +427,8 @@
   align-items: center;
   height: 35px;
   padding: 4px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--tercearyText);
   font-size: var(--font--5);
   border: none;
   border-radius: 5px;
@@ -413,8 +440,8 @@
   align-items: center;
   height: 40px;
   padding: 4px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--secundaria-claro);
+  color: var(--primaryText);
+  background-color: var(--tercearyText);
   font-size: var(--font--5);
   border: none;
   border-radius: 5px;
@@ -437,12 +464,12 @@
   background: transparent;
   border: none;
   font-size: 1.3rem;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .border {
-  border-bottom: solid 1px var(--cor--branco-2);
+  border-bottom: solid 1px var(--sidebarBackground);
   margin-bottom: 10px;
 }
 
@@ -450,7 +477,10 @@
   background: transparent;
   border: none;
   font-size: 1.3rem;
-  color: var(--cor--branco-2);
+  display: flex;
+  align-items: end;
+  justify-content: end;
+  color: var(--primaryText);
   cursor: pointer;
 }
 

@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
-import { ClientStatus, Client, Deal } from "@/types/index";
+import { ClientStatus, Client, Deal, CloseDealPayload } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
 import { fetchDeals } from "@/utils/fetchDeals";
+import { IoStar, IoStarOutline } from "react-icons/io5";
+import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -27,23 +29,6 @@ export default function Deals() {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const fetchDealsData = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const data = await fetchDeals(API!, token, {
-        team: teamDeals,
-        search,
-        status: ["OLD_CLIENTS"],
-      });
-      setDeals(data);
-    } catch (err: unknown) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, [token, search, teamDeals]);
-
   function openCreate() {
     setIsCreateOpen(true);
     setSelectedDeal(null);
@@ -52,6 +37,27 @@ export default function Deals() {
   function openEdit(deal: Deal) {
     setIsEditOpen(true);
     setSelectedDeal(deal);
+  }
+
+  function onClientUpdatedHandler(updatedClient: Client) {
+    setDeals((prev) =>
+      prev.map((d) => {
+        if (!d.client) return d;
+        if (d.client.id === updatedClient.id) {
+          return {
+            ...d,
+            client: { ...d.client, isPriority: updatedClient.isPriority },
+          };
+        }
+        return d;
+      })
+    );
+  }
+
+  function handleDeleteDeal() {
+    fetchDealsData();
+    setIsEditOpen(false);
+    setSelectedDeal(null);
   }
 
   const handleCreate = async (payload: Partial<Deal>) => {
@@ -96,6 +102,48 @@ export default function Deals() {
     setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
     await fetchDealsData();
   };
+
+  const closeDealShares = async (payload: CloseDealPayload) => {
+    if (!selectedDeal?.id) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/deals-close/${selectedDeal.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ dealData: payload }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro ao fechar negociação");
+
+    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
+    await fetchDealsData();
+    setSelectedDeal(null);
+    router.push("/fechados");
+    return;
+  };
+
+  const fetchDealsData = useCallback(async () => {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const data = await fetchDeals(API!, token, {
+        team: teamDeals,
+        search,
+        status: ["OLD_CLIENTS"],
+      });
+      setDeals(data);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, search, teamDeals]);
 
   useEffect(() => {
     let mounted = true;
@@ -143,11 +191,7 @@ export default function Deals() {
     <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.header}>
-          <h1>
-            {teamDeals
-              ? "Negociações arquivadas da equipe"
-              : "Negociações arquivadas"}
-          </h1>
+          <h1>Negociações Arquivadas{teamDeals && " da equipe"}</h1>
         </div>
 
         <div className={styles.headerContent}>
@@ -221,14 +265,51 @@ export default function Deals() {
                   <h4 className={styles.statusName}>{statusObj.label}</h4>
                   <div className={styles.dealList}>
                     {deals
+                      .slice()
+                      .sort(
+                        (a, b) =>
+                          (b.client?.isPriority ? 1 : 0) -
+                          (a.client?.isPriority ? 1 : 0)
+                      )
                       .filter((deal) => deal.statusClient === statusObj.dbValue)
                       .map((deal, index) => (
                         <button
                           key={index}
                           type="button"
-                          className={styles.deal}
+                          className={`
+                          ${
+                            deal.client?.deleteRequest
+                              ? styles.dealDelete
+                              : deal.deleteRequest
+                              ? styles.dealDelete
+                              : styles.deal
+                          }`}
                           onClick={() => openEdit(deal)}
                         >
+                          {deal.client?.isPriority ? (
+                            <div className={styles.titleCard}>
+                              <IoStar
+                                className={styles.btnPriorityActiveCard}
+                              />
+                              <h4 className={styles.lastContact}>
+                                {getDaysSinceLastContact(
+                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                )}
+                              </h4>
+                            </div>
+                          ) : (
+                            <div className={styles.titleCard}>
+                              <IoStarOutline
+                                className={styles.btnPriorityCard}
+                              />
+                              <h4 className={styles.lastContact}>
+                                {getDaysSinceLastContact(
+                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                )}
+                              </h4>
+                            </div>
+                          )}
+
                           <h3>
                             {deal.client?.name || "Cliente não informado"}
                           </h3>
@@ -244,35 +325,14 @@ export default function Deals() {
                 </div>
               );
             })}
-          {/* {Object.values(ClientStatus)
-            .filter(statusObj => 
-              deals.some(deal => deal.statusClient === statusObj.dbValue)
-            )
-            .map(statusObj => (
-              <div key={statusObj.dbValue}>
-                <h4  className={styles.statusName}>{statusObj.label}</h4>
-                <div className={styles.dealList}>
-                  {deals
-                    .filter(deal => deal.statusClient === statusObj.dbValue)
-                    .map((deal, index) => (
-                      <button
-                        key={index}
-                        type="button"
-                        className={styles.deal}
-                        onClick={() => openEdit(deal)}
-                      >
-                        <h3>{deal.client?.name || 'Cliente não informado'}</h3>
-                        <h4>{statusObj.label}</h4>
-                      </button>
-                    ))
-                  }
-                </div>
-              </div>
-            ))
-          } */}
-          {deals.length === 0 && <p>Nenhuma negociação encontrada</p>}
 
-          {isEditOpen && (
+          {deals.length === 0 && (
+            <div className={styles.noItens}>
+              <p>Nenhuma negociação encontrada</p>
+            </div>
+          )}
+
+          {selectedDeal && (
             <DealForm
               mode="edit"
               isOpen={isEditOpen}
@@ -283,12 +343,13 @@ export default function Deals() {
                 setSelectedDeal(null);
               }}
               onSubmit={handleEdit}
+              onCloseDeal={closeDealShares}
+              onClientUpdated={onClientUpdatedHandler}
+              onDelete={handleDeleteDeal}
             />
           )}
         </div>
       </main>
-
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

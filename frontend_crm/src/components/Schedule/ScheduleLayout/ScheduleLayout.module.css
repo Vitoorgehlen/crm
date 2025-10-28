@@ -1,10 +1,10 @@
-.main {
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  padding-bottom: 20px;
-  background-color: var(--cor--branco-2);
+.calendar {
+  border-radius: 10px;
+  background: #ffffffdd;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .header {
@@ -14,6 +14,8 @@
   padding: 0 20px;
   height: 80px;
   gap: 20px;
+  border-radius: 10px 10px 0 0;
+  background: var(--cardBackground);
 }
 
 .navigation {
@@ -25,7 +27,7 @@
 
 .navigation h6 {
   font-weight: 400;
-  color: var(--cor--branco-10);
+  color: var(--tercearyText);
 }
 
 .title {
@@ -46,50 +48,60 @@
   align-items: center;
   gap: 5px;
   border-radius: 10px;
-  border: 1px solid var(--cor--branco-4);
+  border: 1px solid var(--shadowColor);
   cursor: pointer;
   transition: background-color 0.2s;
   font-weight: 600;
 }
 
 .toggleButton {
-  background-color: var(--cor--branco-2);
-}
-
-.toggleButton:hover {
-  background-color: var(--cor--branco-3);
+  color: #3b3b3b;
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .addButton {
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-1);
+  color: var(--primaryColor);
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.toggleButton:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .addButton:hover {
-  background-color: var(--cor--principal);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .icon {
   font-size: 1.2rem;
-  color: var(--cor--branco-10);
+  color: #3b3b3b;
 }
 
 .addButton .icon {
-  color: var(--cor--branco-1);
+  color: #3b3b3b;
 }
 
 .grid {
   display: flex;
   flex-direction: column;
   height: 500px;
-  border-top: 1px solid var(--cor--branco-4);
+  border-top: 1px solid #3b3b3b;
 }
 
 .gridHeader {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   height: 60px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid #3b3b3b;
 }
 
 .gridHeaderMonth {
@@ -97,7 +109,7 @@
   align-items: center;
   grid-template-columns: repeat(7, 1fr);
   height: 30px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid #3b3b3b;
 }
 
 .gridHeaderMonthTxt {
@@ -105,10 +117,9 @@
   align-items: center;
   justify-content: center;
   font-size: 0.85rem;
-  background-color: var(--cor--branco-2);
-  border-right: 1px solid var(--cor--branco-4);
+  border-right: 1px solid #3b3b3b;
   height: 100%;
-  color: var(--cor--branco-10);
+  color: #000000;
 }
 
 .gridHeaderMonthTxt:last-child {
@@ -122,7 +133,7 @@
   align-items: center;
   padding: 10px;
   font-weight: 600;
-  border-right: 1px solid var(--cor--branco-4);
+  border-right: 1px solid #3b3b3b;
 }
 
 .dayHeader:last-child {
@@ -153,7 +164,8 @@
   padding: 10px;
   min-height: 100%;
   border: none;
-  border-right: 1px solid var(--cor--branco-4);
+  border-right: 1px solid #3b3b3b;
+  background: #ffffff;
   cursor: pointer;
 }
 .future {
@@ -165,7 +177,7 @@
 }
 
 .dayColumn:hover {
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackgroundHover);
 }
 
 .dayColumn:last-child {
@@ -179,59 +191,58 @@
 }
 
 .today {
-  background-color: var(--cor--alerta-verde-forte);
-  color: var(--cor--branco-1);
+  background: rgba(5, 60, 24, 0.3);
+  color: #000000;
   font-weight: bold;
   cursor: pointer;
 }
 
 .weekend {
-  background-color: var(--cor--branco-3);
+  background: rgba(59, 59, 59, 0.222);
 }
 
 .monthDay.today.currentMonth {
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--alerta-verde-forte);
-  color: var(--cor--branco-1);
+  background: rgba(1, 71, 25, 0.3);
+  color: #000000;
 }
 
 .monthDay.today.currentMonth:hover {
-  background-color: var(--cor--alerta-verde);
+  background: var(--cardBackgroundHover);
 }
 
 .monthDay.today.otherMonth {
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-1);
+  background: rgba(1, 71, 25, 0.3);
+  color: #ffffff;
 }
 
 .monthDay.pastDay.currentMonth {
-  background-color: var(--cor--branco-6);
-  color: var(--cor--escura-claro);
+  background: #aeaeaeb3;
+  color: #000000;
   cursor: default;
 }
 
 .monthDay.pastDay.otherMonth {
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-3);
-  color: var(--cor--branco-10);
+  background: rgba(174, 174, 174, 0.01);
+  color: #000000;
   cursor: default;
 }
 
 .dayColumn.pastDay {
-  background-color: var(--cor--branco-8);
+  background: #aeaeae;
 }
 
 .dayColumn.today {
-  background-color: var(--cor--alerta-verde-forte);
-  color: var(--cor--branco-1);
+  background: rgba(1, 71, 25, 0.3);
 }
 
 .dayColumn.today:hover {
-  background-color: var(--cor--alerta-verde);
+  background: var(--cardBackgroundHover);
 }
 
 .scheduleItem,
@@ -242,9 +253,12 @@
   border-radius: 3px;
   font-size: 0.75rem;
   padding: 3px;
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-2);
+  color: #000000;
   cursor: pointer;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 
   word-wrap: break-word;
   overflow-wrap: break-word;
@@ -254,25 +268,30 @@
   text-overflow: ellipsis;
 }
 
-.scheduleItem h5,
+.scheduleItem h5 {
+  color: rgba(1, 71, 25, 0.9);
+}
+
 .scheduleItemFinish h5 {
-  color: var(--cor--secundaria-claro);
+  color: #aeaeae;
 }
 
 .scheduleItem {
-  background-color: var(--cor--principal-claro);
+  background: var(--primaryColor);
 }
 
 .scheduleItemFinish {
-  background-color: var(--cor--branco-6);
+  background: var(--secondaryText);
+  color: #ffffff;
 }
 
 .scheduleItem:hover {
-  background-color: var(--cor--principal);
+  background: var(--primaryColor);
 }
 
 .scheduleItemFinish:hover {
-  background-color: var(--cor--branco-4);
+  border: 1px solid var(--primaryColor);
+  background: #3b3b3ba4;
 }
 
 .events {
@@ -290,10 +309,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal-claro);
+  background: var(--primaryColor);
+  text-align: center;
   border-radius: 3px;
   font-weight: 400;
   cursor: pointer;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .monthView .gridBody {
@@ -309,8 +333,9 @@
   align-items: flex-start;
   text-align: left;
   border: none;
-  border-right: 1px solid var(--cor--branco-4);
-  border-bottom: 1px solid var(--cor--branco-4);
+  background: #ffffff;
+  border-right: 1px solid #3b3b3b;
+  border-bottom: 1px solid var(--sidebarBackground);
   border-radius: 0 0 10px 10px;
   padding: 10px;
   min-height: 80px;
@@ -318,7 +343,7 @@
 }
 
 .monthDay:hover {
-  background-color: var(--cor--branco-4);
+  background: var(--cardBackgroundHover);
 }
 
 .monthDay:nth-child(7n) {
@@ -328,15 +353,15 @@
 .otherMonth {
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-1);
-  color: var(--cor--branco-6);
+  background: #ededed;
+  color: #000000;
 }
 
 .tooltipTitle {
   display: flex;
   justify-content: center;
   margin-bottom: 8px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid var(--primaryText);
 }
 
 .tooltip {
@@ -344,18 +369,18 @@
   top: 100px;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--cor--principal-claro);
+  background: var(--tercearyText);
   border-radius: 8px;
   padding: 12px;
   z-index: 1000;
   min-width: 200px;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .tooltipItem {
   margin-bottom: 8px;
   padding-bottom: 6px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid var(--primaryText);
 }
 
 .tooltipItem:last-child {

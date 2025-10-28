@@ -1,29 +1,89 @@
 .sidebar {
-  padding: 10px 0 10px 10px;
-  margin: 0;
-  height: 100vh;
-  width: 60px;
-  box-sizing: border-box;
-
   position: fixed;
   top: 0;
   left: 0;
-  background-color: var(--cor--branco-2);
+
+  width: 60px;
+  height: 100%;
+  padding: 10px 0 10px 10px;
+  box-sizing: border-box;
+  transition: width 0.4s ease, padding-right 0.4s ease;
+
+  background-color: var(--sidebarBackground);
   z-index: 501;
 }
+
+.sidebar:hover {
+  width: 210px;
+  padding-right: 10px;
+}
+
 .contentbar {
   display: flex;
-  align-items: center;
   flex-direction: column;
   justify-content: space-between;
-
   width: 100%;
   height: 100%;
+
   border-radius: 5px;
-  background-color: var(--cor--branco-5);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  background-color: var(--inputColor);
+  padding-bottom: 10px;
 }
+
 .sidebarMenu {
-  margin-top: 10px;
+  width: 100%;
+  padding: 10px;
+}
+
+.sidebar:hover .sidebarMenu {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.logo {
+  width: 100px;
+  border: 2px solid var(--primaryText);
+  border-radius: 20px;
+  padding: 3px;
+  cursor: pointer;
+}
+
+.sidebarMenu .logoActive {
+  color: var(--tercearyText);
+}
+
+.sidebarMenu .logoActive .logo,
+.sidebar:hover .sidebarMenu .logoActive .logo {
+  border: 2px solid var(--tercearyText);
+}
+
+.sidebar:hover .iconContainer:hover .logo {
+  border: 2px solid var(--secondaryText);
+}
+
+.sidebar:hover .iconContainer:hover .logoText {
+  color: var(--secondaryText);
+}
+
+.sidebar:hover .logo {
+  padding-top: 0;
+  padding-bottom: 6px;
+}
+
+.logoText {
+  cursor: pointer;
+  writing-mode: vertical-lr;
+  font-size: 1.2rem;
+  transition: writing-mode 0.3s ease, font-size 0.3s ease, color 0.3s ease;
+}
+
+.sidebar:hover .logoText {
+  text-align: center;
+  writing-mode: horizontal-tb;
+  font-size: 1.5rem;
 }
 
 .sidebarActions {
@@ -31,43 +91,83 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 15px;
 }
 
 .sidebarSettings {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 10px;
+  justify-content: center;
+  flex-direction: row;
 }
 
-.logo {
-  width: 35px;
-  cursor: pointer;
+.sidebar:hover .sidebarActions {
+  padding: 0 9px;
+  align-items: start;
+}
+
+.sidebar:hover .sidebarSettings {
+  padding: 0 9px;
+  justify-content: start;
+}
+
+.iconContainer {
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  transition: all 0.3s ease;
+}
+
+.active {
+  align-items: center;
+  justify-content: center;
+  margin-left: 5px;
+  padding-right: 5px;
+  width: 45px;
+  height: 45px;
+  border-radius: 5px 0 0 5px;
+  transition: all 0.3s ease;
+  background-color: var(--mainBackground);
+}
+
+.sidebar:hover .active {
+  align-items: start;
+  justify-content: start;
+  margin-left: 0;
+  padding-right: 0;
+  width: 100%;
+  height: auto;
+  border-radius: 0;
+  background-color: transparent;
+  color: var(--tercearyText);
+}
+
+.linkText {
+  opacity: 0;
+  display: none;
+}
+
+.sidebar:hover .linkText {
+  display: flex;
+  opacity: 1;
+}
+
+.sidebar a {
+  text-decoration: none;
+  color: var(--primaryText);
 }
 
 .logos {
   font-size: 2rem;
   cursor: pointer;
-  color: var(--cor--escura-claro);
+  color: var(--primaryText);
+  transition: color 0.2s ease;
 }
 
-.iconContainer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 8px;
-  border-radius: 5px;
-  transition: background 0.2s;
+.sidebar:hover .active .logos {
+  color: var(--tercearyText);
 }
 
-.active {
-  margin-left: 10px;
-  padding-right: 10px;
-  background-color: var(--cor--branco-2);
-  width: 50px;
-  height: 50px;
-  border-radius: 5px;
-  z-index: 0;
-  color: var(--cor--principal-claro);
+.sidebar:hover .iconContainer:hover .logos,
+.sidebar:hover .iconContainer:hover .linkText {
+  color: var(--secondaryText);
 }

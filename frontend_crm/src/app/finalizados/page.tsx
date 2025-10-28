@@ -411,7 +411,7 @@ export default function FinishDeals() {
               <IoHourglassOutline />
             </button>
             <button
-              className={styles.btnActive}
+              className={styles.btnDisable}
               onClick={openCreate}
               type="button"
             >
@@ -512,7 +512,7 @@ export default function FinishDeals() {
                           key={d.id}
                           type="button"
                           className={`${styles.card} ${
-                            d.status === "CLOSED" ? styles.cardRed : ""
+                            d.status === "CLOSED" ? styles.inProgress : ""
                           }`}
                           onClick={() => openEdit(d)}
                         >
@@ -521,7 +521,7 @@ export default function FinishDeals() {
                             {d.status === "FINISHED" ? (
                               <div>{formatDateForFinish(d.closedAt)}</div>
                             ) : (
-                              <div>Em andamento</div>
+                              <p>Em andamento</p>
                             )}
                             {teamDeals && (
                               <h6>
@@ -599,8 +599,6 @@ export default function FinishDeals() {
           )}
         </div>
       </main>
-
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

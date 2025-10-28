@@ -8,9 +8,6 @@ export default function Home() {
           <h1>Home</h1>
         </div>
       </main>
-      <footer className={styles.footer}>
-
-      </footer>
     </div>
   );
 }

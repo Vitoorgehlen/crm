@@ -1,0 +1,143 @@
+.main {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+}
+
+.contant {
+  display: flex;
+  margin-top: 20px;
+  width: 90%;
+  max-width: 500px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
+  border-radius: 5px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.contant h2 {
+  color: var(--primaryColor);
+}
+
+.btns {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.btnDefaultDark {
+  width: 70px;
+  height: 70px;
+  color: #dbf017;
+  font-weight: 700;
+  background: linear-gradient(135deg, #a7b054, #323325);
+  border: 1px solid #dbf017;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnDefaultDark:hover {
+  background: linear-gradient(135deg, #323325, #a7b054);
+}
+
+.btnBlueDark {
+  width: 70px;
+  height: 70px;
+  color: #18b2ef;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7dcff0, #1f2c32);
+  border: 1px solid #18b2ef;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnBlueDark:hover {
+  background: linear-gradient(135deg, #1f2c32, #7dcff0);
+}
+
+.btnPinkDark {
+  width: 70px;
+  height: 70px;
+  color: #ff66b3;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f79ac0, #2b1824);
+  border: 1px solid #ff66b3;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnPinkDark:hover {
+  background: linear-gradient(135deg, #2b1824, #f79ac0);
+}
+
+.btnDefault {
+  width: 70px;
+  height: 70px;
+  color: #4a4b3d;
+  font-weight: 700;
+  background: linear-gradient(135deg, #dbf017, #d9dda5);
+  border: 1px solid #4a4b3d;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnDefault:hover {
+  background: linear-gradient(135deg, #d9dda5, #dbf017);
+}
+
+.btnBlue {
+  width: 70px;
+  height: 70px;
+  color: #131c21;
+  font-weight: 700;
+  background: linear-gradient(135deg, #7dcff0, #e5f2f7);
+  border: 1px solid #131c21;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnBlue:hover {
+  background: linear-gradient(135deg, #e5f2f7, #7dcff0);
+}
+
+.btnPink {
+  width: 70px;
+  height: 70px;
+  color: #261420;
+  font-weight: 700;
+  background: linear-gradient(135deg, #f79ac0, #fce8f1);
+  border: 1px solid #261420;
+  border-radius: 100px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  cursor: pointer;
+}
+
+.btnPink:hover {
+  background: linear-gradient(135deg, #fce8f1, #f79ac0);
+}

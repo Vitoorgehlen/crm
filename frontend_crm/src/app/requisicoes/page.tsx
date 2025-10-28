@@ -260,7 +260,7 @@ export default function DeleteRequest() {
                             </div>
                             <div className={styles.box}>
                               <p>Negociações ativas:</p>
-                              <h3>{c.deals?.length ?? 0}</h3>
+                              <p>{c.deals?.length ?? 0}</p>
                             </div>
                             <div className={styles.box}>
                               <p>
@@ -347,7 +347,6 @@ export default function DeleteRequest() {
           </main>
         </>
       )}
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

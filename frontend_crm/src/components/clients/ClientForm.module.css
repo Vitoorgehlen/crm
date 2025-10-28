@@ -12,11 +12,11 @@
 }
 
 .overlay h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay h3 {
-  color: var(--cor--escura-escuro);
+  color: var(--sidebarBackground);
   align-items: start;
   font-size: var(--font--5);
   font-weight: 400;
@@ -24,7 +24,7 @@
 }
 
 .overlay h6 {
-  color: var(--cor--branco-10);
+  color: var(--sidebarBackground);
   font-size: var(--font--5);
   font-weight: 400;
 }
@@ -33,11 +33,16 @@
 .overlay select {
   padding: 8px;
   margin: 3px;
+  color: var(--primaryText);
   border-radius: 5px;
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackground);
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .overlay input:focus,
@@ -45,6 +50,10 @@
 .overlay input:hover {
   border: none !important;
   box-shadow: none !important;
+}
+
+.overlay input::placeholder {
+  color: var(--sidebarBackground);
 }
 
 .overlay label {
@@ -55,12 +64,15 @@
   margin: 3px;
   border-radius: 5px;
   width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -93,7 +105,7 @@
   border: none;
   text-decoration: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-5);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
@@ -102,7 +114,7 @@
   border: none;
   text-decoration: none;
   font-size: 1.5rem;
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
   cursor: pointer;
 }
 
@@ -110,24 +122,54 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .erro {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
+}
+
+.investorBtn {
+  border: none;
+  outline: none;
+  font-size: var(--font--3);
+  cursor: pointer;
+}
+
+.investorBtnCheck {
+  color: var(--primaryColor);
+}
+
+.investorBtnUnC {
+  color: var(--primaryText);
+}
+
+.investorInput {
+  display: none;
+  opacity: 0;
 }
 
 .btnAddClient {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 250px;
   cursor: pointer;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnAddClient:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .btnDelAndUp {
@@ -141,43 +183,46 @@
 
 .delClient {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
+  background: var(--errorColorD);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 250px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--errorColor2);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
-
-/* .clientDelete {
-  background-color: var(--cor--alerta-vermelho-forte);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-} */
 
 .btnDelClient {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 250px;
   cursor: pointer;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnDelClient:hover {
+  background: var(--errorColorD);
+  border: 1px solid var(--errorColor2);
 }
 
 .footerCard {
   display: flex;
-  gap: 20px;
+  flex-direction: column;
   margin-top: 1rem;
+  text-align: center;
 }
 
 .footerCard h6 {
-  font-size: xx-small;
+  color: var(--sidebarBackground);
+  font-size: x-small;
 }

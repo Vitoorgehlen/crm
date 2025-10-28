@@ -12,7 +12,7 @@
 }
 
 .overlay h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay input,
@@ -23,30 +23,35 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .overlay input:focus,
 .overlay input:active,
 .overlay input:hover {
-  border: none !important;
-  box-shadow: none !important;
+  background: var(--cardBackgroundHover);
 }
 
-.overlay label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.overlay select option {
   padding: 8px;
   margin: 3px;
   border-radius: 5px;
   width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  border: none;
+  outline: none;
+  background: var(--mainBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -69,68 +74,87 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .error {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
 }
 
 .btnUpdate {
-  padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
-  border: none;
+  margin-top: 15px;
+  padding: 10px 20px;
+  color: var(--primaryColor);
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
   border-radius: 20px;
-  width: 200px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnUpdate:hover {
+  color: var(--primaryText);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackground2);
 }
 
 .btnEditUser {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal);
+  background: var(--cardBackground);
+  padding: 10px;
   border-radius: 5px;
-  width: 40px;
-  height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
-  border: 1px solid var(--cor--principal);
+  border: 1px solid var(--shadowColor);
+}
+
+.btnEditUser:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .btnEditUserActive {
   display: flex;
   align-items: center;
+  padding: 10px;
   justify-content: center;
-  background-color: var(--cor--alerta-vermelho-forte);
+  background: var(--cardBackground);
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   font-size: 1.3rem;
-  border: 1px solid var(--cor--alerta-vermelho-forte);
+  border: 1px solid var(--shadowColor);
+}
+
+.btnEditUserActive:hover {
+  color: var(--errorColor2);
+  border: 1px solid var(--errorColor2);
+  background: var(--cardBackgroundHover);
 }
 
 .createUserLabels {
+  color: var(--primaryText);
   width: 100%;
 }
 
 .labelSettingUser {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 500px;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
-  transition: 200ms;
+  color: var(--primaryText);
   width: 100%;
+}
+
+.labelSettingUser::placeholder {
+  color: var(--sidebarBackground);
 }
 
 .box {

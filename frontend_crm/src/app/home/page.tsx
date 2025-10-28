@@ -204,7 +204,6 @@ export default function Home() {
         <h1>Bem vindo(a) {user?.name}</h1>
       </div>
       <div className={styles.contentSection}>
-        <div className=""></div>
         <div className={styles.taskSection}>
           <h2>Tarefas</h2>
 
@@ -353,9 +352,9 @@ export default function Home() {
                 ))}
           </div>
         </div>
-      </div>
-      <div className={styles.calendar}>
-        <ScheduleLayout />
+        <div className={styles.calendar}>
+          <ScheduleLayout />
+        </div>
       </div>
     </main>
   );

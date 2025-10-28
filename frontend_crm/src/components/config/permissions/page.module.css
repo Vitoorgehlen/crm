@@ -11,42 +11,59 @@
   width: 90%;
   max-width: 1200px;
   border-collapse: collapse;
-  border: 1px solid var(--cor--branco-6);
+  color: var(--primaryText);
+  border: 1px solid var(--shadowColor);
   border-radius: 5px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .table thead {
-  background-color: var(--cor--branco-4);
+  background: var(--cardBackground2);
 }
 
 .table th {
   text-align: center;
   padding: 10px;
-  border-bottom: 1px solid var(--cor--branco-4);
+  border-bottom: 1px solid var(--shadowColor);
   font-weight: 600;
 }
 
 .table td {
+  padding: 8px 10px;
   text-align: center;
+  border-bottom: 1px solid var(--shadowColor);
 }
 
 .table td:first-child {
   text-align: left;
 }
 
-.table td {
-  padding: 8px 10px;
-  border-bottom: 1px solid var(--cor--branco-6);
+.table tbody tr:nth-child(odd) {
+  background: var(--sidebarBackground);
 }
 
 .table tbody tr:nth-child(even) {
-  background-color: var(--cor--branco-3);
+  background: var(--cardBackgroundHover);
 }
 
 .table td input[type="checkbox"] {
-  margin: 0;
-  transform: scale(1.1);
+  display: none;
+  opacity: 0;
+}
+
+.check,
+.noCheck {
+  color: var(--primaryText);
+  font-size: 1.2rem;
   cursor: pointer;
+}
+
+.check {
+  color: var(--primaryColor);
+  font-size: 1.2rem;
 }
 
 .btnsEnd {
@@ -63,10 +80,10 @@
 .btnReset {
   margin-top: 20px;
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor2);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
   font-size: 0.9rem;
-  border: none;
   border-radius: 5px;
   max-width: 500px;
   width: 80%;
@@ -77,13 +94,18 @@
   transition: 200ms;
 }
 
+.btnReset:hover {
+  color: var(--primaryText);
+  background: var(--errorColorD);
+}
+
 .btnSave {
   margin-top: 20px;
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal);
+  color: var(--primaryColor);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
   font-size: 0.9rem;
-  border: none;
   border-radius: 5px;
   max-width: 500px;
   width: 80%;
@@ -92,4 +114,10 @@
   align-items: center;
   justify-content: center;
   transition: 200ms;
+}
+
+.btnSave:hover {
+  color: var(--primaryText);
+  background: var(--warningColorD);
+  border: 1px solid var(--primaryColor);
 }

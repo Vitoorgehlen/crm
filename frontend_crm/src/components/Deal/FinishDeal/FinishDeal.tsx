@@ -17,7 +17,8 @@ import {
   Note,
   DEAL_STEP_TYPE_LABEL,
 } from "@/types";
-import { RiSave3Fill } from "react-icons/ri";
+import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
+import { FaTimes, FaCheck } from "react-icons/fa";
 
 export default function FinishDeal({
   isOpen,
@@ -28,6 +29,9 @@ export default function FinishDeal({
   const { token, isLoading } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
 
+  const [isOpenDocCost, setIsOpenDocCost] = useState<number | undefined>(
+    undefined
+  );
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
   const [docCostNote, setDocCostNote] = useState("");
@@ -35,6 +39,7 @@ export default function FinishDeal({
   const [docCostTotal, setDocCostTotal] = useState<number>(0);
   const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
 
+  const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
   const [note, setNote] = useState<Array<Note>>([]);
 
@@ -144,6 +149,61 @@ export default function FinishDeal({
     }
   }
 
+  async function handleEditDocCost(docId?: number) {
+    if (!docCostLabel.trim()) return;
+    if (typeof docId !== "number") return;
+
+    try {
+      const res = await fetch(`${API}/documentationcost/${docId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          label: docCostLabel,
+          value: docCostValue,
+          notes: docCostNote,
+        }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao editar valores de documentação");
+      const data = await res.json();
+      setDocCost((prev) =>
+        prev.map((item) => (item.id === docId ? data : item))
+      );
+      setIsOpenDocCost(undefined);
+      setDocCostLabel("");
+      setDocCostValue(0);
+      setDocCostNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleDeleteDocCost(docId?: number) {
+    if (typeof docId !== "number") return;
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir essa documentação?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API}/documentationcost/${docId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar valor de documentação");
+      setDocCost((prev) => prev.filter((item) => item.id !== docId));
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
   async function handleAddNote() {
     if (!newNote.trim()) return;
 
@@ -161,6 +221,52 @@ export default function FinishDeal({
       const data = await res.json();
       setNote((prev) => [data, ...prev]);
       setNewNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleEditNote(noteId?: number) {
+    if (typeof noteId !== "number") return;
+
+    try {
+      const res = await fetch(`${API}/note/${noteId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: newNote }),
+      });
+
+      if (!res.ok) throw new Error("Erro ao editar valores de documentação");
+      const data = await res.json();
+      setNote((prev) => prev.map((item) => (item.id === noteId ? data : item)));
+      setIsOpenNote(undefined);
+      setNewNote("");
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function handleDeleteNote(noteId?: number) {
+    if (typeof noteId !== "number") return;
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir essa nota?`
+    );
+    if (!confirmDelete) return;
+
+    try {
+      const res = await fetch(`${API}/note/${noteId}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar nota");
+      setNote((prev) => prev.filter((item) => item.id !== noteId));
     } catch (err) {
       console.error(err);
     }
@@ -513,9 +619,78 @@ export default function FinishDeal({
                 )}
                 {docCost.map((doc) => (
                   <div key={doc.id} className={styles.docItem}>
-                    <h3>{doc.label}</h3>
-                    <h3>{real(Number(doc.value))}</h3>
-                    <h3>{doc.notes}</h3>
+                    {isOpenDocCost === doc.id ? (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Documentação"
+                          value={docCostLabel}
+                          onChange={(e) => setDocCostLabel(e.target.value)}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Documentação"
+                          value={real(docCostValue)}
+                          onChange={(e) => {
+                            const numeric =
+                              Number(e.target.value.replace(/\D/g, "")) / 100;
+                            setDocCostValue(numeric);
+                          }}
+                        />
+                        <input
+                          type="text"
+                          placeholder="Obs"
+                          value={docCostNote}
+                          onChange={(e) => setDocCostNote(e.target.value)}
+                        />
+
+                        <button
+                          className={styles.btnEditDocValue}
+                          type="button"
+                          onClick={() => handleEditDocCost(doc.id)}
+                        >
+                          <FaCheck />
+                        </button>
+                        <button
+                          className={styles.btnDelDocValue}
+                          type="button"
+                          onClick={() => {
+                            setIsOpenDocCost(undefined);
+                            setDocCostLabel("");
+                            setDocCostValue(0);
+                            setDocCostNote("");
+                          }}
+                        >
+                          <FaTimes />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <h3>{doc.label}</h3>
+                        <h3>{real(Number(doc.value))}</h3>
+                        <h3>{doc.notes}</h3>
+
+                        <button
+                          className={styles.btnEditDocValue}
+                          type="button"
+                          onClick={() => {
+                            setIsOpenDocCost(doc.id);
+                            setDocCostLabel(doc.label);
+                            setDocCostValue(Number(doc.value));
+                            setDocCostNote(doc.notes || "");
+                          }}
+                        >
+                          <RiPencilFill />
+                        </button>
+                        <button
+                          className={styles.btnDelDocValue}
+                          type="button"
+                          onClick={() => handleDeleteDocCost(doc.id)}
+                        >
+                          <RiEraserFill />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
@@ -546,9 +721,58 @@ export default function FinishDeal({
                 {note.length === 0 && (
                   <p>Nenhuma nota do cliente encontrada.</p>
                 )}
-                {note.map((nota) => (
-                  <div key={nota.id} className={styles.noteItem}>
-                    <h3>{nota.content}</h3>
+                {note.map((note) => (
+                  <div key={note.id} className={styles.noteItem}>
+                    {isOpenNote === note.id ? (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Nota"
+                          value={newNote}
+                          onChange={(e) => setNewNote(e.target.value)}
+                        />
+
+                        <button
+                          className={styles.btnEditDocValue}
+                          type="button"
+                          onClick={() => handleEditNote(note.id)}
+                        >
+                          <FaCheck />
+                        </button>
+                        <button
+                          className={styles.btnDelDocValue}
+                          type="button"
+                          onClick={() => {
+                            setIsOpenNote(undefined);
+                            setNewNote("");
+                          }}
+                        >
+                          <FaTimes />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <h3>{note.content}</h3>
+
+                        <button
+                          className={styles.btnEditDocValue}
+                          type="button"
+                          onClick={() => {
+                            setIsOpenNote(note.id);
+                            setNewNote(note.content);
+                          }}
+                        >
+                          <RiPencilFill />
+                        </button>
+                        <button
+                          className={styles.btnDelDocValue}
+                          type="button"
+                          onClick={() => handleDeleteNote(note.id)}
+                        >
+                          <RiEraserFill />
+                        </button>
+                      </>
+                    )}
                   </div>
                 ))}
               </div>

@@ -11,7 +11,7 @@
   text-align: center;
   align-items: center;
   padding: 0 10px;
-  color: var(--cor--branco-9);
-  background-color: var(--cor--branco-2);
+  color: rgba(242, 246, 210, 0.3);
+  background-color: var(--sidebarBackground);
   z-index: 500;
 }

@@ -211,7 +211,7 @@ export default function Config() {
         </div>
         <div className={styles.list}>
           {deals.length === 0 ? (
-            <p>Nenhum usuário encontrado</p>
+            <p>Nenhum cliente encontrado</p>
           ) : (
             <table className={styles.dealsTable}>
               <thead>

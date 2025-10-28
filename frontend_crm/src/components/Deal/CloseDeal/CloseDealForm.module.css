@@ -11,15 +11,14 @@
   overflow-y: auto;
   overflow-y: hiden;
   padding: 20px 0;
-  scrollbar-color: var(--cor--secundaria-claro) rgba(0, 0, 0, 0.6);
-}
+scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 
 .overlay h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay h3 {
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   align-items: start;
   font-size: var(--font--5);
   font-weight: 400;
@@ -27,7 +26,7 @@
 }
 
 .overlay h6 {
-  color: var(--cor--branco-10);
+  color: var(--primaryText);
   font-size: var(--font--5);
   font-weight: 400;
 }
@@ -40,30 +39,29 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background: var(--cardBackground);
 }
 
+.overlay select option {
+  background: var(--mainBackground);
+}
+
+.overlay select option:checked,
+.overlay select option:focus {
+  background: var(--tercearyText);
+  color: var(--sidebarBackground);
+}
+
+.overlay select:hover,
 .overlay input:focus,
 .overlay input:active,
 .overlay input:hover {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.overlay label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackgroundHover);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -80,13 +78,13 @@
 }
 
 .overlay h2.positive {
-  color: var(--cor--alerta-amarelo-forte);
+  color: var(--warningColor2);
 }
 .overlay h2.negative {
-  color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor2);
 }
 .overlay h2.ok {
-  color: var(--cor--alerta-verde-forte);
+  color: var(--successColor);
 }
 
 .title {
@@ -105,12 +103,12 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .error {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
 }
 
@@ -130,14 +128,14 @@
 .btnInstallment {
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-5);
+  color: var(--primaryText);
   font-size: 1rem;
 }
 
 .btnInstallmentActive {
   border: none;
   cursor: pointer;
-  color: var(--cor--secundaria-claro);
+  color: var(--tercearyText);
   font-size: 1rem;
 }
 
@@ -151,22 +149,41 @@
 
 .btnCommission {
   padding: 8px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: var(--font--5);
-  border: none;
+  border: 1px solid var(--shadowColor);
   border-radius: 20px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnActive {
   padding: 8px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
+  background-color: var(--cardBackground);
   font-size: var(--font--5);
-  border: none;
+  border: 1px solid var(--shadowColor);
   border-radius: 20px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnCommission:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.btnActive:hover {
+  border: 1px solid var(--primaryColor);
+  background-color: var(--cardBackgroundHover);
 }
 
 .boxCommissionShare {
@@ -185,12 +202,12 @@
   background: transparent;
   border: none;
   font-size: 1.3rem;
-  color: var(--cor--branco-2);
+  color: var(--tercearyText);
   cursor: pointer;
 }
 
 .border {
-  border-bottom: solid 1px var(--cor--branco-2);
+  border-bottom: solid 1px var(--sidebarBackground);
   margin-bottom: 10px;
 }
 
@@ -198,7 +215,7 @@
   background: transparent;
   border: none;
   font-size: 1.3rem;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
@@ -216,28 +233,33 @@
   gap: 30px;
 }
 
+.btnConfirm,
 .btnCancel {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: 1.3rem;
-  border: none;
+  border: solid 1px var(--shadowColor);
   border-radius: 20px;
   width: 200px;
   cursor: pointer;
   margin-top: 20px;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
-.btnConfirm {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--secundaria-claro);
-  font-size: 1.3rem;
-  border: none;
-  border-radius: 20px;
-  width: 200px;
-  cursor: pointer;
+.btnCancel:hover {
+  background: var(--cardBackgroundHover);
+  border: solid 1px var(--errorColor2);
+  color: var(--errorColor2);
+}
+
+.btnConfirm:hover {
+  background: var(--cardBackgroundHover);
+  border: solid 1px var(--primaryColor);
+  color: var(--primaryColor);
 }
 
 .footerCard {
@@ -247,5 +269,5 @@
 }
 
 .footerCard h6 {
-  font-size: xx-small;
+  font-size: x-small;
 }

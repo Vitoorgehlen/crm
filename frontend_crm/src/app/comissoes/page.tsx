@@ -516,14 +516,6 @@ export default function FinishDeals() {
           </div>
 
           <div className={styles.headerIcons}>
-            {/* {permissions.includes('ALL_DEAL_READ') && (
-              <button 
-              className={`${styles.btnFilter} ${teamDeals ? styles.btnFilterActive : ''}`}
-              onClick={() => setTeamDeals(prev => !prev)} 
-              type="button">
-                <HiUserGroup />
-              </button>
-            )} */}
             <button
               className={styles.addDeal}
               onClick={openCreate}
@@ -549,149 +541,142 @@ export default function FinishDeals() {
         </div>
 
         <div className={styles.boxSteps}>
-          <div className={styles.finishedDealsByYearWrap}>
-            <div className={styles.cashStatsCard}>
-              <div className={styles.cashStatsCardLeft}>
-                <div className={styles.cashStatsCardDiv}>
-                  <div className={styles.cardGoal}>
-                    {selectedYear === new Date().getFullYear() ? (
-                      <div className={styles.infoCard}>
-                        <strong>Meta anual:</strong>
-                        {annualGoal !== undefined ? (
-                          <>
-                            {editGoal ? (
-                              <button
-                                type="button"
-                                className={styles.btnGoal}
-                                onClick={() =>
-                                  handleEditGoal(annualGoal, false)
-                                }
-                              >
-                                <RiSave3Fill />
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className={styles.btnGoal}
-                                onClick={() => setEditGoal(true)}
-                              >
-                                <RiPencilFill />
-                              </button>
-                            )}
-
-                            {editGoal ? (
-                              <button
-                                type="button"
-                                className={styles.btnDelGoal}
-                                onClick={() => setEditGoal(false)}
-                              >
-                                <MdCancel />
-                              </button>
-                            ) : (
-                              <button
-                                type="button"
-                                className={styles.btnDelGoal}
-                                onClick={() => handleDeleteGoal(annualGoal)}
-                              >
-                                <RiEraserFill />
-                              </button>
-                            )}
-                          </>
+          <div className={styles.cashStatsCard}>
+            <div className={styles.cashStatsCardDiv}>
+              <div className={styles.cardGoal}>
+                {selectedYear === new Date().getFullYear() ? (
+                  <div className={styles.infoCard}>
+                    <strong>Meta anual:</strong>
+                    {annualGoal !== undefined ? (
+                      <>
+                        {editGoal ? (
+                          <button
+                            type="button"
+                            className={styles.btnGoal}
+                            onClick={() => handleEditGoal(annualGoal, false)}
+                          >
+                            <RiSave3Fill />
+                          </button>
                         ) : (
                           <button
                             type="button"
                             className={styles.btnGoal}
-                            onClick={() => handleAddGoal(false)}
+                            onClick={() => setEditGoal(true)}
                           >
-                            <RiSave3Fill />
+                            <RiPencilFill />
                           </button>
                         )}
-                      </div>
+
+                        {editGoal ? (
+                          <button
+                            type="button"
+                            className={styles.btnDelGoal}
+                            onClick={() => setEditGoal(false)}
+                          >
+                            <MdCancel />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.btnDelGoal}
+                            onClick={() => handleDeleteGoal(annualGoal)}
+                          >
+                            <RiEraserFill />
+                          </button>
+                        )}
+                      </>
                     ) : (
-                      <div className={styles.cardGoal}>
-                        <div className={styles.infoCard}>
-                          <strong>Meta de {selectedYear}:</strong>
-                        </div>
-                      </div>
-                    )}
-                    {(editGoal || annualGoal === undefined) &&
-                    selectedYear === new Date().getFullYear() ? (
-                      <input
-                        type="text"
-                        value={real(Number(annualGoalValue))}
-                        onChange={(e) => {
-                          const numeric =
-                            Number(e.target.value.replace(/\D/g, "")) / 100;
-                          setAnnualGoalValue(numeric);
-                        }}
-                      />
-                    ) : (
-                      <p>{real(Number(annualGoalValue))}</p>
+                      <button
+                        type="button"
+                        className={styles.btnGoal}
+                        onClick={() => handleAddGoal(false)}
+                      >
+                        <RiSave3Fill />
+                      </button>
                     )}
                   </div>
-                  {annualGoalValue > 0 && (
-                    <>
-                      <div className={styles.cardLeft2}>
-                        <strong>P/ bater a meta:</strong>
+                ) : (
+                  <div className={styles.infoCard}>
+                    <strong>Meta de {selectedYear}:</strong>
+                  </div>
+                )}
+                {(editGoal || annualGoal === undefined) &&
+                selectedYear === new Date().getFullYear() ? (
+                  <input
+                    type="text"
+                    value={real(Number(annualGoalValue))}
+                    onChange={(e) => {
+                      const numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+                      setAnnualGoalValue(numeric);
+                    }}
+                  />
+                ) : (
+                  <p>{real(Number(annualGoalValue))}</p>
+                )}
+              </div>
+              {annualGoalValue > 0 && (
+                <>
+                  {annualGoalValue - selectedYearStats.total > 0 && (
+                    <div className={styles.card}>
+                      <h4>Falta:</h4>
+                      <p>
+                        {real(
+                          Number(annualGoalValue - selectedYearStats.total)
+                        )}
+                      </p>
+                    </div>
+                  )}
+                  <div className={styles.card}>
+                    <h4>Média desejada:</h4>
+                    <p>{real(Number(annualGoalValue / 12))}</p>
+                  </div>
+                  {selectedYear === new Date().getFullYear() &&
+                    annualGoalValue - selectedYearStats.total > 0 && (
+                      <div className={styles.card}>
+                        <h4>Meta até fim do ano p/ bater média</h4>
                         <p>
                           {real(
-                            Number(annualGoalValue - selectedYearStats.total)
+                            Number(
+                              (annualGoalValue - selectedYearStats.total) /
+                                (12 - new Date().getMonth())
+                            )
                           )}
                         </p>
                       </div>
-                      <div className={styles.cardLeft}>
-                        <strong>Média desejada:</strong>
-                        <p>{real(Number(annualGoalValue / 12))}</p>
-                      </div>
-                      {selectedYear === new Date().getFullYear() && (
-                        <div className={styles.cardLeft}>
-                          <strong>Média até Dezembro p/ bater meta</strong>
-                          <p>
-                            {real(
-                              Number(
-                                (annualGoalValue - selectedYearStats.total) /
-                                  (12 - new Date().getMonth())
-                              )
-                            )}
-                          </p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
-                <div className={styles.cashStatsCardDiv}>
-                  <div className={styles.cardLeft}>
-                    <strong>Total de comissões: </strong>
-                    <p>{real(Number(selectedYearStats.total))}</p>
-                  </div>
-                  <div className={styles.cardLeft1}>
-                    <strong>Recebido:</strong>
-                    <p>{real(Number(selectedYearStats.received))}</p>
-                  </div>
-                  <div className={styles.cardLeft2}>
-                    <strong>Valor a receber:</strong>
-                    <p>{real(Number(selectedYearStats.toReceived))}</p>
-                  </div>
-                  <div className={styles.cardLeft}>
-                    <strong>Média mensal:</strong>
-                    <p>{real(Number(selectedYearStats.monthAverage))}</p>
-                  </div>
-                  <div className={styles.cardLeft}>
-                    <strong>
-                      Comparação com {new Date().getFullYear() - 1}:
-                    </strong>
-                    <p>{selectedYearStats.comparStats.toFixed(2)}%</p>
-                  </div>
-                  <div className={styles.cardLeft}>
-                    <strong>
-                      Comparação até {monthNames[new Date().getMonth()]} de{" "}
-                      {new Date().getFullYear() - 1}:
-                    </strong>
-                    <p>{selectedYearStats.comparStatsFair.toFixed(2)}%</p>
-                  </div>
-                </div>
+                    )}
+                </>
+              )}
+              <div className={styles.card}>
+                <h4 className={styles.received}>Total de comissões: </h4>
+                <p>{real(Number(selectedYearStats.total))}</p>
+              </div>
+              <div className={styles.card}>
+                <h4 className={styles.received}>Recebido:</h4>
+                <p>{real(Number(selectedYearStats.received))}</p>
+              </div>
+              <div className={styles.card}>
+                <h4 className={styles.toReceived}>A receber:</h4>
+                <p>{real(Number(selectedYearStats.toReceived))}</p>
+              </div>
+              <div className={styles.card}>
+                <h4>Média:</h4>
+                <p>{real(Number(selectedYearStats.monthAverage))}</p>
+              </div>
+              <div className={styles.card}>
+                <h4>Comparação com {new Date().getFullYear() - 1}:</h4>
+                <p>{selectedYearStats.comparStats.toFixed(2)}%</p>
+              </div>
+              <div className={styles.card}>
+                <h4>
+                  Comparação até {monthNames[new Date().getMonth()]} de{" "}
+                  {new Date().getFullYear() - 1}:
+                </h4>
+                <p>{selectedYearStats.comparStatsFair.toFixed(2)}%</p>
               </div>
             </div>
+          </div>
+          <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
               {yearsSortedDesc.length === 0 && (
                 <p>Nenhuma comissão encontrada.</p>
@@ -774,7 +759,7 @@ export default function FinishDeals() {
                         <button
                           key={d.id}
                           type="button"
-                          className={styles.card}
+                          className={styles.cardDeals}
                           onClick={() => router.push("/finalizados")}
                         >
                           <div>
@@ -850,8 +835,6 @@ export default function FinishDeals() {
           </div>
         </div>
       </main>
-
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

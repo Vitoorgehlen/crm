@@ -6,6 +6,7 @@ import { Client, ClientFormProps } from "@/types/index";
 import { formatDateForCards } from "@/utils/dateUtils";
 import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
+import { MdRadioButtonChecked, MdRadioButtonUnchecked } from "react-icons/md";
 
 import styles from "./ClientForm.module.css";
 
@@ -208,9 +209,24 @@ export default function ClientsForm({
           />
 
           <label>
-            <h3>Investidor?</h3>
+            <h3>Investidor{isInvestor ? ": Sim" : "?"}</h3>
+            <button
+              className={styles.investorBtn}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setIsInvestor((prev) => !prev);
+              }}
+            >
+              {isInvestor ? (
+                <MdRadioButtonChecked className={styles.investorBtnCheck} />
+              ) : (
+                <MdRadioButtonUnchecked className={styles.investorBtnUnC} />
+              )}
+            </button>
             <input
               type="checkbox"
+              className={styles.investorInput}
               checked={isInvestor}
               onChange={(e) => setIsInvestor(e.target.checked)}
             />

@@ -26,12 +26,12 @@
 
 .overlay h2,
 .overlayEdit h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay h3,
 .overlayEdit h3 {
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   align-items: start;
   font-size: var(--font--5);
   font-weight: 400;
@@ -40,7 +40,7 @@
 
 .overlay h6,
 .overlayEdit h6 {
-  color: var(--cor--branco-10);
+  color: var(--sidebarBackground);
   font-size: var(--font--5);
   font-weight: 400;
 }
@@ -55,7 +55,20 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  color: var(--sidebarBackground);
+  background: var(--cardBackground);
+
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.overlay input::placeholder,
+.overlayEdit input::placeholder,
+.overlay select::placeholder,
+.overlayEdit select::placeholder {
+  color: var(--sidebarBackground);
 }
 
 .overlay input.changeClient {
@@ -66,17 +79,7 @@
   height: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
-}
-
-.overlay input:focus,
-.overlay input:active,
-.overlay input:hover,
-.overlayEdit input:focus,
-.overlayEdit input:active,
-.overlayEdit input:hover {
-  border: none !important;
-  box-shadow: none !important;
+  background: var(--cardBackground);
 }
 
 .overlay label,
@@ -88,12 +91,10 @@
   margin: 3px;
   border-radius: 5px;
   width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -106,7 +107,7 @@
 }
 
 .modalEdit {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1rem 1.8rem 1rem 0;
   border-radius: 10px;
   width: 1000px;
@@ -117,7 +118,13 @@
   margin: 0 25px 10px 0;
   justify-content: space-between;
   overflow-y: auto;
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
+
+.cardDeals {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 20px;
 }
 
 .innerModal {
@@ -133,7 +140,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 100%;
+  width: 70%;
   height: 100%;
   justify-content: space-between;
 }
@@ -146,16 +153,29 @@
   width: 100%;
 }
 
-.modalRight {
-  padding: 1.8rem 1.8rem 1rem 1.8rem;
-  background-color: var(--cor--branco-2);
-  border-radius: 10px;
-  gap: 4px;
+.right {
   width: 500px;
   height: 500px;
   display: flex;
   flex-direction: column;
   align-items: center;
+}
+
+.modalRight {
+  padding: 20px 1.8rem 1rem 1.8rem;
+  background: var(--cardBackground2);
+  border-radius: 10px;
+  gap: 4px;
+  width: 30%;
+  height: 500px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .overlayEdit .modalRight input {
@@ -165,14 +185,14 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-3);
+  color: var(--primaryText);
 }
 
 .closeBtn {
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
@@ -180,7 +200,7 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
@@ -189,7 +209,7 @@
   border: none;
   text-decoration: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-5);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
@@ -198,12 +218,12 @@
   border: none;
   text-decoration: none;
   font-size: 1.5rem;
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
   cursor: pointer;
 }
 
 .error {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
 }
 .box {
@@ -224,15 +244,16 @@
   height: 100%;
   padding: 5px;
   font-size: 1.5rem;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   border: none;
   border-radius: 0 5px 5px 0;
   cursor: pointer;
 }
 
 .addClient:hover {
-  background-color: var(--cor--principal-escuro);
+  color: var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .paymentTitle {
@@ -250,35 +271,39 @@
 
 .btnDeal {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: 1.5rem;
+  width: 70%;
   border: none;
   border-radius: 20px;
   width: 250px;
-  margin-top: 20px;
   cursor: pointer;
+
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .modalLeft h4 {
-  color: var(--cor--branco-2);
+  color: var(--secondaryText);
 }
 
-.noteSection h3,
-.noteSection h2 {
-  color: var(--cor--escura-escuro);
+.noteSection h3 {
+  color: var(--primaryText);
 }
 
 .btnSave {
   background: transparent;
   border: none;
-  font-size: 1.5rem;
-  color: var(--cor--principal-claro);
+  font-size: 1.8rem;
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .btnSave:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
 }
 
 .addNote {
@@ -288,25 +313,25 @@
 
 .btnEditDocValue {
   border: none;
-  color: var(--cor--principal-claro);
+  color: var(--tercearyText);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnEditDocValue:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
 }
 
 .btnDelDocValue {
   border: none;
   margin-left: 5px;
-  color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor2);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDelDocValue:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--errorColor);
 }
 
 .noteSection {
@@ -336,10 +361,9 @@
   max-height: 150px;
   padding: 5px;
   border-radius: 5px;
-  background-color: var(--cor--branco-3);
+  background: var(--cardBackground);
   justify-content: space-between;
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--branco-2);
-}
+scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 
 .noteItem {
   display: flex;
@@ -347,68 +371,131 @@
   align-items: center;
   width: 100%;
   justify-content: space-between;
-  border-bottom: solid 1px rgb(95, 164, 1777);
+  border-bottom: solid 1px var(--shadowColor);
 }
 
 .btnUpdateAndSell {
   display: flex;
-  margin: 0 auto;
+  margin-left: 20px;
+  width: 100%;
+  align-items: center;
   flex-direction: row;
   align-items: center;
   gap: 30px;
-  margin-top: 50px;
 }
 
 .deleteRequest {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
+  border: 1px solid var(--errorColor2);
   font-size: 1.5rem;
-  border: none;
   border-radius: 20px;
   width: 150px;
   text-align: center;
+
+  background: var(--errorColorD);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnDelete {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 150px;
   cursor: pointer;
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnDelete:hover {
+  background: var(--errorColorD);
+  border: 1px solid var(--errorColor);
 }
 
 .btnUpdate {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 150px;
   cursor: pointer;
+
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnUpdate:hover {
+  color: var(--primaryColor);
+  background: var(--cardBackgroundHover);
+  border: 1px solid var(--primaryColor);
 }
 
 .btnSell {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--secundaria-claro);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   border-radius: 20px;
   width: 150px;
   cursor: pointer;
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnSell:hover {
+  color: var(--primaryColor);
+  background: var(--cardBackground2);
+  border: 1px solid var(--primaryColor);
 }
 
 .footerCard {
   display: flex;
-  gap: 20px;
-  margin-top: 1rem;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  width: 100%;
 }
 
-.footerCard h6 {
-  font-size: xx-small;
+.footerCard > * {
+  flex: 1;
+  text-align: center;
+}
+
+.btnUpdateAndStep {
+  display: flex;
+  margin: 0 auto;
+  flex-direction: row;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: auto;
+  width: 70%;
+}
+
+.updateBox {
+  display: flex;
+  margin: 0 auto;
+  text-align: center;
+  flex-direction: column;
+  align-items: center;
+  margin-top: auto;
+  width: 30%;
+  max-width: 300px;
+}
+
+.updateBox h6 {
+  font-size: x-small;
 }

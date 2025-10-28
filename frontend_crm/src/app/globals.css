@@ -1,52 +1,229 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
 
 :root {
-  --cor--branco-1: #ffffff;
-  --cor--branco-2: #f7f7f7;
-  --cor--branco-3: #eaeaea;
-  --cor--branco-4: #e0e0e0;
-  --cor--branco-5: #d8d7d7;
-  --cor--branco-6: #d1cfcf;
-  --cor--branco-7: #c4c4c4;
-  --cor--branco-8: #b9b8b8;
-  --cor--branco-9: #b0aeae;
-  --cor--branco-10: #959595;
+  --mainBackground: #5a5a4a;
+  --sidebarBackground: #323325;
+  --primaryText: #f2f6d2;
+  --secondaryText: #e4f07d;
+  --tercearyText: #a7b054;
+  --inputColor: #4a4b3d;
+  --primaryColor: #dbf017;
+  --accentColor: #a7b054;
+  --shadowColor: rgba(47, 47, 18, 0.3);
+  --cardBackground: linear-gradient(
+    135deg,
+    rgba(242, 246, 210, 0.28),
+    rgba(242, 246, 210, 0.08)
+  );
+  --cardBackgroundHover: linear-gradient(
+    135deg,
+    rgba(242, 246, 210, 0.08),
+    rgba(242, 246, 210, 0.28)
+  );
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(228, 240, 125, 0.3),
+    rgba(167, 176, 84, 0.3)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(167, 176, 84, 0.5),
+    rgba(228, 240, 125, 0.5)
+  );
+  --errorColorD: linear-gradient(
+    135deg,
+    rgba(238, 49, 49, 0.5),
+    rgba(201, 74, 74, 0.5)
+  );
+  --errorColorDHover: linear-gradient(
+    135deg,
+    rgba(201, 74, 74, 0.5),
+    rgba(238, 49, 49, 0.5)
+  );
+  --warningColorD: linear-gradient(
+    135deg,
+    rgba(228, 240, 125, 0.2),
+    rgba(243, 234, 65, 0.2)
+  );
+  --warningColorDHover: linear-gradient(
+    135deg,
+    rgba(243, 234, 65, 0.2),
+    rgba(228, 240, 125, 0.2)
+  );
 
-  --cor--escura-claro-RGB: rgb(48, 62, 65);
-  --cor--escura-claro: #303e41;
-  --cor--escura: #1b2325;
-  --cor--escura-escuro: #121719;
+  --successColor: #b8d957;
+  --successColor2: #caf841;
+  --errorColor: #c94a4a;
+  --errorColor2: #ee3131;
+  --warningColor: #e4f07d;
+  --warningColor2: #f3ea41;
 
-  --cor--principal-claro: #4d704c;
-  --cor--principal: #324a31;
-  --cor--principal-escuro: #1b291a;
-
-  --cor--secundaria-claro: #d87518;
-  --cor--secundaria: #c66b16;
-  --cor--secundaria-escuro: #ae5e14;
-
-  --cor--alerta-verde: rgba(137, 157, 122, 0.5);
-  --cor--alerta-amarelo: rgba(217, 200, 119, 0.5);
-  --cor--alerta-laranja: rgba(197, 138, 92, 0.5);
-  --cor--alerta-azul: rgba(122, 140, 157, 0.5);
-  --cor--alerta-vermelho: rgba(166, 106, 106, 0.5);
-  --cor--alerta-cinza: rgba(108, 117, 125, 0.5);
-
-  --cor--alerta-verde-forte: rgba(137, 157, 122);
-  --cor--alerta-amarelo-forte: rgba(217, 200, 119);
-  --cor--alerta-laranja-forte: rgba(197, 138, 92);
-  --cor--alerta-azul-forte: rgba(122, 140, 157);
-  --cor--alerta-vermelho-forte: rgba(166, 106, 106);
-  --cor--alerta-cinza-forte: rgba(108, 117, 125);
-
-  --font--1: 3rem;
-  --font--2: 2rem;
-  --font--3: 1rem;
-  --font--4: 0.875rem;
-  --font--5: 0.75rem;
+  --font-1: 3rem;
+  --font-2: 2rem;
+  --font-3: 1rem;
+  --font-4: 0.875rem;
+  --font-5: 0.75rem;
 
   --font: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+}
+
+[data-theme="default-light"] {
+  --mainBackground: #f2f6d2;
+  --sidebarBackground: #a3ac50;
+  --primaryText: #323325;
+  --secondaryText: #5a5a4a;
+  --tercearyText: #6f7063;
+  --inputColor: #d9dda5;
+  --primaryColor: #a7b054;
+  --accentColor: #dbf017;
+  --shadowColor: rgba(90, 90, 74, 0.2);
+
+  --cardBackground: linear-gradient(
+    135deg,
+    rgba(90, 90, 74, 0.35),
+    rgba(90, 90, 74, 0.15)
+  );
+  --cardBackgroundHover: linear-gradient(
+    135deg,
+    rgba(90, 90, 74, 0.15),
+    rgba(90, 90, 74, 0.35)
+  );
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(167, 176, 84, 0.5),
+    rgba(228, 240, 125, 0.5)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(228, 240, 125, 0.5),
+    rgba(167, 176, 84, 0.5)
+  );
+
+  --errorColorD: linear-gradient(
+    135deg,
+    rgba(238, 49, 49, 0.4),
+    rgba(201, 74, 74, 0.4)
+  );
+  --errorColorDHover: linear-gradient(
+    135deg,
+    rgba(201, 74, 74, 0.4),
+    rgba(238, 49, 49, 0.4)
+  );
+
+  --warningColorD: linear-gradient(
+    135deg,
+    rgba(228, 240, 125, 0.25),
+    rgba(243, 234, 65, 0.25)
+  );
+  --warningColorDHover: linear-gradient(
+    135deg,
+    rgba(243, 234, 65, 0.25),
+    rgba(228, 240, 125, 0.25)
+  );
+}
+
+[data-theme="blue-dark"] {
+  --mainBackground: #344850;
+  --sidebarBackground: #1f2c32;
+  --primaryText: #d2eaf3;
+  --secondaryText: #5496b0;
+  --tercearyText: #7dcff0;
+  --inputColor: #138ab8;
+  --primaryColor: #18b2ef;
+  --accentColor: #7dcff0;
+  --shadowColor: rgba(47, 47, 18, 0.3);
+
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(84, 150, 176, 0.5),
+    rgba(46, 80, 97, 0.3)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(46, 80, 97, 0.3),
+    rgba(84, 150, 176, 0.5)
+  );
+}
+
+[data-theme="blue-light"] {
+  --mainBackground: #e5f2f7;
+  --sidebarBackground: #37a0ca;
+  --primaryText: #131c21;
+  --secondaryText: #344850;
+  --tercearyText: #467dad;
+  --inputColor: #a4b6ef;
+  --primaryColor: #1887ef;
+  --accentColor: #0a719a;
+  --shadowColor: rgba(31, 44, 50, 0.2);
+
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(19, 138, 184, 0.2),
+    rgba(19, 138, 184, 0.5)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(19, 138, 184, 0.5),
+    rgba(19, 138, 184, 0.2)
+  );
+}
+
+[data-theme="pink-dark"] {
+  --mainBackground: #402b38;
+  --sidebarBackground: #2b1824;
+  --primaryText: #f4dce8;
+  --secondaryText: #ff66b3;
+  --tercearyText: #f79ac0;
+  --inputColor: #593247;
+  --primaryColor: #f61c65;
+  --accentColor: #ff8fc0;
+  --shadowColor: rgba(30, 15, 20, 0.3);
+
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(242, 82, 135, 0.3),
+    rgba(247, 154, 192, 0.3)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(247, 154, 192, 0.3),
+    rgba(242, 82, 135, 0.3)
+  );
+}
+
+[data-theme="pink-light"] {
+  --mainBackground: #fce8f1;
+  --sidebarBackground: #cfa7b8;
+  --primaryText: #261420;
+  --secondaryText: #5e2d47;
+  --tercearyText: #f25287;
+  --inputColor: #f3bcd0;
+  --primaryColor: #ff66b3;
+  --accentColor: #ee6fa4;
+  --shadowColor: rgba(90, 45, 60, 0.15);
+
+  --cardBackground: linear-gradient(
+    135deg,
+    rgba(255, 140, 180, 0.4),
+    rgba(252, 232, 241, 0.3)
+  );
+  --cardBackgroundHover: linear-gradient(
+    135deg,
+    rgba(252, 232, 241, 0.3),
+    rgba(255, 140, 180, 0.4)
+  );
+
+  --cardBackground2: linear-gradient(
+    135deg,
+    rgba(255, 140, 180, 0.25),
+    rgba(247, 154, 192, 0.25)
+  );
+  --cardBackground2Hover: linear-gradient(
+    135deg,
+    rgba(247, 154, 192, 0.25),
+    rgba(255, 140, 180, 0.25)
+  );
 }
 
 * {
@@ -58,7 +235,7 @@
 }
 
 body {
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
 }
 
 .main-base {

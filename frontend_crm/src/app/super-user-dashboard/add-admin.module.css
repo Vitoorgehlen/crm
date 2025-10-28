@@ -12,7 +12,7 @@
 }
 
 .overlay h2 {
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
 }
 
 .overlay input,
@@ -23,7 +23,7 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackground);
 }
 
 .overlay input:focus,
@@ -41,12 +41,12 @@
   margin: 3px;
   border-radius: 5px;
   width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
 }
 
 .modal {
-  background: var(--cor--principal);
+  background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -69,19 +69,19 @@
   background: transparent;
   border: none;
   font-size: 1.5rem;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   cursor: pointer;
 }
 
 .error {
-  color: red;
+  color: var(--errorColor2);
   font-size: var(--font--5);
 }
 
 .btnUpdate {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   border: none;
   border-radius: 20px;
   width: 200px;
@@ -92,28 +92,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal);
+  background: var(--cardBackground);
   border-radius: 5px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
-  border: 1px solid var(--cor--principal);
+  border: 1px solid var(--shadowColor);
 }
 
 .btnEditUserActive {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--alerta-vermelho-forte);
+  background: var(--errorColor2);
   border-radius: 5px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   font-size: 1.3rem;
-  border: 1px solid var(--cor--alerta-vermelho-forte);
+  border: 1px solid var(--shadowColor);
 }
 
 .createUserLabels {
@@ -127,8 +127,8 @@
   border-radius: 5px;
   width: 80%;
   max-width: 500px;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  border: 1px solid var(--shadowColor);
+  background: var(--primaryText);
   transition: 200ms;
   width: 100%;
 }

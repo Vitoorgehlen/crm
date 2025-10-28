@@ -6,10 +6,8 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
   overflow-y: auto;
-
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
 }
 
 .header {
@@ -18,14 +16,10 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
-}
-
-.submit:hover {
-  color: var(--cor--principal);
 }
 
 .headerContent {
@@ -52,36 +46,57 @@
 
 .btnSetting {
   margin-top: 20px;
-  padding: 5px;
-  color: var(--cor--escura-escuro);
-  background-color: var(--cor--branco-4);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
   max-width: 500px;
+  gap: 10px;
   width: 80%;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: 200ms;
+
+  text-align: center;
+  padding: 8px 12px;
+  background: var(--cardBackground);
+  color: var(--shadowColor);
+  font-size: 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnSettingActive {
   margin-top: 20px;
-  padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
+  gap: 10px;
   max-width: 500px;
   width: 80%;
-  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: 200ms;
+
+  text-align: center;
+  padding: 8px 12px;
+  background: var(--cardBackground);
+  color: var(--primaryColor);
+  font-size: 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnSetting:hover,
+.btnSettingActive:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .list {
@@ -99,8 +114,17 @@
   width: 80%;
   max-width: 850px;
   padding: 10px;
-  background-color: var(--cor--branco-4);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   border-radius: 5px;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.deleteItem h3 {
+  color: var(--secondaryText);
 }
 
 .deleteItemLabels {
@@ -109,6 +133,7 @@
   justify-content: center;
   align-items: center;
   width: 100%;
+  height: 100%;
 }
 
 .title {
@@ -137,30 +162,42 @@
 
 .btnDelClient {
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
+  background: var(--cardBackgroundHover);
+  border: 1px solid var(--shadowColor);
   font-size: 1rem;
-  border: none;
   border-radius: 3px;
   width: 100%;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnDelClient:hover {
-  background-color: var(--cor--alerta-vermelho);
+  color: var(--errorColor);
+  border: 1px solid var(--errorColor);
+  background: var(--cardBackgroundHover);
 }
 
 .btnCancelClient {
   padding: 5px;
-  color: var(--cor--escura-escuro);
-  background-color: var(--cor--branco-9);
+  color: var(--primaryText);
+  background: var(--cardBackground);
+  border: 1px solid var(--shadowColor);
   font-size: 1rem;
-  border: none;
   border-radius: 3px;
   width: 100%;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnCancelClient:hover {
-  background-color: var(--cor--branco-3);
+  color: var(--primaryColor);
+  border: 1px solid var(--tercearyText);
+  background: var(--cardBackgroundHover);
 }

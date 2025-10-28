@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { MdRadioButtonUnchecked, MdRadioButtonChecked } from "react-icons/md";
 
 import styles from "./page.module.css";
 import {
@@ -232,6 +233,17 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
                       checked={permissionsByRole[role]?.[perm] || false}
                       onChange={() => togglePermissionForRole(role, perm)}
                     />
+                    {permissionsByRole[role]?.[perm] === true ? (
+                      <MdRadioButtonChecked
+                        onClick={() => togglePermissionForRole(role, perm)}
+                        className={styles.check}
+                      />
+                    ) : (
+                      <MdRadioButtonUnchecked
+                        onClick={() => togglePermissionForRole(role, perm)}
+                        className={styles.noCheck}
+                      />
+                    )}
                   </td>
                 ))}
             </tr>

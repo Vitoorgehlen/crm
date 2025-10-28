@@ -6,10 +6,10 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
   overflow-y: auto;
 
-  scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal);
+  /* scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal); */
 }
 
 .header {
@@ -18,7 +18,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
@@ -43,7 +43,11 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  background-color: var(--cor--principal-claro);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 3px;
 }
 
@@ -60,20 +64,35 @@
   border-radius: 5px;
   width: 80%;
   max-width: 500px;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground2);
   transition: 200ms;
   width: 100%;
 }
 
+.labelCreateCompany::placeholder {
+  outline: none;
+  color: var(--sidebarBackground);
+}
+
 .btnSave {
-  color: var(--cor--escura-escuro);
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   width: 200px;
   font-size: 0.9rem;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnSave:hover {
+  color: var(--primaryColor);
+  background: var(--cardBackgroundHover);
+  border: 1px solid var(--primaryColor);
 }
 
 .companies {
@@ -94,8 +113,12 @@
   align-items: center;
   justify-content: center;
   padding: 10px;
-  background-color: var(--cor--principal-claro);
+  background: var(--cardBackground);
   border-radius: 5px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .companyContent {
@@ -111,33 +134,38 @@
   width: 100%;
   max-width: 800px;
   display: flex;
-  color: var(--cor--branco-2);
+  color: var(--primaryText);
   justify-content: space-between;
   border-radius: 5px;
   gap: 15px;
 }
 
 .btnOpenCompany {
-  color: var(--cor--principal-claro);
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   width: 40px;
   height: 40px;
   margin-left: 10px;
   font-size: 1.2rem;
-  border: none;
   border-radius: 5px;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   cursor: pointer;
 }
 
 .btnOpenCompany:hover {
-  color: var(--cor--principal);
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: var(--cardBackgroundHover);
 }
 
 .btnLogout {
   margin-top: 20px;
   padding: 5px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--alerta-vermelho-forte);
+  color: var(--primaryText);
+  background: var(--cardBackground);
   font-size: 0.9rem;
   border: none;
   border-radius: 5px;
@@ -148,4 +176,14 @@
   align-items: center;
   justify-content: center;
   transition: 200ms;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  border: 1px solid var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnLogout:hover {
+  color: var(--errorColor2);
+  background: var(--cardBackgroundHover);
+  border: 1px solid var(--errorColor2);
 }

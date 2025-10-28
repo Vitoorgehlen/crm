@@ -6,7 +6,7 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
 }
 
 .header {
@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
@@ -27,26 +27,34 @@
   padding-right: 15px;
   padding-left: 3px;
   border-radius: 50px;
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.serchDeal:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .serchDeal input {
   border: none;
   outline: none;
-  background-color: var(--cor--branco-5);
-  color: var(--cor--escura-escuro);
+  width: 100%;
+  color: var(--primaryText);
 }
 
 .serchDeal input::placeholder {
-  color: var(--cor--branco-9);
+  color: var(--sidebarBackground);
   opacity: 1;
 }
 
 .serchDeal input:focus,
 .serchDeal input:active,
 .serchDeal input:hover {
-  border: none !important; /* Garante que nenhuma borda apareça */
-  box-shadow: none !important; /* Remove sombras (caso existam) */
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .btnSearch {
@@ -54,14 +62,10 @@
   align-items: center;
   justify-content: center;
   padding: 5px;
-  color: var(--cor--branco-9);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
-}
-
-.submit:hover {
-  color: var(--cor--principal);
 }
 
 .headerContent {
@@ -82,39 +86,45 @@
 }
 
 .btnFilter {
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
   border-radius: 20px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnFilter:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .btnFilterActive {
-  background-color: var(--cor--principal);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--cor--branco-1);
-  font-size: 1.3rem;
+  color: var(--primaryColor);
 }
 
 .addDeal {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal);
+  background: var(--cardBackground);
   border-radius: 20px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
+}
+
+.addDeal:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .statusCard {
@@ -127,32 +137,50 @@
 .statusName {
   width: 100%;
   text-align: center;
-  color: var(--cor--escura-escuro);
+  color: var(--secondaryText);
 }
 
 .status_approved {
-  background-color: var(--cor--alerta-verde);
-  box-shadow: 0 4px 12px 0 var(--cor--alerta-verde);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .status_under_review {
-  background-color: var(--cor--alerta-amarelo);
-  box-shadow: 8px 4px 12px 0 var(--cor--alerta-amarelo);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .status_missing_documents {
-  background-color: var(--cor--alerta-laranja);
-  box-shadow: 0 4px 12px 0 var(--cor--alerta-laranja);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .status_interested {
-  background-color: var(--cor--alerta-azul);
-  box-shadow: 0 4px 12px 0 var(--cor--alerta-azul);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .status_rejected {
-  background-color: var(--cor--alerta-vermelho);
-  box-shadow: 0 4px 12px 0 var(--cor--alerta-vermelho);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 .status_dropped_out {
-  background-color: var(--cor--alerta-cinza);
-  box-shadow: 0 4px 12px 0 var(--cor--alerta-cinza);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .dealList {
@@ -166,6 +194,75 @@
   grid-template-columns: repeat(1, 1fr);
 }
 
+.deal {
+  color: var(--primaryText);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+
+  background: var(--cardBackground2);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.deal:hover {
+  background: var(--cardBackground2Hover);
+}
+
+.titleCard {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+.lastContact {
+  color: var(--primaryColor);
+}
+
+.btnPriorityActiveCard {
+  background: transparent;
+  border: none;
+  text-decoration: none;
+  color: var(--primaryColor);
+  cursor: pointer;
+}
+
+.dealDelete {
+  background: var(--errorColorD);
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.dealDelete:hover {
+  background: var(--errorColorDHover);
+}
+
+.noItens {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.noItens p {
+  color: var(--primaryText);
+}
+
 @media (min-width: 768px) {
   .dealList {
     grid-template-columns: repeat(3, 1fr);
@@ -176,20 +273,4 @@
   .dealList {
     grid-template-columns: repeat(5, 1fr);
   }
-}
-
-.deal {
-  background-color: var(--cor--branco-5);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-}
-
-.deal:hover {
-  background-color: var(--cor--branco-9);
 }

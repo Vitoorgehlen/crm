@@ -3,6 +3,8 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect, useMemo } from "react";
+import styles from "./page.module.css";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token, userType, isLoading } = useAuth();
@@ -42,7 +44,11 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }, [SUPaths, publicPaths, token, userType, isLoading, pathname, router]);
 
   if (isLoading) {
-    return <div className="loading">Carregando...</div>;
+    return (
+      <div className={styles.loading}>
+        <AiOutlineLoading3Quarters className={styles.spinner} />
+      </div>
+    );
   }
 
   if (!token && publicPaths.includes(pathname)) return <>{children}</>;

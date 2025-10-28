@@ -145,6 +145,7 @@ export default function Clients() {
               type="text"
               placeholder="Pesquise pelo nome"
               value={search}
+              className={styles.inputSearch}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
@@ -182,13 +183,18 @@ export default function Clients() {
           </div>
         </div>
 
-        <div className={styles.clientList}>
-          {clients.length > 0 ? (
-            displayClients.map((client, index) => (
-              <button
-                key={index}
-                type="button"
-                className={`
+        <div>
+          {clients.length === 0 ? (
+            <div className={styles.noItens}>
+              <p>Nenhuma cliente encontrado.</p>
+            </div>
+          ) : (
+            <div className={styles.clientList}>
+              {displayClients.map((client, index) => (
+                <button
+                  key={index}
+                  type="button"
+                  className={`
                   ${client.deleteRequest ? styles.clientDelete : styles.client} 
                   ${
                     client.isPriority && isPriorityBtn && !client.deleteRequest
@@ -196,25 +202,24 @@ export default function Clients() {
                       : ""
                   }
                 `}
-                onClick={() => {
-                  setIsEditOpen(true);
-                  setSelectedClient(client);
-                }}
-              >
-                {client.isPriority ? (
-                  <IoStar className={styles.btnPriorityActiveCard} />
-                ) : (
-                  <IoStarOutline className={styles.btnPriorityCard} />
-                )}
-                <h3>{client.name}</h3>
-                <h4>{client.phone}</h4>
-                {teamClients && (
-                  <h6>{client.creator?.name || "Usuário não encontrado"}</h6>
-                )}
-              </button>
-            ))
-          ) : (
-            <p>Nenhum cliente encontrado</p>
+                  onClick={() => {
+                    setIsEditOpen(true);
+                    setSelectedClient(client);
+                  }}
+                >
+                  {client.isPriority ? (
+                    <IoStar className={styles.btnPriorityActiveCard} />
+                  ) : (
+                    <IoStarOutline className={styles.btnPriorityCard} />
+                  )}
+                  <h3>{client.name}</h3>
+                  <h4>{client.phone}</h4>
+                  {teamClients && (
+                    <h6>{client.creator?.name || "Usuário não encontrado"}</h6>
+                  )}
+                </button>
+              ))}
+            </div>
           )}
         </div>
         <div className={styles.box}>

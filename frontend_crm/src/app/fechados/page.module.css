@@ -6,7 +6,7 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
 }
 
 .header {
@@ -15,11 +15,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
 }
+
 .serchDeal {
   display: flex;
   flex-direction: row;
@@ -27,26 +28,34 @@
   padding-right: 15px;
   padding-left: 3px;
   border-radius: 50px;
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.serchDeal:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .serchDeal input {
   border: none;
   outline: none;
-  background-color: var(--cor--branco-5);
-  color: var(--cor--escura-escuro);
+  width: 100%;
+  color: var(--primaryText);
 }
 
 .serchDeal input::placeholder {
-  color: var(--cor--branco-9);
+  color: var(--sidebarBackground);
   opacity: 1;
 }
 
 .serchDeal input:focus,
 .serchDeal input:active,
 .serchDeal input:hover {
-  border: none !important; /* Garante que nenhuma borda apareça */
-  box-shadow: none !important; /* Remove sombras (caso existam) */
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .btnSearch {
@@ -54,14 +63,10 @@
   align-items: center;
   justify-content: center;
   padding: 5px;
-  color: var(--cor--branco-9);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
-}
-
-.submit:hover {
-  color: var(--cor--principal);
 }
 
 .headerContent {
@@ -82,46 +87,51 @@
 }
 
 .btnFilter {
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
   border-radius: 20px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnFilterActive {
-  background-color: var(--cor--principal);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--cor--branco-1);
-  font-size: 1.3rem;
+  color: var(--primaryColor);
 }
 
 .addDeal {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal);
+  background: var(--cardBackground);
   border-radius: 20px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.addDeal:hover,
+.btnFilter:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .boxSteps {
   display: flex;
   flex-direction: column;
   width: calc(100% - 30px);
-  /* justify-content: space-between; */
   margin: 10px 15px;
   padding: 10px;
 }
@@ -129,7 +139,12 @@
 .methodHeader {
   width: 100%;
   text-align: center;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryColor);
+}
+
+.methodHeader h4 {
+  font-weight: 400;
+  color: var(--tercearyText);
 }
 
 .methodWorkflow {
@@ -152,7 +167,12 @@
   text-align: center;
   border-radius: 10px;
   padding: 10px;
-  background-color: var(--cor--branco-4);
+  color: var(--sidebarBackground);
+  background: var(--cardBackgroundHover);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .dealList {
@@ -169,17 +189,27 @@
 
 .card {
   width: 150px;
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background: var(--cardBackground2);
   border-radius: 8px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: center;
   cursor: pointer;
   border: none;
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .card:hover {
-  background-color: var(--cor--branco-9);
+  background: var(--cardBackground2Hover);
+}
+
+.divError {
+  display: flex;
+  justify-content: center;
+  color: var(--primaryText);
 }

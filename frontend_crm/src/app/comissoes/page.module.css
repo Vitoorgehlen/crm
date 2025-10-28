@@ -7,7 +7,7 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
 }
 
 .header {
@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: space-between;
   padding: 20px 10px 10px 10px;
-  color: var(--cor--escura-escuro);
+  color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
@@ -29,26 +29,35 @@
   padding-right: 15px;
   padding-left: 3px;
   border-radius: 50px;
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.serchDeal:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .serchDeal input {
   border: none;
   outline: none;
-  background-color: var(--cor--branco-5);
-  color: var(--cor--escura-escuro);
+  width: 100%;
+  color: var(--primaryText);
 }
 
 .serchDeal input::placeholder {
-  color: var(--cor--branco-9);
+  color: var(--shadowColor);
   opacity: 1;
 }
 
 .serchDeal input:focus,
 .serchDeal input:active,
 .serchDeal input:hover {
-  border: none !important; /* Garante que nenhuma borda apareça */
-  box-shadow: none !important; /* Remove sombras (caso existam) */
+  border: none !important;
+  box-shadow: none !important;
 }
 
 .btnSearch {
@@ -56,14 +65,10 @@
   align-items: center;
   justify-content: center;
   padding: 5px;
-  color: var(--cor--branco-9);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
-}
-
-.submit:hover {
-  color: var(--cor--principal);
 }
 
 .headerContent {
@@ -83,40 +88,33 @@
   gap: 20px;
 }
 
-.btnFilter {
-  background-color: var(--cor--branco-5);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--cor--branco-1);
-  font-size: 1.3rem;
-}
-
-.btnFilterActive {
-  background-color: var(--cor--principal);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--cor--branco-1);
-  font-size: 1.3rem;
+.cashStatsCardRight h2 {
+  color: var(--primaryColor);
+  padding: 5px;
+  font-size: 2rem;
 }
 
 .addDeal {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: var(--cor--principal);
+  background: var(--cardBackground);
   border-radius: 20px;
   width: 40px;
   height: 40px;
   border: none;
   cursor: pointer;
-  color: var(--cor--branco-1);
+  color: var(--primaryText);
   font-size: 1.3rem;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.addDeal:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .boxSteps {
@@ -135,29 +133,24 @@
 
 .cashStatsCard {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  background-color: var(--cor--branco-5);
+  flex-direction: column;
+  width: 30%;
+  max-width: 350px;
+  background: var(--cardBackground);
   padding: 10px;
   border-radius: 8px;
   justify-content: space-between;
-}
 
-.cashStatsCardRight h2 {
-  color: var(--cor--principal);
-  padding: 5px;
-  font-size: 2rem;
-}
+  box-shadow: -3px 3px 10px var(--shadowColor);
 
-.cashStatsCardLeft {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .cashStatsCardDiv {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
+  width: 100%;
   gap: 5px;
 }
 
@@ -166,33 +159,32 @@
   flex-direction: column;
   align-items: center;
   justify-content: space-around;
-  background-color: var(--cor--branco-2);
-  width: 150px;
+  color: var(--primaryText);
+  background: var(--cardBackground2);
+  width: 100%;
   border-radius: 8px;
   padding: 10px;
   text-align: center;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .cardGoal input {
   border: none;
   outline: none;
   width: 90%;
-  border: 1px solid var(--cor--branco-9);
+  border: 1px solid var(--shadowColor);
   border-radius: 2px;
   padding: 2px 5px;
-}
-
-.cardGoal input::placeholder {
-  border: 1px solid var(--cor--branco-9);
-  border-radius: 2px;
-  padding: 2px;
 }
 
 .cardGoal input:focus,
 .cardGoal input:active,
 .cardGoal input:hover {
-  border: 1px solid var(--cor--secundaria-claro);
-  border-radius: 2px;
+  border: 1px solid var(--primaryColor);
 }
 
 .infoCard {
@@ -207,48 +199,49 @@
 
 .btnGoal {
   border: none;
-  color: var(--cor--principal-claro);
+  color: var(--secondaryText);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnGoal:hover {
-  color: var(--cor--secundaria-claro);
+  color: var(--primaryColor);
 }
 
 .btnDelGoal {
   border: none;
-  color: var(--cor--alerta-vermelho);
+  color: var(--errorColor);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDelGoal:hover {
-  color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor2);
 }
 
-.cardLeft {
-  background-color: var(--cor--branco-2);
-  width: 150px;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
+.card {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--shadowColor);
 }
 
-.cardLeft1 {
-  background-color: var(--cor--alerta-verde);
-  width: 150px;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
+.card h4 {
+  font-size: var(--font-4);
+  font-weight: 600;
 }
 
-.cardLeft2 {
-  background-color: var(--cor--alerta-vermelho);
-  width: 150px;
-  border-radius: 8px;
-  padding: 10px;
-  text-align: center;
+.received {
+  color: var(--secondaryText);
+}
+
+.toReceived {
+  color: var(--errorColor2);
+}
+
+.card p {
+  font-size: var(--font-4);
+  font-weight: 400;
 }
 
 .yearButtons {
@@ -260,17 +253,27 @@
 .yearBtn {
   text-align: center;
   padding: 8px 12px;
-  background-color: var(--cor--branco-5);
-  color: var(--cor--branco-10);
+  background: var(--cardBackground);
+  color: var(--shadowColor);
   font-size: 1rem;
   border: none;
   border-radius: 20px;
   cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .yearBtnActive {
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-2);
+  background: var(--cardBackground);
+  color: var(--primaryColor);
+}
+
+.yearBtn:hover,
+.yearBtnActive:hover {
+  background: var(--cardBackgroundHover);
 }
 
 .monthsList {
@@ -279,18 +282,23 @@
   margin: 10px 0;
   padding: 8px;
   border-radius: 5px;
-  background-color: var(--cor--branco-5);
+  background: var(--cardBackground);
   width: 100%;
   min-height: 44px;
   box-sizing: border-box;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .monthToggle,
 .monthToggleActive {
-  background-color: var(--cor--branco-2);
+  background: var(--cardBackground2);
+  color: var(--shadowColor);
   border-radius: 8px;
   padding: 8px 10px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -298,11 +306,21 @@
   justify-content: center;
   cursor: pointer;
   border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.monthToggle:hover,
+.monthToggleActive:hover {
+  background: var(--cardBackground2Hover);
 }
 
 .monthToggleActive {
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-2);
+  background: var(--cardBackground2);
+  color: var(--primaryText);
 }
 
 .dealsOfMonth {
@@ -315,43 +333,10 @@
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
 }
 
-@media (min-width: 768px) {
-  .clientList {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (min-width: 1200px) {
-  .clientList {
-    grid-template-columns: repeat(5, 1fr);
-  }
-}
-
-.dealsOfMonth {
-  background-color: var(--cor--branco-2);
-}
-
-.card {
-  width: 150px;
-  background-color: var(--cor--branco-5);
-  border-radius: 8px;
-  padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-}
-
-.card:hover {
-  background-color: var(--cor--branco-9);
-}
-
 .pendingSection {
   width: 35%;
-  background-color: var(--cor--principal-claro);
-  color: var(--cor--branco-2);
+  background: var(--cardBackground);
+  color: var(--primaryText);
   border-radius: 5px;
   padding: 15px;
 }
@@ -363,30 +348,69 @@
   gap: 5px;
 }
 
+.cardDeals {
+  background: var(--cardBackground);
+  color: var(--primaryText);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cardDeals:hover {
+  background: var(--cardBackgroundHover);
+}
+
 .pendingCard {
   width: 100%;
-  background-color: var(--cor--alerta-verde);
+  background: var(--cardBackground2);
   border-radius: 8px;
   margin: 3px;
   padding: 15px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: flex;
   flex-direction: column;
   justify-content: center;
   cursor: pointer;
   border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .pendingCard p {
-  color: var(--cor--escura-escuro);
+  color: var(--secondaryText);
 }
 
 .pendingCard h6 {
   font-size: 0.9rem;
   font-weight: 400;
-  color: var(--cor--escura-escuro);
+  color: var(--sidebarBackground);
 }
 
 .pendingCard:hover {
-  background-color: var(--cor--alerta-verde-forte);
+  background: var(--cardBackground2Hover);
+}
+
+@media (min-width: 768px) {
+  .clientList {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .clientList {
+    grid-template-columns: repeat(5, 1fr);
+  }
 }

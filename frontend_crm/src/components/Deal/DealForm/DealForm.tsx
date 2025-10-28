@@ -371,321 +371,419 @@ export default function DealForm({
         className={mode === "create" ? styles.modal : styles.modalEdit}
         onClick={(e) => e.stopPropagation()}
       >
-        <div className={styles.innerModal}>
-          <div className={styles.modalLeft}>
-            <div className={styles.titleCard}>
-              <button
-                className={
-                  mode === "create" ? styles.closeBtn : styles.closeBtnEdit
-                }
-                type="button"
-                onClick={() => onClose()}
-              >
-                <MdClose />
-              </button>
+        <div className={styles.cardDeals}>
+          <div className={styles.innerModal}>
+            <div className={styles.modalLeft}>
+              <div className={styles.titleCard}>
+                <button
+                  className={
+                    mode === "create" ? styles.closeBtn : styles.closeBtnEdit
+                  }
+                  type="button"
+                  onClick={() => onClose()}
+                >
+                  <MdClose />
+                </button>
 
-              <div>
-                {mode === "create" ? (
-                  <h2>Adicionar negociação</h2>
-                ) : (
-                  <>
-                    <h4>Editar negociação</h4>
-                    <h2>{deal?.client?.name ?? ""}</h2>
-                    <h6 className={styles.lastContact}>
-                      {`Último contato:
+                <div>
+                  {mode === "create" ? (
+                    <h2>Adicionar negociação</h2>
+                  ) : (
+                    <>
+                      <h4>Editar negociação</h4>
+                      <h2>{deal?.client?.name ?? ""}</h2>
+                      <h6 className={styles.lastContact}>
+                        {`Último contato:
                       ${getDaysSinceLastContact(
                         deal?.updatedAt ?? deal?.createdAt ?? ""
                       )}`}
-                    </h6>
-                  </>
+                      </h6>
+                    </>
+                  )}
+                </div>
+
+                <button
+                  type="button"
+                  className={styles.btnPriority}
+                  onClick={() => setIsPriority(!isPriority)}
+                >
+                  {isPriority ? (
+                    <IoStar className={styles.btnPriorityActive} />
+                  ) : (
+                    <IoStarOutline />
+                  )}
+                </button>
+              </div>
+
+              {error && <p className={styles.error}>{error}</p>}
+
+              <div className={styles.box}>
+                <input
+                  list="clients"
+                  className={styles.changeClient}
+                  placeholder="Buscar cliente..."
+                  value={searchClient}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setSearchClient(value);
+
+                    const foundClient = clients.find(
+                      (client) =>
+                        client.name.toLowerCase() === value.toLowerCase()
+                    );
+                    setClientId(foundClient ? foundClient.id : undefined);
+                  }}
+                />
+
+                <datalist id="clients">
+                  {clients
+                    .slice()
+                    .reverse()
+                    .map((client) => (
+                      <option
+                        key={client.id}
+                        value={client.name || "Cliente não encontrado"}
+                      />
+                    ))}
+                </datalist>
+                {mode === "create" && (
+                  <button
+                    className={styles.addClient}
+                    onClick={() => setIsCreateOpen(true)}
+                    type="button"
+                  >
+                    <AiOutlineUserAdd />
+                  </button>
                 )}
               </div>
 
-              <button
-                type="button"
-                className={styles.btnPriority}
-                onClick={() => setIsPriority(!isPriority)}
-              >
-                {isPriority ? (
-                  <IoStar className={styles.btnPriorityActive} />
-                ) : (
-                  <IoStarOutline />
-                )}
-              </button>
-            </div>
-
-            {error && <p className={styles.error}>{error}</p>}
-
-            <div className={styles.box}>
-              <input
-                list="clients"
-                className={styles.changeClient}
-                placeholder="Buscar cliente..."
-                value={searchClient}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSearchClient(value);
-
-                  const foundClient = clients.find(
-                    (client) =>
-                      client.name.toLowerCase() === value.toLowerCase()
-                  );
-                  setClientId(foundClient ? foundClient.id : undefined);
-                }}
-              />
-
-              <datalist id="clients">
-                {clients
-                  .slice()
-                  .reverse()
-                  .map((client) => (
-                    <option
-                      key={client.id}
-                      value={client.name || "Cliente não encontrado"}
-                    />
-                  ))}
-              </datalist>
-              {mode === "create" && (
-                <button
-                  className={styles.addClient}
-                  onClick={() => setIsCreateOpen(true)}
-                  type="button"
-                >
-                  <AiOutlineUserAdd />
-                </button>
-              )}
-            </div>
-
-            <h3>Status do cliente</h3>
-            <select
-              value={statusClient}
-              onChange={(e) => setStatusClient(e.target.value as ClientStatus)}
-              required
-            >
-              {Object.entries(ClientStatus)
-                .filter(([key]) => {
-                  if (mode === "create")
-                    return key !== "REJECTED" && key !== "DROPPED_OUT";
-                  return true;
-                })
-                .map(([key, { label }]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-            </select>
-
-            <h3>Imóvel desejado</h3>
-            <input
-              type="text"
-              placeholder="O que o cliente busca em um imóvel?"
-              onChange={(e) => setSearchProfile(e.target.value)}
-              value={searchProfile}
-            />
-
-            <h3>Método de pagamento</h3>
-            <div className={styles.payment}>
+              <h3>Status do cliente</h3>
               <select
-                value={paymentMethod}
+                value={statusClient}
                 onChange={(e) =>
-                  setPaymentMethod(e.target.value as PaymentMethod)
+                  setStatusClient(e.target.value as ClientStatus)
                 }
                 required
               >
-                {Object.entries(PaymentMethod).map(([key, { label }]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
+                {Object.entries(ClientStatus)
+                  .filter(([key]) => {
+                    if (mode === "create")
+                      return key !== "REJECTED" && key !== "DROPPED_OUT";
+                    return true;
+                  })
+                  .map(([key, { label }]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
               </select>
 
-              {paymentMethod === "FINANCING" && (
-                <input
-                  type="text"
-                  placeholder="Banco do financiamento"
-                  onChange={(e) => setSearchProfile(e.target.value)}
-                  value={financialInstitution}
-                />
+              <h3>Imóvel desejado</h3>
+              <input
+                type="text"
+                placeholder="O que o cliente busca em um imóvel?"
+                onChange={(e) => setSearchProfile(e.target.value)}
+                value={searchProfile}
+              />
+
+              <h3>Método de pagamento</h3>
+              <div className={styles.payment}>
+                <select
+                  value={paymentMethod}
+                  onChange={(e) =>
+                    setPaymentMethod(e.target.value as PaymentMethod)
+                  }
+                  required
+                >
+                  {Object.entries(PaymentMethod).map(([key, { label }]) => (
+                    <option key={key} value={key}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+
+                {paymentMethod === "FINANCING" && (
+                  <input
+                    type="text"
+                    placeholder="Banco do financiamento"
+                    onChange={(e) => setSearchProfile(e.target.value)}
+                    value={financialInstitution}
+                  />
+                )}
+              </div>
+
+              {paymentMethod === "CASH" && (
+                <>
+                  <div className={styles.paymentTitle}>
+                    <h3>Valor a vista</h3>
+                    <h3>FGTS</h3>
+                  </div>
+                  <div className={styles.payment}>
+                    <input
+                      type="text"
+                      placeholder="Valor a vista"
+                      value={cashValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setCashValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="FGTS"
+                      value={fgtsValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setFgtsValue(numeric);
+                      }}
+                    />
+                  </div>
+                </>
               )}
+
+              {paymentMethod === "FINANCING" && (
+                <>
+                  <div className={styles.paymentTitle}>
+                    <h3>Valor de entrada </h3>
+                    <h3>Subsídio</h3>
+                    <h3>FGTS</h3>
+                    <h3>Financiamento</h3>
+                  </div>
+                  <div className={styles.payment}>
+                    <input
+                      type="text"
+                      placeholder="Valor de entrada"
+                      value={downPaymentValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setDownPaymentValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Valor de subsídio"
+                      value={subsidyValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setSubsidyValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="FGTS"
+                      value={fgtsValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setFgtsValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Valor de Financiamento"
+                      value={financingValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setFinancingValue(numeric);
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              {paymentMethod === "CREDIT_LETTER" && (
+                <>
+                  <div className={styles.paymentTitle}>
+                    <h3>Valor de entrada</h3>
+                    <h3>FGTS</h3>
+                    <h3>Valor da carta de crédito</h3>
+                  </div>
+                  <div className={styles.payment}>
+                    <input
+                      type="text"
+                      placeholder="Valor de entrada"
+                      value={downPaymentValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setDownPaymentValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="FGTS"
+                      value={fgtsValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setFgtsValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Valor da carta de crédito"
+                      value={creditLetterValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setCreditLetterValue(numeric);
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+
+              <h2>
+                {(
+                  (Number(downPaymentValue) || 0) +
+                  (Number(cashValue) || 0) +
+                  (Number(subsidyValue) || 0) +
+                  (Number(fgtsValue) || 0) +
+                  (Number(financingValue) || 0) +
+                  (Number(creditLetterValue) || 0)
+                ).toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+              </h2>
             </div>
+            {mode === "edit" && (
+              <div className={styles.modalRight}>
+                <div className={styles.noteSection}>
+                  <h2>Notas</h2>
 
-            {paymentMethod === "CASH" && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor a vista</h3>
-                  <h3>FGTS</h3>
+                  <div className={styles.addNote}>
+                    {isOpenNote ? (
+                      <>
+                        <h3>Editando</h3>
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          placeholder="Nota"
+                          value={newNote}
+                          onChange={(e) => setNewNote(e.target.value)}
+                        />
+
+                        <button
+                          type="button"
+                          className={styles.btnSave}
+                          onClick={handleAddNote}
+                          disabled={!newNote.trim()}
+                        >
+                          <RiSave3Fill />
+                        </button>
+                      </>
+                    )}
+                  </div>
+
+                  <div className={styles.noteList}>
+                    {note.length === 0 && (
+                      <p>Nenhuma nota do cliente encontrada.</p>
+                    )}
+                    {note.map((note) => (
+                      <div key={note.id} className={styles.noteItem}>
+                        {isOpenNote === note.id ? (
+                          <>
+                            <input
+                              type="text"
+                              placeholder="Nota"
+                              value={newNote}
+                              onChange={(e) => setNewNote(e.target.value)}
+                            />
+
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => handleEditNote(note.id)}
+                            >
+                              <FaCheck />
+                            </button>
+                            <button
+                              className={styles.btnDelDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenNote(undefined);
+                                setNewNote("");
+                              }}
+                            >
+                              <FaTimes />
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <h3>{note.content}</h3>
+
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenNote(note.id);
+                                setNewNote(note.content);
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={styles.btnDelDocValue}
+                              type="button"
+                              onClick={() => handleDeleteNote(note.id)}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Valor a vista"
-                    value={cashValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCashValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="FGTS"
-                    value={fgtsValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setFgtsValue(numeric);
-                    }}
-                  />
-                </div>
-              </>
+              </div>
             )}
-
-            {paymentMethod === "FINANCING" && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor de entrada </h3>
-                  <h3>Subsídio</h3>
-                  <h3>FGTS</h3>
-                  <h3>Financiamento</h3>
-                </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Valor de entrada"
-                    value={downPaymentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setDownPaymentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Valor de subsídio"
-                    value={subsidyValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setSubsidyValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="FGTS"
-                    value={fgtsValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setFgtsValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Valor de Financiamento"
-                    value={financingValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setFinancingValue(numeric);
-                    }}
-                  />
-                </div>
-              </>
-            )}
-
-            {paymentMethod === "CREDIT_LETTER" && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor de entrada</h3>
-                  <h3>FGTS</h3>
-                  <h3>Valor da carta de crédito</h3>
-                </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Valor de entrada"
-                    value={downPaymentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setDownPaymentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="FGTS"
-                    value={fgtsValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setFgtsValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Valor da carta de crédito"
-                    value={creditLetterValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCreditLetterValue(numeric);
-                    }}
-                  />
-                </div>
-              </>
-            )}
-
-            <h2>
-              {(
-                (Number(downPaymentValue) || 0) +
-                (Number(cashValue) || 0) +
-                (Number(subsidyValue) || 0) +
-                (Number(fgtsValue) || 0) +
-                (Number(financingValue) || 0) +
-                (Number(creditLetterValue) || 0)
-              ).toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-            </h2>
-
-            {mode === "create" ? (
-              <button
-                className={styles.btnDeal}
-                type="button"
-                onClick={(e) => handleSubmit(e, onSubmit, false)}
-              >
-                {loading === "save" ? "Enviando..." : "Enviar"}
-              </button>
-            ) : (
-              <div className={styles.btnUpdateAndSell}>
+          </div>
+          {mode === "create" ? (
+            <button
+              className={styles.btnDeal}
+              type="button"
+              onClick={(e) => handleSubmit(e, onSubmit, false)}
+            >
+              {loading === "save" ? "Enviando..." : "Enviar"}
+            </button>
+          ) : (
+            <div className={styles.footerCard}>
+              <div className={styles.btnUpdateAndStep}>
                 {deal?.deleteRequest ? (
                   <div className={styles.deleteRequest}>Solicitado</div>
                 ) : (
@@ -716,116 +814,20 @@ export default function DealForm({
                   Vender
                 </button>
               </div>
-            )}
-          </div>
-          {mode === "edit" && (
-            <div className={styles.modalRight}>
-              <div className={styles.noteSection}>
-                <h2>Notas</h2>
-
-                <div className={styles.addNote}>
-                  {isOpenNote ? (
-                    <>
-                      <h3>Editando</h3>
-                    </>
-                  ) : (
-                    <>
-                      <input
-                        type="text"
-                        placeholder="Nota"
-                        value={newNote}
-                        onChange={(e) => setNewNote(e.target.value)}
-                      />
-
-                      <button
-                        type="button"
-                        className={styles.btnSave}
-                        onClick={handleAddNote}
-                        disabled={!newNote.trim()}
-                      >
-                        <RiSave3Fill />
-                      </button>
-                    </>
-                  )}
-                </div>
-
-                <div className={styles.noteList}>
-                  {note.length === 0 && (
-                    <p>Nenhuma nota do cliente encontrada.</p>
-                  )}
-                  {note.map((note) => (
-                    <div key={note.id} className={styles.noteItem}>
-                      {isOpenNote === note.id ? (
-                        <>
-                          <input
-                            type="text"
-                            placeholder="Nota"
-                            value={newNote}
-                            onChange={(e) => setNewNote(e.target.value)}
-                          />
-
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => handleEditNote(note.id)}
-                          >
-                            <FaCheck />
-                          </button>
-                          <button
-                            className={styles.btnDelDocValue}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenNote(undefined);
-                              setNewNote("");
-                            }}
-                          >
-                            <FaTimes />
-                          </button>
-                        </>
-                      ) : (
-                        <>
-                          <h3>{note.content}</h3>
-
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenNote(note.id);
-                              setNewNote(note.content);
-                            }}
-                          >
-                            <RiPencilFill />
-                          </button>
-                          <button
-                            className={styles.btnDelDocValue}
-                            type="button"
-                            onClick={() => handleDeleteNote(note.id)}
-                          >
-                            <RiEraserFill />
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  ))}
-                </div>
+              <div className={styles.updateBox}>
+                <h6>
+                  Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
+                  {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
+                </h6>
+                <h6>
+                  {" "}
+                  Criado por: {deal?.creator?.name ?? "—"} ·{" "}
+                  {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
+                </h6>
               </div>
             </div>
           )}
         </div>
-
-        {mode === "edit" && (
-          <div className={styles.footerCard}>
-            <h6>
-              Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
-              {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-            </h6>
-            <h6>
-              {" "}
-              Criado por: {deal?.creator?.name ?? "—"} ·{" "}
-              {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-            </h6>
-          </div>
-        )}
 
         {isCloseOpen && deal && (
           <CloseDealForm

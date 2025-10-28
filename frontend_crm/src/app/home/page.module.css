@@ -5,7 +5,7 @@
   justify-content: center;
   align-items: center;
   padding-bottom: 20px;
-  background-color: var(--cor--branco-2);
+  background-color: var(--mainBackground);
 }
 
 .title {
@@ -13,6 +13,34 @@
   display: flex;
   justify-content: flex-end;
   padding-right: 50px;
+  color: var(--primaryColor);
+}
+
+.contentSection {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  width: 90%;
+}
+
+.taskSection {
+  display: flex;
+  padding: 10px 0;
+  align-items: center;
+  flex-direction: column;
+  width: 80%;
+  max-width: 350px;
+  max-height: 350px;
+  margin: 10px 0 5px 0;
+  border: 1px solid var(--borderColor);
+  border-radius: 10px;
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+
+  overflow-y: auto;
 }
 
 .taskSection input,
@@ -23,7 +51,8 @@
   width: 100%;
   border: none;
   outline: none;
-  background-color: var(--cor--branco-2);
+  color: var(--primaryText);
+  background-color: var(--inputColor);
 }
 
 .taskSection input:focus,
@@ -33,38 +62,8 @@
   box-shadow: none !important;
 }
 
-.taskSection label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--cor--principal);
-  background-color: var(--cor--branco-2);
-}
-
-.contentSection {
-  display: flex;
-  justify-content: space-between;
-  width: 90%;
-}
-
-.taskSection {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  width: 80%;
-  max-width: 350px;
-  max-height: 350px;
-  margin: 10px 0 5px 0;
-  border: 1px solid var(--cor--branco-4);
-  border-radius: 10px;
-  padding-bottom: 8px;
-  background: var(--cor--branco-1);
-
-  overflow-y: auto;
+.taskSection h2 {
+  color: var(--primaryText);
 }
 
 .addTask {
@@ -72,23 +71,17 @@
   align-items: center;
   justify-content: space-between;
   width: 95%;
-  border: 1px solid var(--cor--branco-4);
-  border-radius: 5px;
-  background: var(--cor--branco-3);
 }
 
 .btnSave {
-  padding: 8px;
-  color: var(--cor--branco-2);
-  background-color: var(--cor--principal-claro);
+  color: var(--primaryText);
   font-size: 1.5rem;
   border: none;
-  border-radius: 0 5px 5px 0;
   cursor: pointer;
 }
 
 .btnSave:hover {
-  background-color: var(--cor--principal-escuro);
+  color: var(--primaryColor);
 }
 
 .tasksList {
@@ -135,14 +128,14 @@
   width: 100%;
   padding: 2px 5px;
   border: none;
-  color: var(--cor--branco-10);
+  color: var(--tercearyText);
   text-decoration: line-through;
-  text-decoration-color: var(--cor--principal-claro);
+  text-decoration-color: var(--primaryColor);
 }
 
 .btnEditTask {
   border: none;
-  color: var(--cor--principal-claro);
+  color: var(--secondaryText);
   font-size: 0.9rem;
   cursor: pointer;
 }
@@ -150,21 +143,12 @@
 .btnDelTask {
   border: none;
   margin-left: 5px;
-  color: var(--cor--alerta-vermelho-forte);
+  color: var(--errorColor2);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDelTask:hover,
 .btnEditTask:hover {
-  color: var(--cor--secundaria-claro);
-}
-
-.calendar {
-  width: 90%;
-  max-width: 1300px;
-  border-radius: 10px;
-  border: 1px solid var(--cor--branco-4);
-  background: var(--cor--branco-1);
-  margin-bottom: 5px;
+  color: var(--primaryText);
 }

@@ -21,6 +21,7 @@ import { User, RoleLabels } from "@/types";
 import ConfigUsers from "@/components/config/users/page";
 import Permissions from "@/components/config/permissions/page";
 import EditMe from "@/components/config/editMe/page";
+import ThemeSwitcher from "@/components/config/switchTheme/page";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -192,6 +193,7 @@ export default function Config() {
         </div>
 
         <div className={styles.content}>
+          <ThemeSwitcher />
           <div className={styles.settings}>
             {isConfigTeam && (
               <div className={styles.contentConfig}>
@@ -316,8 +318,6 @@ export default function Config() {
           />
         )}
       </main>
-
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

@@ -80,7 +80,6 @@ export default function LoginPage() {
           </form>
         </div>
       </main>
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

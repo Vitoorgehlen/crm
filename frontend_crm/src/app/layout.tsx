@@ -6,6 +6,7 @@ import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
 import Footer from "@/components/footer/page";
 import ProtectedRoute from "@/components/protectedRoute/page";
 import { AuthProvider } from "@/contexts/AuthContext";
+import ThemeInitializer from "@/components/config/switchTheme/ThemeInitializer";
 
 export const metadata: Metadata = {
   title: "Cloop CRM",
@@ -18,6 +19,7 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body className={`${GeistSans.variable} ${GeistMono.variable}`}>
+        <ThemeInitializer />
         <AuthProvider>
           <ProtectedRoute>
             <SidebarWrapper />

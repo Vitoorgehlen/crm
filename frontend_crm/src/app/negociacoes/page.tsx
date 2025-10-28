@@ -326,7 +326,11 @@ export default function Deals() {
               );
             })}
 
-          {deals.length === 0 && <p>Nenhuma negociação encontrada</p>}
+          {deals.length === 0 && (
+            <div className={styles.noItens}>
+              <p>Nenhuma negociação encontrada</p>
+            </div>
+          )}
 
           {selectedDeal && (
             <DealForm
@@ -346,8 +350,6 @@ export default function Deals() {
           )}
         </div>
       </main>
-
-      <footer className={styles.footer}></footer>
     </div>
   );
 }

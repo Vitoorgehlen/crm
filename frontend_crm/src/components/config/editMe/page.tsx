@@ -152,7 +152,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
   return (
     <form className={styles.overlay}>
       <input
-        className={styles.labelSetting}
+        className={styles.labelSettingTitle}
         value={myNewName}
         onChange={(e) => setMyNewName(e.target.value)}
       />
