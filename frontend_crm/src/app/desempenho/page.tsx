@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-import { FaUserEdit, FaSearch } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 
 import styles from "./page.module.css";
 import {
@@ -21,10 +21,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Config() {
   const router = useRouter();
-  const { token, permissions, isLoading, logout } = useAuth();
-  const [isConfigUser, setIsConfigUser] = useState(true);
-  const [isConfigTeam, setIsConfigTeam] = useState(false);
-  const [isOpenPermissions, setIsOpenPermissions] = useState(false);
+  const { token, permissions, isLoading } = useAuth();
 
   const [startDate, setStartDate] = useState("");
   const [startMonth, setStartMonth] = useState("");
@@ -39,11 +36,7 @@ export default function Config() {
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
 
-  const [loading, setLoading] = useState(false);
-
   const fetchUsers = useCallback(async () => {
-    setLoading(true);
-
     try {
       const res = await fetch(`${API}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -54,8 +47,6 @@ export default function Config() {
       setUsers(data);
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   }, [token]);
 
@@ -70,8 +61,6 @@ export default function Config() {
   };
 
   const fetchClientsAndDeals = useCallback(async () => {
-    setLoading(true);
-
     if (startDate === "" || endDate === "") {
       const today = new Date();
       const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -100,8 +89,6 @@ export default function Config() {
       setClients(clientsWithoutDeals);
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
   }, [token, startDate, endDate, selectedUser]);
 
@@ -219,7 +206,6 @@ export default function Config() {
                   <th>Cliente</th>
                   <th>Forma de pagamento</th>
                   <th>Valor total</th>
-                  <th>Status do Cliente</th>
                   <th>Status</th>
                   <th>Criado em</th>
                   <th>Criado por</th>
@@ -260,13 +246,6 @@ export default function Config() {
                             style: "currency",
                             currency: "BRL",
                           })}
-                        </td>
-                        <td>
-                          {d.status === "OLD_CLIENTS" || d.status === "FINISHED"
-                            ? "Vendido"
-                            : ClientStatus[
-                                d.statusClient as keyof typeof ClientStatus
-                              ]?.label || "Não encontrado"}
                         </td>
                         <td>
                           {DealStatus[d.status as keyof typeof DealStatus]

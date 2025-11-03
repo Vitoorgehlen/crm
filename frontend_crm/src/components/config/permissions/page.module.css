@@ -121,3 +121,17 @@
   background: var(--warningColorD);
   border: 1px solid var(--primaryColor);
 }
+
+@media (max-width: 768px) {
+  .table {
+    width: 100%;
+  }
+
+  .table th {
+    font-size: var(--font-5);
+  }
+
+  .table td {
+    font-size: var(--font-5);
+  }
+}

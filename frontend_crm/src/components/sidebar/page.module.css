@@ -1,3 +1,16 @@
+.menuButton {
+  position: fixed;
+  top: 15px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--primaryText);
+  z-index: 1000;
+  cursor: pointer;
+  display: none;
+}
+
 .sidebar {
   position: fixed;
   top: 0;
@@ -170,4 +183,142 @@
 .sidebar:hover .iconContainer:hover .logos,
 .sidebar:hover .iconContainer:hover .linkText {
   color: var(--secondaryText);
+}
+
+@media (max-width: 768px) {
+  .header {
+    background-color: var(--sidebarBackground);
+    height: 65px;
+    padding: 15px;
+    display: flex;
+    align-items: center;
+  }
+
+  .logoH {
+    width: 100px;
+    border: 2px solid var(--primaryText);
+    border-radius: 20px;
+    padding: 3px 3px 5px 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .logoTextH {
+    font-size: 1.5rem;
+    color: var(--primaryText);
+  }
+
+  .logoH:hover {
+    border: 2px solid var(--secondaryText);
+    color: var(--secondaryText);
+  }
+
+  .menuButton {
+    display: block;
+  }
+
+  .menuButton:hover {
+    color: var(--secondaryText);
+  }
+
+  .sidebar:hover {
+    width: 100%;
+    padding-right: 0;
+  }
+
+  .sidebar:hover .sidebarMenu {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+  }
+
+  .logoText,
+  .logoText:hover,
+  .sidebar:hover .logo {
+    writing-mode: horizontal-tb;
+    padding: 3px 0;
+    text-align: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    transition: none;
+  }
+
+  .sidebar:hover .sidebarActions,
+  .sidebar:hover .sidebarSettings {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .iconContainer {
+    align-items: center;
+    justify-content: center;
+  }
+
+  .active,
+  .sidebar:hover .active {
+    align-items: center;
+    justify-content: center;
+    margin-left: 0;
+    padding-right: 0;
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+    background-color: transparent;
+    color: var(--tercearyText);
+  }
+
+  .linkText,
+  .sidebar:hover .linkText {
+    display: flex;
+    opacity: 1;
+  }
+
+  .logos {
+    font-size: 2rem;
+    cursor: pointer;
+    color: var(--primaryText);
+    transition: color 0.2s ease;
+  }
+
+  .sidebar .active .logos,
+  .sidebar:hover .active .logos {
+    color: var(--tercearyText);
+  }
+
+  .sidebar {
+    left: -1200px;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    padding: 10px;
+    opacity: 0;
+    display: none;
+    transition: none !important;
+    z-index: 999;
+  }
+
+  .sidebar:hover {
+    width: 100%;
+    padding: 10px;
+  }
+
+  .sidebarOpen {
+    display: block;
+    opacity: 1;
+    left: 0;
+  }
+
+  /* Quando o menu está aberto, escurece o fundo */
+  .sidebarOpen::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.3);
+    z-index: -1;
+  }
 }

@@ -388,6 +388,35 @@
 }
 
 @media (max-width: 768px) {
+  .calendar {
+    width: 95%;
+    padding: 0 10px;
+  }
+
+  .header {
+    padding: 0 15px;
+    gap: 10px;
+  }
+
+  .navigation {
+    gap: 5px;
+  }
+
+  .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    justify-self: end;
+  }
+
+  .toggleButton,
+  .addButton {
+    padding: 6px 10px;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+  }
+
   .navigation,
   .title,
   .actions {

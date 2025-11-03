@@ -23,6 +23,6 @@
 
 .box h1 {
   color: var(--primaryText);
-  font-size: var(--font--1);
+  font-size: var(--font-1);
   margin-bottom: 20px;
 }

@@ -403,14 +403,32 @@
   background: var(--cardBackground2Hover);
 }
 
-@media (min-width: 768px) {
-  .clientList {
-    grid-template-columns: repeat(3, 1fr);
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: x-large;
   }
-}
 
-@media (min-width: 1200px) {
-  .clientList {
-    grid-template-columns: repeat(5, 1fr);
+  .boxSteps {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cashStatsCard {
+    width: 100%;
+  }
+
+  .monthToggle:hover,
+  .monthToggleActive:hover {
+    background: var(--cardBackground2Hover);
+  }
+
+  .pendingSection {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .dealsOfMonth {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
   }
 }

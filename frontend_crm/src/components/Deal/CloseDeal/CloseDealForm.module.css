@@ -20,14 +20,14 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 .overlay h3 {
   color: var(--primaryText);
   align-items: start;
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
   width: 100%;
 }
 
 .overlay h6 {
   color: var(--primaryText);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
 }
 
@@ -109,7 +109,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 
 .error {
   color: var(--errorColor2);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
 }
 
 .paymentTitle {
@@ -151,7 +151,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
   padding: 8px;
   color: var(--primaryText);
   background: var(--cardBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border: 1px solid var(--shadowColor);
   border-radius: 20px;
   cursor: pointer;
@@ -166,7 +166,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
   padding: 8px;
   color: var(--primaryColor);
   background-color: var(--cardBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border: 1px solid var(--shadowColor);
   border-radius: 20px;
   cursor: pointer;

@@ -18,14 +18,14 @@
 .overlay h3 {
   color: var(--sidebarBackground);
   align-items: start;
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
   width: 100%;
 }
 
 .overlay h6 {
   color: var(--sidebarBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
 }
 
@@ -128,13 +128,13 @@
 
 .erro {
   color: var(--errorColor2);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
 }
 
 .investorBtn {
   border: none;
   outline: none;
-  font-size: var(--font--3);
+  font-size: var(--font-3);
   cursor: pointer;
 }
 

@@ -18,14 +18,14 @@
 .overlay h3 {
   color: var(--primaryText);
   align-items: start;
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
   width: 100%;
 }
 
 .overlay h6 {
   color: var(--sidebarBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
 }
 
@@ -152,7 +152,7 @@
 
 .error {
   color: var(--errorColor2);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
 }
 
 .paymentTitle {
@@ -392,7 +392,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   color: var(--primaryText);
   border: 1px solid var(--shadowColor);
   background: var(--cardBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border-radius: 20px;
   cursor: pointer;
 
@@ -406,7 +406,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   color: var(--primaryColor);
   border: 1px solid var(--shadowColor);
   background: var(--cardBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border-radius: 20px;
   cursor: pointer;
 
@@ -429,7 +429,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   padding: 4px;
   color: var(--primaryText);
   background: var(--tercearyText);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -442,7 +442,7 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   padding: 4px;
   color: var(--primaryText);
   background-color: var(--tercearyText);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   border: none;
   border-radius: 5px;
   cursor: pointer;

@@ -332,7 +332,7 @@ export default function DealForm({
         setSearchClient(selected.name);
       }
     }
-  }, [clientId, clients]);
+  }, [clientId, clients, searchClient]);
 
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
@@ -385,7 +385,7 @@ export default function DealForm({
                   <MdClose />
                 </button>
 
-                <div>
+                <div className={styles.titleCardEdit}>
                   {mode === "create" ? (
                     <h2>Adicionar negociação</h2>
                   ) : (
@@ -552,7 +552,7 @@ export default function DealForm({
               {paymentMethod === "FINANCING" && (
                 <>
                   <div className={styles.paymentTitle}>
-                    <h3>Valor de entrada </h3>
+                    <h3>Entrada </h3>
                     <h3>Subsídio</h3>
                     <h3>FGTS</h3>
                     <h3>Financiamento</h3>

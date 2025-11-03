@@ -201,3 +201,9 @@
   border: 1px solid var(--tercearyText);
   background: var(--cardBackgroundHover);
 }
+
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: x-large;
+  }
+}

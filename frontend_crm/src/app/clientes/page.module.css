@@ -241,14 +241,32 @@
   color: var(--primaryText);
 }
 
+@media (min-width: 1200px) {
+  .clientList {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
 @media (min-width: 768px) {
   .clientList {
     grid-template-columns: repeat(3, 1fr);
   }
 }
 
-@media (min-width: 1200px) {
+@media (max-width: 768px) {
+  .header h1 {
+    font-size: x-large;
+  }
+
+  .headerContent {
+    gap: 20px;
+  }
+
+  .headerIcons {
+    gap: 8px;
+  }
+
   .clientList {
-    grid-template-columns: repeat(5, 1fr);
+    gap: 10px;
   }
 }

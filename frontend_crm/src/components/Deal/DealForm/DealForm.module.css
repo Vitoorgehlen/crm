@@ -33,7 +33,7 @@
 .overlayEdit h3 {
   color: var(--primaryText);
   align-items: start;
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
   width: 100%;
 }
@@ -41,7 +41,7 @@
 .overlay h6,
 .overlayEdit h6 {
   color: var(--sidebarBackground);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
   font-weight: 400;
 }
 
@@ -118,7 +118,8 @@
   margin: 0 25px 10px 0;
   justify-content: space-between;
   overflow-y: auto;
-scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
+  scrollbar-color: var(--primaryColor) var(--sidebarBackground);
+}
 
 .cardDeals {
   display: flex;
@@ -143,6 +144,10 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
   width: 70%;
   height: 100%;
   justify-content: space-between;
+}
+
+.modal .modalLeft {
+  width: 100%;
 }
 
 .titleCard {
@@ -224,8 +229,9 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 
 .error {
   color: var(--errorColor2);
-  font-size: var(--font--5);
+  font-size: var(--font-5);
 }
+
 .box {
   display: flex;
   flex-direction: row;
@@ -284,6 +290,10 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
   box-shadow: -3px 3px 10px var(--shadowColor);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+}
+
+.modal .btnDeal {
+  width: 100%;
 }
 
 .modalLeft h4 {
@@ -363,7 +373,8 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
   border-radius: 5px;
   background: var(--cardBackground);
   justify-content: space-between;
-scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
+  scrollbar-color: var(--primaryColor) var(--sidebarBackground);
+}
 
 .noteItem {
   display: flex;
@@ -498,4 +509,102 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);}
 
 .updateBox h6 {
   font-size: x-small;
+}
+
+@media (max-width: 768px) {
+  .modalEdit {
+    width: 100%;
+    height: 700px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .innerModal {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .modalLeft {
+    gap: 0;
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .modalRight {
+    gap: 0;
+    width: 100%;
+    height: 200px;
+    max-height: 500px;
+  }
+
+  .titleCard h2 {
+    font-size: var(--font-3);
+  }
+
+  .titleCardEdit {
+    text-align: center;
+  }
+
+  .addClient:hover {
+    color: var(--primaryColor);
+    background: var(--cardBackgroundHover);
+  }
+
+  .paymentTitle {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .payment {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .modal .btnDeal {
+    width: 100%;
+  }
+
+  .btnSave {
+    background: transparent;
+    border: none;
+    font-size: 1.8rem;
+    color: var(--primaryText);
+    cursor: pointer;
+  }
+
+  .addNote {
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .noteSection {
+    height: 100%;
+    margin-top: 0;
+  }
+
+  .footerCard {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btnUpdateAndStep {
+    width: 100%;
+    gap: 10px;
+  }
+
+  .updateBox {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .updateBox h6 {
+    font-size: x-small;
+  }
+  .modalEdit {
+    padding: 1rem;
+    margin: 10px;
+  }
 }
