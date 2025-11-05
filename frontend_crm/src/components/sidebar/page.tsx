@@ -29,15 +29,20 @@ const Sidebar = () => {
     <>
       {!isOpen && (
         <div className={styles.header}>
-          <div className={styles.logoH}>
-            <h2 className={styles.logoTextH}>cloop</h2>
-          </div>
+          <Link href="/home" onClick={() => setIsOpen(false)}>
+            <div className={styles.logoH}>
+              <h2 className={styles.logoTextH}>cloop</h2>
+            </div>
+          </Link>
+
+          <button
+            className={styles.menuButton}
+            onClick={() => setIsOpen(!isOpen)}
+          >
+            {isOpen ? <IoMdClose /> : <RxHamburgerMenu />}
+          </button>
         </div>
       )}
-
-      <button className={styles.menuButton} onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <IoMdClose /> : <RxHamburgerMenu />}
-      </button>
       <div
         className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}
         onClick={() => setIsOpen(false)}

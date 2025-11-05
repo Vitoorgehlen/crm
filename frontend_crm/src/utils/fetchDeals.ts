@@ -3,9 +3,9 @@ import { Deal, FetchDealsFilters } from "@/types";
 export async function fetchDeals(
     apiBase: string,
     token: string,
-    filters: FetchDealsFilters = {}
+    filters: FetchDealsFilters = {},
 ): Promise<Deal[]> {
-    const { team = false, search = '', status, statusClient } = filters;
+    const { team = false, search = '', status, statusClient, selectedUser = null } = filters;
 
     const basePath = team ? '/team-deals' : '/deals';
     
@@ -14,6 +14,7 @@ export async function fetchDeals(
     if (search.trim()) params.set('name', search.trim());
     if (status && status.length > 0) params.set('status', status.join(','));
     if (statusClient && statusClient.length > 0) params.set('statusClient', statusClient.join(','));
+    if (selectedUser) params.set('selectedUser', String(selectedUser));
 
     const url = `${apiBase.replace(/\/$/, '')}${basePath}${params.toString() ? `?${params.toString()}` : ''}`;
 

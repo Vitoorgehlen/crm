@@ -67,7 +67,6 @@
   width: 1000px;
   height: 650px;
   position: relative;
-  display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0 25px 10px 0;
@@ -85,7 +84,6 @@
   width: 1000px;
   height: 650px;
   position: relative;
-  display: flex;
   flex-direction: column;
   align-items: center;
   margin: 0 25px 10px 0;
@@ -368,4 +366,85 @@
   display: flex;
   flex-direction: row;
   width: 100%;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .overlay h1 {
+    font-size: var(--font-3);
+  }
+
+  .modal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 10px;
+  }
+
+  .modalRed {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    margin: 0;
+  }
+
+  .innerModal {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .modalLeft {
+    padding: 0;
+    flex-direction: column;
+  }
+
+  .modalRight {
+    margin-top: 20px;
+    padding: 10px;
+    gap: 4px;
+    width: 100%;
+    height: 450px;
+  }
+
+  .paymentTitle {
+    gap: 10px;
+    text-align: center;
+  }
+
+  .modalLeft h4 {
+    font-size: var(--font-4);
+  }
+
+  .btnSave {
+    font-size: 1.2rem;
+  }
+
+  .footerCard {
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 10px;
+    width: 100%;
+  }
+
+  .footerCard h6 {
+    text-align: center;
+  }
+
+  .boxCommissionShare {
+    margin-top: 15px;
+    width: 100%;
+  }
+
+  .boxCommissionShare h2 {
+    font-size: var(--font-3);
+  }
 }

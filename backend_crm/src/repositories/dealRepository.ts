@@ -197,61 +197,75 @@ export async function getDealsByClient(id: number, userId: number) {
 
 export async function getTeamDeals(
   userId: number,
-  filter: { search?: string; status?: string[]; statusClient?: string[]}
+  filter: { search?: string; status?: string[]; statusClient?: string[]; selectedUserId?: number }
 ) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
-  if (!user) throw new Error('Usuário não encontrado.');
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('Usuário não encontrado.');
 
-  const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
-  if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+    const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
+    if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
 
-  const where: any = {
-    companyId: user.companyId,
-  }
-
-  if (filter?.search && filter.search.trim()) {
-    where.client = {
-      OR: [
-        {
-          name: {
-            contains: filter.search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          phone: {
-            contains: filter.search,
-            mode: 'insensitive',
-          },
-        }
-      ]
+    const where: any = {
+      companyId: user.companyId,
     }
-  }
 
-  if (filter?.status && filter.status.length > 0) {
-    where.status = { in: filter.status }
-  }
-
-  if (filter?.statusClient && filter.statusClient.length > 0) {
-    where.statusClient = { in: filter.statusClient }
-  }
-
-  return prisma.deal.findMany({
-    where,
-    include: {
-      client: true,
-      creator: { select: { id: true, name: true } },
-      updater: { select: { id: true, name: true } },
-      DealShare: {
-        include: {
-          user: {select: {id: true, name: true }}
-        }
+    if (filter?.search && filter.search.trim()) {
+      where.client = {
+        OR: [
+          {
+            name: {
+              contains: filter.search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            phone: {
+              contains: filter.search,
+              mode: 'insensitive',
+            },
+          }
+        ]
       }
+    }
 
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    if (filter?.status && filter.status.length > 0) {
+      where.status = { in: filter.status }
+    }
+
+    if (filter?.statusClient && filter.statusClient.length > 0) {
+      where.statusClient = { in: filter.statusClient }
+    }
+
+
+    if (filter.selectedUserId) {
+      const selectedUser = await tx.user.findUnique({
+        where: { id: filter.selectedUserId },
+        select: { companyId: true }
+      });
+
+      if (user.companyId !== selectedUser?.companyId) throw new Error('Sem permissão para ler clientes desse usuário');
+
+      where.createdBy = filter.selectedUserId
+    }
+
+    return tx.deal.findMany({
+      where,
+      include: {
+        client: true,
+        creator: { select: { id: true, name: true } },
+        updater: { select: { id: true, name: true } },
+        DealShare: {
+          include: {
+            user: {select: {id: true, name: true }}
+          }
+        }
+
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
   });
 }
 

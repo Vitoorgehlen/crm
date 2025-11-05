@@ -5,19 +5,26 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
-import { ClientStatus, Client, Deal, CloseDealPayload } from "@/types/index";
+import {
+  ClientStatus,
+  Client,
+  Deal,
+  CloseDealPayload,
+  User,
+} from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
-import { IoMdSearch } from "react-icons/io";
-import { HiUserGroup } from "react-icons/hi2";
 import { fetchDeals } from "@/utils/fetchDeals";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
-
+import DealsHeader from "@/components/searchbar/page";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Deals() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
@@ -136,6 +143,7 @@ export default function Deals() {
         team: teamDeals,
         search,
         status: ["POTENTIAL_CLIENTS"],
+        selectedUser: selectedUser?.id,
       });
       setDeals(data);
     } catch (err: unknown) {
@@ -143,7 +151,21 @@ export default function Deals() {
     } finally {
       setLoading(false);
     }
-  }, [token, search, teamDeals]);
+  }, [token, search, teamDeals, selectedUser]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar Usuários");
+      setUsers(data);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  }, [token]);
 
   useEffect(() => {
     let mounted = true;
@@ -183,9 +205,10 @@ export default function Deals() {
       return;
     }
 
-    const t = setTimeout(fetchDealsData, 150);
-    return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, token, router]);
+    const timeout = setTimeout(fetchDealsData, 150);
+    fetchUsers();
+    return () => clearTimeout(timeout);
+  }, [token, isLoading, search, selectedUser, router, fetchDealsData]);
 
   return (
     <div className={styles.page}>
@@ -195,34 +218,19 @@ export default function Deals() {
         </div>
 
         <div className={styles.headerContent}>
-          <div className={styles.serchDeal}>
-            <button
-              className={styles.btnSearch}
-              type="button"
-              disabled={loading}
-            >
-              <IoMdSearch />
-            </button>
-            <input
-              type="text"
-              placeholder="Pesquise pelo nome"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+          <div className={styles.searchbar}>
+            <DealsHeader
+              search={search}
+              setSearch={setSearch}
+              teamDeals={teamDeals}
+              setTeamDeals={setTeamDeals}
+              users={users}
+              selectedUser={selectedUser}
+              setSelectedUser={setSelectedUser}
+              permissions={permissions}
+              onCreate={openCreate}
+              loading={loading}
             />
-          </div>
-
-          <div className={styles.headerIcons}>
-            {permissions.includes("ALL_DEAL_READ") && (
-              <button
-                className={`${styles.btnFilter} ${
-                  teamDeals ? styles.btnFilterActive : ""
-                }`}
-                onClick={() => setTeamDeals((prev) => !prev)}
-                type="button"
-              >
-                <HiUserGroup />
-              </button>
-            )}
             <button
               className={styles.addDeal}
               onClick={openCreate}

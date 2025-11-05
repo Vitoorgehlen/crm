@@ -149,6 +149,7 @@
 .gridBody {
   flex: 1;
   display: grid;
+  z-index: 2;
 }
 
 .weekView .gridBody {
@@ -389,8 +390,7 @@
 
 @media (max-width: 768px) {
   .calendar {
-    width: 95%;
-    padding: 0 10px;
+    width: 92%;
   }
 
   .header {
@@ -435,5 +435,10 @@
     min-height: 60px;
     padding: 5px;
     font-size: 0.9rem;
+  }
+
+  .dayNumber {
+    font-size: 1rem;
+    margin-top: 3px;
   }
 }

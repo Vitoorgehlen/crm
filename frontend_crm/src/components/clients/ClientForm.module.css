@@ -226,3 +226,17 @@
   color: var(--sidebarBackground);
   font-size: x-small;
 }
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 0 10px;
+  }
+
+  .titleForm h2 {
+    font-size: var(--font-3);
+  }
+
+  .btnAddClient {
+    margin-top: 10px;
+  }
+}

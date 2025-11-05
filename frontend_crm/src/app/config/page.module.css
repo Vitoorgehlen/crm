@@ -2,7 +2,7 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  min-height: 100vh;
+  padding-bottom: 10px;
 
   display: flex;
   flex-direction: column;
@@ -283,10 +283,23 @@
   }
 
   .headerContent {
-    padding: 0 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    padding: 0 10px;
+  }
+
+  .headerIcons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
   }
 
   .headerContent h3 {
-    font-size: var(--font-3);
+    font-size: var(--font-4);
   }
 }

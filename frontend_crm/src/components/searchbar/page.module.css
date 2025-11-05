@@ -1,0 +1,130 @@
+.headerContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.headerContent select {
+  padding: 7px;
+  margin: 3px;
+  border-radius: 5px;
+  width: 100%;
+  border: none;
+  outline: none;
+  color: var(--sidebarBackground);
+  background: var(--cardBackground);
+
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.headerContent select:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.selectUser {
+  max-width: 250px;
+}
+
+.serchDeal {
+  display: flex;
+  flex-direction: row;
+  width: 400px;
+  padding-right: 15px;
+  padding-left: 3px;
+  border-radius: 50px;
+  background: var(--cardBackground);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.serchDeal:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.serchDeal input {
+  border: none;
+  outline: none;
+  width: 100%;
+  color: var(--primaryText);
+}
+
+.serchDeal input::placeholder {
+  color: var(--sidebarBackground);
+  opacity: 1;
+}
+
+.serchDeal input:focus,
+.serchDeal input:active,
+.serchDeal input:hover {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.btnSearch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+  color: var(--primaryText);
+  font-size: 1.5rem;
+  border: none;
+  cursor: pointer;
+}
+
+.headerIcons {
+  display: flex;
+  flex-direction: row;
+  gap: 20px;
+}
+
+.btnFilter {
+  background: var(--cardBackground);
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  color: var(--primaryText);
+  font-size: 1.3rem;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnFilter:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.btnFilterActive {
+  color: var(--primaryColor);
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    gap: 20px;
+  }
+
+  .selectUser {
+    flex-shrink: 0;
+    max-width: 100px;
+  }
+
+  .serchDeal {
+    width: 350px;
+  }
+
+  .headerIcons {
+    gap: 8px;
+  }
+}

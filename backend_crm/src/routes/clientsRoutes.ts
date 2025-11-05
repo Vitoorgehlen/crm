@@ -90,10 +90,12 @@ router.get('/clients-by-search', loginRequired, async (req, res) => {
 router.get('/team-clients', loginRequired, async (req, res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId, role: userRole } = user;
+  const selectedUserId = req.query.userId ? Number(req.query.userId) : null;
+
   if (!userRole) return res.status(400).json({ error: 'ID inválido' });
 
   try {
-    const deal = await getTeamClients(userId);
+    const deal = await getTeamClients(userId, selectedUserId);
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -108,6 +110,7 @@ router.get('/team-clients-by-search', loginRequired, async (req, res) => {
 
   const search = String(req.query.name || '').trim();
   if (!search) return res.status(400).json({ error: 'O parâmetro nome é obrigatório..' });
+  const selectedUserId = req.query.userId ? Number(req.query.userId) : userId;
 
   try {
     const deal = await getTeamClientsBySearch(userId, search);

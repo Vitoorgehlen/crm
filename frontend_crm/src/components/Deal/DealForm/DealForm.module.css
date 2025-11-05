@@ -512,10 +512,19 @@
 }
 
 @media (max-width: 768px) {
+  .overlay {
+    padding: 0 10px;
+  }
+
+  .modal {
+    align-items: center;
+  }
+
   .modalEdit {
     width: 100%;
     height: 700px;
     display: flex;
+    max-height: 97%;
     flex-direction: column;
   }
 
@@ -528,12 +537,14 @@
     gap: 0;
     flex-direction: column;
     width: 100%;
+    padding: 0;
   }
 
   .modalRight {
     gap: 0;
     width: 100%;
     height: 200px;
+    padding: 10px;
     max-height: 500px;
   }
 
@@ -605,6 +616,7 @@
   }
   .modalEdit {
     padding: 1rem;
+
     margin: 10px;
   }
 }

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { Client } from "@/types/index";
+import { Client, User } from "@/types/index";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 import { IoMdSearch } from "react-icons/io";
@@ -16,6 +16,9 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 export default function Clients() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+
+  const [users, setUsers] = useState<User[]>([]);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -30,12 +33,13 @@ export default function Clients() {
       let url = "";
 
       if (teamClients) {
+        const userParam = selectedUser ? `&userId=${selectedUser.id}` : "";
         url =
           search.trim() === ""
-            ? `${API}/team-clients`
+            ? `${API}/team-clients?${userParam}`
             : `${API}/team-clients-by-search?name=${encodeURIComponent(
                 search
-              )}`;
+              )}${userParam}`;
       } else {
         url =
           search.trim() === ""
@@ -53,7 +57,21 @@ export default function Clients() {
     } catch (err: unknown) {
       console.error(err);
     }
-  }, [token, teamClients, search]);
+  }, [token, teamClients, search, selectedUser]);
+
+  const fetchUsers = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar Usuários");
+      setUsers(data);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  }, [token]);
 
   const displayClients = isPriorityBtn
     ? [...clients]
@@ -86,7 +104,6 @@ export default function Clients() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
 
-    // setClients((prev) => [...prev, data]);
     await fetchClientsData();
   };
 
@@ -126,8 +143,17 @@ export default function Clients() {
     }
 
     const timeout = setTimeout(fetchClientsData, 150);
+    fetchUsers();
     return () => clearTimeout(timeout);
-  }, [token, isLoading, search, teamClients, router, fetchClientsData]);
+  }, [
+    token,
+    isLoading,
+    search,
+    teamClients,
+    selectedUser,
+    router,
+    fetchClientsData,
+  ]);
 
   return (
     <div className={styles.page}>
@@ -149,6 +175,26 @@ export default function Clients() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
+          {teamClients && (
+            <div className={styles.selectUser}>
+              <select
+                value={selectedUser ? selectedUser.id : ""}
+                onChange={(e) => {
+                  const user = users.find(
+                    (u) => u.id === Number(e.target.value)
+                  );
+                  setSelectedUser(user || null);
+                }}
+              >
+                <option value={""}>Todos</option>
+                {users.map((user) => (
+                  <option key={user.id} value={user.id}>
+                    {user.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
 
           <div className={styles.headerIcons}>
             {permissions.includes("ALL_DEAL_READ") && (

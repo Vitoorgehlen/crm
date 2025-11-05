@@ -311,7 +311,7 @@
   border-radius: 5px;
   background: var(--cardBackground);
   justify-content: space-between;
-scrollbar-color: var(--primaryColor) var(--sidebarBackground);
+  scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   box-shadow: -3px 3px 10px var(--shadowColor);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -495,4 +495,128 @@ scrollbar-color: var(--primaryColor) var(--sidebarBackground);
   align-items: center;
   width: 100%;
   justify-content: space-between;
+}
+
+@media (max-width: 768px) {
+  .overlay {
+    padding: 10px;
+  }
+
+  .modal {
+    padding: 10px;
+    margin: 0;
+  }
+
+  .innerModal {
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .titleCard h1 {
+    font-size: var(--font-3);
+  }
+
+  .modalLeft {
+    padding: 5px;
+    gap: 4px;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .modalRight {
+    padding: 10px;
+    width: 100%;
+  }
+
+  .paymentBox {
+    width: 100%;
+  }
+
+  .docCostSection h3,
+  .noteSection h3 {
+    color: var(--primaryText);
+  }
+
+  .docCostSection {
+    height: auto;
+    max-height: 220px;
+  }
+
+  .btnSave {
+    font-size: 1.2rem;
+  }
+
+  .noteSection {
+    height: auto;
+    max-height: 220px;
+  }
+
+  .footerCard {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .btnUpdateAndStep {
+    margin-top: 10px;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .updateBox {
+    margin: 10px 0;
+    width: 100%;
+  }
+
+  .updateBox h6 {
+    font-size: x-small;
+  }
+
+  .boxCommissionShare {
+    margin: 15px 0 10px 0;
+  }
+
+  .splitCommissionTitle h2 {
+    font-size: var(--font-4);
+    text-align: center;
+    width: 100px;
+  }
+}
+
+@media (max-width: 480px) {
+  .boxSplitCommission {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 3px;
+    padding: 10px;
+    background: var(--cardBackground);
+    border-radius: 8px;
+    margin-bottom: 10px;
+  }
+
+  .paymentBox {
+    align-items: center;
+  }
+
+  .btnIsPaid,
+  .btnIsPaidActive {
+    width: 100px;
+    font-size: var(--font-6);
+    justify-content: center;
+  }
+
+  .paymentBox {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+  }
+
+  .paymentBox h3 {
+    width: 100%;
+    text-align: center;
+  }
+
+  .paymentBox input,
+  .paymentBox select {
+    width: 100% !important;
+  }
 }

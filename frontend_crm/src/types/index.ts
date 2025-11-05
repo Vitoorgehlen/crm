@@ -52,6 +52,7 @@ export type FetchDealsFilters = {
   search?: string; // name search (opcional)
   status?: string[]; // e.g. ['CLOSED']
   statusClient?: string[]; // e.g. ['OLD_CLIENTS']
+  selectedUser?: number;
 };
 
 export type Deal = {

@@ -163,40 +163,6 @@ export default function Config() {
           </div>
         </div>
         <div className={styles.list}>
-          {typeof selectedUser === "number" && (
-            <>
-              <h2>Clientes criados sem negociação</h2>
-              <table className={styles.dealsTable}>
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Investidor</th>
-                    <th>Criado em</th>
-                    <th>Criado por</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clients
-                    .slice()
-                    .reverse()
-                    .map((c) => (
-                      <tr key={c.id}>
-                        <td>{c.name || "Não encontrado"}</td>
-                        <td>{c.isInvestor ? "Sim" : "Não"}</td>
-                        <td>
-                          {c.createdAt
-                            ? formatDateForFinish(c.createdAt)
-                            : "Não encontrado"}
-                        </td>
-                        <td>{c.creator?.name || "Não encontrado"}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </>
-          )}
-        </div>
-        <div className={styles.list}>
           {deals.length === 0 ? (
             <p>Nenhum cliente encontrado</p>
           ) : (
@@ -204,7 +170,6 @@ export default function Config() {
               <thead>
                 <tr>
                   <th>Cliente</th>
-                  <th>Forma de pagamento</th>
                   <th>Valor total</th>
                   <th>Status</th>
                   <th>Criado em</th>
@@ -236,11 +201,6 @@ export default function Config() {
                     return (
                       <tr key={d.id}>
                         <td>{d.client?.name || "Não encontrado"}</td>
-                        <td>
-                          {PaymentMethod[
-                            d.paymentMethod as keyof typeof PaymentMethod
-                          ]?.label || "Não encontrado"}
-                        </td>
                         <td>
                           {totalValue.toLocaleString("pt-BR", {
                             style: "currency",

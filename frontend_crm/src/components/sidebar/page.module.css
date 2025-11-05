@@ -1,12 +1,9 @@
 .menuButton {
-  position: fixed;
-  top: 15px;
-  right: 15px;
   background: none;
   border: none;
   font-size: 2rem;
   color: var(--primaryText);
-  z-index: 1000;
+  z-index: 850;
   cursor: pointer;
   display: none;
 }
@@ -29,6 +26,10 @@
 .sidebar:hover {
   width: 210px;
   padding-right: 10px;
+}
+
+.logoH {
+  display: none;
 }
 
 .contentbar {
@@ -192,27 +193,23 @@
     padding: 15px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
   }
 
   .logoH {
+    display: flex;
     width: 100px;
     border: 2px solid var(--primaryText);
     border-radius: 20px;
     padding: 3px 3px 5px 3px;
-    display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
   }
 
-  .logoTextH {
-    font-size: 1.5rem;
+  .header a {
+    text-decoration: none;
     color: var(--primaryText);
-  }
-
-  .logoH:hover {
-    border: 2px solid var(--secondaryText);
-    color: var(--secondaryText);
   }
 
   .menuButton {

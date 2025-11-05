@@ -88,3 +88,9 @@
   color: var(--primaryColor);
   background: var(--cardBackgroundHover);
 }
+
+@media (max-width: 768px) {
+  .main {
+    padding: 10px;
+  }
+}

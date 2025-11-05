@@ -2,7 +2,7 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  min-height: 100vh;
+  padding-bottom: 10px;
 
   display: flex;
   flex-direction: column;
@@ -21,91 +21,23 @@
   max-width: 1200px;
 }
 
-.serchDeal {
-  display: flex;
-  flex-direction: row;
-  width: 400px;
-  padding-right: 15px;
-  padding-left: 3px;
-  border-radius: 50px;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.serchDeal:hover {
-  background: var(--cardBackgroundHover);
-}
-
-.serchDeal input {
-  border: none;
-  outline: none;
-  width: 100%;
-  color: var(--primaryText);
-}
-
-.serchDeal input::placeholder {
-  color: var(--sidebarBackground);
-  opacity: 1;
-}
-
-.serchDeal input:focus,
-.serchDeal input:active,
-.serchDeal input:hover {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.btnSearch {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px;
-  color: var(--primaryText);
-  font-size: 1.5rem;
-  border: none;
-  cursor: pointer;
-}
-
 .headerContent {
   display: flex;
-  flex-direction: row;
+  justify-content: center;
   align-items: center;
-  justify-content: space-between;
-  margin: 0 auto;
-  padding: 0 20px;
-  width: 100%;
-  max-width: 1200px;
 }
 
-.headerIcons {
+.searchbar {
   display: flex;
-  flex-direction: row;
-  gap: 20px;
-}
-
-.btnFilter {
-  background: var(--cardBackground);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnFilterActive {
-  color: var(--primaryColor);
+  justify-content: center;
+  width: 100%;
+  padding: 0 20px;
+  max-width: 1200px;
+  gap: 10px;
 }
 
 .addDeal {
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -117,14 +49,9 @@
   cursor: pointer;
   color: var(--primaryText);
   font-size: 1.3rem;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
-.addDeal:hover,
-.btnFilter:hover {
+.addDeal:hover {
   background: var(--cardBackgroundHover);
 }
 
@@ -219,12 +146,8 @@
     font-size: x-large;
   }
 
-  .headerContent {
-    gap: 20px;
-  }
-
-  .headerIcons {
-    gap: 8px;
+  .searchbar {
+    width: 90%;
   }
 
   .dealList {

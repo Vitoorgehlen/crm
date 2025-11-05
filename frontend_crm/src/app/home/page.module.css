@@ -107,6 +107,10 @@
   width: 95%;
 }
 
+.textTask {
+  cursor: pointer;
+}
+
 .divTask {
   display: flex;
   gap: 5px;
@@ -119,6 +123,7 @@
   width: 100%;
   padding: 2px 5px;
   border: none;
+  cursor: pointer;
 }
 
 .divButtonFinish {
@@ -131,6 +136,7 @@
   color: var(--tercearyText);
   text-decoration: line-through;
   text-decoration-color: var(--primaryColor);
+  cursor: pointer;
 }
 
 .btnEditTask {
@@ -155,7 +161,10 @@
 
 @media (max-width: 768px) {
   .title {
-    margin-top: 60px;
+    width: 100%;
+    padding-right: 10px;
+    margin-top: 10px;
+    font-size: var(--font-4);
   }
 
   .contentSection {

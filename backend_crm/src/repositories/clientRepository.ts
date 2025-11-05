@@ -122,23 +122,40 @@ export async function getMyClientsBySearch(userId: number, search: string) {
 }
 
 // Pega todos os clientes feitos pela equipe
-export async function getTeamClients(userId: number) {
+export async function getTeamClients(userId: number, selectedUser: number | null) {
   const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
   if (!canReadClient) throw new Error('Você não tem permissão para ler clientes');
 
-  const company = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { companyId: true }
-  });
-  if (!company) throw new Error('Empresa não encontrada');
+  return prisma.$transaction(async (tx) => {
+    const company = await tx.user.findUnique({
+      where: { id: userId },
+      select: { companyId: true }
+    });
+    if (!company) throw new Error('Empresa não encontrada');
 
-  return prisma.client.findMany({
-    where: { companyId: company.companyId },
-    include: {
-      creator: { select: { name: true } },
-      updater: { select: { name: true } }
+    if (selectedUser !== null) {
+      const userSelected = await tx.user.findUnique({
+      where: { id: selectedUser },
+      select: { companyId: true }
+    });
+    if (company.companyId !== userSelected?.companyId) throw new Error('Sem permissão para visualizar os clientes desse usuário');
+    return tx.client.findMany({
+      where: { createdBy: selectedUser },
+      include: {
+        creator: { select: { name: true } },
+        updater: { select: { name: true } }
+      }
+    });
     }
-  });
+
+    return tx.client.findMany({
+      where: { companyId: company.companyId },
+      include: {
+        creator: { select: { name: true } },
+        updater: { select: { name: true } }
+      }
+    });
+  })
 }
 
 export async function getTeamClientsBySearch(userId: number, search: string) {

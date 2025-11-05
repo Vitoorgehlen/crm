@@ -52,6 +52,7 @@ router.get('/deals', loginRequired, async (req, res) => {
   const status = statusQ ? statusQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
   const statusClient = statusClientQ ? statusClientQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
+
   try {
     const deal = await getDeals(userId, { search, status, statusClient });
     res.json(deal);
@@ -112,8 +113,10 @@ router.get('/team-deals', loginRequired, async (req, res) => {
   const status = statusQ ? statusQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
   const statusClient = statusClientQ ? statusClientQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
+  const selectedUserId = req.query.selectedUser ? Number(req.query.selectedUser) : undefined;
+
   try {
-    const deal = await getTeamDeals(userId, { search, status, statusClient });
+    const deal = await getTeamDeals(userId, { search, status, statusClient, selectedUserId });
     res.json(deal);
   } catch (err) {
     console.log(err);
