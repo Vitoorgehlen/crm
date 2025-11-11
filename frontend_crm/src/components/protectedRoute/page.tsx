@@ -11,7 +11,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicPaths = useMemo(() => ["/login"], []);
+  const publicPaths = useMemo(() => ["/login", "/reset-password"], []);
   const SUPaths = useMemo(() => ["/super-user-dashboard"], []);
 
   useEffect(() => {

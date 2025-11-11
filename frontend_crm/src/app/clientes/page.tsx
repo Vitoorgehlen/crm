@@ -153,6 +153,7 @@ export default function Clients() {
     selectedUser,
     router,
     fetchClientsData,
+    fetchUsers,
   ]);
 
   return (

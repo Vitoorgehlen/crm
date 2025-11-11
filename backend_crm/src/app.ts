@@ -15,6 +15,7 @@ import goalsRoutes from './routes/goalsRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import tasksRoutes from './routes/tasksRoutes';
 import tokenRoutes from './routes/tokenRoutes';
+import resetPassword from './routes/resetPasswordRoutes';
 
 const clientUrl = process.env.CLIENT_URL
 class App {
@@ -50,6 +51,7 @@ class App {
     this.app.use('/', scheduleRoutes);
     this.app.use('/', tasksRoutes);
     this.app.use('/', tokenRoutes);
+    this.app.use('/', resetPassword);
   }
 }
 

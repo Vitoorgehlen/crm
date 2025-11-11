@@ -7,14 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FaSearch } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import {
-  User,
-  Client,
-  Deal,
-  ClientStatus,
-  PaymentMethod,
-  DealStatus,
-} from "@/types";
+import { User, Client, Deal, DealStatus } from "@/types";
 import { formatDateForFinish } from "@/utils/dateUtils";
 
 const API = process.env.NEXT_PUBLIC_API_URL;

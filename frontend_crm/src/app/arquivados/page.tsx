@@ -209,7 +209,7 @@ export default function Deals() {
     const t = setTimeout(fetchDealsData, 150);
     fetchUsers();
     return () => clearTimeout(t);
-  }, [fetchDealsData, selectedUser, isLoading, token, router]);
+  }, [fetchDealsData, selectedUser, fetchUsers, isLoading, token, router]);
 
   return (
     <div className={styles.page}>

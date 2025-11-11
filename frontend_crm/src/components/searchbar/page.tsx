@@ -2,7 +2,6 @@
 
 import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
-import { BsFileEarmarkPlus } from "react-icons/bs";
 import styles from "./page.module.css";
 import { User } from "@/types";
 
@@ -28,7 +27,6 @@ export default function DealsHeader({
   selectedUser,
   setSelectedUser,
   permissions,
-  onCreate,
   loading,
 }: DealsHeaderProps) {
   return (

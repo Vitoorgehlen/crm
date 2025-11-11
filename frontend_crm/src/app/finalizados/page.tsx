@@ -376,7 +376,7 @@ export default function FinishDeals() {
     const t = setTimeout(fetchDealsData, 150);
     fetchUsers();
     return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, selectedUser, token, router]);
+  }, [fetchDealsData, isLoading, selectedUser, token, fetchUsers, router]);
 
   useEffect(() => {
     if (yearsSortedDesc.length > 0) {
