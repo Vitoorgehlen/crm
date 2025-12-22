@@ -23,25 +23,25 @@ export default function ChartLayout() {
   const [commissions, setCommissions] = useState<DealShare[] | null>(null);
   const [chartData, setChartData] = useState<any[]>([]);
 
-  function formatCommission() {
+  useEffect(() => {
+    if (!commissions) return;
+
     const commissionList = Array.from({ length: 12 }, () => 0);
     const currentMonth = new Date().getMonth();
     const currentYear = new Date().getFullYear();
 
-    if (commissions !== null) {
-      for (const commission of commissions) {
-        if (typeof commission.paidAt !== "string") continue;
+    for (const commission of commissions) {
+      if (typeof commission.paidAt !== "string") continue;
 
-        const paidDate = new Date(commission.paidAt);
-        const paidMonth = paidDate.getMonth();
-        const paidYear = paidDate.getFullYear();
+      const paidDate = new Date(commission.paidAt);
+      const paidMonth = paidDate.getMonth();
+      const paidYear = paidDate.getFullYear();
 
-        const monthDiff =
-          (currentYear - paidYear) * 12 + (currentMonth - paidMonth);
+      const monthDiff =
+        (currentYear - paidYear) * 12 + (currentMonth - paidMonth);
 
-        if (monthDiff >= 0 && monthDiff < 12) {
-          commissionList[monthDiff] += Number(commission.amount);
-        }
+      if (monthDiff >= 0 && monthDiff < 12) {
+        commissionList[monthDiff] += Number(commission.amount);
       }
     }
 
@@ -70,7 +70,7 @@ export default function ChartLayout() {
     });
 
     setChartData(formatted);
-  }
+  }, [commissions]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -94,10 +94,6 @@ export default function ChartLayout() {
 
     fetchCommissions();
   }, [isLoading, token, router]);
-
-  useEffect(() => {
-    formatCommission();
-  }, [commissions, formatCommission]);
 
   return (
     <div className={styles.main}>
