@@ -21,25 +21,11 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     new Date().getFullYear().toString()
   );
 
-  const [firstDay, setFirstDay] = useState(() => {
-    const d = new Date();
-    d.setDate(1);
-    return d;
-  });
-
-  const [lastDay, setLastDay] = useState(() => {
-    const d = new Date();
-    d.setMonth(d.getMonth() + 1);
-    d.setDate(0);
-    return d;
-  });
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
 
   const [newExpense, setNewExpense] = useState("");
   const [newExpenseValue, setNewExpenseValue] = useState<number | null>(null);
   const [newDueDate, setNewDueDate] = useState("");
-  const [recurringNewExpense, setRecurringNewExpense] = useState(false);
-  const [isPaid, setIsPaid] = useState(false);
   const [recurrenceType, setRecurrenceType] = useState("MONTHLY");
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
@@ -50,8 +36,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     setNewExpense("");
     setNewExpenseValue(null);
     setNewDueDate("");
-    setRecurringNewExpense(false);
-    setIsPaid(false);
     setRecurrenceType("MONTHLY");
   }
 
@@ -62,8 +46,8 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     let startYear = start.getFullYear();
     let startMonth = start.getMonth();
 
-    let endYear = end.getFullYear();
-    let endMonth = end.getMonth();
+    const endYear = end.getFullYear();
+    const endMonth = end.getMonth();
 
     const result = [];
 
@@ -88,12 +72,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     const [yearStr, monthStr] = value.split("-");
     const year = Number(yearStr.trim());
     const month = Number(monthStr.trim());
-
-    const first = new Date(year, month, 1);
-    const last = new Date(year, month + 1, 0);
-
-    setFirstDay(first);
-    setLastDay(last);
 
     const filtered = expenses.filter((exp) => {
       const expenseDate = new Date(exp.newDueDate);
@@ -241,7 +219,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   const months = useMemo(() => {
     if (!firstExpense) return [];
     return rangeOfExpenses();
-  }, [firstExpense]);
+  }, [firstExpense, rangeOfExpenses]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -461,7 +439,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                   exp.isPaid ? styles.btnIsPaidActive : ""
                                 }`}
                                 onClick={() => {
-                                  setIsPaid(!exp.isPaid);
                                   handleEditExpense({
                                     ...exp,
                                     isPaid: !exp.isPaid,
@@ -521,7 +498,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                   exp.isPaid ? styles.btnIsPaidActive : ""
                                 }`}
                                 onClick={() => {
-                                  setIsPaid(!exp.isPaid);
                                   handleEditExpense({
                                     ...exp,
                                     isPaid: !exp.isPaid,
@@ -546,7 +522,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                   setRecurrenceType(
                                     exp.recurrenceType ?? "NONE"
                                   );
-                                  setRecurringNewExpense(exp.isRecurring);
                                 }}
                               >
                                 <RiPencilFill />

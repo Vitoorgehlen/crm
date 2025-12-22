@@ -97,7 +97,7 @@ export default function ChartLayout() {
 
   useEffect(() => {
     formatCommission();
-  }, [commissions]);
+  }, [commissions, formatCommission]);
 
   return (
     <div className={styles.main}>

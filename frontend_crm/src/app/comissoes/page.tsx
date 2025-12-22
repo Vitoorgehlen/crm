@@ -69,7 +69,7 @@ export default function Commissions() {
     return Math.max(...dates);
   }
 
-  const { paidDeals, pendingDeals } = useMemo(() => {
+  const { paidDeals } = useMemo(() => {
     const paid: Deal[] = [];
     const pend: Deal[] = [];
 
@@ -79,7 +79,7 @@ export default function Commissions() {
       else pend.push(d);
     }
 
-    return { paidDeals: paid, pendingDeals: pend };
+    return { paidDeals: paid };
   }, [deals]);
 
   const groupedByYearMonth = useMemo(() => {
@@ -103,19 +103,6 @@ export default function Commissions() {
       .map(Number)
       .sort((a, b) => a + b);
   }, [groupedByYearMonth]);
-
-  function toggleYear(year: number) {
-    if (selectedYear === year) {
-      setSelectedYear(new Date().getFullYear());
-    } else {
-      setSelectedYear(year);
-    }
-  }
-
-  function real(v: number | undefined | null): string {
-    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
-    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-  }
 
   const statsCash = useMemo(() => {
     let total = 0;
