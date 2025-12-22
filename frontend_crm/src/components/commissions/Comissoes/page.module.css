@@ -1,0 +1,315 @@
+.main {
+  width: 100%;
+}
+
+.boxSteps {
+  display: flex;
+  flex-direction: row;
+  width: calc(100% - 30px);
+  margin: 10px 15px;
+  padding: 10px;
+  gap: 20px;
+  justify-content: space-around;
+}
+
+.finishedDealsByYearWrap {
+  width: 100%;
+}
+
+.cashStatsCard {
+  display: flex;
+  flex-direction: column;
+  width: 30%;
+  max-width: 350px;
+  background: var(--cardBackground);
+  padding: 10px;
+  border-radius: 8px;
+  justify-content: space-between;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cashStatsCardDiv {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 5px;
+}
+
+.cardGoal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-around;
+  color: var(--primaryText);
+  background: var(--cardBackground2);
+  width: 100%;
+  border-radius: 8px;
+  padding: 10px;
+  text-align: center;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cardGoal input {
+  border: none;
+  outline: none;
+  width: 90%;
+  border: 1px solid var(--shadowColor);
+  border-radius: 2px;
+  padding: 2px 5px;
+}
+
+.cardGoal input:focus,
+.cardGoal input:active,
+.cardGoal input:hover {
+  border: 1px solid var(--primaryColor);
+}
+
+.infoCard {
+  display: flex;
+  flex-direction: row;
+  font-size: 1rem;
+}
+
+.infoCard button {
+  font-size: 1rem;
+}
+
+.btnGoal {
+  border: none;
+  color: var(--secondaryText);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnGoal:hover {
+  color: var(--primaryColor);
+}
+
+.btnDelGoal {
+  border: none;
+  color: var(--errorColor);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.btnDelGoal:hover {
+  color: var(--errorColor2);
+}
+
+.card {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--shadowColor);
+}
+
+.card h4 {
+  font-size: var(--font-4);
+  font-weight: 600;
+}
+
+.received {
+  color: var(--secondaryText);
+}
+
+.toReceived {
+  color: var(--errorColor2);
+}
+
+.card p {
+  font-size: var(--font-4);
+  font-weight: 400;
+}
+
+.yearButtons {
+  display: flex;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.yearBtn {
+  text-align: center;
+  padding: 8px 12px;
+  background: var(--cardBackground);
+  color: var(--shadowColor);
+  font-size: 1rem;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.yearBtnActive {
+  background: var(--cardBackground);
+  color: var(--primaryColor);
+}
+
+.yearBtn:hover,
+.yearBtnActive:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.monthsList {
+  display: flex;
+  justify-content: space-around;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 5px;
+  background: var(--cardBackground);
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.monthToggle,
+.monthToggleActive {
+  background: var(--cardBackground2);
+  color: var(--shadowColor);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.monthToggle:hover,
+.monthToggleActive:hover {
+  background: var(--cardBackground2Hover);
+}
+
+.monthToggleActive {
+  background: var(--cardBackground2);
+  color: var(--primaryText);
+}
+
+.dealsOfMonth {
+  display: grid;
+  gap: 15px;
+  width: 100%;
+  margin: 20px auto;
+  padding: 0 20px;
+
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
+.pendingSection {
+  width: 35%;
+  background: var(--cardBackground);
+  color: var(--primaryText);
+  border-radius: 5px;
+  padding: 15px;
+}
+
+.pendingList {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.cardDeals {
+  background: var(--cardBackground);
+  color: var(--primaryText);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.cardDeals:hover {
+  background: var(--cardBackgroundHover);
+}
+
+.pendingCard {
+  width: 100%;
+  background: var(--cardBackground2);
+  border-radius: 8px;
+  margin: 3px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.pendingCard p {
+  color: var(--secondaryText);
+}
+
+.pendingCard h6 {
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--sidebarBackground);
+}
+
+.pendingCard:hover {
+  background: var(--cardBackground2Hover);
+}
+
+@media (max-width: 768px) {
+  .boxSteps {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cashStatsCard {
+    width: 100%;
+  }
+
+  .monthToggle:hover,
+  .monthToggleActive:hover {
+    background: var(--cardBackground2Hover);
+  }
+
+  .pendingSection {
+    width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .dealsOfMonth {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}

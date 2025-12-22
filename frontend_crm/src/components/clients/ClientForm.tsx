@@ -198,22 +198,30 @@ export default function ClientsForm({
             type="tel"
             placeholder="Contato (opcional)"
             value={phone}
-            onChange={(e) => {
-              let value = e.target.value.replace(/\D/g, "");
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+              const input = e.target;
+              let value = input.value.replace(/\D/g, "");
+
               if (value.length > 11) value = value.slice(0, 11);
 
-              if (value.length > 6) {
-                value = value.replace(
-                  /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
-                  "($1) $2 $3-$4"
-                );
-              } else if (value.length > 2) {
-                value = value.replace(
-                  /^(\d{2})(\d{0,1})(\d{0,4}).*/,
-                  "($1) $2 $3"
-                );
-              } else if (value.length > 0) {
-                value = value.replace(/^(\d{0,2}).*/, "($1");
+              const nativeEvent = e.nativeEvent as InputEvent;
+              const isDeleting =
+                nativeEvent.inputType === "deleteContentBackward";
+
+              if (!isDeleting) {
+                if (value.length > 6) {
+                  value = value.replace(
+                    /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
+                    "($1) $2 $3-$4"
+                  );
+                } else if (value.length > 2) {
+                  value = value.replace(
+                    /^(\d{2})(\d{0,1})(\d{0,4}).*/,
+                    "($1) $2 $3"
+                  );
+                } else if (value.length > 0) {
+                  value = value.replace(/^(\d{0,2}).*/, "($1");
+                }
               }
 
               setPhone(value);

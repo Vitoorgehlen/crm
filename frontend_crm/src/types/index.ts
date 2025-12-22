@@ -545,6 +545,31 @@ export type Schedule = {
     };
 };
 
+export type Expense = {
+  id: number;
+  label: string;
+  value: number;
+  newDueDate: string;
+  isRecurring: boolean;
+  isPaid: boolean;
+  recurrenceType?: string;
+};
+
+export type ExpensePayload = {
+  label: string;
+  value: number;
+  newDueDate: string;
+  isRecurring: boolean;
+  isPaid: boolean;
+  recurrenceType?: string;
+};
+
+export type ExpenseProps = {
+  selectedYearStats: {
+    monthAverage: number;
+  };
+};
+
 export type CreateSchedulePayload = {
     dealId?: number;
     label: string;

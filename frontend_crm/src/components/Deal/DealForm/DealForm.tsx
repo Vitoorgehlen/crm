@@ -506,7 +506,7 @@ export default function DealForm({
                   <input
                     type="text"
                     placeholder="Banco do financiamento"
-                    onChange={(e) => setSearchProfile(e.target.value)}
+                    onChange={(e) => setFinancialInstitution(e.target.value)}
                     value={financialInstitution}
                   />
                 )}

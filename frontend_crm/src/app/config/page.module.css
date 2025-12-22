@@ -63,11 +63,12 @@
 .btnSetting {
   margin-top: 20px;
   padding: 5px;
+  gap: 5px;
   color: var(--sidebarBackground);
   font-size: 0.9rem;
   border: none;
   border-radius: 5px;
-  max-width: 500px;
+  max-width: 150px;
   width: 80%;
   cursor: pointer;
   display: flex;
@@ -84,12 +85,13 @@
 .btnSettingActive {
   margin-top: 20px;
   padding: 5px;
+  gap: 5px;
   color: var(--primaryColor);
-  background: var(--cardBackground);
+  background: var(--cardBackground2);
   font-size: 0.9rem;
   border: none;
   border-radius: 5px;
-  max-width: 500px;
+  max-width: 150px;
   width: 80%;
   cursor: pointer;
   display: flex;
@@ -104,6 +106,10 @@
 
 .btnSetting:hover {
   background: var(--cardBackgroundHover);
+}
+
+.btnSettingActive:hover {
+  background: var(--cardBackground2Hover);
 }
 
 .btnLogout {
