@@ -107,12 +107,14 @@ export default function ChartLayout() {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip
-            formatter={(value) =>
-              value.toLocaleString("pt-BR", {
+            formatter={(value) => {
+              if (typeof value !== "number") return value ?? "R$ 0,00";
+
+              return value.toLocaleString("pt-BR", {
                 style: "currency",
                 currency: "BRL",
-              })
-            }
+              });
+            }}
           />
           <Bar dataKey="value" fill="var(--accentColor)" />
         </BarChart>
