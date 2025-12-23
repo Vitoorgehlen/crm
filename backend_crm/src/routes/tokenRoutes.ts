@@ -10,9 +10,15 @@ router.post('/tokens', async (req, res) => {
   try {
     const result = await tokenIndex(email, password);
     res.json(result);
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
-    res.status(500).json({ error: 'Erro ao processar token' });
+     const message = error.message || 'Erro ao processar token';
+
+    if (message === 'Senha incorreta' || message === 'Usuário inválido') {
+      return res.status(401).json({ error: 'Senha ou usuário inválidos' });
+    }
+
+    return res.status(500).json({ error: 'Erro ao processar token' });
   }
 });
 

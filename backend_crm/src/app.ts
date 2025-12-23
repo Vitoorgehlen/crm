@@ -14,6 +14,7 @@ import dealShareRoutes from './routes/dealShareRoutes';
 import goalsRoutes from './routes/goalsRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import tasksRoutes from './routes/tasksRoutes';
+import expenseRoutes from './routes/expenseRoutes';
 import tokenRoutes from './routes/tokenRoutes';
 import resetPassword from './routes/resetPasswordRoutes';
 
@@ -49,6 +50,7 @@ class App {
     this.app.use('/', dealShareRoutes);
     this.app.use('/', goalsRoutes);
     this.app.use('/', scheduleRoutes);
+    this.app.use('/', expenseRoutes);
     this.app.use('/', tasksRoutes);
     this.app.use('/', tokenRoutes);
     this.app.use('/', resetPassword);

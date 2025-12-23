@@ -50,6 +50,23 @@ export async function getCommission(
   });
 }
 
+export async function getChartCommissions(userId: number) {
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setMonth(startDate.getMonth() - 11);
+
+  return prisma.dealShare.findMany({
+    where: {
+      userId,
+      isPaid: true,
+      paidAt : {
+        gte: startDate,
+        lte: endDate
+      }
+    }
+  });
+}
+
 export async function getTeamDeals(
   userId: number,
   filter: { name?: string; status?: string[]; statusClient?: string[]}

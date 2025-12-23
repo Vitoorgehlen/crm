@@ -39,7 +39,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     setRecurrenceType("MONTHLY");
   }
 
-  function rangeOfExpenses() {
+  const rangeOfExpenses = useCallback(() => {
     const start = new Date(firstExpense);
     const end = new Date();
 
@@ -66,7 +66,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     }
 
     return result;
-  }
+  }, [firstExpense]);
 
   function updateRangeByMonth(value: string) {
     const [yearStr, monthStr] = value.split("-");

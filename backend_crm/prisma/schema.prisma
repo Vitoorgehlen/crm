@@ -288,16 +288,25 @@ model Note {
 }
 
 model Expense {
-  id        Int      @id @default(autoincrement())
-  companyId Int
-  company   Company  @relation(fields: [companyId], references: [id])
-  label     String
-  value     Decimal  @db.Decimal(10, 2)
-  notes     String?
-  createdBy Int
-  updatedBy Int
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             Int              @id @default(autoincrement())
+  companyId      Int
+  label          String
+  value          Decimal          @db.Decimal(10, 2)
+  newDueDate     DateTime
+  isRecurring    Boolean          @default(false)
+  recurrenceType recurrenceTypes?
+  isPaid         Boolean          @default(false)
+  createdBy      Int
+  updatedBy      Int
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  company        Company          @relation(fields: [companyId], references: [id])
+}
+
+enum recurrenceTypes {
+  MONTHLY
+  YEARLY
+  WEEKLY
 }
 
 model Schedule {

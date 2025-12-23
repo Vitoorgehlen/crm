@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getCommission } from '../repositories/commissionRepository'
+import { getChartCommissions, getCommission } from '../repositories/commissionRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 
@@ -20,6 +20,20 @@ router.get('/commissions', loginRequired, async (req, res) => {
     res.status(500).json({ error: 'Erro ao buscar negócio.' });
   }
 });
+
+router.get('/chart-commissions', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  try {
+    const commissions = await getChartCommissions(userId);
+    res.json(commissions);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar as comissões.' });
+  }
+})
 
 // router.get('/team-deals', loginRequired, async (req, res) => {
 //   const { user } = req as AuthenticatedRequest;
