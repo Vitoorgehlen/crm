@@ -8,6 +8,7 @@ import {
   MdOutlineEdit,
   MdDeleteForever,
 } from "react-icons/md";
+import { GrConfigure } from "react-icons/gr";
 
 import {
   FaUserEdit,
@@ -21,7 +22,7 @@ import { User, RoleLabels } from "@/types";
 import ConfigUsers from "@/components/config/users/page";
 import Permissions from "@/components/config/permissions/page";
 import EditMe from "@/components/config/editMe/page";
-import ThemeSwitcher from "@/components/config/switchTheme/page";
+import Documentation from "@/components/config/documentation/page";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -31,6 +32,7 @@ export default function Config() {
   const [isConfigUser, setIsConfigUser] = useState(true);
   const [isConfigTeam, setIsConfigTeam] = useState(false);
   const [isOpenPermissions, setIsOpenPermissions] = useState(false);
+  const [isConfigCompany, setIsConfigCompany] = useState(false);
 
   const [isOpenCreateUsers, setIsOpenCreateUsers] = useState(false);
   const [isOpenEditUsers, setIsOpenEditUsers] = useState(false);
@@ -82,7 +84,7 @@ export default function Config() {
 
   const deleteUser = async (UserDelete: User) => {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${UserDelete.name}?`
+      `Tem certeza que deseja excluir ${UserDelete.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -139,6 +141,7 @@ export default function Config() {
             Configurações
             {isConfigTeam && " da Equipe"}
             {isOpenPermissions && " das Permissões"}
+            {isConfigCompany && " da Empresa"}
           </h1>
         </div>
 
@@ -152,6 +155,7 @@ export default function Config() {
                 setIsConfigUser(true);
                 setIsConfigTeam(false);
                 setIsOpenPermissions(false);
+                setIsConfigCompany(false);
               }}
             >
               <FaUserEdit />
@@ -166,6 +170,7 @@ export default function Config() {
                   setIsConfigUser(false);
                   setIsConfigTeam(true);
                   setIsOpenPermissions(false);
+                  setIsConfigCompany(false);
                 }}
               >
                 <FaUsersCog />
@@ -183,17 +188,33 @@ export default function Config() {
                   setIsConfigUser(false);
                   setIsConfigTeam(false);
                   setIsOpenPermissions(true);
+                  setIsConfigCompany(false);
                 }}
               >
                 <FaUnlockAlt />
                 <h3>Permissões da equipe</h3>
               </button>
             )}
+            {user?.role === "ADMIN" && (
+              <button
+                className={`${
+                  isConfigCompany ? styles.btnSettingActive : styles.btnSetting
+                }`}
+                onClick={() => {
+                  setIsConfigUser(false);
+                  setIsConfigTeam(false);
+                  setIsOpenPermissions(false);
+                  setIsConfigCompany(true);
+                }}
+              >
+                <GrConfigure />
+                <h3>Permissões da empresa</h3>
+              </button>
+            )}
           </div>
         </div>
 
         <div className={styles.content}>
-          <ThemeSwitcher />
           <div className={styles.settings}>
             {isConfigTeam && (
               <div className={styles.contentConfig}>
@@ -317,6 +338,8 @@ export default function Config() {
             onClose={() => setIsOpenPermissions(false)}
           />
         )}
+
+        {isConfigCompany && <Documentation />}
       </main>
     </div>
   );

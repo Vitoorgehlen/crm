@@ -46,51 +46,51 @@ export default function CloseDealForm({
   >([]);
 
   const [propertyValue, setPropertyValue] = useState<number>(
-    Number(deal.propertyValue ?? 0)
+    Number(deal.propertyValue ?? 0),
   );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
-    deal.paymentMethod ?? "FINANCING"
+    deal.paymentMethod ?? "FINANCING",
   );
   const [financialInstitution, setFinancialInstitution] = useState(
-    deal.financialInstitution ?? ""
+    deal.financialInstitution ?? "",
   );
   const [cashValue, setCashValue] = useState<number>(
-    Number(deal.cashValue ?? 0)
+    Number(deal.cashValue ?? 0),
   );
   const [subsidyValue, setSubsidyValue] = useState<number>(
-    Number(deal.subsidyValue ?? 0)
+    Number(deal.subsidyValue ?? 0),
   );
   const [downPaymentValue, setDownPaymentValue] = useState<number>(
-    Number(deal.downPaymentValue ?? 0)
+    Number(deal.downPaymentValue ?? 0),
   );
   const [fgtsValue, setFgtsValue] = useState<number>(
-    Number(deal.fgtsValue ?? 0)
+    Number(deal.fgtsValue ?? 0),
   );
   const [financingValue, setFinancingValue] = useState<number>(
-    Number(deal.financingValue ?? 0)
+    Number(deal.financingValue ?? 0),
   );
   const [creditLetterValue, setCreditLetterValue] = useState<number>(
-    Number(deal.creditLetterValue ?? 0)
+    Number(deal.creditLetterValue ?? 0),
   );
   const [installment, setInstallment] = useState(false);
   const [installmentValue, setInstallmentValue] = useState<number>(
-    Number(deal.installmentValue ?? 0)
+    Number(deal.installmentValue ?? 0),
   );
   const [installmentCount, setInstallmentCount] = useState<number>(
-    Number(deal.installmentCount ?? 0)
+    Number(deal.installmentCount ?? 0),
   );
   const [bonusInstallmentValue, setBonusInstallmentValue] = useState<number>(
-    Number(deal.bonusInstallmentValue ?? 0)
+    Number(deal.bonusInstallmentValue ?? 0),
   );
   const [bonusInstallmentCount, setBonusInstallmentCount] = useState<number>(
-    Number(deal.bonusInstallmentCount ?? 0)
+    Number(deal.bonusInstallmentCount ?? 0),
   );
 
   const [commissionAmount, setCommissionAmount] = useState<number>(
-    Number(deal.commissionAmount ?? 0)
+    Number(deal.commissionAmount ?? 0),
   );
   const [splitMethod, setSplitMethod] = useState<"percentage" | "amount">(
-    "percentage"
+    "percentage",
   );
   const [splits, setSplits] = useState<CommissionSplit[]>([]);
 
@@ -125,7 +125,7 @@ export default function CloseDealForm({
 
   function updateSplit(index: number, patch: Partial<CommissionSplit>) {
     setSplits((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, ...patch } : s))
+      prev.map((s, i) => (i === index ? { ...s, ...patch } : s)),
     );
   }
 
@@ -199,10 +199,12 @@ export default function CloseDealForm({
     currency: "BRL",
   });
   const balanceText = isPositive
-    ? `Sobrando${diffFormatted}`
+    ? `Sobrando ${diffFormatted}`
     : isNegative
-    ? `Faltando${diffFormatted}`
-    : `${diffFormatted}`;
+      ? `Faltando ${diffFormatted}`
+      : safeNumber(propertyValue) === 0
+        ? "Ajuste os valores"
+        : "Valores conferem";
   function validate(): string | null {
     if (
       !commissionAmount ||
@@ -225,7 +227,7 @@ export default function CloseDealForm({
       const roundedCom = Math.round(commissionAmount * 100) / 100;
       if (roundedTotal !== roundedCom) {
         return `A soma dos valores dos splits deve ser igual ao valor da comissão (${roundedCom.toFixed(
-          2
+          2,
         )}).`;
       }
     }
@@ -253,7 +255,7 @@ export default function CloseDealForm({
       if (splitMethod === "percentage") {
         const pct = s.percentage ?? 0;
         return {
-          userId: s.isCompany ? null : s.userId ?? null,
+          userId: s.isCompany ? null : (s.userId ?? null),
           isCompany: !!s.isCompany,
           percentage: pct,
           notes: s.notes ?? undefined,
@@ -261,7 +263,7 @@ export default function CloseDealForm({
         };
       } else {
         return {
-          userId: s.isCompany ? null : s.userId ?? null,
+          userId: s.isCompany ? null : (s.userId ?? null),
           isCompany: !!s.isCompany,
           percentage: undefined,
           amount: +(s.amount ?? 0),
@@ -367,37 +369,37 @@ export default function CloseDealForm({
     setPaymentMethod(
       typeof initialPaymentMethod !== "undefined"
         ? initialPaymentMethod
-        : deal.paymentMethod ?? "FINANCING"
+        : (deal.paymentMethod ?? "FINANCING"),
     );
     setPropertyValue(Number(initialPropertyValue ?? deal.propertyValue ?? 0));
     setCommissionAmount(
-      Number(initialCommissionAmount ?? deal.commissionAmount ?? 0)
+      Number(initialCommissionAmount ?? deal.commissionAmount ?? 0),
     );
     setFinancialInstitution(
-      initialFinancialInstitution ?? deal.financialInstitution ?? ""
+      initialFinancialInstitution ?? deal.financialInstitution ?? "",
     );
     setDownPaymentValue(
-      Number(initialDownPaymentValue ?? deal.downPaymentValue ?? 0)
+      Number(initialDownPaymentValue ?? deal.downPaymentValue ?? 0),
     );
     setSubsidyValue(Number(initialSubsidyValue ?? deal.subsidyValue ?? 0));
     setFgtsValue(Number(initialFgtsValue ?? deal.fgtsValue ?? 0));
     setFinancingValue(
-      Number(initialFinancingValue ?? deal.financingValue ?? 0)
+      Number(initialFinancingValue ?? deal.financingValue ?? 0),
     );
     setCreditLetterValue(
-      Number(initialCreditLetterValue ?? deal.creditLetterValue ?? 0)
+      Number(initialCreditLetterValue ?? deal.creditLetterValue ?? 0),
     );
     setInstallmentValue(
-      Number(initialInstallmentValue ?? deal.installmentValue ?? 0)
+      Number(initialInstallmentValue ?? deal.installmentValue ?? 0),
     );
     setInstallmentCount(
-      Number(initialInstallmentCount ?? deal.installmentCount ?? 1)
+      Number(initialInstallmentCount ?? deal.installmentCount ?? 0),
     );
     setBonusInstallmentValue(
-      Number(initialBonusInstallmentValue ?? deal.bonusInstallmentValue ?? 0)
+      Number(initialBonusInstallmentValue ?? deal.bonusInstallmentValue ?? 0),
     );
     setBonusInstallmentCount(
-      Number(initialBonusInstallmentCount ?? deal.bonusInstallmentCount ?? 1)
+      Number(initialBonusInstallmentCount ?? deal.bonusInstallmentCount ?? 0),
     );
 
     setError(null);
@@ -431,31 +433,34 @@ export default function CloseDealForm({
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>
-          <h4>Fechar com:</h4>
-          <h2>{deal?.client?.name ?? ""}</h2>
+          <div className={styles.titleName}>
+            <h4>Fechar com:</h4>
+            <h2>{deal?.client?.name ?? ""}</h2>
+          </div>
+          <button
+            className={styles.closeBtn}
+            type="button"
+            onClick={() => {
+              onClose();
+            }}
+          >
+            <MdClose />
+          </button>
         </div>
 
-        <h2
-          className={`${styles.balance} ${
-            isPositive
-              ? styles.positive
-              : isNegative
-              ? styles.negative
-              : styles.ok
-          }`}
-        >
-          {balanceText}
-        </h2>
-
-        <button
-          className={styles.closeBtn}
-          type="button"
-          onClick={() => {
-            onClose();
-          }}
-        >
-          <MdClose />
-        </button>
+        <div className={styles.titleCash}>
+          <h2
+            className={`${styles.balance} ${
+              isPositive
+                ? styles.positive
+                : isNegative
+                  ? styles.negative
+                  : styles.ok
+            }`}
+          >
+            {balanceText}
+          </h2>
+        </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
@@ -884,8 +889,10 @@ export default function CloseDealForm({
             <button
               className={`
                                 ${styles.btnCommission} ${
-                splitMethod === "percentage" ? styles.btnActive : ""
-              }`}
+                                  splitMethod === "percentage"
+                                    ? styles.btnActive
+                                    : ""
+                                }`}
               type="button"
               onClick={() => setSplitMethod("percentage")}
             >
@@ -894,8 +901,10 @@ export default function CloseDealForm({
             <button
               className={`
                                 ${styles.btnCommission} ${
-                splitMethod === "amount" ? styles.btnActive : ""
-              }`}
+                                  splitMethod === "amount"
+                                    ? styles.btnActive
+                                    : ""
+                                }`}
               type="button"
               onClick={() => setSplitMethod("amount")}
             >
@@ -914,7 +923,7 @@ export default function CloseDealForm({
             <div key={i} className={styles.border}>
               <div className={styles.boxSplitCommission}>
                 <select
-                  value={s.isCompany ? "company" : s.userId ?? ""}
+                  value={s.isCompany ? "company" : (s.userId ?? "")}
                   onChange={(e) => {
                     const isCompany = e.target.value === "company";
                     updateSplit(i, {
@@ -954,7 +963,6 @@ export default function CloseDealForm({
                           });
                         }
                       }}
-                      placeholder="%"
                     />
                     <h3 className={styles.textSplit}>
                       {" "}

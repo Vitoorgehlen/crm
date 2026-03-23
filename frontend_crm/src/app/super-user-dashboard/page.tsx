@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 import { MdEdit, MdOutlinePowerOff } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { IoMdCheckmark, IoMdClose } from "react-icons/io";
-import { User } from "@/types";
+import { docsNames, Documentation, User } from "@/types";
 import { IoMdPersonAdd } from "react-icons/io";
 import { AddAdmin } from "./add-admin";
 
@@ -28,8 +28,10 @@ export default function SuperUserPage() {
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyName, setCompanyName] = useState("");
   const [companyUsers, setCompanyUsers] = useState<number | undefined>(
-    undefined
+    undefined,
   );
+  const [docValues, setDocValues] = useState<Record<string, number>>({});
+
   const [users, setUsers] = useState<User[]>([]);
   const [isOpenCreateUsers, setIsOpenCreateUsers] = useState(false);
 
@@ -96,7 +98,7 @@ export default function SuperUserPage() {
     if (loading) return;
 
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${company.name}?`
+      `Tem certeza que deseja excluir ${company.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -146,8 +148,8 @@ export default function SuperUserPage() {
       const list = Array.isArray(data)
         ? data
         : Array.isArray(data.users)
-        ? data.users
-        : [];
+          ? data.users
+          : [];
       setUsers(list);
     } catch (err: unknown) {
       console.error(err);
@@ -168,6 +170,67 @@ export default function SuperUserPage() {
     }
   }
 
+  async function handleSaveDocs() {
+    if (loading) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const payload = docsNames.map((doc) => ({
+        documentation: doc.key,
+        value: docValues[doc.key] ?? 0,
+      }));
+
+      const response = await fetch(`${API}/documentation-default`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(data.error || "Erro ao apagar a empresa");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro inesperado");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const fetchDocs = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API}/documentation-default-SU/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar a documentação");
+
+      const map: Record<string, number> = {};
+
+      data.forEach((d: Documentation) => {
+        map[d.documentation] = d.value;
+      });
+
+      setDocValues(map);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
   useEffect(() => {
     if (!token) return;
 
@@ -183,8 +246,8 @@ export default function SuperUserPage() {
         const list = Array.isArray(data)
           ? data
           : Array.isArray(data.companies)
-          ? data.companies
-          : [];
+            ? data.companies
+            : [];
         setCompanies(list);
       } catch (err) {
         console.log(err);
@@ -203,6 +266,10 @@ export default function SuperUserPage() {
     }
     fetchUsers();
   }, [fetchUsers, selectedCompany]);
+
+  useEffect(() => {
+    fetchDocs();
+  }, [fetchDocs]);
 
   return (
     <div className={styles.page}>
@@ -323,6 +390,24 @@ export default function SuperUserPage() {
               })
             )}
           </div>
+
+          {docsNames.map((doc) => (
+            <div key={doc.key}>
+              <h3>{doc.label}</h3>
+              <input
+                type="number"
+                value={docValues[doc.key] ?? ""}
+                onChange={(e) =>
+                  setDocValues((prev) => ({
+                    ...prev,
+                    [doc.key]: Number(e.target.value),
+                  }))
+                }
+              />
+            </div>
+          ))}
+
+          <button onClick={handleSaveDocs}>Salvar documentações</button>
 
           <button
             className={styles.btnLogout}

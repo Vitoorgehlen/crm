@@ -46,7 +46,7 @@
 }
 
 .table tbody tr:nth-child(even) {
-  background: var(--cardBackgroundHover);
+  background: var(--cardBackground2);
 }
 
 .table td input[type="checkbox"] {

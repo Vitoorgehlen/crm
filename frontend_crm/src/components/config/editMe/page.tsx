@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import { ConfigMeProps } from "@/types";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
+import ThemeSwitcher from "../switchTheme/page";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -151,6 +152,8 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
 
   return (
     <form className={styles.overlay}>
+      <ThemeSwitcher />
+
       <input
         className={styles.labelSettingTitle}
         value={myNewName}

@@ -158,6 +158,16 @@
   width: 100%;
 }
 
+.clientBtn {
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.clientBtn:hover h2 {
+  color: var(--primaryColor);
+}
+
 .right {
   width: 500px;
   height: 500px;
@@ -209,6 +219,12 @@
   cursor: pointer;
 }
 
+.btnPriorityAndDoc {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
 .btnPriority {
   background: transparent;
   border: none;
@@ -225,6 +241,63 @@
   font-size: 1.5rem;
   color: var(--primaryColor);
   cursor: pointer;
+}
+
+.btnDocValue {
+  color: var(--primaryText);
+  height: 100%;
+  font-size: 1.5rem;
+}
+
+.btnDocValue2 {
+  position: relative;
+}
+
+.boxDocValue {
+  position: fixed;
+  right: 25px;
+  width: 250px;
+  padding: 10px 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.boxDoc {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--primaryText);
+}
+
+.boxDocTotal {
+  display: flex;
+  align-items: center;
+  width: 80%;
+  justify-content: space-between;
+}
+
+.boxDocTotal p {
+  color: var(--primaryText);
+}
+
+.boxDocValue .boxDoc h4 {
+  font-size: 0.8rem;
+  color: white;
+}
+
+.boxDocValue .boxDocTotal h4 {
+  font-size: 0.9rem;
+  color: var(--primaryColor);
 }
 
 .error {

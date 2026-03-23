@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Client,
   ClientStatus,
   Deal,
   DealFormProps,
   DealStatus,
+  docsNames,
+  Documentation,
   Note,
   PaymentMethod,
 } from "@/types";
@@ -22,6 +24,7 @@ import { FaTimes, FaCheck } from "react-icons/fa";
 import ClientsForm from "@/components/clients/ClientForm";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
+import { BsCashCoin } from "react-icons/bs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,6 +45,7 @@ export default function DealForm({
   const [clients, setClients] = useState<Client[]>(clientsProp ?? []);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
+  const [showPopup, setShowPopup] = useState(false);
 
   const [searchClient, setSearchClient] = useState("");
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -58,6 +62,11 @@ export default function DealForm({
   const [fgtsValue, setFgtsValue] = useState<number>(0);
   const [financingValue, setFinancingValue] = useState<number>(0);
   const [creditLetterValue, setCreditLetterValue] = useState<number>(0);
+
+  const [docValues, setDocValues] = useState<Record<string, number>>({});
+  const [docsCalculated, setDocsCalculated] = useState<
+    { label: string; value: number }[]
+  >([]);
 
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
@@ -108,7 +117,7 @@ export default function DealForm({
   const handleSubmit = async (
     e: React.FormEvent,
     submitFunction: (payload: Partial<Deal>) => Promise<void> | void,
-    isClosingDeal: boolean = false
+    isClosingDeal: boolean = false,
   ) => {
     e.preventDefault();
     if (loading !== null) return;
@@ -213,7 +222,7 @@ export default function DealForm({
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`
+      `Tem certeza que deseja excluir essa nota?`,
     );
     if (!confirmDelete) return;
 
@@ -235,7 +244,7 @@ export default function DealForm({
 
   const deleteDeal = async () => {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${deal?.client?.name}?`
+      `Tem certeza que deseja excluir ${deal?.client?.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -271,6 +280,196 @@ export default function DealForm({
       setLoading(null);
     }
   };
+
+  const fetchDocs = useCallback(async () => {
+    setLoading("read");
+
+    try {
+      const res = await fetch(`${API}/documentation-default/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar a documentação");
+
+      const map: Record<string, number> = {};
+
+      data.forEach((d: Documentation) => {
+        map[d.documentation] = d.value;
+      });
+
+      setDocValues(map);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(null);
+    }
+  }, [token]);
+
+  function getTotal() {
+    if (paymentMethod === "CASH") {
+      return (cashValue || 0) + (fgtsValue || 0) + (downPaymentValue || 0);
+    }
+
+    if (paymentMethod === "FINANCING") {
+      return (
+        (downPaymentValue || 0) +
+        (subsidyValue || 0) +
+        (fgtsValue || 0) +
+        (financingValue || 0)
+      );
+    }
+
+    if (paymentMethod === "CREDIT_LETTER") {
+      return (
+        (downPaymentValue || 0) + (fgtsValue || 0) + (creditLetterValue || 0)
+      );
+    }
+
+    return 0;
+  }
+
+  function sumDocs() {
+    if (!docValues) return;
+
+    const updatedDocs = [];
+
+    const propertyRegistry = docsNames.find(
+      (doc) => doc.key === "PROPERTY_REGISTRY",
+    );
+    if (propertyRegistry) {
+      const value = docValues[propertyRegistry.key] || 0;
+
+      updatedDocs.push({
+        label: "Matrícula",
+        value,
+      });
+    }
+
+    if (paymentMethod === "FINANCING") {
+      const engineering = docsNames.find((doc) => doc.key === "ENGINEERING");
+      if (engineering) {
+        const value = docValues[engineering.key] || 0;
+
+        updatedDocs.push({
+          label: engineering.label,
+          value,
+        });
+      }
+
+      const financingSbpe = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_SBPE",
+      );
+      const financingSbpeMin = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MIN_SBPE",
+      );
+      if (financingSbpe && financingSbpeMin) {
+        const value =
+          ((docValues[financingSbpe.key] || 0) / 100) *
+          (Number(financingValue) || 0);
+        const minValue = docValues[financingSbpeMin.key] || 0;
+
+        updatedDocs.push({
+          label: "Financiar SBPE",
+          value: value < minValue ? minValue : value,
+        });
+      }
+
+      const financing = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MCMV",
+      );
+      const financingMin = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MIN_MCMV",
+      );
+      if (financing && financingMin) {
+        const value =
+          ((docValues[financing.key] || 0) / 100) *
+          (Number(financingValue) || 0);
+        const minValue = docValues[financingMin.key] || 0;
+
+        updatedDocs.push({
+          label: "Financiar MCMV",
+          value: value < minValue ? minValue : value,
+        });
+      }
+    }
+
+    if (paymentMethod === "CASH") {
+      const cash = docsNames.find((doc) => doc.key === "DEED_CASH");
+      if (cash) {
+        const value =
+          ((docValues[cash.key] || 0) / 100) *
+          ((Number(cashValue) || 0) +
+            (Number(fgtsValue) || 0) +
+            (Number(downPaymentValue) || 0));
+
+        updatedDocs.push({
+          label: "Escritura",
+          value,
+        });
+      }
+    }
+
+    const itbiCash = docsNames.find((doc) => doc.key === "ITBI_CASH");
+    if (itbiCash) {
+      const value =
+        ((docValues[itbiCash.key] || 0) / 100) *
+        ((Number(cashValue) || 0) +
+          (Number(downPaymentValue) || 0) +
+          (Number(fgtsValue) || 0) +
+          (Number(subsidyValue) || 0));
+
+      let financedItbi = 0;
+      if (paymentMethod !== "CASH") {
+        const itbiFinanced = docsNames.find(
+          (doc) => doc.key === "ITBI_FINANCED",
+        );
+        if (itbiFinanced) {
+          const value =
+            ((docValues[itbiFinanced.key] || 0) / 100) *
+            (Number(financingValue) || 0);
+          financedItbi = value;
+        }
+      }
+      updatedDocs.push({
+        label: "ITBI",
+        value: value + financedItbi + 50,
+      });
+    }
+
+    const registrationValue = docsNames.find(
+      (doc) => doc.key === "REGISTRATION",
+    );
+    if (registrationValue) {
+      const value =
+        ((docValues[registrationValue.key] || 0) / 100) *
+        (Number(getTotal()) || 0);
+
+      updatedDocs.push({
+        label: "Registro",
+        value: value,
+      });
+    }
+
+    setDocsCalculated(updatedDocs);
+  }
+
+  useEffect(() => {
+    fetchDocs();
+  }, [fetchDocs]);
+
+  useEffect(() => {
+    sumDocs();
+  }, [
+    docValues,
+    downPaymentValue,
+    cashValue,
+    subsidyValue,
+    fgtsValue,
+    financingValue,
+    creditLetterValue,
+  ]);
 
   useEffect(() => {
     let mounted = true;
@@ -324,6 +523,23 @@ export default function DealForm({
       clearForm();
     }
   }, [deal, mode]);
+
+  useEffect(() => {
+    if (paymentMethod === "CASH") {
+      setFinancingValue(0);
+      setCreditLetterValue(0);
+      setSubsidyValue(0);
+    }
+
+    if (paymentMethod === "FINANCING") {
+      setCashValue(0);
+    }
+
+    if (paymentMethod === "CREDIT_LETTER") {
+      setFinancingValue(0);
+      setCashValue(0);
+    }
+  }, [paymentMethod]);
 
   useEffect(() => {
     if (clientId) {
@@ -391,28 +607,95 @@ export default function DealForm({
                   ) : (
                     <>
                       <h4>Editar negociação</h4>
-                      <h2>{deal?.client?.name ?? ""}</h2>
+                      <button className={styles.clientBtn}>
+                        <h2>{deal?.client?.name ?? ""}</h2>
+                      </button>
                       <h6 className={styles.lastContact}>
                         {`Último contato:
                       ${getDaysSinceLastContact(
-                        deal?.updatedAt ?? deal?.createdAt ?? ""
+                        deal?.updatedAt ?? deal?.createdAt ?? "",
                       )}`}
                       </h6>
                     </>
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  className={styles.btnPriority}
-                  onClick={() => setIsPriority(!isPriority)}
-                >
-                  {isPriority ? (
-                    <IoStar className={styles.btnPriorityActive} />
-                  ) : (
-                    <IoStarOutline />
-                  )}
-                </button>
+                <div className={styles.btnPriorityAndDoc}>
+                  <button
+                    type="button"
+                    className={styles.btnPriority}
+                    onClick={() => setIsPriority(!isPriority)}
+                  >
+                    {isPriority ? (
+                      <IoStar className={styles.btnPriorityActive} />
+                    ) : (
+                      <IoStarOutline />
+                    )}
+                  </button>
+
+                  <div
+                    onMouseEnter={() => {
+                      setShowPopup(true);
+                      sumDocs();
+                    }}
+                    onMouseLeave={() => setShowPopup(false)}
+                    className={styles.btnDocValue2}
+                  >
+                    <BsCashCoin className={styles.btnDocValue} />
+                    {showPopup && (
+                      <div className={styles.boxDocValue}>
+                        <h4>Documentação aproximada</h4>
+                        {docsCalculated.map((doc) => {
+                          return (
+                            <div key={doc.label} className={styles.boxDoc}>
+                              <h4>{doc.label}:</h4>
+                              <p>
+                                R$
+                                {doc.value.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </p>
+                            </div>
+                          );
+                        })}
+
+                        {paymentMethod === "FINANCING" && (
+                          <>
+                            <div className={styles.boxDocTotal}>
+                              <h4>Total MCMV:</h4>
+                              <p>
+                                R$
+                                {docsCalculated
+                                  .reduce((acc, item) => {
+                                    if (item.label === "Financiar SBPE")
+                                      return acc;
+                                    return acc + item.value;
+                                  }, 0)
+                                  .toLocaleString("pt-BR", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                              </p>
+                            </div>
+                          </>
+                        )}
+                        <div className={styles.boxDocTotal}>
+                          <h4>Total SBPE:</h4>
+                          <p>
+                            R$
+                            {docsCalculated
+                              .reduce((acc, item) => acc + item.value, 0)
+                              .toLocaleString("pt-BR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
 
               {error && <p className={styles.error}>{error}</p>}
@@ -421,7 +704,7 @@ export default function DealForm({
                 <input
                   list="clients"
                   className={styles.changeClient}
-                  placeholder="Buscar cliente..."
+                  placeholder="Buscar cliente"
                   value={searchClient}
                   onChange={(e) => {
                     const value = e.target.value;
@@ -429,7 +712,7 @@ export default function DealForm({
 
                     const foundClient = clients.find(
                       (client) =>
-                        client.name.toLowerCase() === value.toLowerCase()
+                        client.name.toLowerCase() === value.toLowerCase(),
                     );
                     setClientId(foundClient ? foundClient.id : undefined);
                   }}
@@ -515,14 +798,15 @@ export default function DealForm({
               {paymentMethod === "CASH" && (
                 <>
                   <div className={styles.paymentTitle}>
-                    <h3>Valor a vista</h3>
+                    <h3>Entrada</h3>
                     <h3>FGTS</h3>
+                    <h3>Valor à vista</h3>
                   </div>
                   <div className={styles.payment}>
                     <input
                       type="text"
-                      placeholder="Valor a vista"
-                      value={cashValue.toLocaleString("pt-BR", {
+                      placeholder="Entrada"
+                      value={downPaymentValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
                       })}
@@ -543,6 +827,19 @@ export default function DealForm({
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
                         setFgtsValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      placeholder="Valor à vista"
+                      value={cashValue.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setCashValue(numeric);
                       }}
                     />
                   </div>
@@ -683,7 +980,6 @@ export default function DealForm({
               <div className={styles.modalRight}>
                 <div className={styles.noteSection}>
                   <h2>Notas</h2>
-
                   <div className={styles.addNote}>
                     {isOpenNote ? (
                       <>
@@ -779,7 +1075,7 @@ export default function DealForm({
               type="button"
               onClick={(e) => handleSubmit(e, onSubmit, false)}
             >
-              {loading === "save" ? "Enviando..." : "Enviar"}
+              {loading === "save" ? "Enviando" : "Enviar"}
             </button>
           ) : (
             <div className={styles.footerCard}>
@@ -792,7 +1088,7 @@ export default function DealForm({
                     type="button"
                     onClick={() => deleteDeal()}
                   >
-                    {loading === "del" ? "Apagando..." : "Apagar"}
+                    {loading === "del" ? "Apagando" : "Apagar"}
                   </button>
                 )}
 
@@ -801,7 +1097,7 @@ export default function DealForm({
                   type="button"
                   onClick={(e) => handleSubmit(e, onSubmit, false)}
                 >
-                  {loading === "save" ? "Atualizando..." : "Atualizar"}
+                  {loading === "save" ? "Atualizando" : "Atualizar"}
                 </button>
                 <button
                   className={styles.btnSell}

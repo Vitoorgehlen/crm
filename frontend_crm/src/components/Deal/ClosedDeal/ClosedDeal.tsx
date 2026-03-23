@@ -15,6 +15,8 @@ import {
   Note,
   DEAL_STEP_TYPE_LABEL,
   WORKFLOW_BY_METHOD,
+  Documentation,
+  docsNames,
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
@@ -26,6 +28,7 @@ import {
 } from "react-icons/md";
 import { GiCheckMark } from "react-icons/gi";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
+import { BsCashCoin } from "react-icons/bs";
 
 export default function ClosedDeal({
   isOpen,
@@ -42,54 +45,54 @@ export default function ClosedDeal({
   >([]);
 
   const [propertyValue, setPropertyValue] = useState<number>(
-    Number(deal.propertyValue ?? 0)
+    Number(deal.propertyValue ?? 0),
   );
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(
-    deal.paymentMethod ?? "FINANCING"
+    deal.paymentMethod ?? "FINANCING",
   );
   const [financialInstitution, setFinancialInstitution] = useState(
-    deal.financialInstitution ?? ""
+    deal.financialInstitution ?? "",
   );
   const [downPaymentValue, setDownPaymentValue] = useState<number>(
-    Number(deal.downPaymentValue ?? 0)
+    Number(deal.downPaymentValue ?? 0),
   );
   const [subsidyValue, setSubsidyValue] = useState<number>(
-    Number(deal.subsidyValue ?? 0)
+    Number(deal.subsidyValue ?? 0),
   );
   const [cashValue, setCashValue] = useState<number>(
-    Number(deal.cashValue ?? 0)
+    Number(deal.cashValue ?? 0),
   );
   const [fgtsValue, setFgtsValue] = useState<number>(
-    Number(deal.fgtsValue ?? 0)
+    Number(deal.fgtsValue ?? 0),
   );
   const [financingValue, setFinancingValue] = useState<number>(
-    Number(deal.financingValue ?? 0)
+    Number(deal.financingValue ?? 0),
   );
   const [creditLetterValue, setCreditLetterValue] = useState<number>(
-    Number(deal.creditLetterValue ?? 0)
+    Number(deal.creditLetterValue ?? 0),
   );
   const [installment, setInstallment] = useState(false);
   const [installmentValue, setInstallmentValue] = useState<number>(
-    Number(deal.installmentValue ?? 0)
+    Number(deal.installmentValue ?? 0),
   );
   const [installmentCount, setInstallmentCount] = useState<number>(
-    Number(deal.installmentCount ?? 0)
+    Number(deal.installmentCount ?? 0),
   );
   const [bonusInstallmentValue, setBonusInstallmentValue] = useState<number>(
-    Number(deal.bonusInstallmentValue ?? 0)
+    Number(deal.bonusInstallmentValue ?? 0),
   );
   const [bonusInstallmentCount, setBonusInstallmentCount] = useState<number>(
-    Number(deal.bonusInstallmentCount ?? 0)
+    Number(deal.bonusInstallmentCount ?? 0),
   );
 
   const [commissionAmount, setCommissionAmount] = useState<number>(
-    Number(deal.commissionAmount ?? 0)
+    Number(deal.commissionAmount ?? 0),
   );
   const [isFirstStep, setIsFirstStep] = useState(false);
   const [isLastStep, setIsLastStep] = useState(false);
 
   const [isOpenDocCost, setIsOpenDocCost] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
@@ -97,12 +100,18 @@ export default function ClosedDeal({
   const [docCost, setDocCost] = useState<Array<DocumentationCost>>([]);
   const [docCostTotal, setDocCostTotal] = useState<number>(0);
 
+  const [showPopup, setShowPopup] = useState(false);
+  const [docValues, setDocValues] = useState<Record<string, number>>({});
+  const [docsCalculated, setDocsCalculated] = useState<
+    { label: string; value: number }[]
+  >([]);
+
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
   const [note, setNote] = useState<Array<Note>>([]);
 
   const [splitMethod, setSplitMethod] = useState<"percentage" | "amount">(
-    "percentage"
+    "percentage",
   );
   const [splits, setSplits] = useState<CommissionSplit[]>([]);
 
@@ -138,7 +147,7 @@ export default function ClosedDeal({
 
   function updateSplit(index: number, patch: Partial<CommissionSplit>) {
     setSplits((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, ...patch } : s))
+      prev.map((s, i) => (i === index ? { ...s, ...patch } : s)),
     );
   }
 
@@ -181,7 +190,7 @@ export default function ClosedDeal({
       const roundedCom = Math.round(commissionAmount * 100) / 100;
       if (roundedTotal !== roundedCom) {
         return `A soma dos valores dos splits deve ser igual ao valor da comissão (${roundedCom.toFixed(
-          2
+          2,
         )}).`;
       }
     }
@@ -204,6 +213,180 @@ export default function ClosedDeal({
     return null;
   }
 
+  const fetchDocs = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API}/documentation-default/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar a documentação");
+
+      const map: Record<string, number> = {};
+
+      data.forEach((d: Documentation) => {
+        map[d.documentation] = d.value;
+      });
+
+      setDocValues(map);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  function getTotal() {
+    if (paymentMethod === "CASH") {
+      return (cashValue || 0) + (fgtsValue || 0) + (downPaymentValue || 0);
+    }
+
+    if (paymentMethod === "FINANCING") {
+      return (
+        (downPaymentValue || 0) +
+        (subsidyValue || 0) +
+        (fgtsValue || 0) +
+        (financingValue || 0)
+      );
+    }
+
+    if (paymentMethod === "CREDIT_LETTER") {
+      return (
+        (downPaymentValue || 0) + (fgtsValue || 0) + (creditLetterValue || 0)
+      );
+    }
+
+    return 0;
+  }
+
+  function sumDocs() {
+    if (!docValues) return;
+
+    const updatedDocs = [];
+
+    const propertyRegistry = docsNames.find(
+      (doc) => doc.key === "PROPERTY_REGISTRY",
+    );
+    if (propertyRegistry) {
+      const value = docValues[propertyRegistry.key] || 0;
+
+      updatedDocs.push({
+        label: "Matrícula",
+        value,
+      });
+    }
+
+    if (paymentMethod === "FINANCING") {
+      const engineering = docsNames.find((doc) => doc.key === "ENGINEERING");
+      if (engineering) {
+        const value = docValues[engineering.key] || 0;
+
+        updatedDocs.push({
+          label: engineering.label,
+          value,
+        });
+      }
+
+      const financingSbpe = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_SBPE",
+      );
+      const financingSbpeMin = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MIN_SBPE",
+      );
+      if (financingSbpe && financingSbpeMin) {
+        const value =
+          ((docValues[financingSbpe.key] || 0) / 100) *
+          (Number(financingValue) || 0);
+        const minValue = docValues[financingSbpeMin.key] || 0;
+
+        updatedDocs.push({
+          label: "Financiar SBPE",
+          value: value < minValue ? minValue : value,
+        });
+      }
+
+      const financing = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MCMV",
+      );
+      const financingMin = docsNames.find(
+        (doc) => doc.key === "DEED_FINANCED_MIN_MCMV",
+      );
+      if (financing && financingMin) {
+        const value =
+          ((docValues[financing.key] || 0) / 100) *
+          (Number(financingValue) || 0);
+        const minValue = docValues[financingMin.key] || 0;
+
+        updatedDocs.push({
+          label: "Financiar MCMV",
+          value: value < minValue ? minValue : value,
+        });
+      }
+    }
+
+    if (paymentMethod === "CASH") {
+      const cash = docsNames.find((doc) => doc.key === "DEED_CASH");
+      if (cash) {
+        const value =
+          ((docValues[cash.key] || 0) / 100) *
+          ((Number(cashValue) || 0) +
+            (Number(fgtsValue) || 0) +
+            (Number(downPaymentValue) || 0));
+
+        updatedDocs.push({
+          label: "Escritura",
+          value,
+        });
+      }
+    }
+
+    const itbiCash = docsNames.find((doc) => doc.key === "ITBI_CASH");
+    if (itbiCash) {
+      const value =
+        ((docValues[itbiCash.key] || 0) / 100) *
+        ((Number(cashValue) || 0) +
+          (Number(downPaymentValue) || 0) +
+          (Number(fgtsValue) || 0) +
+          (Number(subsidyValue) || 0));
+
+      let financedItbi = 0;
+      if (paymentMethod !== "CASH") {
+        const itbiFinanced = docsNames.find(
+          (doc) => doc.key === "ITBI_FINANCED",
+        );
+        if (itbiFinanced) {
+          const value =
+            ((docValues[itbiFinanced.key] || 0) / 100) *
+            (Number(financingValue) || 0);
+          financedItbi = value;
+        }
+      }
+      updatedDocs.push({
+        label: "ITBI",
+        value: value + financedItbi + 50,
+      });
+    }
+
+    const registrationValue = docsNames.find(
+      (doc) => doc.key === "REGISTRATION",
+    );
+    if (registrationValue) {
+      const value =
+        ((docValues[registrationValue.key] || 0) / 100) *
+        (Number(getTotal()) || 0);
+
+      updatedDocs.push({
+        label: "Registro",
+        value: value,
+      });
+    }
+
+    setDocsCalculated(updatedDocs);
+  }
+
   function buildPayload(): CloseDealPayload {
     const normalizedSplits = splits.map((s) => {
       const amount =
@@ -216,7 +399,7 @@ export default function ClosedDeal({
       if (splitMethod === "percentage") {
         const pct = s.percentage ?? 0;
         return {
-          userId: s.isCompany ? null : s.userId ?? null,
+          userId: s.isCompany ? null : (s.userId ?? null),
           isCompany: !!s.isCompany,
           percentage: pct,
           received: s.received ?? undefined,
@@ -225,7 +408,7 @@ export default function ClosedDeal({
         };
       } else {
         return {
-          userId: s.isCompany ? null : s.userId ?? null,
+          userId: s.isCompany ? null : (s.userId ?? null),
           isCompany: !!s.isCompany,
           percentage: undefined,
           amount: +(s.amount ?? 0),
@@ -287,7 +470,7 @@ export default function ClosedDeal({
       const hasUnpaidCommission = splits.some((s) => !s.isPaid);
       if (hasUnpaidCommission) {
         setError(
-          "Não é possível finalizar a negociação com comissões pendentes."
+          "Não é possível finalizar a negociação com comissões pendentes.",
         );
         return;
       }
@@ -355,7 +538,7 @@ export default function ClosedDeal({
       if (!res.ok) throw new Error("Erro ao editar valores de documentação");
       const data = await res.json();
       setDocCost((prev) =>
-        prev.map((item) => (item.id === docId ? data : item))
+        prev.map((item) => (item.id === docId ? data : item)),
       );
       setIsOpenDocCost(undefined);
       setDocCostLabel("");
@@ -369,7 +552,7 @@ export default function ClosedDeal({
   async function handleDeleteDocCost(docId?: number) {
     if (typeof docId !== "number") return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa documentação?`
+      `Tem certeza que deseja excluir essa documentação?`,
     );
     if (!confirmDelete) return;
 
@@ -437,7 +620,7 @@ export default function ClosedDeal({
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`
+      `Tem certeza que deseja excluir essa nota?`,
     );
     if (!confirmDelete) return;
 
@@ -569,10 +752,43 @@ export default function ClosedDeal({
   useEffect(() => {
     const total = docCost.reduce(
       (sum: number, item: DocumentationCost) => sum + Number(item.value ?? 0),
-      0
+      0,
     );
     setDocCostTotal(total);
   }, [docCost]);
+
+  useEffect(() => {
+    fetchDocs();
+  }, [fetchDocs]);
+
+  useEffect(() => {
+    sumDocs();
+  }, [
+    docValues,
+    downPaymentValue,
+    cashValue,
+    subsidyValue,
+    fgtsValue,
+    financingValue,
+    creditLetterValue,
+  ]);
+
+  useEffect(() => {
+    if (paymentMethod === "CASH") {
+      setFinancingValue(0);
+      setCreditLetterValue(0);
+      setSubsidyValue(0);
+    }
+
+    if (paymentMethod === "FINANCING") {
+      setCashValue(0);
+    }
+
+    if (paymentMethod === "CREDIT_LETTER") {
+      setFinancingValue(0);
+      setCashValue(0);
+    }
+  }, [paymentMethod]);
 
   useEffect(() => {
     if (!isOpen || !deal?.id || !token) return;
@@ -609,7 +825,7 @@ export default function ClosedDeal({
               <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
               <h2>{deal?.client?.name ?? ""}</h2>
               <h6>{`Último contato: ${getDaysSinceLastContact(
-                deal?.updatedAt ?? deal?.createdAt ?? ""
+                deal?.updatedAt ?? deal?.createdAt ?? "",
               )}`}</h6>
             </div>
 
@@ -920,8 +1136,10 @@ export default function ClosedDeal({
                 <button
                   className={`
                                     ${styles.btnCommission} ${
-                    splitMethod === "percentage" ? styles.btnActive : ""
-                  }`}
+                                      splitMethod === "percentage"
+                                        ? styles.btnActive
+                                        : ""
+                                    }`}
                   type="button"
                   onClick={() => setSplitMethod("percentage")}
                 >
@@ -930,8 +1148,10 @@ export default function ClosedDeal({
                 <button
                   className={`
                                     ${styles.btnCommission} ${
-                    splitMethod === "amount" ? styles.btnActive : ""
-                  }`}
+                                      splitMethod === "amount"
+                                        ? styles.btnActive
+                                        : ""
+                                    }`}
                   type="button"
                   onClick={() => setSplitMethod("amount")}
                 >
@@ -954,7 +1174,7 @@ export default function ClosedDeal({
                       {!s.isPaid ? (
                         <select
                           style={{ width: 160 }}
-                          value={s.isCompany ? "company" : s.userId ?? ""}
+                          value={s.isCompany ? "company" : (s.userId ?? "")}
                           onChange={(e) => {
                             const isCompany = e.target.value === "company";
                             updateSplit(i, {
@@ -1064,8 +1284,10 @@ export default function ClosedDeal({
                       <button
                         className={`
                                                     ${styles.btnIsPaid} ${
-                          s.isPaid ? styles.btnIsPaidActive : ""
-                        }`}
+                                                      s.isPaid
+                                                        ? styles.btnIsPaidActive
+                                                        : ""
+                                                    }`}
                         type="button"
                         onClick={() => updateSplit(i, { isPaid: !s.isPaid })}
                       >
@@ -1105,7 +1327,71 @@ export default function ClosedDeal({
 
           <div className={styles.modalRight}>
             <div className={styles.docCostSection}>
-              <h2>Valor de documentação</h2>
+              <div className={styles.titleDocs}>
+                <h2>Valor de documentação</h2>
+                <div
+                  onMouseEnter={() => {
+                    setShowPopup(true);
+                    sumDocs();
+                  }}
+                  onMouseLeave={() => setShowPopup(false)}
+                  className={styles.btnDocValue2}
+                >
+                  <BsCashCoin className={styles.btnDocValue} />
+                  {showPopup && (
+                    <div className={styles.boxDocValue}>
+                      <h4>Documentação aproximada</h4>
+                      {docsCalculated.map((doc) => {
+                        return (
+                          <div key={doc.label} className={styles.boxDoc}>
+                            <h4>{doc.label}:</h4>
+                            <p>
+                              R$
+                              {doc.value.toLocaleString("pt-BR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })}
+                            </p>
+                          </div>
+                        );
+                      })}
+
+                      {paymentMethod === "FINANCING" && (
+                        <>
+                          <div className={styles.boxDocTotal}>
+                            <h4>Total MCMV:</h4>
+                            <p>
+                              R$
+                              {docsCalculated
+                                .reduce((acc, item) => {
+                                  if (item.label === "Financiar SBPE")
+                                    return acc;
+                                  return acc + item.value;
+                                }, 0)
+                                .toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                            </p>
+                          </div>
+                        </>
+                      )}
+                      <div className={styles.boxDocTotal}>
+                        <h4>Total SBPE:</h4>
+                        <p>
+                          R$
+                          {docsCalculated
+                            .reduce((acc, item) => acc + item.value, 0)
+                            .toLocaleString("pt-BR", {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
 
               <div className={styles.addDoc}>
                 {isOpenDocCost ? (

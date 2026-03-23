@@ -507,6 +507,25 @@ export type DocumentationCost = {
     };
 };
 
+export type Documentation = {
+  id: number;
+  documentation: string;
+  value: number;
+};
+
+export const docsNames = [
+    { key: "ENGINEERING", label: "Engenharia", type: "money", value: 0 },
+    { key: "PROPERTY_REGISTRY", label: "Matrícula", type: "money", value: 0  },
+    { key: "DEED_FINANCED_SBPE", label: "Escritura SBPE", type: "percent", value: 0  },
+    { key: "DEED_FINANCED_MIN_SBPE", label: "Mínimo Escritura SBPE", type: "money", value: 0  },
+    { key: "DEED_FINANCED_MCMV", label: "Escritura MCMV", type: "percent", value: 0  },
+    { key: "DEED_FINANCED_MIN_MCMV", label: "Mínimo Escritura MCMV", type: "money", value: 0  },
+    { key: "DEED_CASH", label: "Escritura À Vista", type: "percent", value: 0  },
+    { key: "ITBI_CASH", label: "ITBI à Vista", type: "percent", value: 0  },
+    { key: "ITBI_FINANCED", label: "ITBI Financiamento", type: "percent", value: 0  },
+    { key: "REGISTRATION", label: "Registro", type: "percent", value: 0  },
+  ];
+
 export type Note = {
     id?: number;
     dealId: number;

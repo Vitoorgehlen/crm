@@ -64,7 +64,6 @@
 .modal {
   background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
-  gap: 4px;
   border-radius: 10px;
   max-width: 550px;
   width: 100%;
@@ -90,17 +89,33 @@
 
 .title {
   display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: center;
   align-items: center;
+  width: 100%;
   gap: 10px;
 }
 
+.titleName {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 10px;
+}
+
+.titleCash {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  justify-content: center;
+}
+
+.coin:hover {
+  color: var(--accentColor);
+}
+
 .closeBtn {
-  position: absolute;
+  /* position: absolute;
   top: 20px;
-  right: 20px;
+  right: 20px; */
   background: transparent;
   border: none;
   font-size: 1.5rem;
@@ -228,6 +243,7 @@
 
 .btnCancelAndConfirm {
   display: flex;
+  justify-content: center;
   margin: 0 auto;
   flex-direction: row;
   align-items: center;
@@ -288,7 +304,8 @@
   }
 
   .modal {
-    padding: 10px 15px;
+    padding: 15px;
+    padding-bottom: 10px;
     height: 100vh;
     justify-content: space-between;
   }

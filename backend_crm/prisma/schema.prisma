@@ -21,13 +21,14 @@ model Company {
   maxUsers Int?
   isActive Boolean @default(true)
 
-  users           User[]
-  clients         Client[]
-  deals           Deal[]
-  expenses        Expense[]
-  dealShares      DealShare[]
-  rolePermissions RolePermission[]
-  Schedule        Schedule[]
+  users                     User[]
+  clients                   Client[]
+  deals                     Deal[]
+  expenses                  Expense[]
+  dealShares                DealShare[]
+  rolePermissions           RolePermission[]
+  Schedule                  Schedule[]
+  documentationValueCustoms DocumentationValueCustom[]
 }
 
 model User {
@@ -257,6 +258,36 @@ model DealShare {
   updater User @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id])
 }
 
+model DocumentationValueDefault {
+  id            Int           @id @default(autoincrement())
+  documentation Documentation @unique
+  value         Float
+}
+
+model DocumentationValueCustom {
+  id            Int           @id @default(autoincrement())
+  companyId     Int
+  documentation Documentation
+  value         Float
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, documentation])
+}
+
+enum Documentation {
+  ENGINEERING
+  PROPERTY_REGISTRY
+  DEED_FINANCED_SBPE
+  DEED_FINANCED_MIN_SBPE
+  DEED_FINANCED_MCMV
+  DEED_FINANCED_MIN_MCMV
+  DEED_CASH
+  ITBI_FINANCED
+  ITBI_CASH
+  REGISTRATION
+}
+
 model DocumentationCost {
   id        Int      @id @default(autoincrement())
   dealId    Int
@@ -271,6 +302,13 @@ model DocumentationCost {
   deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
   creator User @relation("UserDocumentations", fields: [createdBy], references: [id])
   updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id])
+}
+
+model DocumentationValue {
+  id            Int     @id @default(autoincrement())
+  companyId     Int
+  documentation String
+  value         Decimal @db.Decimal(10, 2)
 }
 
 model Note {
