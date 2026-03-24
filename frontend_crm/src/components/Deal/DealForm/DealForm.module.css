@@ -256,8 +256,8 @@
   position: fixed;
   right: 20px;
   bottom: 20px;
-  width: 150px;
-  padding: 10px 0;
+  width: 180px;
+  padding: 10px;
   background: rgba(0, 0, 0, 0.6);
   border-radius: 5px;
   border: 1px solid var(--shadowColor);

@@ -141,7 +141,7 @@ export default function Config() {
             Configurações
             {isConfigTeam && " da Equipe"}
             {isOpenPermissions && " das Permissões"}
-            {isConfigCompany && " da Empresa"}
+            {isConfigCompany}
           </h1>
         </div>
 
@@ -158,7 +158,7 @@ export default function Config() {
                 setIsConfigCompany(false);
               }}
             >
-              <FaUserEdit />
+              <FaUserEdit className={styles.icon} />
               <h3>Suas configurações</h3>
             </button>
             {permissions.includes("USER_UPDATE") && (
@@ -173,7 +173,7 @@ export default function Config() {
                   setIsConfigCompany(false);
                 }}
               >
-                <FaUsersCog />
+                <FaUsersCog className={styles.icon} />
                 <h3>Configurações da equipe</h3>
               </button>
             )}
@@ -191,7 +191,7 @@ export default function Config() {
                   setIsConfigCompany(false);
                 }}
               >
-                <FaUnlockAlt />
+                <FaUnlockAlt className={styles.icon} />
                 <h3>Permissões da equipe</h3>
               </button>
             )}
@@ -207,8 +207,8 @@ export default function Config() {
                   setIsConfigCompany(true);
                 }}
               >
-                <GrConfigure />
-                <h3>Permissões da empresa</h3>
+                <GrConfigure className={styles.icon} />
+                <h3>Configurar documentos</h3>
               </button>
             )}
           </div>

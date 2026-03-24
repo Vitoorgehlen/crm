@@ -25,7 +25,7 @@ export function sumDocs(
 
     updatedDocs.push({
       label: "Matrícula",
-      description: "Variar muito!!",
+      description: "Pode variar muito!!",
       value,
     });
   }

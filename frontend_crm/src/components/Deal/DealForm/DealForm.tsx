@@ -579,22 +579,30 @@ export default function DealForm({
 
                         {paymentMethod === "FINANCING" && (
                           <>
-                            <div className={styles.boxDocTotal}>
-                              <h4>Total MCMV:</h4>
-                              <p>
-                                R$
-                                {docsCalculated
-                                  .reduce((acc, item) => {
-                                    if (item.label === "Financiar SBPE")
-                                      return acc;
-                                    return acc + item.value;
-                                  }, 0)
-                                  .toLocaleString("pt-BR", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                              </p>
-                            </div>
+                            {Number(downPaymentValue) +
+                              Number(subsidyValue) +
+                              Number(cashValue) +
+                              Number(fgtsValue) +
+                              Number(financingValue) +
+                              Number(creditLetterValue) <
+                              500000 && (
+                              <div className={styles.boxDocTotal}>
+                                <h4>Total MCMV:</h4>
+                                <p>
+                                  R$
+                                  {docsCalculated
+                                    .reduce((acc, item) => {
+                                      if (item.label === "Financiar SBPE")
+                                        return acc;
+                                      return acc + item.value;
+                                    }, 0)
+                                    .toLocaleString("pt-BR", {
+                                      minimumFractionDigits: 2,
+                                      maximumFractionDigits: 2,
+                                    })}
+                                </p>
+                              </div>
+                            )}
                             <div className={styles.boxDocTotal}>
                               <h4>Total SBPE:</h4>
                               <p>

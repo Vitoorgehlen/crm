@@ -13,8 +13,7 @@ export default function Documentation() {
   const [loading, setLoading] = useState<"read" | "save" | "reset" | null>(
     null,
   );
-
-  const [docValues, setDocValues] = useState<Record<string, string>>({});
+  const [docValues, setDocValues] = useState<Record<string, number>>({});
 
   const [error, setError] = useState("");
 
@@ -104,10 +103,10 @@ export default function Documentation() {
       if (!res.ok)
         throw new Error(data.error || "Erro ao buscar a documentação");
 
-      const map: Record<string, string> = {};
+      const map: Record<string, number> = {};
 
       data.forEach((d: Documentation) => {
-        map[d.documentation] = String(d.value);
+        map[d.documentation] = Number(d.value);
       });
 
       setDocValues(map);
@@ -128,7 +127,7 @@ export default function Documentation() {
         <div className={styles.description}>
           <h3>Configurar valor padrão de documentação</h3>
           <h5>Configure aqui os valores médios praticados na sua região.</h5>
-          <p>
+          <p className={styles.warning}>
             Esses valores serão utilizados apenas como referência para gerar uma
             estimativa de valor de documentação.
           </p>
@@ -138,32 +137,43 @@ export default function Documentation() {
           <div key={doc.key} className={styles.doc}>
             <h4>{doc.label}</h4>
             <div className={styles.inputAndPercent}>
-              <input
-                type="text"
-                className={styles.input}
-                value={docValues[doc.key] ?? ""}
-                onChange={(e) => {
-                  let value = e.target.value;
-
-                  if (!/^[\d.,]*$/.test(value)) return;
-
-                  value = value.replace(/,/g, ".");
-
-                  const parts = value.split(".");
-                  if (parts.length > 2) return;
-
-                  if (doc.type === "percent") {
-                    const parsed = parseFloat(value);
-                    if (!isNaN(parsed) && parsed > 100) return;
+              <div className={styles.inputWrapper}>
+                <input
+                  type="text"
+                  className={
+                    doc.type === "percent"
+                      ? styles.inputPercent
+                      : styles.inputValue
                   }
+                  value={
+                    docValues[doc.key] !== undefined
+                      ? doc.type === "percent"
+                        ? docValues[doc.key].toLocaleString("pt-BR", {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          })
+                        : docValues[doc.key].toLocaleString("pt-BR", {
+                            style: "currency",
+                            currency: "BRL",
+                          })
+                      : ""
+                  }
+                  onChange={(e) => {
+                    const raw = e.target.value.replace(/\D/g, "");
+                    const numeric = Number(raw) / 100;
 
-                  setDocValues((prev) => ({
-                    ...prev,
-                    [doc.key]: value,
-                  }));
-                }}
-              />
-              <h4>{doc.type === "percent" ? "%" : ""}</h4>
+                    if (doc.type === "percent" && numeric > 100) return;
+
+                    setDocValues((prev) => ({
+                      ...prev,
+                      [doc.key]: numeric,
+                    }));
+                  }}
+                />
+                {doc.type === "percent" && (
+                  <span className={styles.suffix}>%</span>
+                )}
+              </div>
             </div>
           </div>
         ))}

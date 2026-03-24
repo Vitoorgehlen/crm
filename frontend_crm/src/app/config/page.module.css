@@ -305,6 +305,18 @@
     width: 100%;
   }
 
+  .headerIcons .btnSetting h3 {
+    font-size: var(--font-5);
+  }
+
+  .headerIcons .btnSettingActive h3 {
+    font-size: var(--font-5);
+  }
+
+  .icon {
+    display: none;
+  }
+
   .headerContent h3 {
     font-size: var(--font-4);
   }

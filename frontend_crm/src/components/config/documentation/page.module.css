@@ -13,18 +13,33 @@
   border: 1px solid var(--shadowColor);
   background: var(--cardBackground);
   color: var(--primaryText);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .description {
   margin-bottom: 20px;
+  text-align: center;
+}
+
+.warning {
+  text-align: center;
+  color: var(--primaryColor);
+}
+
+.error {
+  color: var(--errorColor2);
+  font-size: var(--font-5);
 }
 
 .doc {
-  display: grid;
-  grid-template-columns: 250px 120px 40px;
+  display: flex;
   align-items: center;
-  justify-content: space-evenly;
+  justify-content: space-between;
   margin-bottom: 5px;
+  width: 100%;
+  max-width: 800px;
 }
 
 .label {
@@ -35,13 +50,46 @@
   display: flex;
 }
 
-.input {
+.inputWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.suffix {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none; /* 🔥 importante */
+  color: var(--primaryText);
+}
+
+.inputPercent {
+  padding-right: 20px; /* espaço pro % */
+  text-align: right;
+}
+
+.inputPercent {
+  align-items: center;
+  padding: 5px 23px 5px 5px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 100px;
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
+  transition: 200ms;
+  color: var(--primaryText);
+  text-align: right;
+  gap: 5px;
+}
+
+.inputValue {
   display: flex;
   align-items: center;
   padding: 5px;
   border-radius: 5px;
-  width: 80%;
-  max-width: 120px;
+  width: 100%;
+  max-width: 100px;
   border: 1px solid var(--shadowColor);
   background: var(--cardBackground);
   transition: 200ms;
@@ -53,6 +101,7 @@
   width: 100%;
   align-items: center;
   justify-content: space-around;
+  max-width: 500px;
 }
 
 .btnSave {
@@ -105,4 +154,21 @@
 .btnReset:hover {
   color: var(--primaryText);
   background: var(--errorColorD);
+}
+
+@media (max-width: 768px) {
+  .description {
+    text-align: center;
+  }
+
+  .doc {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+  }
+
+  .btns {
+    gap: 10px;
+  }
 }
