@@ -28,7 +28,7 @@ model Company {
   dealShares                DealShare[]
   rolePermissions           RolePermission[]
   Schedule                  Schedule[]
-  documentationValueCustoms DocumentationValueCustom[]
+  documentationValuesCustom DocumentationValueCustom[]
 }
 
 model User {
@@ -302,13 +302,6 @@ model DocumentationCost {
   deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
   creator User @relation("UserDocumentations", fields: [createdBy], references: [id])
   updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id])
-}
-
-model DocumentationValue {
-  id            Int     @id @default(autoincrement())
-  companyId     Int
-  documentation String
-  value         Decimal @db.Decimal(10, 2)
 }
 
 model Note {

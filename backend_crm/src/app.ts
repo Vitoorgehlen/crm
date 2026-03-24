@@ -9,7 +9,6 @@ import userRoutes from './routes/userRoutes';
 import clientsRoutes from './routes/clientsRoutes';
 import dealRoutes from './routes/dealRoutes';
 import documentationCostRoutes from './routes/documentationCostRoutes';
-import documentationValueRoutes from './routes/documentationValueRoutes';
 import previousDocumentationRoutes from './routes/previousDocumentationRoutes';
 import noteRoutes from './routes/noteRoutes';
 import dealShareRoutes from './routes/dealShareRoutes';
@@ -48,7 +47,6 @@ class App {
     this.app.use('/', clientsRoutes);
     this.app.use('/', dealRoutes);
     this.app.use('/', documentationCostRoutes);
-    this.app.use('/', documentationValueRoutes);
     this.app.use('/', previousDocumentationRoutes);
     this.app.use('/', noteRoutes);
     this.app.use('/', dealShareRoutes);
