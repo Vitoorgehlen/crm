@@ -22,6 +22,8 @@ export default function ScheduleForm({
   schedule,
   onClose,
   onDelete,
+  onCreate,
+  onUpdate,
 }: ScheduleFormProps) {
   const router = useRouter();
   const { token, isLoading } = useAuth();
@@ -33,10 +35,31 @@ export default function ScheduleForm({
   const [newLabel, setNewLabel] = useState("");
   const [newFinish, setNewFinish] = useState(false);
   const [newDate, setNewDate] = useState<Date | undefined>(
-    schedule?.reminderAt ? new Date(schedule.reminderAt) : undefined
+    schedule?.reminderAt ? new Date(schedule.reminderAt) : undefined,
   );
 
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [error, setError] = useState("");
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      const formEvent = e as unknown as React.FormEvent;
+      handleSubmit(formEvent);
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   function formatDateForInput(date: Date | undefined): string {
     if (!date) return "";
@@ -90,6 +113,8 @@ export default function ScheduleForm({
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Erro ao salvar a agenda");
+
+      if (onCreate) onCreate(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -114,6 +139,8 @@ export default function ScheduleForm({
       const data = await response.json();
       if (!response.ok)
         throw new Error(data.error || "Erro ao editar a agenda");
+
+      if (onUpdate) onUpdate(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -125,7 +152,7 @@ export default function ScheduleForm({
 
   const handleDelete = async (schedule: Schedule) => {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir o compromisso?`
+      `Tem certeza que deseja excluir o compromisso?`,
     );
     if (!confirmDelete) return;
 
@@ -155,17 +182,6 @@ export default function ScheduleForm({
     } catch (err) {
       console.error(err);
       setError("Erro inesperado ao apagar o compromisso");
-    }
-  };
-
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
-      if (schedule) {
-        const formEvent = e as unknown as React.FormEvent;
-        handleSubmit(formEvent);
-      } else {
-        onClose();
-      }
     }
   };
 
@@ -205,7 +221,7 @@ export default function ScheduleForm({
         setNewLabel(schedule.label || "");
         setNewFinish(schedule.finish || false);
         setNewDate(
-          schedule.reminderAt ? new Date(schedule.reminderAt) : undefined
+          schedule.reminderAt ? new Date(schedule.reminderAt) : undefined,
         );
       } else {
         setDealId(undefined);
@@ -222,8 +238,10 @@ export default function ScheduleForm({
   return (
     <form
       className={styles.overlay}
-      onClick={handleOverlayClick}
       onSubmit={handleSubmit}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
@@ -260,7 +278,7 @@ export default function ScheduleForm({
                 setSearchClient(value);
 
                 const foundDeal = deals.find(
-                  (deal) => deal.client?.name === value
+                  (deal) => deal.client?.name === value,
                 );
                 if (foundDeal) setDealId(foundDeal.id);
               }}

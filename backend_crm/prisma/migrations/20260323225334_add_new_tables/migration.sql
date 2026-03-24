@@ -5,11 +5,34 @@
   - Added the required column `newDueDate` to the `Expense` table without a default value. This is not possible if the table is not empty.
 
 */
--- CreateEnum
-CREATE TYPE "public"."Documentation" AS ENUM ('ENGINEERING', 'PROPERTY_REGISTRY', 'DEED_FINANCED_SBPE', 'DEED_FINANCED_MIN_SBPE', 'DEED_FINANCED_MCMV', 'DEED_FINANCED_MIN_MCMV', 'DEED_CASH', 'ITBI_FINANCED', 'ITBI_CASH', 'REGISTRATION');
+-- CreateEnum Documentation
+DO $$ BEGIN
+    CREATE TYPE "public"."Documentation" AS ENUM (
+        'ENGINEERING',
+        'PROPERTY_REGISTRY',
+        'DEED_FINANCED_SBPE',
+        'DEED_FINANCED_MIN_SBPE',
+        'DEED_FINANCED_MCMV',
+        'DEED_FINANCED_MIN_MCMV',
+        'DEED_CASH',
+        'ITBI_FINANCED',
+        'ITBI_CASH',
+        'REGISTRATION'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
--- CreateEnum
-CREATE TYPE "public"."recurrenceTypes" AS ENUM ('MONTHLY', 'YEARLY', 'WEEKLY');
+-- CreateEnum recurrenceTypes
+DO $$ BEGIN
+    CREATE TYPE "public"."recurrenceTypes" AS ENUM (
+        'MONTHLY',
+        'YEARLY',
+        'WEEKLY'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- AlterTable
 ALTER TABLE "public"."Expense" DROP COLUMN "notes",

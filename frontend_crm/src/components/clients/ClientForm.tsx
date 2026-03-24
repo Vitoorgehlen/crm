@@ -26,10 +26,35 @@ export default function ClientsForm({
   const [dateOfBirth, setDateOfBirth] = useState("");
   const [isInvestor, setIsInvestor] = useState(false);
   const [isPriority, setIsPriority] = useState(false);
+
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState<"read" | "save" | "delete" | null>(
-    null
+    null,
   );
   const [error, setError] = useState("");
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      if (mode === "create") {
+        onClose();
+      } else if (mode === "edit") {
+        handleSubmit(e, onSubmit);
+      }
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   function clearForm() {
     setName("");
@@ -63,7 +88,7 @@ export default function ClientsForm({
 
   const handleSubmit = async (
     e: React.FormEvent,
-    submitFunction: (payload: Partial<Client>) => Promise<void> | void
+    submitFunction: (payload: Partial<Client>) => Promise<void> | void,
   ) => {
     e.preventDefault();
     if (loading !== null) return;
@@ -99,13 +124,13 @@ export default function ClientsForm({
   const deleteClient = async () => {
     if (!client) return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${client.name}?`
+      `Tem certeza que deseja excluir ${client.name}?`,
     );
     if (!confirmDelete) return;
     const deals = await fetchDealByClient(client);
     if (deals.length > 0) {
       const confirm2Delete = window.confirm(
-        `O ${client.name} possui ${deals.length} negociação que vai ser apagado juntos com ele.`
+        `O ${client.name} possui ${deals.length} negociação que vai ser apagado juntos com ele.`,
       );
       if (!confirm2Delete) return;
     }
@@ -152,13 +177,9 @@ export default function ClientsForm({
   return (
     <div
       className={styles.overlay}
-      onClick={(e) => {
-        if (mode === "edit") {
-          if (e.target === e.currentTarget) handleSubmit(e, onSubmit);
-        } else if (mode === "create") {
-          onClose();
-        }
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
@@ -212,12 +233,12 @@ export default function ClientsForm({
                 if (value.length > 6) {
                   value = value.replace(
                     /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
-                    "($1) $2 $3-$4"
+                    "($1) $2 $3-$4",
                   );
                 } else if (value.length > 2) {
                   value = value.replace(
                     /^(\d{2})(\d{0,1})(\d{0,4}).*/,
-                    "($1) $2 $3"
+                    "($1) $2 $3",
                   );
                 } else if (value.length > 0) {
                   value = value.replace(/^(\d{0,2}).*/, "($1");

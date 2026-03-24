@@ -97,6 +97,8 @@ export default function CloseDealForm({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
+
   const totalPercentage = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.percentage ?? 0), 0);
   }, [splits]);
@@ -104,6 +106,25 @@ export default function CloseDealForm({
   const totalAmounts = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.amount ?? 0), 0);
   }, [splits]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      onClose();
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   function addSplit() {
     setSplits((prev) => [
@@ -427,9 +448,9 @@ export default function CloseDealForm({
   return (
     <div
       className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>

@@ -23,7 +23,7 @@ export default function ScheduleLayout() {
   const [isOpenCard, setIsOpenCard] = useState(false);
   const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [selectedSchedule, setSelectedSchedule] = useState<Schedule | null>(
-    null
+    null,
   );
 
   function isPastDay(day: Date): boolean {
@@ -31,12 +31,12 @@ export default function ScheduleLayout() {
     const dayWithoutTime = new Date(
       day.getFullYear(),
       day.getMonth(),
-      day.getDate()
+      day.getDate(),
     );
     const todayWithoutTime = new Date(
       today.getFullYear(),
       today.getMonth(),
-      today.getDate()
+      today.getDate(),
     );
 
     return dayWithoutTime < todayWithoutTime;
@@ -73,7 +73,7 @@ export default function ScheduleLayout() {
       newDate.setDate(currentDate.getDate() + (direction === "next" ? 7 : -7));
     } else {
       newDate.setMonth(
-        currentDate.getMonth() + (direction === "next" ? 1 : -1)
+        currentDate.getMonth() + (direction === "next" ? 1 : -1),
       );
     }
 
@@ -147,6 +147,18 @@ export default function ScheduleLayout() {
     return text.charAt(0).toUpperCase() + text.slice(1, -1);
   }
 
+  const handleCreateSchedule = (newSchedule: Schedule) => {
+    setSchedules((prev) => [...prev, newSchedule]);
+  };
+
+  const handleUpdateSchedule = (updatedSchedule: Schedule) => {
+    setSchedules((prev) =>
+      prev.map((schedule) =>
+        schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
+      ),
+    );
+  };
+
   useEffect(() => {
     if (isLoading) return;
     if (!token) {
@@ -206,7 +218,7 @@ export default function ScheduleLayout() {
                 } else {
                   const today = new Date();
                   setCurrentDate(
-                    new Date(today.getFullYear(), today.getMonth(), 1)
+                    new Date(today.getFullYear(), today.getMonth(), 1),
                   );
                 }
                 return next;
@@ -239,7 +251,7 @@ export default function ScheduleLayout() {
               <div key={index} className={styles.dayHeader}>
                 <span>
                   {formatTextWeek(
-                    day.toLocaleDateString("pt-BR", { weekday: "short" })
+                    day.toLocaleDateString("pt-BR", { weekday: "short" }),
                   )}
                 </span>
                 {isWeekOrMonth && (
@@ -257,7 +269,7 @@ export default function ScheduleLayout() {
                 <div key={index} className={styles.gridHeaderMonthTxt}>
                   <span>{day}</span>
                 </div>
-              )
+              ),
             )}
           </div>
         )}
@@ -293,7 +305,7 @@ export default function ScheduleLayout() {
                         .sort(
                           (a, b) =>
                             new Date(a.reminderAt ?? 0).getTime() -
-                            new Date(b.reminderAt ?? 0).getTime()
+                            new Date(b.reminderAt ?? 0).getTime(),
                         )
                         .map((schedule) => (
                           <button
@@ -377,9 +389,11 @@ export default function ScheduleLayout() {
             setSelectedSchedule(null);
             setIsOpenCard(false);
           }}
-          onCreate={(newSchedule) =>
-            setSchedules((prev) => [...prev, newSchedule])
-          }
+          onCreate={handleCreateSchedule}
+          onUpdate={handleUpdateSchedule}
+          onDelete={(deleteId) => {
+            setSchedules((prev) => prev.filter((s) => s.id !== deleteId));
+          }}
           onSubmit={async (payload) => {
             console.log(payload);
           }}

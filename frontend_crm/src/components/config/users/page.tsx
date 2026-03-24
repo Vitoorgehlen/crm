@@ -34,8 +34,28 @@ export default function ConfigUsers({
   const [isOpenEditEmail, setIsOpenEditEmail] = useState(false);
   const [isOpenEditPassword, setIsOpenEditPassword] = useState(false);
 
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      onClose();
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -104,7 +124,7 @@ export default function ConfigUsers({
         finalEmail2,
         finalPassword,
         finalPassword2,
-        false
+        false,
       );
 
       if (!payload) {
@@ -165,7 +185,7 @@ export default function ConfigUsers({
         finalEmail2,
         finalPassword,
         finalPassword2,
-        true
+        true,
       );
 
       if (!payload) {
@@ -217,7 +237,7 @@ export default function ConfigUsers({
     email2: string,
     password: string,
     password2: string,
-    isEdit = false
+    isEdit = false,
   ) => {
     try {
       if (name.length < 4 || name.length > 25) {
@@ -253,7 +273,7 @@ export default function ConfigUsers({
         const passReq = /(?=.*[a-z])(?=.*[A-Z])/;
         if (!passReq.test(password)) {
           setError(
-            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula"
+            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula",
           );
           return;
         }
@@ -285,9 +305,9 @@ export default function ConfigUsers({
   return (
     <form
       className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>

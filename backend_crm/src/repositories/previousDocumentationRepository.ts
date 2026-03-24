@@ -1,5 +1,6 @@
 import { prisma } from "../prisma-client";
 import { Documentation, Prisma } from '@prisma/client';
+import { checkUserPermission } from "./rolePermissionRepository";
 //! ----------------------------- DEFAULT -------------------------------
 
 // CRIA OU ATUALIZA um DocumentationDefault (SUPER User)
@@ -54,21 +55,21 @@ export function getDocumentationDefault(userId: number) {
     return result;
 })};
 
-// Apaga documentação
-export async function deleteDocumentationDefault(
-  id: number,
-) {
-  return prisma.$transaction(async (tx) => {
-    const documentationExist = await tx.documentationValueDefault.findFirst({
-      where: { id },
-    });
-    if (!documentationExist) throw new Error('Documentação não existe.');
+// // Apaga documentação
+// export async function deleteDocumentationDefault(
+//   id: number,
+// ) {
+//   return prisma.$transaction(async (tx) => {
+//     const documentationExist = await tx.documentationValueDefault.findFirst({
+//       where: { id },
+//     });
+//     if (!documentationExist) throw new Error('Documentação não existe.');
 
-    return tx.documentationValueDefault.delete({
-      where: { id }
-    });
-  });
-}
+//     return tx.documentationValueDefault.delete({
+//       where: { id }
+//     });
+//   });
+// }
 
 //! ----------------------------- CUSTOM -------------------------------
 export async function upsertDocumentationCustom(
@@ -103,7 +104,6 @@ export async function upsertDocumentationCustom(
 
 // Apaga documentação
 export async function deleteDocumentationCustom(
-  id: number,
   userId: number
 ) {
   return prisma.$transaction(async (tx) => {
@@ -113,16 +113,18 @@ export async function deleteDocumentationCustom(
     });
     if (!user) throw new Error('Usuário não encontrado.');
 
-    const documentationExist = await tx.documentationValueCustom.findFirst({
+    const hasAccess = await checkUserPermission(userId, 'DEAL_DELETE');
+    if (!hasAccess) throw new Error('Você não tem permissão para apagar documentação.' );
+
+    const documentationExist = await tx.documentationValueCustom.findMany({
       where: {
-        id,
         companyId: user.companyId,
       },
     });
     if (!documentationExist) throw new Error('Documentação não existe.');
 
-    return tx.documentationValueCustom.delete({
-      where: { id }
+    return tx.documentationValueCustom.deleteMany({
+      where: { companyId: user.companyId }
     });
   });
 }

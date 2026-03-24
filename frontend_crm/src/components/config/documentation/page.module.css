@@ -48,15 +48,21 @@
   color: var(--primaryText);
 }
 
+.btns {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-around;
+}
+
 .btnSave {
   margin-top: 20px;
   padding: 5px;
   color: var(--primaryColor);
   background: var(--cardBackground);
-  font-size: 0.9rem;
   border: none;
   border-radius: 5px;
-  max-width: 500px;
+  max-width: 200px;
   width: 80%;
   cursor: pointer;
   display: flex;
@@ -73,4 +79,30 @@
 .btnSave:hover {
   color: var(--primaryText);
   background: var(--cardBackground2);
+}
+
+.btnReset {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--errorColor2);
+  border: 1px solid var(--shadowColor);
+  background: var(--cardBackground);
+  border: none;
+  border-radius: 5px;
+  max-width: 200px;
+  width: 80%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: 200ms;
+
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.btnReset:hover {
+  color: var(--primaryText);
+  background: var(--errorColorD);
 }

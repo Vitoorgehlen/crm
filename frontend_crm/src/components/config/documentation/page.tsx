@@ -10,7 +10,9 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Documentation() {
   const { token } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState<"read" | "save" | "reset" | null>(
+    null,
+  );
 
   const [docValues, setDocValues] = useState<Record<string, string>>({});
 
@@ -19,7 +21,7 @@ export default function Documentation() {
   async function handleSaveDocs() {
     if (loading) return;
 
-    setLoading(true);
+    setLoading("save");
     setError("");
 
     try {
@@ -44,7 +46,9 @@ export default function Documentation() {
 
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error || "Erro ao apagar a empresa");
+        throw new Error(
+          data.error || "Erro ao salvar as documentações personalizadas",
+        );
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -52,12 +56,44 @@ export default function Documentation() {
         setError("Erro inesperado");
       }
     } finally {
-      setLoading(false);
+      setLoading(null);
+    }
+  }
+
+  async function handleResetDocs() {
+    if (loading) return;
+
+    setLoading("reset");
+    setError("");
+
+    try {
+      const response = await fetch(`${API}/documentation-custom`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok)
+        throw new Error(
+          data.error || "Erro ao apagar as documentações personalizadas",
+        );
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro inesperado");
+      }
+    } finally {
+      setLoading(null);
+      fetchDocs();
     }
   }
 
   const fetchDocs = useCallback(async () => {
-    setLoading(true);
+    setLoading("read");
 
     try {
       const res = await fetch(`${API}/documentation-default/`, {
@@ -78,7 +114,7 @@ export default function Documentation() {
     } catch (err: unknown) {
       console.error(err);
     } finally {
-      setLoading(false);
+      setLoading(null);
     }
   }, [token]);
 
@@ -131,10 +167,30 @@ export default function Documentation() {
             </div>
           </div>
         ))}
-
-        <button onClick={handleSaveDocs} className={styles.btnSave}>
-          Salvar documentações
-        </button>
+        <div className={styles.btns}>
+          <button
+            className={styles.btnReset}
+            onClick={handleResetDocs}
+            type="button"
+          >
+            {loading === "reset" ? (
+              <h4>Restaurando...</h4>
+            ) : (
+              <h4>Restaurar as documentações</h4>
+            )}
+          </button>
+          <button
+            className={styles.btnSave}
+            onClick={handleSaveDocs}
+            type="button"
+          >
+            {loading === "save" ? (
+              <h4>Salvando...</h4>
+            ) : (
+              <h4>Salvar as documentações</h4>
+            )}
+          </button>
+        </div>
       </main>
     </div>
   );

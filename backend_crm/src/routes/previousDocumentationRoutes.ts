@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import superUserOnly from '../middlewares/superUserOnly';
-import { upsertDocumentationDefaults, upsertDocumentationCustom, deleteDocumentationCustom, deleteDocumentationDefault, getDocumentationDefault, getDocumentationDefaultSU } from '../repositories/previousDocumentationRepository';
+import { upsertDocumentationDefaults, upsertDocumentationCustom, deleteDocumentationCustom, getDocumentationDefault, getDocumentationDefaultSU } from '../repositories/previousDocumentationRepository';
 
 const router = Router();
 
@@ -55,24 +55,24 @@ router.get('/documentation-default', loginRequired, async (req, res) => {
   }
 });
 
-router.delete('/documentation-default/:id', superUserOnly, async(
-  req: Request & { superUser?: { id: number; email: string } },
-  res: Response
-) => {
-  const superUser = req.superUser;
-  if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
+// router.delete('/documentation-default/:id', superUserOnly, async(
+//   req: Request & { superUser?: { id: number; email: string } },
+//   res: Response
+// ) => {
+//   const superUser = req.superUser;
+//   if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
 
-  const id = Number(req.params.id);
-  if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+//   const id = Number(req.params.id);
+//   if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
 
-  try {
-    const deleteDoc = await deleteDocumentationDefault( id );
-    res.status(201).json(deleteDoc);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao deletar documentação personalizada.' });
-  }
-});
+//   try {
+//     const deleteDoc = await deleteDocumentationDefault( id );
+//     res.status(201).json(deleteDoc);
+//   } catch (err) {
+//     console.log(err);
+//     res.status(500).json({ error: 'Erro ao deletar documentação personalizada.' });
+//   }
+// });
 
 //! ------------------------ CUSTOM ------------------------------------
 router.put('/documentation-custom', loginRequired, async (req, res) => {
@@ -92,17 +92,14 @@ router.put('/documentation-custom', loginRequired, async (req, res) => {
   }
 });
 
-router.delete('/documentation-custom/:id', loginRequired, async(req,res) => {
+router.delete('/documentation-custom', loginRequired, async(req,res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId } = user;
 
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
-  const id = Number(req.params.id);
-  if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
-
   try {
-    const deleteDoc = await deleteDocumentationCustom( id, userId );
+    const deleteDoc = await deleteDocumentationCustom( userId );
     res.status(201).json(deleteDoc);
   } catch (err) {
     console.log(err);

@@ -7,7 +7,6 @@ import {
   Deal,
   DealFormProps,
   DealStatus,
-  docsNames,
   Documentation,
   Note,
   PaymentMethod,
@@ -25,6 +24,7 @@ import ClientsForm from "@/components/clients/ClientForm";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
+import { getTotal, sumDocs } from "@/utils/sumPreviusDocs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -46,6 +46,7 @@ export default function DealForm({
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
+  const [showClientPopup, setShowClientPopup] = useState(false);
 
   const [searchClient, setSearchClient] = useState("");
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -65,17 +66,41 @@ export default function DealForm({
 
   const [docValues, setDocValues] = useState<Record<string, number>>({});
   const [docsCalculated, setDocsCalculated] = useState<
-    { label: string; value: number }[]
+    { label: string; value: number; description: string }[]
   >([]);
 
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
   const [note, setNote] = useState<Array<Note>>([]);
 
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState<
     "read" | "addNote" | "save" | "del" | null
   >(null);
   const [error, setError] = useState("");
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      if (mode === "create") {
+        onClose();
+      } else if (mode === "edit") {
+        handleSubmit(e, onSubmit, false);
+      }
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   function clearForm() {
     setClientId(undefined);
@@ -307,162 +332,26 @@ export default function DealForm({
     }
   }, [token]);
 
-  function getTotal() {
-    if (paymentMethod === "CASH") {
-      return (cashValue || 0) + (fgtsValue || 0) + (downPaymentValue || 0);
-    }
-
-    if (paymentMethod === "FINANCING") {
-      return (
-        (downPaymentValue || 0) +
-        (subsidyValue || 0) +
-        (fgtsValue || 0) +
-        (financingValue || 0)
-      );
-    }
-
-    if (paymentMethod === "CREDIT_LETTER") {
-      return (
-        (downPaymentValue || 0) + (fgtsValue || 0) + (creditLetterValue || 0)
-      );
-    }
-
-    return 0;
-  }
-
-  function sumDocs() {
-    if (!docValues) return;
-
-    const updatedDocs = [];
-
-    const propertyRegistry = docsNames.find(
-      (doc) => doc.key === "PROPERTY_REGISTRY",
-    );
-    if (propertyRegistry) {
-      const value = docValues[propertyRegistry.key] || 0;
-
-      updatedDocs.push({
-        label: "Matrícula",
-        value,
-      });
-    }
-
-    if (paymentMethod === "FINANCING") {
-      const engineering = docsNames.find((doc) => doc.key === "ENGINEERING");
-      if (engineering) {
-        const value = docValues[engineering.key] || 0;
-
-        updatedDocs.push({
-          label: engineering.label,
-          value,
-        });
-      }
-
-      const financingSbpe = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_SBPE",
-      );
-      const financingSbpeMin = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MIN_SBPE",
-      );
-      if (financingSbpe && financingSbpeMin) {
-        const value =
-          ((docValues[financingSbpe.key] || 0) / 100) *
-          (Number(financingValue) || 0);
-        const minValue = docValues[financingSbpeMin.key] || 0;
-
-        updatedDocs.push({
-          label: "Financiar SBPE",
-          value: value < minValue ? minValue : value,
-        });
-      }
-
-      const financing = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MCMV",
-      );
-      const financingMin = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MIN_MCMV",
-      );
-      if (financing && financingMin) {
-        const value =
-          ((docValues[financing.key] || 0) / 100) *
-          (Number(financingValue) || 0);
-        const minValue = docValues[financingMin.key] || 0;
-
-        updatedDocs.push({
-          label: "Financiar MCMV",
-          value: value < minValue ? minValue : value,
-        });
-      }
-    }
-
-    if (paymentMethod === "CASH") {
-      const cash = docsNames.find((doc) => doc.key === "DEED_CASH");
-      if (cash) {
-        const value =
-          ((docValues[cash.key] || 0) / 100) *
-          ((Number(cashValue) || 0) +
-            (Number(fgtsValue) || 0) +
-            (Number(downPaymentValue) || 0));
-
-        updatedDocs.push({
-          label: "Escritura",
-          value,
-        });
-      }
-    }
-
-    const itbiCash = docsNames.find((doc) => doc.key === "ITBI_CASH");
-    if (itbiCash) {
-      const value =
-        ((docValues[itbiCash.key] || 0) / 100) *
-        ((Number(cashValue) || 0) +
-          (Number(downPaymentValue) || 0) +
-          (Number(fgtsValue) || 0) +
-          (Number(subsidyValue) || 0));
-
-      let financedItbi = 0;
-      if (paymentMethod !== "CASH") {
-        const itbiFinanced = docsNames.find(
-          (doc) => doc.key === "ITBI_FINANCED",
-        );
-        if (itbiFinanced) {
-          const value =
-            ((docValues[itbiFinanced.key] || 0) / 100) *
-            (Number(financingValue) || 0);
-          financedItbi = value;
-        }
-      }
-      updatedDocs.push({
-        label: "ITBI",
-        value: value + financedItbi + 50,
-      });
-    }
-
-    const registrationValue = docsNames.find(
-      (doc) => doc.key === "REGISTRATION",
-    );
-    if (registrationValue) {
-      const value =
-        ((docValues[registrationValue.key] || 0) / 100) *
-        (Number(getTotal()) || 0);
-
-      updatedDocs.push({
-        label: "Registro",
-        value: value,
-      });
-    }
-
-    setDocsCalculated(updatedDocs);
-  }
-
   useEffect(() => {
     fetchDocs();
   }, [fetchDocs]);
 
   useEffect(() => {
-    sumDocs();
+    const result = sumDocs(
+      docValues,
+      paymentMethod,
+      downPaymentValue,
+      subsidyValue,
+      cashValue,
+      fgtsValue,
+      financingValue,
+      creditLetterValue,
+    );
+
+    setDocsCalculated(result ?? []);
   }, [
     docValues,
+    paymentMethod,
     downPaymentValue,
     cashValue,
     subsidyValue,
@@ -575,13 +464,9 @@ export default function DealForm({
   return (
     <form
       className={mode === "create" ? styles.overlay : styles.overlayEdit}
-      onClick={(e) => {
-        if (mode === "edit") {
-          if (e.target === e.currentTarget) handleSubmit(e, onSubmit, false);
-        } else if (mode === "create") {
-          onClose();
-        }
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div
         className={mode === "create" ? styles.modal : styles.modalEdit}
@@ -607,9 +492,25 @@ export default function DealForm({
                   ) : (
                     <>
                       <h4>Editar negociação</h4>
-                      <button className={styles.clientBtn}>
-                        <h2>{deal?.client?.name ?? ""}</h2>
-                      </button>
+                      <div
+                        onMouseEnter={() => {
+                          setShowClientPopup(true);
+                        }}
+                        onMouseLeave={() => {
+                          setShowClientPopup(false);
+                        }}
+                        className={styles.popupClient}
+                      >
+                        <button className={styles.clientBtn}>
+                          <h2>{deal?.client?.name ?? ""}</h2>
+                        </button>
+                        {showClientPopup && (
+                          <div className={styles.boxClientPopup}>
+                            <h3>{deal?.client?.name ?? ""}</h3>
+                            <p>{deal?.client?.phone ?? ""}</p>
+                          </div>
+                        )}
+                      </div>
                       <h6 className={styles.lastContact}>
                         {`Último contato:
                       ${getDaysSinceLastContact(
@@ -636,9 +537,20 @@ export default function DealForm({
                   <div
                     onMouseEnter={() => {
                       setShowPopup(true);
-                      sumDocs();
+                      sumDocs(
+                        docValues,
+                        paymentMethod,
+                        downPaymentValue,
+                        subsidyValue,
+                        cashValue,
+                        fgtsValue,
+                        financingValue,
+                        creditLetterValue,
+                      );
                     }}
-                    onMouseLeave={() => setShowPopup(false)}
+                    onMouseLeave={() => {
+                      setShowPopup(false);
+                    }}
                     className={styles.btnDocValue2}
                   >
                     <BsCashCoin className={styles.btnDocValue} />
@@ -648,14 +560,19 @@ export default function DealForm({
                         {docsCalculated.map((doc) => {
                           return (
                             <div key={doc.label} className={styles.boxDoc}>
-                              <h4>{doc.label}:</h4>
-                              <p>
-                                R$
-                                {doc.value.toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </p>
+                              <div className={styles.nameValue}>
+                                <h4>{doc.label}:</h4>
+                                <p>
+                                  R$
+                                  {doc.value.toLocaleString("pt-BR", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                                </p>
+                              </div>
+                              <div className={styles.description}>
+                                <p>{doc.description}</p>
+                              </div>
                             </div>
                           );
                         })}
@@ -678,20 +595,68 @@ export default function DealForm({
                                   })}
                               </p>
                             </div>
+                            <div className={styles.boxDocTotal}>
+                              <h4>Total SBPE:</h4>
+                              <p>
+                                R$
+                                {docsCalculated
+                                  .reduce((acc, item) => {
+                                    if (item.label === "Financiar MCMV")
+                                      return acc;
+                                    return acc + item.value;
+                                  }, 0)
+                                  .toLocaleString("pt-BR", {
+                                    minimumFractionDigits: 2,
+                                    maximumFractionDigits: 2,
+                                  })}
+                              </p>
+                            </div>
                           </>
                         )}
-                        <div className={styles.boxDocTotal}>
-                          <h4>Total SBPE:</h4>
-                          <p>
-                            R$
-                            {docsCalculated
-                              .reduce((acc, item) => acc + item.value, 0)
-                              .toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                          </p>
-                        </div>
+
+                        {paymentMethod === "CASH" && (
+                          <div className={styles.boxDocTotal}>
+                            <h4>Total:</h4>
+                            <p>
+                              R$
+                              {docsCalculated
+                                .reduce((acc, item) => {
+                                  if (
+                                    item.label === "Financiar MCMV" ||
+                                    item.label === "Financiar SBPE"
+                                  )
+                                    return acc;
+                                  return acc + item.value;
+                                }, 0)
+                                .toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                            </p>
+                          </div>
+                        )}
+
+                        {paymentMethod === "CREDIT_LETTER" && (
+                          <div className={styles.boxDocTotal}>
+                            <h4>Total:</h4>
+                            <p>
+                              R$
+                              {docsCalculated
+                                .reduce((acc, item) => {
+                                  if (
+                                    item.label === "Financiar MCMV" ||
+                                    item.label === "Financiar SBPE"
+                                  )
+                                    return acc;
+                                  return acc + item.value;
+                                }, 0)
+                                .toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                            </p>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -798,14 +763,13 @@ export default function DealForm({
               {paymentMethod === "CASH" && (
                 <>
                   <div className={styles.paymentTitle}>
-                    <h3>Entrada</h3>
-                    <h3>FGTS</h3>
                     <h3>Valor à vista</h3>
+                    <h3>FGTS</h3>
                   </div>
                   <div className={styles.payment}>
                     <input
                       type="text"
-                      placeholder="Entrada"
+                      placeholder="Valor à vista"
                       value={downPaymentValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
                         maximumFractionDigits: 2,
@@ -813,7 +777,7 @@ export default function DealForm({
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCashValue(numeric);
+                        setDownPaymentValue(numeric);
                       }}
                     />
                     <input
@@ -827,19 +791,6 @@ export default function DealForm({
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
                         setFgtsValue(numeric);
-                      }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Valor à vista"
-                      value={cashValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCashValue(numeric);
                       }}
                     />
                   </div>
@@ -963,13 +914,14 @@ export default function DealForm({
               )}
 
               <h2>
-                {(
-                  (Number(downPaymentValue) || 0) +
-                  (Number(cashValue) || 0) +
-                  (Number(subsidyValue) || 0) +
-                  (Number(fgtsValue) || 0) +
-                  (Number(financingValue) || 0) +
-                  (Number(creditLetterValue) || 0)
+                {getTotal(
+                  paymentMethod,
+                  downPaymentValue,
+                  subsidyValue,
+                  cashValue,
+                  fgtsValue,
+                  financingValue,
+                  creditLetterValue,
                 ).toLocaleString("pt-BR", {
                   style: "currency",
                   currency: "BRL",

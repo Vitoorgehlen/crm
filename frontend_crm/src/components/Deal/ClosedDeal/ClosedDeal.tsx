@@ -29,6 +29,7 @@ import {
 import { GiCheckMark } from "react-icons/gi";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
+import { sumDocs } from "@/utils/sumPreviusDocs";
 
 export default function ClosedDeal({
   isOpen,
@@ -100,10 +101,12 @@ export default function ClosedDeal({
   const [docCost, setDocCost] = useState<Array<DocumentationCost>>([]);
   const [docCostTotal, setDocCostTotal] = useState<number>(0);
 
+  const [showClientPopup, setShowClientPopup] = useState(false);
+
   const [showPopup, setShowPopup] = useState(false);
   const [docValues, setDocValues] = useState<Record<string, number>>({});
   const [docsCalculated, setDocsCalculated] = useState<
-    { label: string; value: number }[]
+    { label: string; value: number; description: string }[]
   >([]);
 
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
@@ -115,6 +118,7 @@ export default function ClosedDeal({
   );
   const [splits, setSplits] = useState<CommissionSplit[]>([]);
 
+  const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -125,6 +129,25 @@ export default function ClosedDeal({
   const totalAmounts = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.amount ?? 0), 0);
   }, [splits]);
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      setIsMouseDownInside(false);
+    } else {
+      setIsMouseDownInside(true);
+    }
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    if (!isMouseDownInside && e.target === e.currentTarget) {
+      onClose();
+    }
+    setIsMouseDownInside(false);
+  };
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
 
   function addSplit() {
     setSplits((prev) => [
@@ -260,131 +283,6 @@ export default function ClosedDeal({
     }
 
     return 0;
-  }
-
-  function sumDocs() {
-    if (!docValues) return;
-
-    const updatedDocs = [];
-
-    const propertyRegistry = docsNames.find(
-      (doc) => doc.key === "PROPERTY_REGISTRY",
-    );
-    if (propertyRegistry) {
-      const value = docValues[propertyRegistry.key] || 0;
-
-      updatedDocs.push({
-        label: "Matrícula",
-        value,
-      });
-    }
-
-    if (paymentMethod === "FINANCING") {
-      const engineering = docsNames.find((doc) => doc.key === "ENGINEERING");
-      if (engineering) {
-        const value = docValues[engineering.key] || 0;
-
-        updatedDocs.push({
-          label: engineering.label,
-          value,
-        });
-      }
-
-      const financingSbpe = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_SBPE",
-      );
-      const financingSbpeMin = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MIN_SBPE",
-      );
-      if (financingSbpe && financingSbpeMin) {
-        const value =
-          ((docValues[financingSbpe.key] || 0) / 100) *
-          (Number(financingValue) || 0);
-        const minValue = docValues[financingSbpeMin.key] || 0;
-
-        updatedDocs.push({
-          label: "Financiar SBPE",
-          value: value < minValue ? minValue : value,
-        });
-      }
-
-      const financing = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MCMV",
-      );
-      const financingMin = docsNames.find(
-        (doc) => doc.key === "DEED_FINANCED_MIN_MCMV",
-      );
-      if (financing && financingMin) {
-        const value =
-          ((docValues[financing.key] || 0) / 100) *
-          (Number(financingValue) || 0);
-        const minValue = docValues[financingMin.key] || 0;
-
-        updatedDocs.push({
-          label: "Financiar MCMV",
-          value: value < minValue ? minValue : value,
-        });
-      }
-    }
-
-    if (paymentMethod === "CASH") {
-      const cash = docsNames.find((doc) => doc.key === "DEED_CASH");
-      if (cash) {
-        const value =
-          ((docValues[cash.key] || 0) / 100) *
-          ((Number(cashValue) || 0) +
-            (Number(fgtsValue) || 0) +
-            (Number(downPaymentValue) || 0));
-
-        updatedDocs.push({
-          label: "Escritura",
-          value,
-        });
-      }
-    }
-
-    const itbiCash = docsNames.find((doc) => doc.key === "ITBI_CASH");
-    if (itbiCash) {
-      const value =
-        ((docValues[itbiCash.key] || 0) / 100) *
-        ((Number(cashValue) || 0) +
-          (Number(downPaymentValue) || 0) +
-          (Number(fgtsValue) || 0) +
-          (Number(subsidyValue) || 0));
-
-      let financedItbi = 0;
-      if (paymentMethod !== "CASH") {
-        const itbiFinanced = docsNames.find(
-          (doc) => doc.key === "ITBI_FINANCED",
-        );
-        if (itbiFinanced) {
-          const value =
-            ((docValues[itbiFinanced.key] || 0) / 100) *
-            (Number(financingValue) || 0);
-          financedItbi = value;
-        }
-      }
-      updatedDocs.push({
-        label: "ITBI",
-        value: value + financedItbi + 50,
-      });
-    }
-
-    const registrationValue = docsNames.find(
-      (doc) => doc.key === "REGISTRATION",
-    );
-    if (registrationValue) {
-      const value =
-        ((docValues[registrationValue.key] || 0) / 100) *
-        (Number(getTotal()) || 0);
-
-      updatedDocs.push({
-        label: "Registro",
-        value: value,
-      });
-    }
-
-    setDocsCalculated(updatedDocs);
   }
 
   function buildPayload(): CloseDealPayload {
@@ -762,9 +660,21 @@ export default function ClosedDeal({
   }, [fetchDocs]);
 
   useEffect(() => {
-    sumDocs();
+    const result = sumDocs(
+      docValues,
+      paymentMethod,
+      downPaymentValue,
+      subsidyValue,
+      cashValue,
+      fgtsValue,
+      financingValue,
+      creditLetterValue,
+    );
+
+    setDocsCalculated(result ?? []);
   }, [
     docValues,
+    paymentMethod,
     downPaymentValue,
     cashValue,
     subsidyValue,
@@ -814,16 +724,34 @@ export default function ClosedDeal({
   return (
     <div
       className={styles.overlay}
-      onClick={(e) => {
-        if (e.target === e.currentTarget) handleSubmit();
-      }}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
           <div className={styles.modalLeft}>
             <div className={styles.titleCard}>
               <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
-              <h2>{deal?.client?.name ?? ""}</h2>
+              <div
+                onMouseEnter={() => {
+                  setShowClientPopup(true);
+                }}
+                onMouseLeave={() => {
+                  setShowClientPopup(false);
+                }}
+                className={styles.popupClient}
+              >
+                <button className={styles.clientBtn}>
+                  <h2>{deal?.client?.name ?? ""}</h2>
+                </button>
+                {showClientPopup && (
+                  <div className={styles.boxClientPopup}>
+                    <h3>{deal?.client?.name ?? ""}</h3>
+                    <p>{deal?.client?.phone ?? ""}</p>
+                  </div>
+                )}
+              </div>
               <h6>{`Último contato: ${getDaysSinceLastContact(
                 deal?.updatedAt ?? deal?.createdAt ?? "",
               )}`}</h6>
@@ -1332,7 +1260,16 @@ export default function ClosedDeal({
                 <div
                   onMouseEnter={() => {
                     setShowPopup(true);
-                    sumDocs();
+                    sumDocs(
+                      docValues,
+                      paymentMethod,
+                      downPaymentValue,
+                      subsidyValue,
+                      cashValue,
+                      fgtsValue,
+                      financingValue,
+                      creditLetterValue,
+                    );
                   }}
                   onMouseLeave={() => setShowPopup(false)}
                   className={styles.btnDocValue2}
@@ -1344,14 +1281,19 @@ export default function ClosedDeal({
                       {docsCalculated.map((doc) => {
                         return (
                           <div key={doc.label} className={styles.boxDoc}>
-                            <h4>{doc.label}:</h4>
-                            <p>
-                              R$
-                              {doc.value.toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                            </p>
+                            <div className={styles.nameValue}>
+                              <h4>{doc.label}:</h4>
+                              <p>
+                                R$
+                                {doc.value.toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })}
+                              </p>
+                            </div>
+                            <div className={styles.description}>
+                              <p>{doc.description}</p>
+                            </div>
                           </div>
                         );
                       })}

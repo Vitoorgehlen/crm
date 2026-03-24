@@ -30,7 +30,7 @@ export default function FinishDeal({
   const API = process.env.NEXT_PUBLIC_API_URL;
 
   const [isOpenDocCost, setIsOpenDocCost] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
@@ -44,7 +44,7 @@ export default function FinishDeal({
   const [note, setNote] = useState<Array<Note>>([]);
 
   const [splitMethod, setSplitMethod] = useState<"percentage" | "amount">(
-    "percentage"
+    "percentage",
   );
   const [splits, setSplits] = useState<CommissionSplit[]>([]);
 
@@ -170,7 +170,7 @@ export default function FinishDeal({
       if (!res.ok) throw new Error("Erro ao editar valores de documentação");
       const data = await res.json();
       setDocCost((prev) =>
-        prev.map((item) => (item.id === docId ? data : item))
+        prev.map((item) => (item.id === docId ? data : item)),
       );
       setIsOpenDocCost(undefined);
       setDocCostLabel("");
@@ -184,7 +184,7 @@ export default function FinishDeal({
   async function handleDeleteDocCost(docId?: number) {
     if (typeof docId !== "number") return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa documentação?`
+      `Tem certeza que deseja excluir essa documentação?`,
     );
     if (!confirmDelete) return;
 
@@ -252,7 +252,7 @@ export default function FinishDeal({
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`
+      `Tem certeza que deseja excluir essa nota?`,
     );
     if (!confirmDelete) return;
 
@@ -340,7 +340,7 @@ export default function FinishDeal({
         const total = data.reduce(
           (sum: number, item: DocumentationCost) =>
             sum + Number(item.value ?? 0),
-          0
+          0,
         );
         setDocCostTotal(total);
       } catch (err) {
@@ -537,8 +537,8 @@ export default function FinishDeal({
                       {s.isCompany
                         ? "Imobiliária"
                         : s.userId != null
-                        ? userMap.get(Number(s.userId)) ?? String(s.userId)
-                        : "—"}
+                          ? (userMap.get(Number(s.userId)) ?? String(s.userId))
+                          : "—"}
                     </h3>
                     <h3>{real(Number(computedAmountFor(i)))}</h3>
                     <h3>{s.notes ?? ""}</h3>
@@ -554,10 +554,26 @@ export default function FinishDeal({
               <div className={styles.border}>
                 <div className={styles.boxSplitCommission}>
                   <h3>Criado: {formatDateForFinish(deal.createdAt)}</h3>
+                  <h3>Criado por: {deal?.client?.creator?.name ?? ""}</h3>
                   <h3>Finalizado: {formatDateForFinish(deal.finalizedAt)}</h3>
                 </div>
                 <div className={styles.boxSplitCommission}>
                   <h3>Finalizado em: {saleDuration}</h3>
+                </div>
+              </div>
+            </div>
+
+            <div className={styles.boxCommissionShare}>
+              <div className={styles.splitCommissionTitle}>
+                <h2>Dados do cliente</h2>
+              </div>
+              <div className={styles.border}>
+                <div className={styles.boxSplitCommission}>
+                  <h3>Contato: {deal?.client?.phone ?? ""}</h3>
+                  {deal?.client?.isInvestor && <h3>Cliente investidor</h3>}
+                  {deal?.client?.dateOfBirth && (
+                    <h3>{formatDateForFinish(deal?.client?.dateOfBirth)}</h3>
+                  )}
                 </div>
               </div>
             </div>

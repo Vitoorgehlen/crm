@@ -160,7 +160,6 @@
 
 .clientBtn {
   border: none;
-  cursor: pointer;
   width: 100%;
 }
 
@@ -253,9 +252,40 @@
   position: relative;
 }
 
+.boxClientPopup {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 150px;
+  padding: 10px 0;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+}
+
+.popupClient .boxClientPopup h3 {
+  font-size: var(--font-3);
+  font-weight: 600;
+  color: var(--primaryText);
+}
+
+.popupClient .boxClientPopup p {
+  font-size: var(--font-5);
+  font-weight: 400;
+  color: white;
+}
+
 .boxDocValue {
   position: fixed;
-  right: 25px;
+  right: 20px;
+  bottom: 20px;
   width: 250px;
   padding: 10px 0;
   background: rgba(0, 0, 0, 0.6);
@@ -271,12 +301,29 @@
   z-index: 1000;
 }
 
+.btnDocValue2 .boxDocValue h4 {
+  color: var(--primaryText);
+}
+
 .boxDoc {
-  display: flex;
   align-items: center;
   width: 80%;
-  justify-content: space-between;
   border-bottom: 1px solid var(--primaryText);
+}
+
+.nameValue {
+  display: flex;
+  justify-content: space-between;
+}
+
+.description {
+  width: 100%;
+  text-align: start;
+}
+
+.description p {
+  font-size: 0.6rem;
+  color: white;
 }
 
 .boxDocTotal {
@@ -297,9 +344,13 @@
 
 .boxDocValue .boxDocTotal h4 {
   font-size: 0.9rem;
-  color: var(--primaryColor);
+  color: var(--primaryText);
 }
 
+.boxDocValue .boxDocTotal p {
+  font-size: 0.9rem;
+  color: var(--primaryColor);
+}
 .error {
   color: var(--errorColor2);
   font-size: var(--font-5);
