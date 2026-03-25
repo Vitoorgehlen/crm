@@ -14,11 +14,26 @@ import {
   PAYMENT_METHOD_LABEL,
   WORKFLOW_BY_METHOD,
   User,
+  DealStepType,
 } from "@/types/index";
+import {
+  DndContext,
+  MouseSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+  closestCenter,
+} from "@dnd-kit/core";
+import {
+  restrictToHorizontalAxis,
+  restrictToVerticalAxis,
+} from "@dnd-kit/modifiers";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { PaymentMethod } from "@/types/index";
 import { fetchDeals } from "@/utils/fetchDeals";
 import DealsHeader from "@/components/searchbar/page";
+import DraggableCard from "@/components/draggableAndDroppable/draggableCard";
+import DroppableColumn from "@/components/draggableAndDroppable/droppable";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -38,6 +53,54 @@ export default function Deals() {
 
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  const handleDragEnd = async (event: any) => {
+    const { active, over } = event;
+
+    if (!over) return;
+
+    const dealId = Number(active.id);
+    const [methodFromDrop, newStep] = String(over.id).split("-") as [
+      PaymentMethod,
+      DealStepType,
+    ];
+
+    const deal = deals.find((d) => d.id === dealId);
+    if (!deal) return;
+
+    const steps = WORKFLOW_BY_METHOD[deal.paymentMethod];
+
+    if (!steps.includes(newStep)) {
+      console.warn("Step inválido para esse método");
+      return;
+    }
+
+    if (deal.paymentMethod !== methodFromDrop) {
+      console.warn("Não pode mover entre métodos");
+      return;
+    }
+
+    if (deal.currentStep === newStep) return;
+
+    console.log({
+      activeId: active.id,
+      overId: over.id,
+    });
+
+    await handleChangeStepById(dealId, newStep);
+  };
+
+  const sensors = useSensors(
+    useSensor(MouseSensor),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 100,
+        tolerance: 5,
+      },
+    }),
+  );
 
   function openCreate() {
     setIsCreateOpen(true);
@@ -114,7 +177,7 @@ export default function Deals() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ changeStep: step }),
-      }
+      },
     );
 
     const data = await res.json();
@@ -126,6 +189,28 @@ export default function Deals() {
     setSelectedDeal(null);
     router.push("/fechados");
     return;
+  };
+
+  const handleChangeStepById = async (dealId: number, step: string) => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const res = await fetch(`${API}/deals-close-change-step-dnd/${dealId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ changeStep: step }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erro ao mudar de passo");
+
+    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
+    await fetchDealsData();
   };
 
   const fetchDealsData = useCallback(async () => {
@@ -203,6 +288,16 @@ export default function Deals() {
     return () => clearTimeout(t);
   }, [fetchDealsData, isLoading, selectedUser, token, fetchUsers, router]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -250,90 +345,108 @@ export default function Deals() {
           )}
         </div>
 
-        <div className={styles.boxSteps}>
-          {(Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[]).map(
-            (method) => {
-              const steps = WORKFLOW_BY_METHOD[method];
-              const dealsForMethod = deals.filter(
-                (d) => d.paymentMethod === method
-              );
-              if (dealsForMethod.length === 0) return null;
+        <DndContext
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+          sensors={sensors}
+          modifiers={
+            isMobile ? [restrictToVerticalAxis] : [restrictToHorizontalAxis]
+          }
+        >
+          <div className={styles.boxSteps}>
+            {(Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[]).map(
+              (method) => {
+                const steps = WORKFLOW_BY_METHOD[method];
+                const dealsForMethod = deals.filter(
+                  (d) => d.paymentMethod === method,
+                );
+                if (dealsForMethod.length === 0) return null;
 
-              return (
-                <section key={method} className={styles.methodSection}>
-                  <header className={styles.methodHeader}>
-                    <h3>{PAYMENT_METHOD_LABEL[method]}</h3>
-                    <h4 className={styles.methodCount}>
-                      {dealsForMethod.length}{" "}
-                      {dealsForMethod.length === 1
-                        ? "negociação"
-                        : "negociações"}
-                    </h4>
-                  </header>
+                return (
+                  <section key={method} className={styles.methodSection}>
+                    <header className={styles.methodHeader}>
+                      <h3>{PAYMENT_METHOD_LABEL[method]}</h3>
+                      <h4 className={styles.methodCount}>
+                        {dealsForMethod.length}{" "}
+                        {dealsForMethod.length === 1
+                          ? "negociação"
+                          : "negociações"}
+                      </h4>
+                    </header>
 
-                  <div className={styles.methodWorkflow}>
-                    {steps.map((step) => {
-                      const columnDeals = dealsForMethod.filter(
-                        (d) => d.currentStep === step
-                      );
-                      return (
-                        <div className={styles.column} key={String(step)}>
-                          <h5 className={styles.stepName}>
-                            {DEAL_STEP_TYPE_LABEL[step]}
-                          </h5>
-                          <div className={styles.dealList}>
-                            {columnDeals.map((dealItem) => (
-                              <button
-                                key={dealItem.id}
-                                type="button"
-                                className={styles.card}
-                                onClick={() => openEdit(dealItem)}
-                              >
-                                <h3>
-                                  {dealItem.client?.name ||
-                                    "Cliente não informado"}
-                                </h3>
-                                {teamDeals && (
-                                  <h6>
-                                    {dealItem.creator?.name ||
-                                      "Usuário não encontrado"}
-                                  </h6>
+                    <div className={styles.methodWorkflow}>
+                      {steps.map((step) => {
+                        const columnDeals = dealsForMethod.filter(
+                          (d) => d.currentStep === step,
+                        );
+                        return (
+                          <DroppableColumn
+                            key={String(step)}
+                            id={`${method}-${step}`}
+                          >
+                            <div className={styles.column}>
+                              <h5 className={styles.stepName}>
+                                {DEAL_STEP_TYPE_LABEL[step]}
+                              </h5>
+                              <div className={styles.dealList}>
+                                {columnDeals.map((dealItem) => (
+                                  <DraggableCard
+                                    key={String(dealItem.id)}
+                                    deal={dealItem}
+                                  >
+                                    <button
+                                      type="button"
+                                      className={styles.card}
+                                      onClick={() => openEdit(dealItem)}
+                                    >
+                                      <h3>
+                                        {dealItem.client?.name ||
+                                          "Cliente não informado"}
+                                      </h3>
+                                      {teamDeals && (
+                                        <h6>
+                                          {dealItem.creator?.name ||
+                                            "Usuário não encontrado"}
+                                        </h6>
+                                      )}
+                                    </button>
+                                  </DraggableCard>
+                                ))}
+
+                                {columnDeals.length === 0 && (
+                                  <div className={styles.noDeals}>—</div>
                                 )}
-                              </button>
-                            ))}
+                              </div>
+                            </div>
+                          </DroppableColumn>
+                        );
+                      })}
+                    </div>
+                  </section>
+                );
+              },
+            )}
 
-                            {columnDeals.length === 0 && (
-                              <div className={styles.noDeals}>—</div>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </section>
-              );
-            }
-          )}
+            {deals.length === 0 && (
+              <div className={styles.divError}>
+                <p>Nenhuma negociação encontrada</p>
+              </div>
+            )}
 
-          {deals.length === 0 && (
-            <div className={styles.divError}>
-              <p>Nenhuma negociação encontrada</p>
-            </div>
-          )}
-
-          {selectedDeal && (
-            <ClosedDeal
-              isOpen={isCloseOpen}
-              deal={selectedDeal}
-              onClose={() => {
-                setIsCloseOpen(false);
-                setSelectedDeal(null);
-              }}
-              onSubmit={closeDealShares}
-              newStep={handleChangeStep}
-            />
-          )}
-        </div>
+            {selectedDeal && (
+              <ClosedDeal
+                isOpen={isCloseOpen}
+                deal={selectedDeal}
+                onClose={() => {
+                  setIsCloseOpen(false);
+                  setSelectedDeal(null);
+                }}
+                onSubmit={closeDealShares}
+                newStep={handleChangeStep}
+              />
+            )}
+          </div>
+        </DndContext>
       </main>
     </div>
   );

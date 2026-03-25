@@ -335,6 +335,50 @@ export async function updateStep(
   });
 }
 
+// update Step
+export async function updateStepDnd(
+  id: number,
+  changeStep: string,
+  userId: number,
+) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error('Usuário não encontrado.');
+
+  const targetDeal = await prisma.deal.findUnique({ where: { id } });
+  if (!targetDeal) throw new Error('Negociação não encontrada.');
+
+  if (user.companyId !== targetDeal.companyId) {
+    throw new Error('Você não tem permissão para editar as negociações dessa empresa');
+  }
+
+  if (userId !== targetDeal.createdBy) {
+    const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
+    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+  } else {
+    const canUpdateDeal = await checkUserPermission(userId, 'DEAL_UPDATE');
+    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+  }
+
+    if (targetDeal.currentStep === null) {
+      throw new Error('Ação inválida, não existe passo atual.');
+    }
+
+  const paymentMethod = targetDeal.paymentMethod;
+  const steps = WORKFLOW[paymentMethod];
+  if (!steps) throw new Error('Workflow não definido para esse método de pagamento');
+
+  if (!steps.includes(changeStep as DealStepType)) {
+  throw new Error('Step inválido para esse workflow');
+}
+
+  return await prisma.deal.update({
+    where: { id },
+    data: {
+      currentStep: changeStep as DealStepType,
+    },
+  });
+}
+
 // Atualizar DealShare
 export async function updateDealShare(
   id: number,

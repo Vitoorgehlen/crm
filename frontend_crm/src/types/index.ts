@@ -717,3 +717,5 @@ export const TaskPriority = {
   }
 } as const;
 export type TaskPriority = keyof typeof TaskPriority;
+
+export type DroppableId = `${PaymentMethod}-${DealStepType}`;
