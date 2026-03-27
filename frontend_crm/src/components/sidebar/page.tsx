@@ -27,28 +27,28 @@ const Sidebar = () => {
 
   return (
     <>
-      {!isOpen && (
-        <div className={styles.header}>
-          <Link href="/home" onClick={() => setIsOpen(false)}>
-            <div className={styles.logoH}>
-              <h2 className={styles.logoTextH}>cloop</h2>
-            </div>
-          </Link>
+      <div className={styles.header}>
+        <Link href="/home" onClick={() => setIsOpen(false)}>
+          <div className={styles.logoH}>
+            <h2 className={styles.logoTextH}>cloop</h2>
+          </div>
+        </Link>
 
-          <button
-            className={styles.menuButton}
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <IoMdClose /> : <RxHamburgerMenu />}
-          </button>
-        </div>
-      )}
+        <button
+          className={styles.menuButton}
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <RxHamburgerMenu />
+        </button>
+      </div>
       <div
         className={`${styles.sidebar} ${isOpen ? styles.sidebarOpen : ""}`}
         onClick={() => setIsOpen(false)}
       >
         <div className={styles.contentbar} onClick={(e) => e.stopPropagation()}>
           <div className={styles.sidebarMenu}>
+            {isOpen && <div></div>}
+
             <Link href="/home" onClick={() => setIsOpen(false)}>
               <span
                 className={`${styles.iconContainer} 
@@ -59,6 +59,15 @@ const Sidebar = () => {
                 </div>
               </span>
             </Link>
+
+            {isOpen && (
+              <button
+                className={styles.menuButton}
+                onClick={() => setIsOpen(!isOpen)}
+              >
+                <IoMdClose />
+              </button>
+            )}
           </div>
           <div className={styles.sidebarActions}>
             <Link href="/clientes" onClick={() => setIsOpen(false)}>

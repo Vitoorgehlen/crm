@@ -96,7 +96,7 @@ export default function Deals() {
     useSensor(MouseSensor),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 100,
+        delay: 500,
         tolerance: 5,
       },
     }),
