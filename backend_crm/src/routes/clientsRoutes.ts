@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addClient, deleteClient, getClientById, getClientDeletedRequest, getMyClients, getMyClientsBySearch, getTeamClients, getTeamClientsBySearch, updateClient} from '../repositories/clientRepository'
+import { addClient, deleteClient, getClientById, getClientDeletedRequest, getMyClients, getTeamClients, updateClient} from '../repositories/clientRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';
@@ -62,24 +62,10 @@ router.get('/clients', loginRequired, async (req, res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId } = user;
 
-  try {
-    const deal = await getMyClients(userId);
-    res.json(deal);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
-  }
-});
-
-router.get('/clients-by-search', loginRequired, async (req, res) => {
-  const { user } = req as AuthenticatedRequest;
-  const { id: userId } = user;
-
-  const search = String(req.query.name || '').trim();
-  if (!search) return res.status(400).json({ error: 'O parâmetro nome é obrigatório..' });
+  const search = String(req.query.search || '').trim();
 
   try {
-    const deal = await getMyClientsBySearch(userId, search);
+    const deal = await getMyClients(userId, search);
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -93,27 +79,10 @@ router.get('/team-clients', loginRequired, async (req, res) => {
   const selectedUserId = req.query.userId ? Number(req.query.userId) : null;
 
   if (!userRole) return res.status(400).json({ error: 'ID inválido' });
+  const search = String(req.query.search || '').trim();
 
   try {
-    const deal = await getTeamClients(userId, selectedUserId);
-    res.json(deal);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
-  }
-});
-
-router.get('/team-clients-by-search', loginRequired, async (req, res) => {
-  const { user } = req as AuthenticatedRequest;
-  const { id: userId } = user;
-  if (!userId) return res.status(400).json({ error: 'Usuário não identificado' });
-
-  const search = String(req.query.name || '').trim();
-  if (!search) return res.status(400).json({ error: 'O parâmetro nome é obrigatório..' });
-  const selectedUserId = req.query.userId ? Number(req.query.userId) : userId;
-
-  try {
-    const deal = await getTeamClientsBySearch(userId, search);
+    const deal = await getTeamClients(userId, search, selectedUserId);
     res.json(deal);
   } catch (err) {
     console.log(err);

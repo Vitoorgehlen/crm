@@ -130,7 +130,7 @@ export default function Config() {
 
     fetchMe();
     fetchUsers();
-  }, [isLoading, token, router, fetchMe, fetchUsers, permissions, user]);
+  }, [isLoading, token]);
 
   return (
     <div className={styles.page}>

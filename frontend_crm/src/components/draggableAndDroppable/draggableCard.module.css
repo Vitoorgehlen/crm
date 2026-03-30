@@ -56,7 +56,7 @@
 
 @media (max-width: 768px) {
   .drag {
-    flex-direction: row;
+    flex-direction: row-reverse;
   }
 
   .dragHandle {

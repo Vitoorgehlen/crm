@@ -253,6 +253,7 @@
   margin: 0;
   font-family: var(--font);
   background-color: transparent;
+  scrollbar-color: var(--primaryColor) transparent;
 }
 
 body {
@@ -289,6 +290,15 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+[data-draggable="true"] {
+  will-change: transform;
+  transition: transform 0ms !important;
+}
+
+body:has(.dragging) {
+  overflow-x: hidden;
 }
 
 @media (max-width: 768px) {

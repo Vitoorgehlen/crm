@@ -46,7 +46,8 @@
   gap: 20px;
 }
 
-.headerBtns input {
+.headerBtns input,
+.headerBtns select {
   padding: 8px;
   margin: 3px;
   border: 1px solid var(--shadowColor);
@@ -61,6 +62,9 @@
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
+.headerBtns select option {
+  color: black;
+}
 
 .headerBtns input {
   padding: 8px;
@@ -73,10 +77,14 @@
   background: var(--cardBackground);
 }
 
+.headerBtns select::placeholder,
 .headerBtns input::placeholder {
   color: var(--sidebarBackground);
 }
 
+.headerBtns select:focus,
+.headerBtns select:active,
+.headerBtns select:hover,
 .headerBtns input:focus,
 .headerBtns input:active,
 .headerBtns input:hover {
@@ -204,6 +212,7 @@
     flex-wrap: nowrap;
   }
 
+  .headerBtns select,
   .headerBtns input {
     width: 130px;
   }

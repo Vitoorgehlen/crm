@@ -10,6 +10,7 @@ import { IoMdSearch } from "react-icons/io";
 import { HiUserGroup } from "react-icons/hi2";
 import styles from "./page.module.css";
 import ClientsForm from "@/components/clients/ClientForm";
+import { useQueryState } from "nuqs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,34 +19,37 @@ export default function Clients() {
   const { token, permissions, isLoading } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [teamClients, setTeamClients] = useState(false);
   const [isPriorityBtn, setIsPriorityBtn] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+  const [teamClients, setTeamClients] = useQueryState("team", {
+    defaultValue: false,
+    parse: (v) => v === "true",
+    serialize: (v) => String(v),
+  });
+  const [userId, setUserId] = useQueryState("userId", {
+    defaultValue: "",
+  });
+  const selectedUser = users.find((u) => String(u.id) === userId) || null;
 
   const fetchClientsData = useCallback(async () => {
     try {
-      let url = "";
+      const params = new URLSearchParams();
 
-      if (teamClients) {
-        const userParam = selectedUser ? `&userId=${selectedUser.id}` : "";
-        url =
-          search.trim() === ""
-            ? `${API}/team-clients?${userParam}`
-            : `${API}/team-clients-by-search?name=${encodeURIComponent(
-                search
-              )}${userParam}`;
-      } else {
-        url =
-          search.trim() === ""
-            ? `${API}/clients`
-            : `${API}/clients-by-search?name=${encodeURIComponent(search)}`;
-      }
+      if (search.trim()) params.append("search", search.trim());
+      // if (page) params.append("page", String(page));
+      // if (limit) params.append("limit", String(limit));
+
+      if (teamClients && selectedUser)
+        params.append("userId", String(selectedUser.id));
+
+      const url = teamClients
+        ? `${API}/team-clients?${params.toString()}`
+        : `${API}/clients?${params.toString()}`;
 
       const res = await fetch(url, {
         headers: { Authorization: `Bearer ${token}` },
@@ -78,13 +82,13 @@ export default function Clients() {
         .sort(
           (a, b) =>
             new Date(b.createdAt ?? 0).getTime() -
-            new Date(a.createdAt ?? 0).getTime()
+            new Date(a.createdAt ?? 0).getTime(),
         )
         .sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0))
     : [...clients].sort(
         (a, b) =>
           new Date(b.createdAt ?? 0).getTime() -
-          new Date(a.createdAt ?? 0).getTime()
+          new Date(a.createdAt ?? 0).getTime(),
       );
 
   const handleCreate = async (payload: Partial<Client>) => {
@@ -142,19 +146,13 @@ export default function Clients() {
       return;
     }
 
-    const timeout = setTimeout(fetchClientsData, 150);
-    fetchUsers();
+    const timeout = setTimeout(fetchClientsData, 400);
     return () => clearTimeout(timeout);
-  }, [
-    token,
-    isLoading,
-    search,
-    teamClients,
-    selectedUser,
-    router,
-    fetchClientsData,
-    fetchUsers,
-  ]);
+  }, [isLoading, token, fetchClientsData]);
+
+  useEffect(() => {
+    if (token) fetchUsers();
+  }, [token, fetchUsers]);
 
   return (
     <div className={styles.page}>
@@ -180,12 +178,7 @@ export default function Clients() {
             <div className={styles.selectUser}>
               <select
                 value={selectedUser ? selectedUser.id : ""}
-                onChange={(e) => {
-                  const user = users.find(
-                    (u) => u.id === Number(e.target.value)
-                  );
-                  setSelectedUser(user || null);
-                }}
+                onChange={(e) => setUserId(e.target.value)}
               >
                 <option value={""}>Todos</option>
                 {users.map((user) => (

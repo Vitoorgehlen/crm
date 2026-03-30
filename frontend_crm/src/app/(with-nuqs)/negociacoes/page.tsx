@@ -16,7 +16,9 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { fetchDeals } from "@/utils/fetchDeals";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
+import { useQueryState } from "nuqs";
 import DealsHeader from "@/components/searchbar/page";
+
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Deals() {
@@ -24,17 +26,30 @@ export default function Deals() {
   const { token, permissions, isLoading } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [teamDeals, setTeamDeals] = useState(false);
+
+  const [search, setSearch] = useQueryState("search", {
+    defaultValue: "",
+  });
+
+  const [teamDeals, setTeamDeals] = useQueryState("team", {
+    defaultValue: false,
+    parse: (v) => v === "true",
+    serialize: (v) => String(v),
+  });
+
+  const [userId, setUserId] = useQueryState("userId", {
+    defaultValue: "",
+  });
+
+  const selectedUser = users.find((u) => String(u.id) === userId) || null;
 
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
 
   function openCreate() {
     setIsCreateOpen(true);
@@ -57,7 +72,7 @@ export default function Deals() {
           };
         }
         return d;
-      })
+      }),
     );
   }
 
@@ -143,7 +158,7 @@ export default function Deals() {
         team: teamDeals,
         search,
         status: ["POTENTIAL_CLIENTS"],
-        selectedUser: selectedUser?.id,
+        selectedUser: userId ? Number(userId) : undefined,
       });
       setDeals(data);
     } catch (err: unknown) {
@@ -151,7 +166,7 @@ export default function Deals() {
     } finally {
       setLoading(false);
     }
-  }, [token, search, teamDeals, selectedUser]);
+  }, [token, search, teamDeals, userId]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -205,18 +220,10 @@ export default function Deals() {
       return;
     }
 
-    const timeout = setTimeout(fetchDealsData, 150);
+    const timeout = setTimeout(fetchDealsData, 400);
     fetchUsers();
     return () => clearTimeout(timeout);
-  }, [
-    token,
-    isLoading,
-    search,
-    selectedUser,
-    fetchUsers,
-    router,
-    fetchDealsData,
-  ]);
+  }, [fetchDealsData, fetchUsers, isLoading, token, router, userId]);
 
   return (
     <div className={styles.page}>
@@ -234,7 +241,7 @@ export default function Deals() {
               setTeamDeals={setTeamDeals}
               users={users}
               selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
+              setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
               permissions={permissions}
               onCreate={openCreate}
               loading={loading}
@@ -268,7 +275,7 @@ export default function Deals() {
         <div>
           {Object.values(ClientStatus)
             .filter((statusObj) =>
-              deals.some((deal) => deal.statusClient === statusObj.dbValue)
+              deals.some((deal) => deal.statusClient === statusObj.dbValue),
             )
             .map((statusObj) => {
               const statusKey = statusObj.dbValue.toString().toLowerCase();
@@ -285,7 +292,7 @@ export default function Deals() {
                       .sort(
                         (a, b) =>
                           (b.client?.isPriority ? 1 : 0) -
-                          (a.client?.isPriority ? 1 : 0)
+                          (a.client?.isPriority ? 1 : 0),
                       )
                       .filter((deal) => deal.statusClient === statusObj.dbValue)
                       .map((deal, index) => (
@@ -297,8 +304,8 @@ export default function Deals() {
                             deal.client?.deleteRequest
                               ? styles.dealDelete
                               : deal.deleteRequest
-                              ? styles.dealDelete
-                              : styles.deal
+                                ? styles.dealDelete
+                                : styles.deal
                           }`}
                           onClick={() => openEdit(deal)}
                         >
@@ -309,7 +316,7 @@ export default function Deals() {
                               />
                               <h4 className={styles.lastContact}>
                                 {getDaysSinceLastContact(
-                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                  deal.updatedAt ?? deal.createdAt ?? "",
                                 )}
                               </h4>
                             </div>
@@ -320,7 +327,7 @@ export default function Deals() {
                               />
                               <h4 className={styles.lastContact}>
                                 {getDaysSinceLastContact(
-                                  deal.updatedAt ?? deal.createdAt ?? ""
+                                  deal.updatedAt ?? deal.createdAt ?? "",
                                 )}
                               </h4>
                             </div>

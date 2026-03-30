@@ -12,6 +12,7 @@ import { BsCashCoin } from "react-icons/bs";
 
 import ExpenseCard from "@/components/commissions/Despesas/page";
 import CommissionCard from "@/components/commissions/Comissoes/page";
+import { useQueryState } from "nuqs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -19,15 +20,18 @@ export default function Commissions() {
   const router = useRouter();
   const { token, isLoading } = useAuth();
 
-  const [isOpenCommission, setIsOpenCommission] = useState(true);
-  const [isOpenExpense, setIsOpenExpense] = useState(false);
-
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
-  const [selectedYear, setSelectedYear] = useState<number>(
-    new Date().getFullYear()
-  );
+  const [selectedYear, setSelectedYear] = useQueryState("year", {
+    defaultValue: String(new Date().getFullYear()),
+  });
+
+  const [tab, setTab] = useQueryState("tab", {
+    defaultValue: "commission",
+  });
+  const isOpenCommission = tab === "commission";
+  const isOpenExpense = tab === "expense";
 
   const lastDay = new Date();
   lastDay.setMonth(lastDay.getMonth() + 1);
@@ -195,7 +199,7 @@ export default function Commissions() {
   const selectedYearStats = useMemo(() => {
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth();
-    const year = selectedYear ?? new Date().getFullYear();
+    const year = Number(selectedYear) || new Date().getFullYear();
     const stats = statsCash.yearlyStats[year] || {
       total: 0,
       received: 0,
@@ -219,7 +223,7 @@ export default function Commissions() {
 
     let comparStatsFair = 0;
 
-    if (currentYear === selectedYear) {
+    if (currentYear === year) {
       let currentYearSum = 0;
       let lastYearSum = 0;
       for (let month = 0; month <= currentMonth; month++) {
@@ -300,11 +304,11 @@ export default function Commissions() {
   }, [fetchDealsData, isLoading, token, router]);
 
   useEffect(() => {
-    if (yearsSortedDesc.length > 0) {
+    if (yearsSortedDesc.length > 0 && !selectedYear) {
       const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
-      setSelectedYear(lastYear);
+      setSelectedYear(String(lastYear));
     }
-  }, [yearsSortedDesc]);
+  }, [yearsSortedDesc, selectedYear]);
 
   return (
     <div className={styles.page}>
@@ -321,8 +325,7 @@ export default function Commissions() {
                 isOpenCommission ? styles.btnSettingActive : styles.btnSetting
               }`}
               onClick={() => {
-                setIsOpenCommission(true);
-                setIsOpenExpense(false);
+                setTab("commission");
               }}
               type="button"
             >
@@ -334,8 +337,7 @@ export default function Commissions() {
                 isOpenExpense ? styles.btnSettingActive : styles.btnSetting
               }`}
               onClick={() => {
-                setIsOpenCommission(false);
-                setIsOpenExpense(true);
+                setTab("expense");
               }}
               type="button"
             >

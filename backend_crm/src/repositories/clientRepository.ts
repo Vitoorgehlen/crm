@@ -1,5 +1,5 @@
 import { prisma } from "../prisma-client";
-import { Prisma, UserRole } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
 export async function addClient(
@@ -83,22 +83,13 @@ export async function getClientDeletedRequest(userId: number) {
 }
 
 // Pega todos os clientes feitos pelo User
-export async function getMyClients(userId: number) {
-  return prisma.client.findMany({
-    where: { createdBy: userId },
-    include: {
-        creator: { select: { name: true, email: true } },
-        updater: { select: { name: true, email: true } }
-      }
-  });
-}
+export async function getMyClients(userId: number, search: string) {
+  const where: any = {
+    createdBy: userId,
+  };
 
-// Pega clientes feitos pelo User procurando pelo nome
-export async function getMyClientsBySearch(userId: number, search: string) {
-  return prisma.client.findMany({
-    where: {
-      createdBy: userId,
-      OR: [
+  if (search) {
+    where.OR = [
         {
           name: {
             contains: search,
@@ -112,8 +103,9 @@ export async function getMyClientsBySearch(userId: number, search: string) {
           },
         }
       ]
-
-    },
+  }
+  return prisma.client.findMany({
+    where,
     include: {
         creator: { select: { name: true, email: true } },
         updater: { select: { name: true, email: true } }
@@ -122,9 +114,11 @@ export async function getMyClientsBySearch(userId: number, search: string) {
 }
 
 // Pega todos os clientes feitos pela equipe
-export async function getTeamClients(userId: number, selectedUser: number | null) {
+export async function getTeamClients(userId: number, search: string, selectedUser: number | null) {
   const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
   if (!canReadClient) throw new Error('Você não tem permissão para ler clientes');
+
+  const where: any = {};
 
   return prisma.$transaction(async (tx) => {
     const company = await tx.user.findUnique({
@@ -135,62 +129,39 @@ export async function getTeamClients(userId: number, selectedUser: number | null
 
     if (selectedUser !== null) {
       const userSelected = await tx.user.findUnique({
-      where: { id: selectedUser },
-      select: { companyId: true }
-    });
-    if (company.companyId !== userSelected?.companyId) throw new Error('Sem permissão para visualizar os clientes desse usuário');
-    return tx.client.findMany({
-      where: { createdBy: selectedUser },
-      include: {
-        creator: { select: { name: true } },
-        updater: { select: { name: true } }
-      }
-    });
+        where: { id: selectedUser },
+        select: { companyId: true }
+      });
+      if (company.companyId !== userSelected?.companyId) throw new Error('Sem permissão para visualizar os clientes desse usuário');
+
+      where.AND = [{ createdBy: selectedUser }];
+    } else where.AND = [{ companyId: company.companyId }];
+
+    if (search) {
+      where.OR = [
+          {
+            name: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          },
+          {
+            phone: {
+              contains: search,
+              mode: 'insensitive',
+            },
+          }
+        ]
     }
 
     return tx.client.findMany({
-      where: { companyId: company.companyId },
+      where,
       include: {
         creator: { select: { name: true } },
         updater: { select: { name: true } }
       }
     });
   })
-}
-
-export async function getTeamClientsBySearch(userId: number, search: string) {
-  const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
-  if (!canReadClient) throw new Error('Você não tem permissão para ler clientes');
-
-  const company = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {companyId: true }
-  });
-  if (!company) throw new Error('Empresa não encontrada');
-
-  return prisma.client.findMany({
-    where: {
-      companyId: company.companyId,
-      OR: [
-        {
-          name: {
-            contains: search,
-            mode: 'insensitive',
-          },
-        },
-        {
-          phone: {
-            contains: search,
-            mode: 'insensitive',
-          },
-        }
-      ]
-    },
-    include: {
-        creator: { select: { name: true, email: true } },
-        updater: { select: { name: true, email: true } }
-      }
-  });
 }
 
 // Atualizar cliente

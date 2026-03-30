@@ -9,6 +9,7 @@ import { FaSearch } from "react-icons/fa";
 import styles from "./page.module.css";
 import { User, Client, Deal, DealStatus } from "@/types";
 import { formatDateForFinish } from "@/utils/dateUtils";
+import { useQueryState } from "nuqs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,15 +18,18 @@ export default function Config() {
   const { token, permissions, isLoading } = useAuth();
 
   const [startDate, setStartDate] = useState("");
-  const [startMonth, setStartMonth] = useState("");
+  const [startMonth, setStartMonth] = useQueryState("month", {
+    defaultValue: "",
+  });
   const [endDate, setEndDate] = useState("");
 
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<number | "ALL" | "INVALID">(
-    "ALL"
-  );
-  const [searchUser, setSearchUser] = useState("");
-
+  const [selectedUser, setSelectedUser] = useQueryState("user", {
+    defaultValue: "ALL",
+  });
+  const [searchUser, setSearchUser] = useQueryState("search", {
+    defaultValue: "",
+  });
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
 
@@ -43,16 +47,6 @@ export default function Config() {
     }
   }, [token]);
 
-  const handleSearch = (foundUser: User | undefined) => {
-    if (foundUser) {
-      setSelectedUser(foundUser.id);
-    } else if (searchUser === "") {
-      setSelectedUser("ALL");
-    } else {
-      setSelectedUser("INVALID");
-    }
-  };
-
   const fetchClientsAndDeals = useCallback(async () => {
     if (startDate === "" || endDate === "") {
       const today = new Date();
@@ -68,8 +62,9 @@ export default function Config() {
       const params = new URLSearchParams();
       params.append("startDate", startDate);
       params.append("endDate", endDate);
-      if (selectedUser) params.append("selectedUser", selectedUser.toString());
-
+      if (selectedUser && selectedUser !== "ALL") {
+        params.append("selectedUser", selectedUser);
+      }
       const res = await fetch(`${API}/team-performace?${params.toString()}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -95,6 +90,17 @@ export default function Config() {
     fetchUsers();
   }, [isLoading, token, router, fetchUsers, permissions]);
 
+  useEffect(() => {
+    if (!startMonth) return;
+
+    const [year, month] = startMonth.split("-");
+    const firstDay = new Date(Number(year), Number(month) - 1, 1);
+    const lastDay = new Date(Number(year), Number(month), 0);
+
+    setStartDate(firstDay.toISOString());
+    setEndDate(lastDay.toISOString());
+  }, [startMonth]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -104,43 +110,36 @@ export default function Config() {
 
         <div className={styles.headerContent}>
           <div className={styles.headerBtns}>
-            <input
-              list="users"
-              placeholder="Buscar usuário..."
-              value={searchUser}
+            <select
+              value={selectedUser ?? "ALL"}
               onChange={(e) => {
-                const value = e.target.value;
-                setSearchUser(value);
-                const foundUser = users.find((user) => user.name === value);
-                handleSearch(foundUser);
-
-                if (value === "" || value.toLowerCase() === "todos")
-                  setSelectedUser("ALL");
+                setSelectedUser(e.target.value);
               }}
-            />
-
-            <datalist id="users">
-              <option value="Todos" />
+            >
+              <option value="ALL">Todos</option>
               {users
                 .slice()
                 .reverse()
                 .map((user) => (
-                  <option
-                    key={user.id}
-                    value={user.name || "Usuário não encontrado"}
-                  />
+                  <option key={user.id} value={user.id}>
+                    {user.name || "Usuário não encontrado"}
+                  </option>
                 ))}
-            </datalist>
+            </select>
+
             <input
               type="month"
-              value={startMonth}
+              value={startMonth ?? ""}
               onChange={(e) => {
-                const [year, month] = e.target.value.split("-");
+                const value = e.target.value;
+                setStartMonth(value);
+
+                const [year, month] = value.split("-");
                 const firstDay = new Date(Number(year), Number(month) - 1, 1);
                 const lastDay = new Date(Number(year), Number(month), 0);
+
                 setStartDate(firstDay.toISOString());
                 setEndDate(lastDay.toISOString());
-                setStartMonth(e.target.value);
               }}
             />
 
@@ -180,16 +179,16 @@ export default function Config() {
                           Number(d.fgtsValue ?? 0) +
                           Number(d.downPaymentValue ?? 0)
                         : d.paymentMethod === "FINANCING"
-                        ? Number(d.financingValue ?? 0) +
-                          Number(d.subsidyValue ?? 0) +
-                          Number(d.fgtsValue ?? 0) +
-                          Number(d.downPaymentValue ?? 0)
-                        : d.paymentMethod === "CREDIT_LETTER"
-                        ? Number(d.creditLetterValue ?? 0) +
-                          Number(d.subsidyValue ?? 0) +
-                          Number(d.fgtsValue ?? 0) +
-                          Number(d.downPaymentValue ?? 0)
-                        : 0;
+                          ? Number(d.financingValue ?? 0) +
+                            Number(d.subsidyValue ?? 0) +
+                            Number(d.fgtsValue ?? 0) +
+                            Number(d.downPaymentValue ?? 0)
+                          : d.paymentMethod === "CREDIT_LETTER"
+                            ? Number(d.creditLetterValue ?? 0) +
+                              Number(d.subsidyValue ?? 0) +
+                              Number(d.fgtsValue ?? 0) +
+                              Number(d.downPaymentValue ?? 0)
+                            : 0;
 
                     return (
                       <tr key={d.id}>

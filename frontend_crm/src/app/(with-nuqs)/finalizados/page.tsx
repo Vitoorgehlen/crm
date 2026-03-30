@@ -12,6 +12,7 @@ import { fetchDeals } from "@/utils/fetchDeals";
 import { formatDateForFinish } from "@/utils/dateUtils";
 import { IoHourglassOutline } from "react-icons/io5";
 import DealsHeader from "@/components/searchbar/page";
+import { useQueryState } from "nuqs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -20,20 +21,33 @@ export default function FinishDeals() {
   const { token, permissions, isLoading } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
   const [progressDeals, setProgressDeals] = useState(true);
-  const [teamDeals, setTeamDeals] = useState(false);
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
 
+  const [search, setSearch] = useQueryState("search", {
+    defaultValue: "",
+  });
+
+  const [teamDeals, setTeamDeals] = useQueryState("team", {
+    defaultValue: false,
+    parse: (v) => v === "true",
+    serialize: (v) => String(v),
+  });
+
+  const [userId, setUserId] = useQueryState("userId", {
+    defaultValue: "",
+  });
+
+  const selectedUser = users.find((u) => String(u.id) === userId) || null;
+
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState("");
 
   function openCreate() {
     setIsCreateOpen(true);
@@ -110,7 +124,7 @@ export default function FinishDeals() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({ changeStep: step }),
-      }
+      },
     );
 
     const data = await res.json();
@@ -237,7 +251,7 @@ export default function FinishDeals() {
       const startDate = new Date(String(deal.createdAt));
       const endDate = new Date(String(deal.updatedAt));
       const durationDays = Math.floor(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)
+        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
       const dealYear = endDate.getFullYear();
@@ -247,7 +261,7 @@ export default function FinishDeals() {
         yearlyStats[dealYear].dealsFinish += 1;
         yearlyStats[dealYear].timeMax = Math.max(
           yearlyStats[dealYear].timeMax,
-          durationDays
+          durationDays,
         );
         yearlyStats[dealYear].timeMin =
           yearlyStats[dealYear].timeMin === 0
@@ -342,7 +356,7 @@ export default function FinishDeals() {
         team: teamDeals,
         search,
         status: ["FINISHED", "CLOSED"],
-        selectedUser: selectedUser?.id,
+        selectedUser: userId ? Number(userId) : undefined,
       });
       setDeals(data);
     } catch (err: unknown) {
@@ -350,7 +364,7 @@ export default function FinishDeals() {
     } finally {
       setLoading(false);
     }
-  }, [token, search, teamDeals, selectedUser]);
+  }, [token, search, teamDeals, userId]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -373,10 +387,10 @@ export default function FinishDeals() {
       return;
     }
 
-    const t = setTimeout(fetchDealsData, 150);
+    const t = setTimeout(fetchDealsData, 400);
     fetchUsers();
     return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, selectedUser, token, fetchUsers, router]);
+  }, [fetchDealsData, isLoading, userId, token, fetchUsers, router]);
 
   useEffect(() => {
     if (yearsSortedDesc.length > 0) {
@@ -401,7 +415,7 @@ export default function FinishDeals() {
               setTeamDeals={setTeamDeals}
               users={users}
               selectedUser={selectedUser}
-              setSelectedUser={setSelectedUser}
+              setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
               permissions={permissions}
               onCreate={openCreate}
               loading={loading}
@@ -448,7 +462,7 @@ export default function FinishDeals() {
                 const monthsObj = groupedByYearMonth[year] || {};
                 const total = Object.values(monthsObj).reduce(
                   (s, arr) => s + arr.length,
-                  0
+                  0,
                 );
                 const active = selectedYear === year;
                 return (
@@ -573,8 +587,8 @@ export default function FinishDeals() {
                 {real(
                   Number(
                     selectedYearStats.propertysValue /
-                      selectedYearStats.propertyTotal
-                  )
+                      selectedYearStats.propertyTotal,
+                  ),
                 )}
               </p>
               <p>
