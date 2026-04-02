@@ -8,7 +8,6 @@ import DealForm from "@/components/Deal/DealForm/DealForm";
 import FinishDeal from "@/components/Deal/FinishDeal/FinishDeal";
 import { Deal, CloseDealPayload, User } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
-import { fetchDeals } from "@/utils/fetchDeals";
 import { formatDateForFinish } from "@/utils/dateUtils";
 import { IoHourglassOutline } from "react-icons/io5";
 import DealsHeader from "@/components/searchbar/page";
@@ -21,7 +20,9 @@ export default function FinishDeals() {
   const { token, permissions, isLoading } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
-
+  const [years, setYears] = useState<
+    { year: number; total: number; months: any[] }[]
+  >([]);
   const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -188,10 +189,8 @@ export default function FinishDeals() {
   }, [filteredDeals]);
 
   const yearsSortedDesc = useMemo(() => {
-    return Object.keys(groupedByYearMonth)
-      .map(Number)
-      .sort((a, b) => a + b);
-  }, [groupedByYearMonth]);
+    return [...years].sort((a, b) => a.year - b.year);
+  }, [years]);
 
   function toggleYear(year: number) {
     if (selectedYear === year) {
@@ -248,45 +247,43 @@ export default function FinishDeals() {
     for (const deal of deals) {
       if (!deal.DealShare || deal.DealShare.length === 0) continue;
 
+      const closedDate = new Date(String(deal.closedAt));
       const startDate = new Date(String(deal.createdAt));
-      const endDate = new Date(String(deal.updatedAt));
+
       const durationDays = Math.floor(
-        (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
+        (closedDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24),
       );
 
-      const dealYear = endDate.getFullYear();
-      ensureYear(dealYear);
+      const dealYear = closedDate.getFullYear();
+      const stats = ensureYear(dealYear);
 
       if (deal.status === "FINISHED") {
-        yearlyStats[dealYear].dealsFinish += 1;
-        yearlyStats[dealYear].timeMax = Math.max(
-          yearlyStats[dealYear].timeMax,
-          durationDays,
-        );
-        yearlyStats[dealYear].timeMin =
-          yearlyStats[dealYear].timeMin === 0
+        stats.dealsFinish += 1;
+        stats.timeMax = Math.max(stats.timeMax, durationDays);
+        stats.timeMin =
+          stats.timeMin === 0
             ? durationDays
-            : Math.min(yearlyStats[dealYear].timeMin, durationDays);
-        yearlyStats[dealYear].propertysValue += Number(deal.propertyValue) ?? 0;
-        yearlyStats[dealYear].propertyTotal += 1;
+            : Math.min(stats.timeMin, durationDays);
+
+        stats.propertysValue += Number(deal.propertyValue) ?? 0;
+        stats.propertyTotal += 1;
 
         if (
           typeof deal.propertyValue === "number" ||
           typeof deal.propertyValue === "string"
         ) {
-          if (
-            deal.propertyValue > yearlyStats[dealYear].propertyMaxValue ||
-            yearlyStats[dealYear].propertyMaxValue === 0
-          ) {
-            yearlyStats[dealYear].propertyMaxValue = deal.propertyValue;
+          const value = Number(deal.propertyValue);
+
+          if (value > stats.propertyMaxValue || stats.propertyMaxValue === 0) {
+            stats.propertyMaxValue = value;
           }
 
-          if (deal.propertyValue < yearlyStats[dealYear].propertyMinValue) {
-            yearlyStats[dealYear].propertyMinValue = deal.propertyValue;
+          if (value < stats.propertyMinValue) {
+            stats.propertyMinValue = value;
           }
         }
       } else {
-        yearlyStats[dealYear].dealsToFinish += 1;
+        stats.dealsToFinish += 1;
       }
 
       for (const share of deal.DealShare) {
@@ -349,22 +346,65 @@ export default function FinishDeals() {
   }
 
   const fetchDealsData = useCallback(async () => {
-    if (!token) return;
-    setLoading(true);
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
     try {
-      const data = await fetchDeals(API!, token, {
-        team: teamDeals,
-        search,
-        status: ["FINISHED", "CLOSED"],
-        selectedUser: userId ? Number(userId) : undefined,
+      const params = new URLSearchParams();
+
+      if (search.trim()) params.append("name", search.trim());
+      if (selectedYear) params.append("year", String(selectedYear));
+      params.append("progressDeals", progressDeals ? "true" : "false");
+      params.append("teamDeals", teamDeals ? "true" : "false");
+      if (teamDeals && userId) params.append("userId", userId);
+
+      const url = `${API}/deals-finished?${params.toString()}`;
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
       });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
+
       setDeals(data);
     } catch (err: unknown) {
       console.error(err);
-    } finally {
-      setLoading(false);
     }
-  }, [token, search, teamDeals, userId]);
+  }, [token, search, teamDeals, selectedYear, userId, progressDeals]);
+
+  const fetchDealsYears = useCallback(async () => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    try {
+      const params = new URLSearchParams();
+
+      params.append("teamDeals", teamDeals ? "true" : "false");
+      params.append("progressDeals", progressDeals ? "true" : "false");
+      if (teamDeals && userId) params.append("userId", userId);
+
+      const url = `${API}/deals-total-finished?${params.toString()}`;
+
+      const res = await fetch(url, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar anos de vendas");
+
+      setYears(data);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  }, [token, teamDeals, userId, progressDeals]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -381,23 +421,39 @@ export default function FinishDeals() {
   }, [token]);
 
   useEffect(() => {
+    fetchDealsYears();
+  }, [fetchDealsYears]);
+
+  useEffect(() => {
     if (isLoading) return;
     if (!token) {
       router.push("/login");
       return;
     }
 
-    const t = setTimeout(fetchDealsData, 400);
+    fetchDealsData();
     fetchUsers();
-    return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, userId, token, fetchUsers, router]);
+  }, [
+    fetchDealsData,
+    isLoading,
+    userId,
+    token,
+    fetchUsers,
+    router,
+    selectedYear,
+  ]);
 
   useEffect(() => {
-    if (yearsSortedDesc.length > 0) {
-      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1];
+    if (!selectedYear) return;
+    fetchDealsData();
+  }, [selectedYear]);
+
+  useEffect(() => {
+    if (selectedYear === null && yearsSortedDesc.length > 0) {
+      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1]?.year;
       setSelectedYear(lastYear);
     }
-  }, [yearsSortedDesc]);
+  }, [yearsSortedDesc, selectedYear]);
 
   return (
     <div className={styles.page}>
@@ -458,12 +514,9 @@ export default function FinishDeals() {
               {yearsSortedDesc.length === 0 && (
                 <p>Nenhuma negociação finalizada.</p>
               )}
-              {yearsSortedDesc.map((year) => {
-                const monthsObj = groupedByYearMonth[year] || {};
-                const total = Object.values(monthsObj).reduce(
-                  (s, arr) => s + arr.length,
-                  0,
-                );
+              {yearsSortedDesc.map((y) => {
+                const year = y.year;
+                const total = y.total;
                 const active = selectedYear === year;
                 return (
                   <button
@@ -518,9 +571,9 @@ export default function FinishDeals() {
                         if (progressDeals) return true;
                         return d.status === "FINISHED";
                       })
-                      .sort((a) => {
+                      .sort((a, b) => {
                         const dateA = new Date(a.closedAt || "").getTime();
-                        const dateB = new Date(a.updatedAt || "").getTime();
+                        const dateB = new Date(b.updatedAt || "").getTime();
 
                         return dateB - dateA;
                       })

@@ -19,6 +19,7 @@ import {
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 
 export default function FinishDeal({
   isOpen,
@@ -27,11 +28,15 @@ export default function FinishDeal({
   newStep,
 }: CloseDealFormProps) {
   const { token, isLoading } = useAuth();
+  const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_URL;
 
   const [isOpenDocCost, setIsOpenDocCost] = useState<number | undefined>(
     undefined,
   );
+
+  const [showPopup, setShowPopup] = useState(false);
+  const [showClientPopup, setShowClientPopup] = useState(false);
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
   const [docCostNote, setDocCostNote] = useState("");
@@ -392,7 +397,28 @@ export default function FinishDeal({
             ) : (
               <h1>Negociação finalizada</h1>
             )}
-            <h2>{deal?.client?.name ?? ""}</h2>
+            <button
+              className={styles.clientBtn}
+              onMouseEnter={() => {
+                setShowClientPopup(true);
+              }}
+              onMouseLeave={() => {
+                setShowClientPopup(false);
+              }}
+              onClick={() => {
+                if (!deal?.client?.name) return;
+
+                router.push(`/clientes?clientId=${deal.client.id}&team=true`);
+              }}
+            >
+              <h2>{deal?.client?.name ?? ""}</h2>
+            </button>
+            {showClientPopup && (
+              <div className={styles.boxClientPopup}>
+                <h3>{deal?.client?.name ?? ""}</h3>
+                <p>{deal?.client?.phone ?? ""}</p>
+              </div>
+            )}
 
             <button
               className={styles.closeBtn}

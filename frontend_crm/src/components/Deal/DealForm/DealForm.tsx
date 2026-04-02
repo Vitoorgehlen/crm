@@ -377,7 +377,7 @@ export default function DealForm({
         if (!res.ok) throw new Error("Erro ao buscar clientes");
         const data = await res.json();
         if (!mounted) return;
-        setClients(data);
+        setClients(data.data);
       } catch (err) {
         console.log(err);
         setError("Erro ao carregar lista de clientes");
@@ -501,7 +501,16 @@ export default function DealForm({
                         }}
                         className={styles.popupClient}
                       >
-                        <button className={styles.clientBtn}>
+                        <button
+                          className={styles.clientBtn}
+                          onClick={() => {
+                            if (!deal?.client?.name) return;
+
+                            router.push(
+                              `/clientes?clientId=${deal.client.id}&team=true`,
+                            );
+                          }}
+                        >
                           <h2>{deal?.client?.name ?? ""}</h2>
                         </button>
                         {showClientPopup && (

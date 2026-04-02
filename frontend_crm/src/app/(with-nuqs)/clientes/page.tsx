@@ -26,6 +26,11 @@ export default function Clients() {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isPriorityBtn, setIsPriorityBtn] = useState(false);
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
+
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const [limit, setLimit] = useState(10);
+
   const [teamClients, setTeamClients] = useQueryState("team", {
     defaultValue: false,
     parse: (v) => v === "true",
@@ -36,32 +41,46 @@ export default function Clients() {
   });
   const selectedUser = users.find((u) => String(u.id) === userId) || null;
 
-  const fetchClientsData = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
+  const fetchClientsData = useCallback(
+    async (pageToFetch: number = 1) => {
+      if (!token) {
+        router.push("/login");
+        return;
+      }
 
-      if (search.trim()) params.append("search", search.trim());
-      // if (page) params.append("page", String(page));
-      // if (limit) params.append("limit", String(limit));
+      try {
+        const params = new URLSearchParams();
 
-      if (teamClients && selectedUser)
-        params.append("userId", String(selectedUser.id));
+        if (search.trim()) params.append("search", search.trim());
+        params.append("page", String(pageToFetch));
+        params.append("limit", String(limit));
+        if (teamClients && selectedUser)
+          params.append("userId", String(selectedUser.id));
 
-      const url = teamClients
-        ? `${API}/team-clients?${params.toString()}`
-        : `${API}/clients?${params.toString()}`;
+        const url = teamClients
+          ? `${API}/team-clients?${params.toString()}`
+          : `${API}/clients?${params.toString()}`;
 
-      const res = await fetch(url, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+        const res = await fetch(url, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
-      setClients(data);
-    } catch (err: unknown) {
-      console.error(err);
-    }
-  }, [token, teamClients, search, selectedUser]);
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
+
+        const clientsData = data.data || [];
+
+        setClients(clientsData);
+        setTotal(Math.ceil(data.total / limit));
+        console.log("buscou");
+        console.log("buscou");
+      } catch (err: unknown) {
+        console.error(err);
+      }
+    },
+    [token, teamClients, search, selectedUser],
+  );
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -76,20 +95,6 @@ export default function Clients() {
       console.error(err);
     }
   }, [token]);
-
-  const displayClients = isPriorityBtn
-    ? [...clients]
-        .sort(
-          (a, b) =>
-            new Date(b.createdAt ?? 0).getTime() -
-            new Date(a.createdAt ?? 0).getTime(),
-        )
-        .sort((a, b) => (b.isPriority ? 1 : 0) - (a.isPriority ? 1 : 0))
-    : [...clients].sort(
-        (a, b) =>
-          new Date(b.createdAt ?? 0).getTime() -
-          new Date(a.createdAt ?? 0).getTime(),
-      );
 
   const handleCreate = async (payload: Partial<Client>) => {
     if (!token) {
@@ -108,7 +113,7 @@ export default function Clients() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
 
-    await fetchClientsData();
+    await fetchClientsData(page);
   };
 
   const handleEdit = async (payload: Partial<Client>) => {
@@ -130,14 +135,29 @@ export default function Clients() {
     if (!res.ok) throw new Error(data.error || "Erro");
 
     setClients((prev) => prev.map((c) => (c.id === data.id ? data : c)));
-    await fetchClientsData();
+    await fetchClientsData(page);
   };
 
   function handleDeleteDeal() {
-    fetchClientsData();
+    fetchClientsData(page);
     setIsEditOpen(false);
     setSelectedClient(null);
   }
+
+  const handlePageChange = (newPage: number) => {
+    if (newPage < 1 || newPage > total) return;
+    setPage(newPage);
+    fetchClientsData(newPage);
+  };
+
+  useEffect(() => {
+    const handleResize = () => {
+      setLimit(window.innerWidth <= 768 ? 6 : 10);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
     if (isLoading) return;
@@ -146,7 +166,28 @@ export default function Clients() {
       return;
     }
 
-    const timeout = setTimeout(fetchClientsData, 400);
+    setPage(1);
+    fetchClientsData(1);
+  }, [
+    isLoading,
+    token,
+    fetchClientsData,
+    search,
+    teamClients,
+    userId,
+    isPriorityBtn,
+  ]);
+
+  useEffect(() => {
+    if (isLoading) return;
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      fetchClientsData();
+    }, 400);
     return () => clearTimeout(timeout);
   }, [isLoading, token, fetchClientsData]);
 
@@ -230,11 +271,12 @@ export default function Clients() {
             </div>
           ) : (
             <div className={styles.clientList}>
-              {displayClients.map((client, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  className={`
+              {clients.map((client, index) => {
+                return (
+                  <button
+                    key={index}
+                    type="button"
+                    className={`
                   ${client.deleteRequest ? styles.clientDelete : styles.client} 
                   ${
                     client.isPriority && isPriorityBtn && !client.deleteRequest
@@ -242,23 +284,45 @@ export default function Clients() {
                       : ""
                   }
                 `}
-                  onClick={() => {
-                    setIsEditOpen(true);
-                    setSelectedClient(client);
-                  }}
+                    onClick={() => {
+                      setIsEditOpen(true);
+                      setSelectedClient(client);
+                    }}
+                  >
+                    {client.isPriority ? (
+                      <IoStar className={styles.btnPriorityActiveCard} />
+                    ) : (
+                      <IoStarOutline className={styles.btnPriorityCard} />
+                    )}
+                    <h3>{client.name}</h3>
+                    <h4>{client.phone}</h4>
+                    {teamClients && (
+                      <h6>
+                        {client.creator?.name || "Usuário não encontrado"}
+                      </h6>
+                    )}
+                  </button>
+                );
+              })}
+              <div className={styles.pagination}>
+                <button
+                  disabled={page <= 1}
+                  onClick={() => handlePageChange(page - 1)}
                 >
-                  {client.isPriority ? (
-                    <IoStar className={styles.btnPriorityActiveCard} />
-                  ) : (
-                    <IoStarOutline className={styles.btnPriorityCard} />
-                  )}
-                  <h3>{client.name}</h3>
-                  <h4>{client.phone}</h4>
-                  {teamClients && (
-                    <h6>{client.creator?.name || "Usuário não encontrado"}</h6>
-                  )}
+                  Anterior
                 </button>
-              ))}
+
+                <span>
+                  {page}/{total}
+                </span>
+
+                <button
+                  disabled={page >= total}
+                  onClick={() => handlePageChange(page + 1)}
+                >
+                  Próxima
+                </button>
+              </div>
             </div>
           )}
         </div>

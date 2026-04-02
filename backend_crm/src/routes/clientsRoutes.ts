@@ -63,13 +63,16 @@ router.get('/clients', loginRequired, async (req, res) => {
   const { id: userId } = user;
 
   const search = String(req.query.search || '').trim();
+  const page = Number(req.query.page || 1);
+  const limit = Number(req.query.limit || 50);
+  const clientId = req.query.clientId ? Number(req.query.clientId) : undefined;
 
   try {
-    const deal = await getMyClients(userId, search);
+    const deal = await getMyClients(userId, search, page, limit, clientId);
     res.json(deal);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+    res.status(500).json({ error: 'Erro ao buscar cliente.' });
   }
 });
 
@@ -80,13 +83,16 @@ router.get('/team-clients', loginRequired, async (req, res) => {
 
   if (!userRole) return res.status(400).json({ error: 'ID inválido' });
   const search = String(req.query.search || '').trim();
+  const page = Number(req.query.page || 1);
+  const limit = Number(req.query.limit || 50);
+  const clientId = req.query.clientId ? Number(req.query.clientId) : undefined;
 
   try {
-    const deal = await getTeamClients(userId, search, selectedUserId);
+    const deal = await getTeamClients(userId, search, page, limit, selectedUserId, clientId);
     res.json(deal);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+    res.status(500).json({ error: 'Erro ao buscar cliente.' });
   }
 });
 

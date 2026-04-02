@@ -30,6 +30,7 @@ import { GiCheckMark } from "react-icons/gi";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { sumDocs } from "@/utils/sumPreviusDocs";
+import { useRouter } from "next/navigation";
 
 export default function ClosedDeal({
   isOpen,
@@ -40,6 +41,7 @@ export default function ClosedDeal({
 }: CloseDealFormProps) {
   const { token, isLoading } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
+  const router = useRouter();
 
   const [companyUsers, setCompanyUsers] = useState<
     Array<{ id: number; name?: string }>
@@ -742,7 +744,16 @@ export default function ClosedDeal({
                 }}
                 className={styles.popupClient}
               >
-                <button className={styles.clientBtn}>
+                <button
+                  className={styles.clientBtn}
+                  onClick={() => {
+                    if (!deal?.client?.name) return;
+
+                    router.push(
+                      `/clientes?clientId=${deal.client.id}&team=true`,
+                    );
+                  }}
+                >
                   <h2>{deal?.client?.name ?? ""}</h2>
                 </button>
                 {showClientPopup && (

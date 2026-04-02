@@ -83,12 +83,20 @@ export async function getClientDeletedRequest(userId: number) {
 }
 
 // Pega todos os clientes feitos pelo User
-export async function getMyClients(userId: number, search: string) {
+export async function getMyClients(
+  userId: number,
+  search: string,
+  page: number,
+  limit: number,
+  clientId?: number
+) {
   const where: any = {
     createdBy: userId,
   };
 
-  if (search) {
+  if (clientId) {
+      where.id = clientId;
+    } else if (search) {
     where.OR = [
         {
           name: {
@@ -104,17 +112,35 @@ export async function getMyClients(userId: number, search: string) {
         }
       ]
   }
-  return prisma.client.findMany({
-    where,
-    include: {
-        creator: { select: { name: true, email: true } },
-        updater: { select: { name: true, email: true } }
-      }
+  return prisma.$transaction(async (tx) => {
+    const data = await tx.client.findMany({
+      where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        { isPriority: 'desc' },
+        { createdAt: 'desc' }
+      ],
+      include: {
+          creator: { select: { name: true, email: true } },
+          updater: { select: { name: true, email: true } }
+        }
+      });
+
+    const total = await tx.client.count({ where });
+
+    return { data, total}
   });
 }
 
 // Pega todos os clientes feitos pela equipe
-export async function getTeamClients(userId: number, search: string, selectedUser: number | null) {
+export async function getTeamClients(
+  userId: number,
+  search: string,
+  page: number,
+  limit: number,
+  selectedUser: number | null,
+  clientId?: number) {
   const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
   if (!canReadClient) throw new Error('Você não tem permissão para ler clientes');
 
@@ -137,7 +163,9 @@ export async function getTeamClients(userId: number, search: string, selectedUse
       where.AND = [{ createdBy: selectedUser }];
     } else where.AND = [{ companyId: company.companyId }];
 
-    if (search) {
+    if (clientId) {
+      where.id = clientId;
+    } else if (search) {
       where.OR = [
           {
             name: {
@@ -154,13 +182,23 @@ export async function getTeamClients(userId: number, search: string, selectedUse
         ]
     }
 
-    return tx.client.findMany({
+    const data = await tx.client.findMany({
       where,
+      skip: (page - 1) * limit,
+      take: limit,
+      orderBy: [
+        { isPriority: 'desc' },
+        { createdAt: 'desc' }
+      ],
       include: {
         creator: { select: { name: true } },
         updater: { select: { name: true } }
       }
     });
+
+    const total = await tx.client.count({ where })
+
+    return ({ data, total })
   })
 }
 

@@ -109,6 +109,46 @@
   justify-content: space-between;
 }
 
+.clientBtn {
+  border: none;
+  width: 100%;
+  cursor: pointer;
+}
+
+.clientBtn:hover h2 {
+  color: var(--primaryColor);
+}
+
+.boxClientPopup {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 180px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 5px;
+  border: 1px solid var(--shadowColor);
+  box-shadow: -3px 3px 10px var(--shadowColor);
+  backdrop-filter: blur(20px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1002;
+}
+
+.modalLeft .boxClientPopup h3 {
+  font-size: var(--font-3);
+  font-weight: 600;
+  color: var(--primaryText);
+}
+
+.modalLeft .boxClientPopup p {
+  font-size: var(--font-5);
+  font-weight: 400;
+  color: white;
+}
+
 .modalRight {
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   background: var(--cardBackground2);

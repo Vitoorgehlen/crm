@@ -8,6 +8,8 @@ import {
   getDealsByClient,
   getDealDeletedRequest,
   getTeamPerformace,
+  getFinishedDealsYears,
+  getTotalDealsOfYear,
 } from '../repositories/dealRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
@@ -39,6 +41,23 @@ router.post('/deals', loginRequired, async(req, res) => {
   }
 });
 
+router.get('/deals-by-client/:id', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  const id = Number(req.params.id);
+  if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+
+  try {
+    const deal = await getDealsByClient(id, userId);
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
 router.get('/deals', loginRequired, async (req, res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId } = user;
@@ -48,13 +67,84 @@ router.get('/deals', loginRequired, async (req, res) => {
 
   const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;
   const statusClientQ = typeof req.query.statusClient === 'string' ? req.query.statusClient : undefined;
+  const paymentMethod = typeof req.query.paymentMethod  === 'string' ? req.query.paymentMethod  : undefined;
 
   const status = statusQ ? statusQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
   const statusClient = statusClientQ ? statusClientQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
 
+  const page = Number(req.query.page || 1);
+  const limit = Number(req.query.limit || 50);
 
   try {
-    const deal = await getDeals(userId, { search, status, statusClient });
+    const deal = await getDeals(userId, { search, status, statusClient, paymentMethod }, page, limit);
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
+router.get('/deals-finished', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  const name = String(req.query.name || '').trim();
+  const teamDeals = req.query.teamDeals === 'true';
+  const targetId = Number(req.query.userId) || null;
+  const progressDeals = req.query.progressDeals === 'true';
+
+  const currentYear = new Date().getFullYear();
+  const year = Number(req.query.year) || currentYear;
+
+  try {
+    const deal = await getFinishedDealsYears(userId, { name, progressDeals, teamDeals, targetId, year } );
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
+router.get('/deals-total-finished', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  const teamDeals = req.query.teamDeals === 'true';
+  const progressDeals = req.query.progressDeals === 'true';
+  const targetId = Number(req.query.userId) || null;
+
+  try {
+    const deal = await getTotalDealsOfYear(userId, progressDeals, teamDeals, targetId);
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
+router.get('/team-deals', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+  const search = String(req.query.name || '').trim();
+
+  const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;
+  const statusClientQ = typeof req.query.statusClient === 'string' ? req.query.statusClient : undefined;
+  const paymentMethod = typeof req.query.paymentMethod  === 'string' ? req.query.paymentMethod  : undefined;
+
+  const status = statusQ ? statusQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+  const statusClient = statusClientQ ? statusClientQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+
+  const page = Number(req.query.page || 1);
+  const limit = Number(req.query.limit || 50)
+
+  const selectedUserId = req.query.userId ? Number(req.query.userId) : undefined;
+
+  try {
+    const deal = await getTeamDeals(userId, { search, status, statusClient, paymentMethod, selectedUserId }, page, limit);
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -80,47 +170,6 @@ router.get('/team-performace', loginRequired, async (req, res) => {
   } catch (err) {
     console.log(err);
     res.status(500).json({ error: 'Erro ao buscar performace da equipe.' });
-  }
-});
-
-router.get('/deals-by-client/:id', loginRequired, async (req, res) => {
-  const { user } = req as AuthenticatedRequest;
-  const { id: userId } = user;
-  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
-
-  const id = Number(req.params.id);
-  if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
-
-  try {
-    const deal = await getDealsByClient(id, userId);
-    res.json(deal);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
-  }
-});
-
-router.get('/team-deals', loginRequired, async (req, res) => {
-  const { user } = req as AuthenticatedRequest;
-  const { id: userId } = user;
-  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
-
-  const search = String(req.query.name || '').trim();
-
-  const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;
-  const statusClientQ = typeof req.query.statusClient === 'string' ? req.query.statusClient : undefined;
-
-  const status = statusQ ? statusQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
-  const statusClient = statusClientQ ? statusClientQ.split(',').map(s => s.trim()).filter(Boolean) : undefined;
-
-  const selectedUserId = req.query.selectedUser ? Number(req.query.selectedUser) : undefined;
-
-  try {
-    const deal = await getTeamDeals(userId, { search, status, statusClient, selectedUserId });
-    res.json(deal);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar negócio.' });
   }
 });
 

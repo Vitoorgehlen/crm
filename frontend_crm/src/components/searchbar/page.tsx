@@ -29,6 +29,12 @@ export default function DealsHeader({
   permissions,
   loading,
 }: DealsHeaderProps) {
+  const handleToggleTeamDeals = () => {
+    const newValue = !teamDeals;
+    setTeamDeals(newValue);
+
+    if (!newValue) setSelectedUser(null);
+  };
   return (
     <div className={styles.headerContent}>
       <div className={styles.serchDeal}>
@@ -68,7 +74,7 @@ export default function DealsHeader({
             className={`${styles.btnFilter} ${
               teamDeals ? styles.btnFilterActive : ""
             }`}
-            onClick={() => setTeamDeals(!teamDeals)}
+            onClick={handleToggleTeamDeals}
             type="button"
           >
             <HiUserGroup />

@@ -161,6 +161,7 @@
 .clientBtn {
   border: none;
   width: 100%;
+  cursor: pointer;
 }
 
 .clientBtn:hover h2 {

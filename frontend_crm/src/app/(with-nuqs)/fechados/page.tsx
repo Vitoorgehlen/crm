@@ -30,13 +30,14 @@ import {
 } from "@dnd-kit/modifiers";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { PaymentMethod } from "@/types/index";
-import { fetchDeals } from "@/utils/fetchDeals";
 import DealsHeader from "@/components/searchbar/page";
 import DraggableCard from "@/components/draggableAndDroppable/draggableCard";
 import DroppableColumn from "@/components/draggableAndDroppable/droppable";
 import { useQueryState } from "nuqs";
+import { fetchDealsList, fetchMultipleDeals } from "@/utils/fetchDeals";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
+const LIMIT = 5;
 
 export default function Deals() {
   const router = useRouter();
@@ -44,11 +45,10 @@ export default function Deals() {
 
   const [users, setUsers] = useState<User[]>([]);
 
-  const [clients, setClients] = useState<Client[]>([]);
-  const [deals, setDeals] = useState<Deal[]>([]);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
+  const [limit, setLimit] = useState(LIMIT);
 
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
@@ -67,7 +67,33 @@ export default function Deals() {
   const selectedUser = users.find((u) => String(u.id) === userId) || null;
 
   const [isMobile, setIsMobile] = useState(false);
+  const [dealsByMethod, setDealsByMethod] = useState<
+    Record<PaymentMethod, Deal[]>
+  >(
+    Object.keys(WORKFLOW_BY_METHOD).reduce(
+      (acc, method) => {
+        acc[method as PaymentMethod] = [];
+        return acc;
+      },
+      {} as Record<PaymentMethod, Deal[]>,
+    ),
+  );
+  const [currentPageByMethod, setCurrentPageByMethod] = useState<
+    Record<PaymentMethod, number>
+  >({} as Record<PaymentMethod, number>);
+  const [totalPagesByMethod, setTotalPagesByMethod] = useState<
+    Record<PaymentMethod, number>
+  >({} as Record<PaymentMethod, number>);
+
   const [loading, setLoading] = useState(false);
+
+  const findDealById = (dealId: number): Deal | undefined => {
+    for (const method of Object.keys(dealsByMethod) as PaymentMethod[]) {
+      const found = dealsByMethod[method].find((d) => d.id === dealId);
+      if (found) return found;
+    }
+    return undefined;
+  };
 
   const handleDragEnd = async (event: any) => {
     const { active, over } = event;
@@ -80,7 +106,7 @@ export default function Deals() {
       DealStepType,
     ];
 
-    const deal = deals.find((d) => d.id === dealId);
+    const deal = findDealById(dealId);
     if (!deal) return;
 
     const steps = WORKFLOW_BY_METHOD[deal.paymentMethod];
@@ -143,8 +169,10 @@ export default function Deals() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro");
 
-    setDeals((prev) => [...prev, data]);
-    await fetchDealsData();
+    if (data.paymentMethod) {
+      await fetchDealsByMethod(data.paymentMethod as PaymentMethod, 1);
+    }
+    // await fetchDealsData();
   };
 
   const closeDealShares = async (payload: CloseDealPayload) => {
@@ -166,8 +194,14 @@ export default function Deals() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao fechar negociação");
 
-    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
-    await fetchDealsData();
+    setDealsByMethod((prev) => {
+      const newState = { ...prev };
+      for (const method of Object.keys(newState) as PaymentMethod[]) {
+        newState[method] = newState[method].filter((d) => d.id !== data.id);
+      }
+      return newState;
+    });
+    // await fetchDealsData();
     setIsCloseOpen(false);
     setSelectedDeal(null);
     router.push("/fechados");
@@ -196,8 +230,15 @@ export default function Deals() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao mudar de passo");
 
-    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
-    await fetchDealsData();
+    if (data.paymentMethod) {
+      const currentPage =
+        currentPageByMethod[data.paymentMethod as PaymentMethod] || 1;
+      await fetchDealsByMethod(
+        data.paymentMethod as PaymentMethod,
+        currentPage,
+      );
+    }
+    // await fetchDealsData();
     setIsCloseOpen(false);
     setSelectedDeal(null);
     router.push("/fechados");
@@ -222,27 +263,119 @@ export default function Deals() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao mudar de passo");
 
-    setDeals((prev) => prev.map((d) => (d.id === data.id ? data : d)));
-    await fetchDealsData();
+    setDealsByMethod((prev) => {
+      const newState = { ...prev };
+      for (const method of Object.keys(newState) as PaymentMethod[]) {
+        const index = newState[method].findIndex((d) => d.id === data.id);
+        if (index !== -1) {
+          newState[method] = [...newState[method]];
+          newState[method][index] = data;
+          break;
+        }
+      }
+      return newState;
+    });
+    if (data.paymentMethod) {
+      const currentPage =
+        currentPageByMethod[data.paymentMethod as PaymentMethod] || 1;
+      await fetchDealsByMethod(
+        data.paymentMethod as PaymentMethod,
+        currentPage,
+      );
+    }
+    // await fetchDealsData();
   };
 
-  const fetchDealsData = useCallback(async () => {
+  const fetchDealsByMethod = useCallback(
+    async (paymentMethod: PaymentMethod, pageToFetch: number = 1) => {
+      if (!token) return;
+      setLoading(true);
+
+      try {
+        const result = await fetchDealsList({
+          token,
+          apiUrl: API!,
+          search,
+          teamDeals,
+          userId,
+          limit,
+          page: pageToFetch,
+          status: "CLOSED",
+          paymentMethod,
+        });
+
+        setDealsByMethod((prev) => ({
+          ...prev,
+          [paymentMethod]: result.deals,
+        }));
+
+        setTotalPagesByMethod((prev) => ({
+          ...prev,
+          [paymentMethod]: Math.ceil(result.total / limit),
+        }));
+
+        setCurrentPageByMethod((prev) => ({
+          ...prev,
+          [paymentMethod]: pageToFetch,
+        }));
+      } catch (err: unknown) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [token, search, teamDeals, userId, limit],
+  );
+
+  const fetchAllMethodData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
+
     try {
-      const data = await fetchDeals(API!, token, {
-        team: teamDeals,
+      const methods = Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[];
+
+      const items = methods.map((method) => ({
+        key: method,
+        status: "CLOSED",
+        paymentMethod: method,
+      }));
+
+      const results = await fetchMultipleDeals({
+        token,
+        apiUrl: API!,
         search,
-        status: ["CLOSED"],
-        selectedUser: userId ? Number(userId) : undefined,
+        teamDeals,
+        userId,
+        limit,
+        items,
       });
-      setDeals(data);
+
+      const newDealsByMethod: Record<PaymentMethod, Deal[]> = {} as Record<
+        PaymentMethod,
+        Deal[]
+      >;
+      const newTotalPagesByMethod: Record<PaymentMethod, number> = {} as Record<
+        PaymentMethod,
+        number
+      >;
+      const newCurrentPageByMethod: Record<PaymentMethod, number> =
+        {} as Record<PaymentMethod, number>;
+
+      results.forEach((result) => {
+        newDealsByMethod[result.key as PaymentMethod] = result.deals;
+        newTotalPagesByMethod[result.key as PaymentMethod] = result.totalPages;
+        newCurrentPageByMethod[result.key as PaymentMethod] = 1;
+      });
+
+      setDealsByMethod(newDealsByMethod);
+      setTotalPagesByMethod(newTotalPagesByMethod);
+      setCurrentPageByMethod(newCurrentPageByMethod);
     } catch (err: unknown) {
-      console.error(err);
+      console.error("Erro ao buscar deals:", err);
     } finally {
       setLoading(false);
     }
-  }, [token, search, teamDeals, userId]);
+  }, [token, search, teamDeals, userId, limit]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -258,36 +391,12 @@ export default function Deals() {
     }
   }, [token]);
 
-  useEffect(() => {
-    let mounted = true;
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
+  const handlePageChange = (paymentMethod: PaymentMethod, newPage: number) => {
+    const totalPages = totalPagesByMethod[paymentMethod] || 1;
+    if (newPage < 1 || newPage > totalPages) return;
 
-    async function fetchClients() {
-      setLoading(true);
-      try {
-        const res = await fetch(`${API}/clients`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Erro ao buscar clientes");
-        const data = await res.json();
-        if (!mounted) return;
-        setClients(data);
-      } catch (err: unknown) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchClients();
-    return () => {
-      mounted = false;
-    };
-  }, [token, isLoading, router]);
+    fetchDealsByMethod(paymentMethod, newPage);
+  };
 
   useEffect(() => {
     if (isLoading) return;
@@ -296,15 +405,16 @@ export default function Deals() {
       return;
     }
 
-    const t = setTimeout(fetchDealsData, 400);
+    const t = setTimeout(fetchAllMethodData, 400);
     fetchUsers();
     return () => clearTimeout(t);
-  }, [fetchDealsData, isLoading, userId, token, fetchUsers, router]);
+  }, [fetchAllMethodData, isLoading, userId, token, fetchUsers, router]);
+
   useEffect(() => {
     const handleResize = () => {
+      setLimit(window.innerWidth <= 768 ? 4 : LIMIT);
       setIsMobile(window.innerWidth < 768);
     };
-
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -347,7 +457,7 @@ export default function Deals() {
               mode="create"
               isOpen={isCreateOpen}
               deal={undefined}
-              clients={clients}
+              // clients={clients}
               onClose={() => {
                 setIsCreateOpen(false);
                 setSelectedDeal(null);
@@ -369,18 +479,19 @@ export default function Deals() {
             {(Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[]).map(
               (method) => {
                 const steps = WORKFLOW_BY_METHOD[method];
-                const dealsForMethod = deals.filter(
-                  (d) => d.paymentMethod === method,
-                );
-                if (dealsForMethod.length === 0) return null;
+                const currentDeals = dealsByMethod[method] || [];
+                const currentPage = currentPageByMethod[method] || 1;
+                const totalPages = totalPagesByMethod[method] || 1;
+
+                if (currentDeals.length === 0) return null;
 
                 return (
                   <section key={method} className={styles.methodSection}>
                     <header className={styles.methodHeader}>
                       <h3>{PAYMENT_METHOD_LABEL[method]}</h3>
                       <h4 className={styles.methodCount}>
-                        {dealsForMethod.length}{" "}
-                        {dealsForMethod.length === 1
+                        {currentDeals.length}{" "}
+                        {currentDeals.length === 1
                           ? "negociação"
                           : "negociações"}
                       </h4>
@@ -388,12 +499,12 @@ export default function Deals() {
 
                     <div className={styles.methodWorkflow}>
                       {steps.map((step) => {
-                        const columnDeals = dealsForMethod.filter(
+                        const columnDeals = currentDeals.filter(
                           (d) => d.currentStep === step,
                         );
                         return (
                           <DroppableColumn
-                            key={String(step)}
+                            key={`${method}-${step}`}
                             id={`${method}-${step}`}
                           >
                             <div className={styles.column}>
@@ -434,16 +545,44 @@ export default function Deals() {
                         );
                       })}
                     </div>
+                    {totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        <button
+                          disabled={currentPage <= 1 || loading}
+                          onClick={() =>
+                            handlePageChange(method, currentPage - 1)
+                          }
+                        >
+                          Anterior
+                        </button>
+
+                        <span>
+                          {currentPage} / {totalPages}
+                        </span>
+
+                        <button
+                          disabled={currentPage >= totalPages || loading}
+                          onClick={() =>
+                            handlePageChange(method, currentPage + 1)
+                          }
+                        >
+                          Próxima
+                        </button>
+                      </div>
+                    )}
                   </section>
                 );
               },
             )}
 
-            {deals.length === 0 && (
-              <div className={styles.divError}>
-                <p>Nenhuma negociação encontrada</p>
-              </div>
-            )}
+            {Object.values(dealsByMethod).every(
+              (deals) => deals.length === 0,
+            ) &&
+              !loading && (
+                <div className={styles.divError}>
+                  <p>Nenhuma negociação encontrada</p>
+                </div>
+              )}
 
             {selectedDeal && (
               <ClosedDeal
