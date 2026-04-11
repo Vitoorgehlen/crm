@@ -18,20 +18,20 @@ export default function DeleteRequest() {
   const [isRequestDeal, setIsRequestDeal] = useState(false);
 
   const [clientRequest, setClientRequest] = useState<ClientDeletedRequest[]>(
-    []
+    [],
   );
   const [dealRequest, setDealRequest] = useState<Deal[]>([]);
   const [loading, setLoading] = useState<"read" | "canc" | "del" | null>(null);
 
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${client.name}?`
+      `Tem certeza que deseja excluir ${client.name}?`,
     );
     if (!confirmDelete) return;
 
     if (client.deals?.length) {
       const confirmDelete = window.confirm(
-        `${client.name} possui ${client.deals?.length} negociações em aberto`
+        `${client.name} possui ${client.deals?.length} negociações em aberto`,
       );
       if (!confirmDelete) return;
     }
@@ -59,7 +59,7 @@ export default function DeleteRequest() {
 
   const rejectedRequestClient = async (client: ClientDeletedRequest) => {
     const confirmDelete = window.confirm(
-      `Cancelar solicitação para excluir ${client.name}?`
+      `Cancelar solicitação para excluir ${client.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -91,7 +91,7 @@ export default function DeleteRequest() {
 
   const approvedRequestDeal = async (deal: Deal) => {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${deal.client?.name}?`
+      `Tem certeza que deseja excluir ${deal.client?.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -118,7 +118,7 @@ export default function DeleteRequest() {
 
   const rejectedRequestDeal = async (client: Deal) => {
     const confirmDelete = window.confirm(
-      `Cancelar solicitação para excluir ${client.client?.name}?`
+      `Cancelar solicitação para excluir ${client.client?.name}?`,
     );
     if (!confirmDelete) return;
 
@@ -156,8 +156,7 @@ export default function DeleteRequest() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
-      console.log("clients-deleted-request parsed:", data);
-      const clients = Array.isArray(data) ? data : data?.clients ?? [];
+      const clients = Array.isArray(data) ? data : (data?.clients ?? []);
       setClientRequest(clients);
     } catch (err: unknown) {
       console.error(err);
@@ -175,7 +174,7 @@ export default function DeleteRequest() {
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao buscar negociações");
-      const deals = Array.isArray(data) ? data : data?.deals ?? [];
+      const deals = Array.isArray(data) ? data : (data?.deals ?? []);
       setDealRequest(deals);
     } catch (err: unknown) {
       console.error(err);
@@ -204,40 +203,39 @@ export default function DeleteRequest() {
       {permissions.includes("ALL_DEAL_DELETE") && (
         <>
           <main className={styles.main}>
-            <div className={styles.header}>
-              <h1>Apagar{isRequestClient ? " Clientes" : " Negociações"}</h1>
-            </div>
-
             <div className={styles.headerContent}>
+              <div className={styles.title}>
+                <h3>Apagar</h3>
+                <h5>{isRequestClient ? " Clientes" : " Negociações"}</h5>
+              </div>
               <div className={styles.headerIcons}>
                 <button
                   className={`${
                     isRequestClient
-                      ? styles.btnSettingActive
-                      : styles.btnSetting
-                  }`}
+                      ? "btn-action-active"
+                      : "btn-action-inactive"
+                  } btn-action glass`}
                   onClick={() => {
                     setIsRequestClient(true);
                     setIsRequestDeal(false);
                   }}
                 >
                   <FaUserEdit />
-                  <h3>Clientes</h3>
                 </button>
+
                 {permissions.includes("USER_UPDATE") && (
                   <button
                     className={`${
                       isRequestDeal
-                        ? styles.btnSettingActive
-                        : styles.btnSetting
-                    }`}
+                        ? "btn-action-active"
+                        : "btn-action-inactive"
+                    } btn-action glass`}
                     onClick={() => {
                       setIsRequestClient(false);
                       setIsRequestDeal(true);
                     }}
                   >
                     <FaUsersCog />
-                    <h3>Negociações</h3>
                   </button>
                 )}
               </div>
@@ -253,10 +251,16 @@ export default function DeleteRequest() {
                       .slice()
                       .reverse()
                       .map((c) => (
-                        <div key={c.id} className={styles.deleteItem}>
+                        <div
+                          key={c.id}
+                          className={`glass ${styles.deleteItem}`}
+                          onClick={() =>
+                            router.push(`/clientes?team=true&clientId=${c.id}`)
+                          }
+                        >
                           <div className={styles.deleteItemLabels}>
-                            <div className={styles.title}>
-                              <h3>{c.name || "Cliente não encontrado"}</h3>
+                            <div className={styles.titleCard}>
+                              <h5>{c.name || "Cliente não encontrado"}</h5>
                             </div>
                             <div className={styles.box}>
                               <p>Negociações ativas:</p>
@@ -268,21 +272,29 @@ export default function DeleteRequest() {
                               </p>
                             </div>
                             <div className={styles.box}>
-                              <h6>{formatDateForCards(c.deleteRequestAt)}</h6>
+                              <span>
+                                {formatDateForCards(c.deleteRequestAt)}
+                              </span>
                             </div>
                           </div>
                           <div className={styles.boxBtns}>
                             <button
-                              className={styles.btnDelClient}
+                              className={styles.btnDel}
                               type="button"
-                              onClick={() => approvedRequestClient(c)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                approvedRequestClient(c);
+                              }}
                             >
                               {loading === "del" ? "Apagando..." : "Apagar"}
                             </button>
                             <button
-                              className={styles.btnCancelClient}
+                              className={`${styles.btnDel} ${styles.btnCancel}`}
                               type="button"
-                              onClick={() => rejectedRequestClient(c)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                rejectedRequestClient(c);
+                              }}
                             >
                               {loading === "canc"
                                 ? "Cancelando..."
@@ -304,12 +316,26 @@ export default function DeleteRequest() {
                       .slice()
                       .reverse()
                       .map((d) => (
-                        <div key={d.id} className={styles.deleteItem}>
+                        <div
+                          key={d.id}
+                          className={`glass ${styles.deleteItem}`}
+                          onClick={() => {
+                            if (d.status === "POTENTIAL_CLIENTS") {
+                              router.push(
+                                `/negociacoes?team=true&dealId=${d.id}`,
+                              );
+                            } else {
+                              router.push(
+                                `/arquivados?team=true&dealId=${d.id}`,
+                              );
+                            }
+                          }}
+                        >
                           <div className={styles.deleteItemLabels}>
-                            <div className={styles.title}>
-                              <h3>
+                            <div className={styles.titleCard}>
+                              <h5>
                                 {d.client?.name || "Negociação não encontrada"}
-                              </h3>
+                              </h5>
                             </div>
                             <div className={styles.box}>
                               <p>
@@ -317,21 +343,29 @@ export default function DeleteRequest() {
                               </p>
                             </div>
                             <div className={styles.box}>
-                              <h6>{formatDateForCards(d.deleteRequestAt)}</h6>
+                              <span>
+                                {formatDateForCards(d.deleteRequestAt)}
+                              </span>
                             </div>
                           </div>
                           <div className={styles.boxBtns}>
                             <button
-                              className={styles.btnDelClient}
+                              className={styles.btnDel}
                               type="button"
-                              onClick={() => approvedRequestDeal(d)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                approvedRequestDeal(d);
+                              }}
                             >
                               {loading === "del" ? "Apagando..." : "Apagar"}
                             </button>
                             <button
-                              className={styles.btnCancelClient}
+                              className={`${styles.btnDel} ${styles.btnCancel}`}
                               type="button"
-                              onClick={() => rejectedRequestDeal(d)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                rejectedRequestDeal(d);
+                              }}
                             >
                               {loading === "canc"
                                 ? "Cancelando..."

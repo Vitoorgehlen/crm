@@ -4,13 +4,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { Client, User } from "@/types/index";
-import { AiOutlineUserAdd } from "react-icons/ai";
 import { IoStar, IoStarOutline } from "react-icons/io5";
-import { IoMdSearch } from "react-icons/io";
-import { HiUserGroup } from "react-icons/hi2";
 import styles from "./page.module.css";
 import ClientsForm from "@/components/clients/ClientForm";
 import { useQueryState } from "nuqs";
+import HeaderPage from "@/components/searchbar/page";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
+import { IoCloseOutline } from "react-icons/io5";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -20,16 +20,20 @@ export default function Clients() {
 
   const [users, setUsers] = useState<User[]>([]);
 
+  const [ignoreClientEffect, setIgnoreClientEffect] = useState(false);
+  const [clientIdRaw, setClientId] = useQueryState("clientId");
+  const clientId = clientIdRaw ?? null;
+
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isPriorityBtn, setIsPriorityBtn] = useState(false);
   const [search, setSearch] = useQueryState("search", { defaultValue: "" });
 
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
-  const [limit, setLimit] = useState(10);
+  const [limit] = useState(20);
+  const [loading, setLoading] = useState(false);
 
   const [teamClients, setTeamClients] = useQueryState("team", {
     defaultValue: false,
@@ -48,6 +52,7 @@ export default function Clients() {
         return;
       }
 
+      setLoading(true);
       try {
         const params = new URLSearchParams();
 
@@ -56,6 +61,7 @@ export default function Clients() {
         params.append("limit", String(limit));
         if (teamClients && selectedUser)
           params.append("userId", String(selectedUser.id));
+        if (clientId) params.append("clientId", clientId);
 
         const url = teamClients
           ? `${API}/team-clients?${params.toString()}`
@@ -73,16 +79,17 @@ export default function Clients() {
 
         setClients(clientsData);
         setTotal(Math.ceil(data.total / limit));
-        console.log("buscou");
-        console.log("buscou");
       } catch (err: unknown) {
         console.error(err);
+      } finally {
+        setLoading(false);
       }
     },
-    [token, teamClients, search, selectedUser],
+    [token, teamClients, search, selectedUser, limit, clientId],
   );
 
   const fetchUsers = useCallback(async () => {
+    setLoading(true);
     try {
       const res = await fetch(`${API}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -93,6 +100,8 @@ export default function Clients() {
       setUsers(data);
     } catch (err: unknown) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   }, [token]);
 
@@ -144,127 +153,76 @@ export default function Clients() {
     setSelectedClient(null);
   }
 
+  function openCreate() {
+    setIsCreateOpen(true);
+    setSelectedClient(null);
+  }
+
   const handlePageChange = (newPage: number) => {
     if (newPage < 1 || newPage > total) return;
     setPage(newPage);
-    fetchClientsData(newPage);
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setLimit(window.innerWidth <= 768 ? 6 : 10);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    if (!token || isLoading) return;
 
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
+    const timer = setTimeout(() => {
+      fetchClientsData(page);
+    }, 300);
 
-    setPage(1);
-    fetchClientsData(1);
-  }, [
-    isLoading,
-    token,
-    fetchClientsData,
-    search,
-    teamClients,
-    userId,
-    isPriorityBtn,
-  ]);
-
-  useEffect(() => {
-    if (isLoading) return;
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      fetchClientsData();
-    }, 400);
-    return () => clearTimeout(timeout);
-  }, [isLoading, token, fetchClientsData]);
+    return () => clearTimeout(timer);
+  }, [page, token, clientId, teamClients, selectedUser, search]);
 
   useEffect(() => {
     if (token) fetchUsers();
   }, [token, fetchUsers]);
 
+  useEffect(() => {
+    if (ignoreClientEffect) return;
+    if (!clientId || clients.length === 0) return;
+    if (clientId === null) return;
+
+    const client = clients.find((c) => String(c.id) === clientId);
+
+    if (client) {
+      setSelectedClient(client);
+      setIsEditOpen(true);
+    }
+  }, [clientId, clients]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [teamClients, selectedUser, search]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>{teamClients ? "Clientes da equipe" : "Clientes"}</h1>
-        </div>
-
-        <div className={styles.headerContent}>
-          <div className={styles.serchClient}>
-            <button className={styles.btnSearch} type="button">
-              <IoMdSearch />
-            </button>
-            <input
-              type="text"
-              placeholder="Pesquise pelo nome"
-              value={search}
-              className={styles.inputSearch}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-          </div>
-          {teamClients && (
-            <div className={styles.selectUser}>
-              <select
-                value={selectedUser ? selectedUser.id : ""}
-                onChange={(e) => setUserId(e.target.value)}
-              >
-                <option value={""}>Todos</option>
-                {users.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-
-          <div className={styles.headerIcons}>
-            {permissions.includes("ALL_DEAL_READ") && (
-              <button
-                className={`${styles.btnTeam} ${
-                  teamClients ? styles.btnTeamActive : ""
-                }`}
-                onClick={() => setTeamClients((prev) => !prev)}
-                type="button"
-              >
-                <HiUserGroup />
-              </button>
-            )}
-            <button
-              type="button"
-              className={styles.btnPriority}
-              onClick={() => setIsPriorityBtn((prev) => !prev)}
-            >
-              {isPriorityBtn ? (
-                <IoStar className={styles.btnPriorityActive} />
-              ) : (
-                <IoStarOutline />
-              )}
-            </button>
-            <button
-              className={styles.addClient}
-              onClick={() => setIsCreateOpen(true)}
-              type="button"
-            >
-              <AiOutlineUserAdd />
-            </button>
-          </div>
-        </div>
+        <HeaderPage
+          title="Clientes"
+          search={search}
+          setSearch={setSearch}
+          teamMode={teamClients}
+          add={true}
+          setTeamMode={setTeamClients}
+          users={users}
+          selectedUser={selectedUser}
+          setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
+          permissions={permissions}
+          onCreate={openCreate}
+          showClearButton={!!clientId}
+        />
 
         <div>
+          {clientId && (
+            <div className={styles.btnUncheck}>
+              <button
+                className={`btn-action glass ${styles.uncheck}`}
+                onClick={() => router.push("/clientes")}
+              >
+                <IoCloseOutline />
+              </button>
+            </div>
+          )}
           {clients.length === 0 ? (
             <div className={styles.noItens}>
               <p>Nenhuma cliente encontrado.</p>
@@ -277,52 +235,67 @@ export default function Clients() {
                     key={index}
                     type="button"
                     className={`
-                  ${client.deleteRequest ? styles.clientDelete : styles.client} 
-                  ${
-                    client.isPriority && isPriorityBtn && !client.deleteRequest
-                      ? styles.clientPriority
-                      : ""
-                  }
+                  glass ${styles.client} 
+                  ${client.deleteRequest && "glass-danger"} 
+                  ${client.isPriority && styles.clientPriority}
                 `}
                     onClick={() => {
                       setIsEditOpen(true);
                       setSelectedClient(client);
                     }}
                   >
-                    {client.isPriority ? (
-                      <IoStar className={styles.btnPriorityActiveCard} />
-                    ) : (
-                      <IoStarOutline className={styles.btnPriorityCard} />
-                    )}
-                    <h3>{client.name}</h3>
-                    <h4>{client.phone}</h4>
+                    <div className={styles.clientHeader}>
+                      {client.isPriority ? (
+                        <IoStar className={styles.btnPriorityActiveCard} />
+                      ) : (
+                        <IoStarOutline className={styles.btnPriorityCard} />
+                      )}
+                      <IoStarOutline className={styles.starInvisible} />
+                    </div>
+
+                    <div className={styles.clientInfos}>
+                      <h5>{client.name}</h5>
+                      <span>{client.phone}</span>
+                    </div>
                     {teamClients && (
-                      <h6>
+                      <span className={styles.user}>
                         {client.creator?.name || "Usuário não encontrado"}
-                      </h6>
+                      </span>
                     )}
                   </button>
                 );
               })}
-              <div className={styles.pagination}>
-                <button
-                  disabled={page <= 1}
-                  onClick={() => handlePageChange(page - 1)}
-                >
-                  Anterior
-                </button>
+              {!clientId && (
+                <div className={styles.pagination}>
+                  <button
+                    className={`
+                            arrow-pagination ${
+                              (page <= 1 || loading) &&
+                              "arrow-pagination-disable"
+                            }
+                            `}
+                    onClick={() => handlePageChange(page - 1)}
+                  >
+                    <FaArrowAltCircleLeft />
+                  </button>
 
-                <span>
-                  {page}/{total}
-                </span>
+                  <span>
+                    <span className={styles.currentPage}>{page}</span>/{total}
+                  </span>
 
-                <button
-                  disabled={page >= total}
-                  onClick={() => handlePageChange(page + 1)}
-                >
-                  Próxima
-                </button>
-              </div>
+                  <button
+                    className={`
+                            arrow-pagination ${
+                              (page >= total || loading) &&
+                              "arrow-pagination-disable"
+                            }
+                              `}
+                    onClick={() => handlePageChange(page + 1)}
+                  >
+                    <FaArrowAltCircleRight />
+                  </button>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -95,7 +95,17 @@ export async function getMyClients(
   };
 
   if (clientId) {
-      where.id = clientId;
+      const data = await prisma.client.findMany({
+        where: { id: clientId },
+        include: {
+          creator: { select: { name: true, email: true } },
+          updater: { select: { name: true, email: true } }
+        }
+      });
+
+      const total = await prisma.client.count({ where });
+
+      return { data, total};
     } else if (search) {
     where.OR = [
         {
@@ -164,7 +174,17 @@ export async function getTeamClients(
     } else where.AND = [{ companyId: company.companyId }];
 
     if (clientId) {
-      where.id = clientId;
+      const data = await prisma.client.findMany({
+        where: { id: clientId },
+        include: {
+          creator: { select: { name: true, email: true } },
+          updater: { select: { name: true, email: true } }
+        }
+      });
+
+      const total = await prisma.client.count({ where });
+
+      return { data, total};
     } else if (search) {
       where.OR = [
           {

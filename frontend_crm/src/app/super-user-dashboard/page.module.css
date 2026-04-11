@@ -72,7 +72,7 @@
 
 .labelCreateCompany::placeholder {
   outline: none;
-  color: var(--sidebarBackground);
+  color: var(--textBase);
 }
 
 .btnSave {

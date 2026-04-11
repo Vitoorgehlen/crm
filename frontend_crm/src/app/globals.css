@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
 
 :root {
-  --mainBackground: #5a5a4a;
-  --sidebarBackground: #323325;
+  --mainBackground: #141519;
+  --sidebarBackground: #1a1b1e;
+  --textBase: #6b6c70;
   --primaryText: #f2f6d2;
   --secondaryText: #e4f07d;
   --tercearyText: #a7b054;
@@ -58,21 +59,9 @@
   --warningColor: #e4f07d;
   --warningColor2: #f3ea41;
 
-  --font-1: 3rem;
-  --font-2: 2rem;
-  --font-3: 1rem;
-  --font-4: 0.875rem;
-  --font-5: 0.75rem;
-
   --font:
     system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-
-  --font-size-5: 48px;
-  --font-size-4: 36px;
-  --font-size-3: 18px;
-  --font-size-2: 16px;
-  --font-size-1: 14px;
 
   --textColor: #f2f6d2;
   --colorPrimary: #dbf017;
@@ -91,7 +80,7 @@
 
 [data-theme="default-light"] {
   --mainBackground: #f2f6d2;
-  --sidebarBackground: #a3ac50;
+  --textBase: #a3ac50;
   --primaryText: #323325;
   --secondaryText: #5a5a4a;
   --tercearyText: #6f7063;
@@ -146,7 +135,7 @@
 
 [data-theme="blue-dark"] {
   --mainBackground: #344850;
-  --sidebarBackground: #1f2c32;
+  --textBase: #1f2c32;
   --primaryText: #d2eaf3;
   --secondaryText: #5496b0;
   --tercearyText: #7dcff0;
@@ -169,7 +158,7 @@
 
 [data-theme="blue-light"] {
   --mainBackground: #e5f2f7;
-  --sidebarBackground: #37a0ca;
+  --textBase: #37a0ca;
   --primaryText: #131c21;
   --secondaryText: #344850;
   --tercearyText: #467dad;
@@ -192,7 +181,7 @@
 
 [data-theme="pink-dark"] {
   --mainBackground: #402b38;
-  --sidebarBackground: #2b1824;
+  --textBase: #2b1824;
   --primaryText: #f4dce8;
   --secondaryText: #ff66b3;
   --tercearyText: #f79ac0;
@@ -215,7 +204,7 @@
 
 [data-theme="pink-light"] {
   --mainBackground: #fce8f1;
-  --sidebarBackground: #cfa7b8;
+  --textBase: #cfa7b8;
   --primaryText: #261420;
   --secondaryText: #5e2d47;
   --tercearyText: #f25287;
@@ -257,11 +246,115 @@
 }
 
 body {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  padding-bottom: 10px;
+
+  display: flex;
+  flex-direction: column;
   background-color: var(--mainBackground);
+}
+
+input:focus,
+input:active,
+input:hover {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.app-bg {
+  min-height: 98vh;
+  background-image: radial-gradient(circle, #141519 0%, #000000 100%);
+}
+
+.logoMain {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10%;
+  width: 200px;
+  height: auto;
+  z-index: 1;
+  color: rgba(255, 255, 255, 0.01);
 }
 
 .main-base {
   margin-left: 60px;
+}
+
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.glass-danger {
+  background: rgba(255, 0, 0, 0.15);
+  border: 1px solid rgba(255, 0, 0, 0.3) !important;
+}
+
+.glass-danger:hover {
+  background: rgba(255, 0, 0, 0.3) !important;
+  border: 1px solid rgba(255, 0, 0, 0.15) !important;
+}
+
+.form-base {
+  background: none;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 9px 15px;
+  font-size: 14px;
+  font-weight: 200;
+  outline: none;
+}
+
+.form-base:focus,
+.form-base:hover {
+  border: 1px solid var(--primaryColor) !important;
+}
+
+.btn-action {
+  border-radius: 20px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-action-active {
+  color: var(--primaryColor);
+}
+
+.btn-action-inactive {
+  color: var(--primaryText);
+}
+
+.arrow-pagination {
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--textBase);
+}
+
+.arrow-pagination:hover {
+  color: var(--primaryColor);
+}
+
+.arrow-pagination-disable:hover,
+.arrow-pagination-disable {
+  color: rgba(255, 255, 255, 0.1);
+  cursor: auto;
 }
 
 button,
@@ -301,8 +394,62 @@ body:has(.dragging) {
   overflow-x: hidden;
 }
 
+h2 {
+  font-size: 48px;
+}
+
+h3 {
+  font-size: 36px;
+}
+
+h4 {
+  font-size: 18px;
+}
+
+h5 {
+  font-size: 17px;
+  font-weight: 500;
+}
+
+p {
+  font-size: 16px;
+}
+
+span {
+  font-size: 14px;
+  font-weight: 200;
+}
+
 @media (max-width: 768px) {
   .main-base {
     margin-left: 0;
+  }
+
+  .logoMain {
+    width: 180px;
+  }
+
+  h2 {
+    font-size: 40px;
+  }
+
+  h3 {
+    font-size: 30px;
+  }
+
+  h4 {
+    font-size: 15px;
+  }
+
+  h5 {
+    font-size: 13px;
+  }
+
+  p {
+    font-size: 12px;
+  }
+
+  span {
+    font-size: 10px;
   }
 }

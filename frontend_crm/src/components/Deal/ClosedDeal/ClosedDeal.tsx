@@ -31,6 +31,7 @@ import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { sumDocs } from "@/utils/sumPreviusDocs";
 import { useRouter } from "next/navigation";
+import CustomSelect from "@/components/Tools/Select/CustomSelect";
 
 export default function ClosedDeal({
   isOpen,
@@ -131,6 +132,25 @@ export default function ClosedDeal({
   const totalAmounts = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.amount ?? 0), 0);
   }, [splits]);
+
+  const paymentMethodOptions = useMemo(() => {
+    return Object.entries(PaymentMethod).map(([key, { label }]) => ({
+      value: key as PaymentMethod,
+      label: label,
+    }));
+  }, []);
+
+  const selectedPaymentMethodOption = paymentMethodOptions.find(
+    (opt) => opt.value === paymentMethod,
+  );
+
+  const userOptions = [
+    { value: 0, label: "Empresa" },
+    ...companyUsers.map((u) => ({
+      value: u.id,
+      label: u.name ?? `Usuário ${u.id}`,
+    })),
+  ];
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -724,7 +744,7 @@ export default function ClosedDeal({
   if (!isOpen) return null;
 
   return (
-    <div
+    <form
       className={styles.overlay}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
@@ -734,58 +754,80 @@ export default function ClosedDeal({
         <div className={styles.innerModal}>
           <div className={styles.modalLeft}>
             <div className={styles.titleCard}>
-              <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
-              <div
-                onMouseEnter={() => {
-                  setShowClientPopup(true);
-                }}
-                onMouseLeave={() => {
-                  setShowClientPopup(false);
-                }}
-                className={styles.popupClient}
+              <button
+                className={styles.closeBtn}
+                type="button"
+                onClick={() => onClose()}
               >
-                <button
-                  className={styles.clientBtn}
-                  onClick={() => {
-                    if (!deal?.client?.name) return;
+                <MdClose />
+              </button>
 
-                    router.push(
-                      `/clientes?clientId=${deal.client.id}&team=true`,
+              <div className={styles.titleCardEdit}>
+                <p>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</p>
+                <div
+                  onMouseEnter={() => {
+                    setShowClientPopup(true);
+                  }}
+                  onMouseLeave={() => {
+                    setShowClientPopup(false);
+                  }}
+                  className={styles.popupClient}
+                >
+                  <button
+                    className={styles.clientBtn}
+                    onClick={() => {
+                      if (!deal?.client?.name) return;
+
+                      router.push(
+                        `/clientes?clientId=${deal.client.id}&team=true`,
+                      );
+                    }}
+                  >
+                    <h4>{deal?.client?.name ?? ""}</h4>
+                  </button>
+                </div>
+                <span>
+                  {`Fechada:
+                      ${getDaysSinceLastContact(deal?.closedAt ?? "")}`}
+                </span>
+              </div>
+
+              <div className={styles.btnPriorityAndDoc}>
+                <div
+                  onMouseEnter={() => {
+                    setShowPopup(true);
+                    sumDocs(
+                      docValues,
+                      paymentMethod,
+                      downPaymentValue,
+                      subsidyValue,
+                      cashValue,
+                      fgtsValue,
+                      financingValue,
+                      creditLetterValue,
                     );
                   }}
+                  onMouseLeave={() => {
+                    setShowPopup(false);
+                  }}
                 >
-                  <h2>{deal?.client?.name ?? ""}</h2>
-                </button>
-                {showClientPopup && (
-                  <div className={styles.boxClientPopup}>
-                    <h3>{deal?.client?.name ?? ""}</h3>
-                    <p>{deal?.client?.phone ?? ""}</p>
-                  </div>
-                )}
+                  <BsCashCoin className={styles.btnDocValue} />
+                </div>
               </div>
-              <h6>{`Último contato: ${getDaysSinceLastContact(
-                deal?.updatedAt ?? deal?.createdAt ?? "",
-              )}`}</h6>
             </div>
-
-            <button
-              className={styles.closeBtn}
-              type="button"
-              onClick={() => {
-                onClose();
-              }}
-            >
-              <MdClose />
-            </button>
 
             {error && <p className={styles.error}>{error}</p>}
 
-            <div className={styles.paymentMethodStyle}>
-              <div className={styles.paymentBox}>
-                <h3>Valor do imóvel</h3>
+            <div className={styles.paymentTitle}>
+              <div className={styles.payment}>
+                <p>Valor do imóvel</p>
                 <input
                   type="text"
-                  value={real(propertyValue)}
+                  className={`form-base ${styles.form}`}
+                  value={propertyValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
                   onChange={(e) => {
                     const numeric =
                       Number(e.target.value.replace(/\D/g, "")) / 100;
@@ -794,41 +836,15 @@ export default function ClosedDeal({
                   placeholder="Valor do imóvel"
                 />
               </div>
-
-              <div className={styles.paymentBox}>
-                <h3>Método de pagamento</h3>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) =>
-                    setPaymentMethod(e.target.value as PaymentMethod)
-                  }
-                  required
-                >
-                  {Object.entries(PaymentMethod).map(([key, { label }]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {paymentMethod === "FINANCING" && (
-                <div className={styles.paymentBox}>
-                  <h3>Banco</h3>
-                  <input
-                    type="text"
-                    value={financialInstitution}
-                    placeholder="Banco"
-                    onChange={(e) => setFinancialInstitution(e.target.value)}
-                  />
-                </div>
-              )}
-
-              <div className={styles.paymentBox}>
-                <h3> Valor total da comissão </h3>
+              <div className={styles.payment}>
+                <p>Valor total da comissão</p>
                 <input
                   type="text"
-                  value={real(commissionAmount)}
+                  className={`form-base ${styles.form}`}
+                  value={commissionAmount.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
                   onChange={(e) => {
                     const numeric =
                       Number(e.target.value.replace(/\D/g, "")) / 100;
@@ -837,181 +853,104 @@ export default function ClosedDeal({
                   placeholder="Valor da comissão"
                 />
               </div>
+
+              {paymentMethod === "FINANCING" && (
+                <div className={styles.payment}>
+                  <p>Instituição</p>
+                  <p>financeira</p>
+                  <input
+                    type="text"
+                    className={`form-base ${styles.inputBank}`}
+                    placeholder="Banco"
+                    onChange={(e) => setFinancialInstitution(e.target.value)}
+                    value={financialInstitution}
+                  />
+                </div>
+              )}
+
+              <div className={styles.payment}>
+                <p>Método de pagamento</p>
+                <CustomSelect
+                  options={paymentMethodOptions}
+                  value={selectedPaymentMethodOption || null}
+                  onChange={(option) => {
+                    if (option) {
+                      setPaymentMethod(option.value);
+                    }
+                  }}
+                />
+              </div>
             </div>
 
-            {paymentMethod === "CASH" && (
-              <>
-                <div className={styles.paymentMethodStyle}>
-                  <div className={styles.paymentBox}>
-                    <h3>Entrada</h3>
-                    <input
-                      type="text"
-                      placeholder="Valor de entrada"
-                      value={real(downPaymentValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
-                      }}
-                    />
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>Em dinheiro</h3>
-                    <input
-                      type="text"
-                      placeholder="Valor a vista"
-                      value={real(cashValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCashValue(numeric);
-                      }}
-                    />
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
-                    <input
-                      type="text"
-                      placeholder="FGTS"
-                      value={real(fgtsValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className={styles.nameBtnInstallment}>
-                  <button
-                    className={`${styles.btnInstallment} ${
-                      installment ? styles.btnInstallmentActive : ""
-                    }`}
-                    onClick={() => setInstallment((prev) => !prev)}
-                    type="button"
-                  >
-                    <div className={styles.nameBtnInstallment}>
-                      <h2>Parcelar entrada</h2>
-                      {installment ? (
-                        <MdCheckBox />
-                      ) : (
-                        <MdCheckBoxOutlineBlank />
-                      )}
-                    </div>
-                  </button>
-                </div>
+            <div className={styles.paymentTitle}>
+              <div className={styles.payment}>
+                <p>Entrada</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="Valor de entrada"
+                  value={downPaymentValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setDownPaymentValue(numeric);
+                  }}
+                />
+              </div>
 
-                {installment && (
-                  <>
-                    <div className={styles.paymentMethodStyle}>
-                      <div className={styles.paymentBox}>
-                        <h3>Valor da parcela</h3>
-                        <input
-                          type="text"
-                          placeholder="Parcelamento"
-                          value={installmentValue.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                          onChange={(e) => {
-                            const numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-                            setInstallmentValue(numeric);
-                          }}
-                        />
-                      </div>
-                      <div className={styles.paymentBox}>
-                        <h3>Qtd. Parcelas</h3>
-                        <input
-                          type="text"
-                          placeholder="Qtd de parcelas"
-                          value={installmentCount}
-                          onChange={(e) =>
-                            setInstallmentCount(Number(e.target.value))
-                          }
-                        />
-                      </div>
-                      <div className={styles.paymentBox}>
-                        <h3>Valor do reforço</h3>
-                        <input
-                          type="text"
-                          placeholder="Reforço"
-                          value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                          onChange={(e) => {
-                            const numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-                            setBonusInstallmentValue(numeric);
-                          }}
-                        />
-                      </div>
-                      <div className={styles.paymentBox}>
-                        <h3>Qtd. Reforços</h3>
-                        <input
-                          type="text"
-                          placeholder="Qtd de reforços"
-                          value={bonusInstallmentCount}
-                          onChange={(e) =>
-                            setBonusInstallmentCount(Number(e.target.value))
-                          }
-                        />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </>
-            )}
+              <div className={styles.payment}>
+                <p>FGTS</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="FGTS"
+                  value={fgtsValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setFgtsValue(numeric);
+                  }}
+                />
+              </div>
 
-            {paymentMethod === "FINANCING" && (
-              <>
-                <div className={styles.paymentMethodStyle}>
-                  <div className={styles.paymentBox}>
-                    <h3>Entrada</h3>
+              {paymentMethod === "CASH" && (
+                <div className={styles.payment}>
+                  <p>Valor à vista</p>
+                  <input
+                    type="text"
+                    className={`form-base ${styles.form}`}
+                    placeholder="Valor a vista"
+                    value={cashValue.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                    onChange={(e) => {
+                      const numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+                      setCashValue(numeric);
+                    }}
+                  />
+                </div>
+              )}
+
+              {paymentMethod === "FINANCING" && (
+                <>
+                  <div className={styles.payment}>
+                    <p>Financiamento</p>
                     <input
                       type="text"
-                      placeholder="Valor de entrada"
-                      value={real(downPaymentValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
-                      }}
-                    />
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>Subsídio</h3>
-                    <input
-                      type="text"
-                      placeholder="Valor de entrada"
-                      value={real(subsidyValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setSubsidyValue(numeric);
-                      }}
-                    />
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
-                    <input
-                      type="text"
-                      placeholder="FGTS"
-                      value={real(fgtsValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
-                      }}
-                    />
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>Financiado</h3>
-                    <input
-                      type="text"
+                      className={`form-base ${styles.form}`}
                       placeholder="Valor de Financiamento"
-                      value={real(financingValue)}
+                      value={financingValue.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
@@ -1019,50 +958,126 @@ export default function ClosedDeal({
                       }}
                     />
                   </div>
-                </div>
-              </>
-            )}
 
-            {paymentMethod === "CREDIT_LETTER" && (
+                  <div className={styles.payment}>
+                    <p>Subsídio</p>
+                    <input
+                      type="text"
+                      className={`form-base ${styles.form}`}
+                      placeholder="Valor de subsídio"
+                      value={subsidyValue.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setSubsidyValue(numeric);
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+              {paymentMethod === "CREDIT_LETTER" && (
+                <div className={styles.payment}>
+                  <p>Carta crédito</p>
+                  <input
+                    type="text"
+                    className={`form-base ${styles.form}`}
+                    placeholder="Valor da carta de crédito"
+                    value={creditLetterValue.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                    onChange={(e) => {
+                      const numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+                      setCreditLetterValue(numeric);
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className={styles.nameBtnInstallment}>
+              <button
+                className={`${styles.btnInstallment} 
+                  ${installment && styles.btnInstallmentActive}`}
+                onClick={() => setInstallment((prev) => !prev)}
+                type="button"
+              >
+                <div className={styles.nameBtnInstallment}>
+                  {installment ? (
+                    <p>Cancelar parcelamento</p>
+                  ) : (
+                    <p>Parcelar entrada</p>
+                  )}
+                  {installment ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
+                </div>
+              </button>
+            </div>
+
+            {installment && (
               <>
-                <div className={styles.paymentMethodStyle}>
-                  <div className={styles.paymentBox}>
-                    <h3>Entrada</h3>
+                <div
+                  className={`${styles.paymentTitle} ${styles.paymentTitleMobile}`}
+                >
+                  <div className={styles.payment}>
+                    <p>Valor da parcela</p>
                     <input
                       type="text"
-                      placeholder="Valor de entrada"
-                      value={real(downPaymentValue)}
+                      className={`form-base ${styles.form}`}
+                      placeholder="Parcelamento"
+                      value={installmentValue.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
+                        setInstallmentValue(numeric);
                       }}
                     />
                   </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
+                  <div className={styles.payment}>
+                    <p>Quantidade de parcelas</p>
                     <input
                       type="text"
-                      placeholder="FGTS"
-                      value={real(fgtsValue)}
+                      className={`form-base ${styles.form}`}
+                      placeholder="Qtd de parcelas"
+                      value={installmentCount}
+                      onChange={(e) =>
+                        setInstallmentCount(Number(e.target.value))
+                      }
+                    />
+                  </div>
+                  <div className={styles.payment}>
+                    <p>Valor do reforço</p>
+                    <input
+                      type="text"
+                      className={`form-base ${styles.form}`}
+                      placeholder="Reforço"
+                      value={bonusInstallmentValue.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
+                      })}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
+                        setBonusInstallmentValue(numeric);
                       }}
                     />
                   </div>
-                  <div className={styles.paymentBox}>
-                    <h3>Carta de crédito</h3>
+                  <div className={styles.payment}>
+                    <p>Quantidade de reforços</p>
                     <input
                       type="text"
-                      placeholder="Valor da carta de crédito"
-                      value={real(creditLetterValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCreditLetterValue(numeric);
-                      }}
+                      className={`form-base ${styles.form}`}
+                      placeholder="Qtd de reforços"
+                      value={bonusInstallmentCount}
+                      onChange={(e) =>
+                        setBonusInstallmentCount(Number(e.target.value))
+                      }
                     />
                   </div>
                 </div>
@@ -1071,30 +1086,24 @@ export default function ClosedDeal({
 
             <div className={styles.boxCommissionShare}>
               <div className={styles.splitCommissionTitle}>
-                <h2>Divisão da comissão</h2>
+                <p>Divisão da comissão</p>
                 <button
-                  className={`
-                                    ${styles.btnCommission} ${
-                                      splitMethod === "percentage"
-                                        ? styles.btnActive
-                                        : ""
-                                    }`}
+                  className={`btn-action
+                            ${styles.btnCommission} 
+                            ${splitMethod === "percentage" && styles.btnActive}`}
                   type="button"
                   onClick={() => setSplitMethod("percentage")}
                 >
-                  por %
+                  %
                 </button>
                 <button
-                  className={`
-                                    ${styles.btnCommission} ${
-                                      splitMethod === "amount"
-                                        ? styles.btnActive
-                                        : ""
-                                    }`}
+                  className={`btn-action
+                            ${styles.btnCommission} 
+                            ${splitMethod === "amount" && styles.btnActive}`}
                   type="button"
                   onClick={() => setSplitMethod("amount")}
                 >
-                  por valor
+                  R$
                 </button>
                 <button
                   className={styles.addSplit}
@@ -1105,169 +1114,150 @@ export default function ClosedDeal({
                 </button>
               </div>
 
-              {splits.map((s, i) => (
-                <div key={i} className={styles.border}>
-                  <div className={styles.boxSplitCommission}>
-                    <div className={styles.paymentBox}>
-                      <h3>Quem deve receber</h3>
-                      {!s.isPaid ? (
-                        <select
-                          style={{ width: 160 }}
-                          value={s.isCompany ? "company" : (s.userId ?? "")}
-                          onChange={(e) => {
-                            const isCompany = e.target.value === "company";
-                            updateSplit(i, {
-                              isCompany,
-                              userId: isCompany ? null : Number(e.target.value),
-                            });
-                          }}
-                        >
-                          <option value="company">Empresa</option>
-                          {companyUsers.map((u) => (
-                            <option key={u.id} value={u.id}>
-                              {u.name ?? `Usuário ${u.id}`}
-                            </option>
-                          ))}
-                        </select>
-                      ) : (
-                        <h4>
-                          {companyUsers.find((user) => user.id === s.userId)
-                            ?.name ?? "Empresa"}
-                        </h4>
-                      )}
-                    </div>
-                    {splitMethod === "percentage" ? (
-                      !s.isPaid ? (
-                        <div className={styles.paymentBox}>
-                          <h3>Porcentagem</h3>
-                          <div className={styles.percentCommission}>
-                            <input
-                              type="type"
-                              style={{ width: 80 }}
-                              value={s.percentage === 0 ? "" : s.percentage}
-                              onChange={(e) =>
-                                updateSplit(i, {
-                                  percentage: Number(e.target.value),
-                                })
+              {splits.map((s, i) => {
+                const selectedOption = s.isCompany
+                  ? userOptions.find((opt) => opt.value === 0) || null
+                  : userOptions.find((opt) => opt.value === s.userId) || null;
+
+                return (
+                  <div key={i} className={styles.border}>
+                    <div className={styles.boxSplitCommission}>
+                      <CustomSelect
+                        options={userOptions}
+                        value={selectedOption}
+                        onChange={(option) => {
+                          if (!option) return;
+
+                          const isCompany = option.value === null;
+
+                          updateSplit(i, {
+                            isCompany,
+                            userId: isCompany ? null : Number(option.value),
+                          });
+                        }}
+                      />
+
+                      {splitMethod === "percentage" ? (
+                        <>
+                          <input
+                            type="type"
+                            className={`form-base ${styles.form}`}
+                            style={{ width: 90 }}
+                            value={s.percentage === 0 ? "" : s.percentage}
+                            onChange={(e) => {
+                              let value = e.target.value;
+                              value = value.replace(",", ".");
+
+                              if (value === "") {
+                                updateSplit(i, { percentage: 0 });
+                                return;
                               }
-                              placeholder="%"
-                            />
-                            <h3 className={styles.textSplit}>
-                              {" "}
-                              ≈ {computedAmountFor(i)}
-                            </h3>
-                          </div>
-                        </div>
+
+                              const parsed = parseFloat(value);
+
+                              if (!isNaN(parsed)) {
+                                updateSplit(i, {
+                                  percentage: Math.min(parseFloat(value), 100),
+                                });
+                              }
+                            }}
+                          />
+                          <span> ≈ R$ {computedAmountFor(i)}</span>
+                        </>
                       ) : (
-                        <div className={styles.paymentBox}>
-                          <h3>Valor</h3>
-                          <h2>{real(Number(s.amount))}</h2>
-                        </div>
-                      )
-                    ) : !s.isPaid ? (
-                      <div className={styles.paymentBox}>
-                        <h3>Valor</h3>
-                        <input
-                          type="text"
-                          style={{ width: 100 }}
-                          value={real(Number(s.amount))}
-                          onChange={(e) => {
-                            const numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-                            updateSplit(i, { amount: numeric });
-                          }}
-                          placeholder="Valor"
-                        />
-                      </div>
-                    ) : (
-                      <div className={styles.paymentBox}>
-                        <h3>Valor</h3>
-                        <h4>{real(Number(s.amount))}</h4>
-                      </div>
-                    )}
-                    {!s.isPaid && (
-                      <div className={styles.paymentBox}>
-                        <h3>Valor já recebido</h3>
-                        <input
-                          type="text"
-                          style={{ width: 100 }}
-                          value={real(Number(s.received))}
-                          onChange={(e) => {
-                            const numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-                            const maxAllowed = s.amount ?? 0;
-                            if (numeric > maxAllowed) {
-                              updateSplit(i, { received: maxAllowed });
-                            } else {
-                              updateSplit(i, { received: numeric });
-                            }
-                          }}
-                          placeholder="Pago"
-                        />
-                      </div>
-                    )}
-                    <div className={styles.paymentBox}>
-                      <h3>Observação</h3>
+                        <>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.form}`}
+                            style={{ width: 120 }}
+                            value={real(Number(s.amount ?? 0))}
+                            onChange={(e) => {
+                              const numeric =
+                                Number(e.target.value.replace(/\D/g, "")) / 100;
+                              updateSplit(i, {
+                                amount: numeric,
+                              });
+                            }}
+                            placeholder="Valor"
+                          />
+                        </>
+                      )}
+
                       <input
-                        className={styles.textObs}
                         type="text"
+                        className={`form-base ${styles.form}`}
                         placeholder="Observação"
                         value={s.notes ?? ""}
                         onChange={(e) =>
-                          updateSplit(i, { notes: e.target.value })
+                          updateSplit(i, {
+                            notes: e.target.value,
+                          })
                         }
                       />
-                    </div>
-                    <div className={styles.paymentBox}>
-                      <h3>Recebido</h3>
+
                       <button
-                        className={`
-                                                    ${styles.btnIsPaid} ${
-                                                      s.isPaid
-                                                        ? styles.btnIsPaidActive
-                                                        : ""
-                                                    }`}
+                        className={`${styles.addSplit} ${styles.removeSplit}`}
                         type="button"
-                        onClick={() => updateSplit(i, { isPaid: !s.isPaid })}
+                        onClick={() => removeSplit(i)}
                       >
-                        {s.isPaid ? (
-                          <>
-                            <GiCheckMark /> Recebido!
-                          </>
-                        ) : (
-                          <>Receber</>
-                        )}
+                        <IoRemoveCircle />
                       </button>
                     </div>
-
-                    <button
-                      className={styles.removeSplit}
-                      type="button"
-                      onClick={() => removeSplit(i)}
-                    >
-                      <IoRemoveCircle />
-                    </button>
                   </div>
-                </div>
-              ))}
+                );
+              })}
 
-              <div>
+              <div className={styles.sum}>
                 {splitMethod === "percentage" ? (
-                  <h3>Somatório: {totalPercentage.toFixed(2)}%</h3>
+                  <span>Somatório: {totalPercentage.toFixed(2)}%</span>
                 ) : (
-                  <h3>
+                  <span>
                     Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
                     {commissionAmount.toFixed(2)}
-                  </h3>
+                  </span>
                 )}
               </div>
             </div>
+
+            <div className={styles.btnCancelAndConfirm}>
+              <button
+                className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
+                type="button"
+                onClick={(e) => {
+                  handleChangeStep(e, "back");
+                }}
+              >
+                <span>
+                  {isFirstStep ? "Cancelar negociação" : "Voltar etapa"}
+                </span>
+              </button>
+
+              <button
+                className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
+                type="button"
+                onClick={(e) => handleSubmit(e)}
+              >
+                <span>Atualizar</span>
+              </button>
+
+              <button
+                className={`btn-action glass ${styles.btnDeal} ${styles.btnNextStep}`}
+                type="button"
+                onClick={(e) => {
+                  handleChangeStep(e, "next");
+                }}
+              >
+                <span>
+                  {isLastStep ? "Finalizar negociação" : "Próxima etapa"}
+                </span>
+              </button>
+            </div>
           </div>
 
-          <div className={styles.modalRight}>
+          <div className={`glass ${styles.modalRight}`}>
             <div className={styles.docCostSection}>
               <div className={styles.titleDocs}>
-                <h2>Valor de documentação</h2>
+                <h5>Valor de documentação</h5>
                 <div
                   onMouseEnter={() => {
                     setShowPopup(true);
@@ -1286,137 +1276,26 @@ export default function ClosedDeal({
                   className={styles.btnDocValue2}
                 >
                   <BsCashCoin className={styles.btnDocValue} />
-                  {showPopup && (
-                    <div className={styles.boxDocValue}>
-                      <h4>Documentação aproximada</h4>
-                      {docsCalculated.map((doc) => {
-                        return (
-                          <div key={doc.label} className={styles.boxDoc}>
-                            <div className={styles.nameValue}>
-                              <h4>{doc.label}:</h4>
-                              <p>
-                                R$
-                                {doc.value.toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                              </p>
-                            </div>
-                            <div className={styles.description}>
-                              <p>{doc.description}</p>
-                            </div>
-                          </div>
-                        );
-                      })}
-
-                      {paymentMethod === "FINANCING" && (
-                        <>
-                          {Number(downPaymentValue) +
-                            Number(subsidyValue) +
-                            Number(cashValue) +
-                            Number(fgtsValue) +
-                            Number(financingValue) +
-                            Number(creditLetterValue) <
-                            500000 && (
-                            <div className={styles.boxDocTotal}>
-                              <h4>Total MCMV:</h4>
-                              <p>
-                                R$
-                                {docsCalculated
-                                  .reduce((acc, item) => {
-                                    if (item.label === "Financiar SBPE")
-                                      return acc;
-                                    return acc + item.value;
-                                  }, 0)
-                                  .toLocaleString("pt-BR", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                              </p>
-                            </div>
-                          )}
-                          <div className={styles.boxDocTotal}>
-                            <h4>Total SBPE:</h4>
-                            <p>
-                              R$
-                              {docsCalculated
-                                .reduce((acc, item) => {
-                                  if (item.label === "Financiar MCMV")
-                                    return acc;
-                                  return acc + item.value;
-                                }, 0)
-                                .toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                            </p>
-                          </div>
-                        </>
-                      )}
-
-                      {paymentMethod === "CASH" && (
-                        <div className={styles.boxDocTotal}>
-                          <h4>Total:</h4>
-                          <p>
-                            R$
-                            {docsCalculated
-                              .reduce((acc, item) => {
-                                if (
-                                  item.label === "Financiar MCMV" ||
-                                  item.label === "Financiar SBPE"
-                                )
-                                  return acc;
-                                return acc + item.value;
-                              }, 0)
-                              .toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                          </p>
-                        </div>
-                      )}
-
-                      {paymentMethod === "CREDIT_LETTER" && (
-                        <div className={styles.boxDocTotal}>
-                          <h4>Total:</h4>
-                          <p>
-                            R$
-                            {docsCalculated
-                              .reduce((acc, item) => {
-                                if (
-                                  item.label === "Financiar MCMV" ||
-                                  item.label === "Financiar SBPE"
-                                )
-                                  return acc;
-                                return acc + item.value;
-                              }, 0)
-                              .toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })}
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  )}
                 </div>
               </div>
 
               <div className={styles.addDoc}>
                 {isOpenDocCost ? (
                   <>
-                    <h3>Editando</h3>
+                    <span>Editando</span>
                   </>
                 ) : (
                   <>
                     <input
                       type="text"
+                      className={`form-base ${styles.addNoteForm}`}
                       placeholder="Documentação"
                       value={docCostLabel}
                       onChange={(e) => setDocCostLabel(e.target.value)}
                     />
                     <input
                       type="text"
+                      className={`form-base ${styles.addNoteForm}`}
                       placeholder="Documentação"
                       value={real(docCostValue)}
                       onChange={(e) => {
@@ -1427,6 +1306,7 @@ export default function ClosedDeal({
                     />
                     <input
                       type="text"
+                      className={`form-base ${styles.addNoteForm}`}
                       placeholder="Obs"
                       value={docCostNote}
                       onChange={(e) => setDocCostNote(e.target.value)}
@@ -1442,22 +1322,24 @@ export default function ClosedDeal({
                 )}
               </div>
 
-              <div className={styles.docList}>
+              <div className={styles.list}>
                 {docCost.length === 0 && (
                   <p>Nenhuma documentação encontrada.</p>
                 )}
                 {docCost.map((doc) => (
-                  <div key={doc.id} className={styles.docItem}>
+                  <div key={doc.id} className={styles.item}>
                     {isOpenDocCost === doc.id ? (
                       <>
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Documentação"
                           value={docCostLabel}
                           onChange={(e) => setDocCostLabel(e.target.value)}
                         />
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Documentação"
                           value={real(docCostValue)}
                           onChange={(e) => {
@@ -1468,75 +1350,83 @@ export default function ClosedDeal({
                         />
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Obs"
                           value={docCostNote}
                           onChange={(e) => setDocCostNote(e.target.value)}
                         />
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => handleEditDocCost(doc.id)}
-                        >
-                          <FaCheck />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenDocCost(undefined);
-                            setDocCostLabel("");
-                            setDocCostValue(0);
-                            setDocCostNote("");
-                          }}
-                        >
-                          <FaTimes />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => handleEditDocCost(doc.id)}
+                          >
+                            <FaCheck />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenDocCost(undefined);
+                              setDocCostLabel("");
+                              setDocCostValue(0);
+                              setDocCostNote("");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </>
                     ) : (
-                      <>
-                        <h3>{doc.label}</h3>
-                        <h3>{real(Number(doc.value))}</h3>
-                        <h3>{doc.notes}</h3>
+                      <div className={styles.doc}>
+                        <div className={styles.titleDoc}>
+                          <span>{doc.label}</span>
+                          <span>{real(Number(doc.value))}</span>
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenDocCost(doc.id);
-                            setDocCostLabel(doc.label);
-                            setDocCostValue(Number(doc.value));
-                            setDocCostNote(doc.notes || "");
-                          }}
-                        >
-                          <RiPencilFill />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => handleDeleteDocCost(doc.id)}
-                        >
-                          <RiEraserFill />
-                        </button>
-                      </>
+                          <div className={styles.btnsNote}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenDocCost(doc.id);
+                                setDocCostLabel(doc.label);
+                                setDocCostValue(Number(doc.value));
+                                setDocCostNote(doc.notes || "");
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={() => handleDeleteDocCost(doc.id)}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </div>
+                        </div>
+                        <div className={styles.lineDoc}>
+                          <span>{doc.notes}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
-              <h3 className={styles.docCost}>Total: {real(docCostTotal)}</h3>
+              <p className={styles.docCost}>Total: {real(docCostTotal)}</p>
             </div>
-
             <div className={styles.noteSection}>
-              <h2>Notas</h2>
-
+              <h5>Notas</h5>
               <div className={styles.addNote}>
                 {isOpenNote ? (
                   <>
-                    <h3>Editando</h3>
+                    <span>Editando</span>
                   </>
                 ) : (
                   <>
                     <input
+                      className={`form-base ${styles.addNoteForm}`}
                       type="text"
                       placeholder="Nota"
                       value={newNote}
@@ -1544,6 +1434,7 @@ export default function ClosedDeal({
                     />
 
                     <button
+                      type="button"
                       className={styles.btnSave}
                       onClick={handleAddNote}
                       disabled={!newNote.trim()}
@@ -1554,112 +1445,203 @@ export default function ClosedDeal({
                 )}
               </div>
 
-              <div className={styles.noteList}>
+              <div className={`glass ${styles.list}`}>
                 {note.length === 0 && (
                   <p>Nenhuma nota do cliente encontrada.</p>
                 )}
                 {note.map((note) => (
-                  <div key={note.id} className={styles.noteItem}>
+                  <div key={note.id} className={styles.item}>
                     {isOpenNote === note.id ? (
                       <>
                         <input
+                          className={`form-base ${styles.inputNote}`}
                           type="text"
                           placeholder="Nota"
                           value={newNote}
                           onChange={(e) => setNewNote(e.target.value)}
                         />
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => handleEditNote(note.id)}
-                        >
-                          <FaCheck />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenNote(undefined);
-                            setNewNote("");
-                          }}
-                        >
-                          <FaTimes />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => handleEditNote(note.id)}
+                          >
+                            <FaCheck />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(undefined);
+                              setNewNote("");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <h3>{note.content}</h3>
+                        <span>{note.content}</span>
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenNote(note.id);
-                            setNewNote(note.content);
-                          }}
-                        >
-                          <RiPencilFill />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => handleDeleteNote(note.id)}
-                        >
-                          <RiEraserFill />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(note.id);
+                              setNewNote(note.content);
+                            }}
+                          >
+                            <RiPencilFill />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            <RiEraserFill />
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>
                 ))}
               </div>
             </div>
+            <div className={styles.updateBox}>
+              <span>
+                Atualizado a última vez por: {deal?.updater?.name ?? "—"}.{" "}
+                {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
+              </span>
+              <span>
+                Criado por: {deal?.creator?.name ?? "—"}·{" "}
+                {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
+              </span>
+            </div>
           </div>
         </div>
 
-        <div className={styles.footerCard}>
-          <div className={styles.btnUpdateAndStep}>
-            <button
-              className={styles.btnBackStep}
-              type="button"
-              onClick={(e) => {
-                handleChangeStep(e, "back");
-              }}
-            >
-              {isFirstStep ? "Cancelar negociação" : "Voltar etapa"}
-            </button>
-
-            <button
-              className={styles.btnUpdate}
-              type="button"
-              onClick={(e) => handleSubmit(e)}
-            >
-              Atualizar
-            </button>
-
-            <button
-              className={styles.btnNextStep}
-              type="button"
-              onClick={(e) => {
-                handleChangeStep(e, "next");
-              }}
-            >
-              {isLastStep ? "Finalizar negociação" : "Próxima etapa"}
-            </button>
+        {showClientPopup && (
+          <div className={`glass ${styles.popup} ${styles.clientPopup}`}>
+            <h5>{deal?.client?.name ?? ""}</h5>
+            <span>{deal?.client?.phone ?? ""}</span>
           </div>
-          <div className={styles.updateBox}>
-            <h6>
-              Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
-              {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-            </h6>
-            <h6>
-              {" "}
-              Criado por: {deal?.creator?.name ?? "—"} ·{" "}
-              {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-            </h6>
+        )}
+
+        {showPopup && (
+          <div className={`glass ${styles.popup} ${styles.docPopUp}`}>
+            <h5>Documentação aproximada</h5>
+            {docsCalculated.map((doc) => {
+              return (
+                <div key={doc.label} className={styles.boxDoc}>
+                  <div className={styles.nameValue}>
+                    <p>{doc.label}:</p>
+                    <span>
+                      R$
+                      {doc.value.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className={styles.description}>
+                    <span>{doc.description}</span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {paymentMethod === "FINANCING" && (
+              <>
+                {Number(downPaymentValue) +
+                  Number(subsidyValue) +
+                  Number(cashValue) +
+                  Number(fgtsValue) +
+                  Number(financingValue) +
+                  Number(creditLetterValue) <
+                  500000 && (
+                  <div className={styles.boxDocTotal}>
+                    <h5>Total MCMV:</h5>
+                    <p>
+                      R$
+                      {docsCalculated
+                        .reduce((acc, item) => {
+                          if (item.label === "Financiar SBPE") return acc;
+                          return acc + item.value;
+                        }, 0)
+                        .toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                    </p>
+                  </div>
+                )}
+                <div className={styles.boxDocTotal}>
+                  <h5>Total SBPE:</h5>
+                  <p>
+                    R$
+                    {docsCalculated
+                      .reduce((acc, item) => {
+                        if (item.label === "Financiar MCMV") return acc;
+                        return acc + item.value;
+                      }, 0)
+                      .toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {paymentMethod === "CASH" && (
+              <div className={styles.boxDocTotal}>
+                <h5>Total:</h5>
+                <p>
+                  R$
+                  {docsCalculated
+                    .reduce((acc, item) => {
+                      if (
+                        item.label === "Financiar MCMV" ||
+                        item.label === "Financiar SBPE"
+                      )
+                        return acc;
+                      return acc + item.value;
+                    }, 0)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === "CREDIT_LETTER" && (
+              <div className={styles.boxDocTotal}>
+                <h4>Total:</h4>
+                <p>
+                  R$
+                  {docsCalculated
+                    .reduce((acc, item) => {
+                      if (
+                        item.label === "Financiar MCMV" ||
+                        item.label === "Financiar SBPE"
+                      )
+                        return acc;
+                      return acc + item.value;
+                    }, 0)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </p>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
-    </div>
+    </form>
   );
 }

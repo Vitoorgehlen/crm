@@ -4,18 +4,22 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 
-import { FaSearch } from "react-icons/fa";
+import { FaSearch, FaTimes } from "react-icons/fa";
 
 import styles from "./page.module.css";
 import { User, Client, Deal, DealStatus } from "@/types";
 import { formatDateForFinish } from "@/utils/dateUtils";
 import { useQueryState } from "nuqs";
+import UserSelect from "@/components/Tools/Select/UserSelect";
+import MonthPicker from "@/components/Tools/DatePicker/MonthPicker/MonthPicker";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Config() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+
+  const [hasSearched, setHasSearched] = useState(false);
 
   const [startDate, setStartDate] = useState("");
   const [startMonth, setStartMonth] = useQueryState("month", {
@@ -27,11 +31,13 @@ export default function Config() {
   const [selectedUser, setSelectedUser] = useQueryState("user", {
     defaultValue: "ALL",
   });
-  const [searchUser, setSearchUser] = useQueryState("search", {
-    defaultValue: "",
-  });
   const [clients, setClients] = useState<Client[]>([]);
   const [deals, setDeals] = useState<Deal[]>([]);
+
+  const selectedUserObject =
+    users.find((u) => String(u.id) === selectedUser) || null;
+
+  const startMonthDate = startMonth ? new Date(startMonth + "-01") : null;
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -104,61 +110,82 @@ export default function Config() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Desempenho da Equipe</h1>
-        </div>
-
         <div className={styles.headerContent}>
-          <div className={styles.headerBtns}>
-            <select
-              value={selectedUser ?? "ALL"}
-              onChange={(e) => {
-                setSelectedUser(e.target.value);
+          <div className={styles.title}>
+            <h3>Desempenho da Equipe</h3>
+          </div>
+          <div className={styles.headerIcons}>
+            <UserSelect
+              users={users}
+              value={selectedUserObject}
+              onChange={(user) => {
+                setSelectedUser(user?.id?.toString() || "ALL");
               }}
-            >
-              <option value="ALL">Todos</option>
-              {users
-                .slice()
-                .reverse()
-                .map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name || "Usuário não encontrado"}
-                  </option>
-                ))}
-            </select>
+            />
+            <MonthPicker
+              value={startMonthDate}
+              onChange={(date) => {
+                if (!date) {
+                  setStartMonth("");
+                  return;
+                }
 
-            <input
-              type="month"
-              value={startMonth ?? ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setStartMonth(value);
+                const formatted = `${date.getFullYear()}-${String(
+                  date.getMonth() + 1,
+                ).padStart(2, "0")}`;
 
-                const [year, month] = value.split("-");
-                const firstDay = new Date(Number(year), Number(month) - 1, 1);
-                const lastDay = new Date(Number(year), Number(month), 0);
+                setStartMonth(formatted);
+
+                const firstDay = new Date(
+                  date.getFullYear(),
+                  date.getMonth(),
+                  1,
+                );
+                const lastDay = new Date(
+                  date.getFullYear(),
+                  date.getMonth() + 1,
+                  0,
+                );
 
                 setStartDate(firstDay.toISOString());
                 setEndDate(lastDay.toISOString());
               }}
             />
 
-            <button
-              className={styles.btnSetting}
-              onClick={() => {
-                fetchClientsAndDeals();
-              }}
-            >
-              <FaSearch />
-              <h3>Buscar</h3>
-            </button>
+            {!hasSearched ? (
+              startMonth && (
+                <button
+                  className={`glass btn-action ${styles.search}`}
+                  onClick={() => {
+                    fetchClientsAndDeals();
+                    setHasSearched(true);
+                  }}
+                >
+                  <FaSearch />
+                </button>
+              )
+            ) : (
+              <button
+                className={`glass btn-action ${styles.search}`}
+                onClick={() => {
+                  setStartMonth("");
+                  setDeals([]);
+                  setClients([]);
+                  setHasSearched(false);
+                }}
+              >
+                <FaTimes />
+              </button>
+            )}
           </div>
         </div>
-        <div className={styles.list}>
+        <div
+          className={`glass ${deals.length === 0 ? styles.listEmpty : styles.list}`}
+        >
           {deals.length === 0 ? (
-            <p>Nenhum cliente encontrado</p>
+            <p>Selecione um mês e pesquise o desempenho da equipe.</p>
           ) : (
-            <table className={styles.dealsTable}>
+            <table className={`glass ${styles.dealsTable}`}>
               <thead>
                 <tr>
                   <th>Cliente</th>

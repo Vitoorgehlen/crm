@@ -6,97 +6,45 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
   overflow-y: auto;
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px 10px 10px;
-  color: var(--primaryText);
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
 }
 
 .headerContent {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   margin: 0 auto;
-  padding: 0 20px;
   width: 100%;
-  max-width: 1200px;
+  gap: 20px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 30px;
+  padding: 20px 0 22px 0;
+  color: var(--primaryText);
 }
 
 .headerIcons {
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-top: 15px;
+  margin-right: 10px;
+}
+
+.headerIcons button:hover {
+  border: 1px solid var(--primaryColor);
 }
 
 .content {
   width: 100%;
   margin-bottom: 30px;
-}
-
-.btnSetting {
-  margin-top: 20px;
-  max-width: 500px;
-  gap: 10px;
-  width: 80%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-
-  text-align: center;
-  padding: 8px 12px;
-  background: var(--cardBackground);
-  color: var(--shadowColor);
-  font-size: 1rem;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSettingActive {
-  margin-top: 20px;
-  gap: 10px;
-  max-width: 500px;
-  width: 80%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-
-  text-align: center;
-  padding: 8px 12px;
-  background: var(--cardBackground);
-  color: var(--primaryColor);
-  font-size: 1rem;
-  border: none;
-  border-radius: 20px;
-  cursor: pointer;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSetting:hover,
-.btnSettingActive:hover {
-  background: var(--cardBackgroundHover);
 }
 
 .list {
@@ -115,16 +63,12 @@
   max-width: 850px;
   padding: 10px;
   color: var(--primaryText);
-  background: var(--cardBackground);
   border-radius: 5px;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
-.deleteItem h3 {
-  color: var(--secondaryText);
+.deleteItem h5 {
+  color: var(--primaryColor);
+  margin-bottom: 15px;
 }
 
 .deleteItemLabels {
@@ -136,19 +80,15 @@
   height: 100%;
 }
 
-.title {
+.titleCard {
   width: 100%;
-  text-align: start;
+  text-align: center;
 }
 
 .box {
   display: flex;
   align-items: center;
   gap: 5px;
-}
-
-.box h6 {
-  font-weight: 400;
 }
 
 .boxBtns {
@@ -160,50 +100,47 @@
   justify-content: center;
 }
 
-.btnDelClient {
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackgroundHover);
-  border: 1px solid var(--shadowColor);
+.btnDel {
+  text-align: center;
+  padding: 8px 12px;
+  color: var(--textBase);
+  border: 1px solid var(--textBase);
   font-size: 1rem;
-  border-radius: 3px;
-  width: 100%;
+  border-radius: 20px;
   cursor: pointer;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--mainBackground);
 }
 
-.btnDelClient:hover {
-  color: var(--errorColor);
-  border: 1px solid var(--errorColor);
-  background: var(--cardBackgroundHover);
-}
-
-.btnCancelClient {
-  padding: 5px;
+.btnDel:hover {
+  background: var(--errorColor);
   color: var(--primaryText);
-  background: var(--cardBackground);
-  border: 1px solid var(--shadowColor);
-  font-size: 1rem;
-  border-radius: 3px;
-  width: 100%;
-  cursor: pointer;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--primaryText);
 }
 
-.btnCancelClient:hover {
-  color: var(--primaryColor);
-  border: 1px solid var(--tercearyText);
-  background: var(--cardBackgroundHover);
+.btnCancel:hover {
+  background-color: var(--primaryColor);
+  color: var(--mainBackground);
+  border: 1px solid var(--mainBackground);
 }
 
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: x-large;
+  .headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .title {
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
+  }
+
+  .headerIcons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 13px;
   }
 }

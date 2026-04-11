@@ -8,6 +8,7 @@ import { MdClose } from "react-icons/md";
 
 import styles from "./page.module.css";
 import { User, RolePermissions, RoleLabels, ConfigUsersProps } from "@/types";
+import CustomSelect from "@/components/Tools/Select/CustomSelect";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -37,6 +38,14 @@ export default function ConfigUsers({
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const roleOptions = Object.keys(RolePermissions).map((roleKey) => ({
+    value: roleKey,
+    label: RoleLabels[roleKey] || roleKey,
+  }));
+
+  const selectedRoleOption =
+    roleOptions.find((opt) => opt.value === newRole) || null;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -315,7 +324,7 @@ export default function ConfigUsers({
             <div className={styles.createUserLabels}>
               <div className={styles.box}>
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="text"
                   placeholder="Nome"
                   onChange={(e) => setNewName(e.target.value)}
@@ -331,13 +340,13 @@ export default function ConfigUsers({
               {error && <p className={styles.error}>{error}</p>}
               <div className={styles.box}>
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="email"
                   placeholder="Novo e-mail"
                   onChange={(e) => setNewEmail(e.target.value)}
                 />
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="email"
                   placeholder="Confirme e-mail"
                   onChange={(e) => setNewEmail2(e.target.value)}
@@ -345,38 +354,30 @@ export default function ConfigUsers({
               </div>
               <div className={styles.box}>
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="password"
                   placeholder="Nova senha"
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="password"
                   placeholder="Confirme a senha"
                   onChange={(e) => setNewPassword2(e.target.value)}
                 />
               </div>
               <div className={styles.box}>
-                <select
-                  className={styles.labelSettingUser}
-                  onChange={(e) => setNewRole(e.target.value)}
-                >
-                  <option value="">Selecione um cargo</option>
-                  {Object.keys(RolePermissions).map((roleKey) => (
-                    <option key={roleKey} value={roleKey}>
-                      {RoleLabels[roleKey] || roleKey}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className={styles.box}>
+                <CustomSelect
+                  options={roleOptions}
+                  value={selectedRoleOption}
+                  onChange={(option) => setNewRole(option?.value || "")}
+                />
                 <button
-                  className={styles.btnUpdate}
+                  className={`btn-action glass ${styles.btnUpdate}`}
                   type="button"
                   onClick={() => handleCreateUser()}
                 >
-                  {loading ? <h3>Criando...</h3> : <h3>Criar usuário</h3>}
+                  {loading ? <h5>Criando...</h5> : <h5>Criar usuário</h5>}
                 </button>
               </div>
             </div>
@@ -384,7 +385,7 @@ export default function ConfigUsers({
             <div className={styles.createUserLabels}>
               <div className={styles.box}>
                 <input
-                  className={styles.labelSettingUser}
+                  className={`${styles.labelUser} form-base`}
                   type="text"
                   value={newName}
                   placeholder="Nome"
@@ -402,31 +403,31 @@ export default function ConfigUsers({
               {isOpenEditEmail ? (
                 <div className={styles.box}>
                   <input
-                    className={styles.labelSettingUser}
+                    className={`${styles.labelUser} form-base`}
                     type="email"
                     placeholder="Novo e-mail"
                     onChange={(e) => setNewEmail(e.target.value)}
                   />
                   <input
-                    className={styles.labelSettingUser}
+                    className={`${styles.labelUser} form-base`}
                     type="email"
                     placeholder="Confirme e-mail"
                     onChange={(e) => setNewEmail2(e.target.value)}
                   />
                   <button
                     type="button"
-                    className={styles.btnEditUserActive}
+                    className={`btn-action glass ${styles.btnEditUser} ${styles.close}`}
                     onClick={() => setIsOpenEditEmail((prev) => !prev)}
                   >
                     <MdOutlineCancel />
                   </button>
                 </div>
               ) : (
-                <div className={styles.boxClose}>
-                  <h2>Alterar E-mail</h2>
+                <div className={`${styles.box} ${styles.boxClose}`}>
+                  <h5>Alterar E-mail</h5>
                   <button
                     type="button"
-                    className={styles.btnEditUser}
+                    className={`btn-action glass ${styles.btnEditUser}`}
                     onClick={() => setIsOpenEditEmail((prev) => !prev)}
                   >
                     <MdOutlineEdit />
@@ -436,31 +437,31 @@ export default function ConfigUsers({
               {isOpenEditPassword ? (
                 <div className={styles.box}>
                   <input
-                    className={styles.labelSettingUser}
+                    className={`${styles.labelUser} form-base`}
                     type="password"
                     placeholder="Nova senha"
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <input
-                    className={styles.labelSettingUser}
+                    className={`${styles.labelUser} form-base`}
                     type="password"
                     placeholder="Confirme a senha"
                     onChange={(e) => setNewPassword2(e.target.value)}
                   />
                   <button
                     type="button"
-                    className={styles.btnEditUserActive}
+                    className={`btn-action glass ${styles.btnEditUser} ${styles.close}`}
                     onClick={() => setIsOpenEditPassword((prev) => !prev)}
                   >
                     <MdOutlineCancel />
                   </button>
                 </div>
               ) : (
-                <div className={styles.boxClose}>
-                  <h2>Alterar senha</h2>
+                <div className={`${styles.box} ${styles.boxClose}`}>
+                  <h5>Alterar senha</h5>
                   <button
                     type="button"
-                    className={styles.btnEditUser}
+                    className={`btn-action glass ${styles.btnEditUser}`}
                     onClick={() => setIsOpenEditPassword((prev) => !prev)}
                   >
                     <MdOutlineEdit />
@@ -468,26 +469,17 @@ export default function ConfigUsers({
                 </div>
               )}
               <div className={styles.box}>
-                <select
-                  className={styles.labelSettingUser}
-                  value={newRole || user?.role}
-                  onChange={(e) => setNewRole(e.target.value)}
-                >
-                  <option value="">Selecione um cargo</option>
-                  {Object.keys(RolePermissions).map((roleKey) => (
-                    <option key={roleKey} value={roleKey}>
-                      {RoleLabels[roleKey] || roleKey}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className={styles.box}>
+                <CustomSelect
+                  options={roleOptions}
+                  value={selectedRoleOption}
+                  onChange={(option) => setNewRole(option?.value || "")}
+                />
                 <button
-                  className={styles.btnUpdate}
+                  className={`btn-action glass ${styles.btnUpdate}`}
                   type="button"
                   onClick={() => handleEditUsers()}
                 >
-                  {loading ? <h3>Editando...</h3> : <h3>Editar usuário</h3>}
+                  {loading ? <h5>Editando...</h5> : <h5>Editar usuário</h5>}
                 </button>
               </div>
             </div>

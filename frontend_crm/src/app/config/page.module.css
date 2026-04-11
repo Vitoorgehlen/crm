@@ -11,33 +11,41 @@
   padding-bottom: 50px;
 }
 
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px 10px 10px;
-  color: var(--primaryText);
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
-}
-
 .headerContent {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   margin: 0 auto;
-  padding: 0 20px;
   width: 100%;
-  max-width: 1200px;
+  gap: 20px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 30px;
+  padding: 20px 0 22px 0;
+  color: var(--primaryText);
+}
+
+.titleTeam {
+  padding-bottom: 0;
 }
 
 .headerIcons {
   display: flex;
   flex-direction: row;
-  gap: 20px;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-top: 15px;
+  margin-right: 10px;
+}
+
+.headerIcons button:hover {
+  border: 1px solid var(--primaryColor);
 }
 
 .content {
@@ -52,93 +60,6 @@
   width: 100%;
 }
 
-.setting {
-  width: 50%;
-  max-width: 500px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.btnSetting {
-  margin-top: 20px;
-  padding: 5px;
-  gap: 5px;
-  color: var(--sidebarBackground);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 150px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSettingActive {
-  margin-top: 20px;
-  padding: 5px;
-  gap: 5px;
-  color: var(--primaryColor);
-  background: var(--cardBackground2);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 150px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSetting:hover {
-  background: var(--cardBackgroundHover);
-}
-
-.btnSettingActive:hover {
-  background: var(--cardBackground2Hover);
-}
-
-.btnLogout {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--errorColor2);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  border: 1px solid var(--errorColor2);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnLogout:hover {
-  color: var(--primaryText);
-  background: var(--errorColorD);
-}
-
 .contentConfig {
   width: 100%;
   display: flex;
@@ -149,114 +70,46 @@
 
 .createUser {
   display: flex;
-  margin: 20px 0;
-  width: 500px;
-  max-width: 80%;
+  margin: 20px 0 10px 0;
+  max-width: 200px;
+  width: 80%;
   padding: 10px;
-  background: var(--cardBackground);
   border-radius: 5px;
-  color: var(--secondaryText);
+  color: var(--textBase);
   justify-content: space-around;
   align-items: center;
   cursor: pointer;
   border: 1px solid var(--shadowColor);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .createUser:hover {
-  color: var(--primaryColor);
+  color: var(--primaryText);
   border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
+  background: var(--cardBackground);
+}
+
+.userList {
+  width: 100%;
+  max-width: 850px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
 .editUser {
   display: flex;
-  margin: 20px 0;
+  justify-content: space-between;
   width: 500px;
   max-width: 80%;
   padding: 10px;
+  color: var(--textBase);
+  border-radius: 6px;
+}
+
+.editUser h5 {
   color: var(--primaryText);
-  background: var(--cardBackground);
-  border-radius: 5px;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.editUser h3 {
-  color: var(--secondaryText);
-}
-
-.btnEditUser {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 5px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  border: 1px solid var(--shadowColor);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnEditUser:hover {
-  color: var(--primaryColor);
-  border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
-}
-
-.btnDeleteUser {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 5px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  border: 1px solid var(--shadowColor);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnDeleteUser:hover {
-  border: 1px solid var(--errorColor2);
-  background: var(--errorColorD);
-}
-
-.editUserLabels {
-  width: 100%;
-}
-
-.box {
-  display: flex;
-  width: 100%;
-  gap: 3px;
-  margin-bottom: 3px;
-  justify-content: center;
-}
-
-.boxClose {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 3px;
 }
 
 .btnsUser {
@@ -267,6 +120,30 @@
   gap: 5px;
 }
 
+.btnEditUser {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  cursor: pointer;
+  color: var(--primaryText);
+  font-size: 1.2rem;
+  border: 1px solid var(--textBase);
+}
+
+.btnEditUser:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  background: var(--mainBackground);
+}
+
+.btnDeleteUser:hover {
+  color: var(--errorColor);
+  border: 1px solid var(--errorColor);
+}
+
 .editMe {
   display: flex;
   flex-direction: column;
@@ -274,50 +151,49 @@
   justify-content: center;
 }
 
-.userList {
-  width: 100%;
-  max-width: 850px;
+.btnLogout {
+  margin-top: 20px;
+  padding: 5px;
+  color: var(--errorColor);
+  border: none;
+  border-radius: 6px;
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
   display: flex;
-  flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  border: 1px solid var(--textBase);
+}
+
+.btnLogout:hover {
+  color: var(--primaryText);
+  background: var(--errorColor);
 }
 
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: x-large;
-  }
-
   .headerContent {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    padding: 0 10px;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .title {
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
+  }
+
+  .titleTeam {
+    margin-bottom: -17px;
+    padding: 10px;
   }
 
   .headerIcons {
     display: flex;
     flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .headerIcons .btnSetting h3 {
-    font-size: var(--font-5);
-  }
-
-  .headerIcons .btnSettingActive h3 {
-    font-size: var(--font-5);
-  }
-
-  .icon {
-    display: none;
-  }
-
-  .headerContent h3 {
-    font-size: var(--font-4);
+    gap: 8px;
+    margin-top: 13px;
   }
 }

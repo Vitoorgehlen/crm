@@ -20,8 +20,8 @@ export default function ThemeSwitcher() {
 
   return (
     <div className={styles.main}>
-      <div className={styles.contant}>
-        <h2>Personalize o tema do seu CRM!</h2>
+      <div className={`glass ${styles.contant}`}>
+        <h5>Personalize o tema do seu CRM!</h5>
         <div className={styles.btns}>
           <button
             className={styles.btnDefaultDark}

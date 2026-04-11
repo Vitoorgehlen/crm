@@ -6,6 +6,34 @@
   justify-content: center;
 }
 
+.labelSetting {
+  margin-top: 20px;
+  width: 80%;
+  max-width: 500px;
+  color: var(--primaryText);
+}
+
+.title {
+  font-size: 18px;
+}
+
+.btnSetting {
+  margin-top: 20px;
+  color: var(--textBase);
+  max-width: 500px;
+  width: 80%;
+  cursor: pointer;
+  border: 1px solid var(--shadowColor);
+}
+
+.btnSettingActive {
+  border: 1px solid var(--primaryColor);
+}
+
+.active {
+  color: var(--primaryColor);
+}
+
 .labelsSetting {
   display: flex;
   flex-direction: column;
@@ -15,127 +43,30 @@
   max-width: 600px;
 }
 
-.labelSetting {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 500px;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  transition: 200ms;
-  margin-top: 20px;
+.labelsSetting p {
+  color: var(--primaryColor);
+}
+
+.labelsSetting span {
   color: var(--primaryText);
-}
-
-.labelSetting::placeholder {
-  color: var(--sidebarBackground);
-}
-.labelSetting:hover,
-.labelSetting:active,
-.labelSetting:focus {
-  outline: none;
-  border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
-}
-
-.labelSettingTitle {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  font-size: 1.8rem;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 500px;
-  color: var(--secondaryText);
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  transition: 200ms;
-  margin-top: 20px;
-}
-
-.labelSettingTitle:hover,
-.labelSettingTitle:focus,
-.labelSettingTitle:active {
-  outline: none;
-  border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
-}
-
-.btnSetting {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--sidebarBackground);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  border: 1px solid var(--shadowColor);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSettingActive {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-
-  border: 1px solid var(--shadowColor);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSetting:hover,
-.btnSettingActive:hover {
-  background: var(--cardBackgroundHover);
 }
 
 .btnSave {
   margin-top: 20px;
   padding: 5px;
   color: var(--primaryColor);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
   max-width: 500px;
   width: 80%;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: 200ms;
-
-  border: 1px solid var(--primaryColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--textBase);
 }
 
 .btnSave:hover {
   color: var(--primaryText);
-  background: var(--cardBackground2);
+  border: 1px solid var(--primaryColor);
 }

@@ -75,7 +75,6 @@
 
 .error {
   color: var(--errorColor2);
-  font-size: var(--font-5);
 }
 
 .btnUpdate {

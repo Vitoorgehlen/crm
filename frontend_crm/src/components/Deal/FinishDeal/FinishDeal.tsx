@@ -35,7 +35,6 @@ export default function FinishDeal({
     undefined,
   );
 
-  const [showPopup, setShowPopup] = useState(false);
   const [showClientPopup, setShowClientPopup] = useState(false);
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
@@ -56,7 +55,9 @@ export default function FinishDeal({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const saleDuration = calculateDuration(deal.createdAt, deal.finalizedAt);
+  const negociationDuration = calculateDuration(deal.createdAt, deal.closedAt);
+  const saleDuration = calculateDuration(deal.closedAt, deal.finalizedAt);
+  const negociationTotal = calculateDuration(deal.closedAt, deal.finalizedAt);
 
   useEffect(() => {
     let mounted = true;
@@ -385,292 +386,317 @@ export default function FinishDeal({
       }}
     >
       <div
-        className={`${styles.modal} ${
-          deal.status === "CLOSED" ? styles.modalRed : ""
-        }`}
+        className={`${styles.modal} ${deal.status === "CLOSED" && styles.modalRed}`}
         onClick={(e) => e.stopPropagation()}
       >
         <div className={styles.innerModal}>
           <div className={styles.modalLeft}>
-            {deal.status === "CLOSED" ? (
-              <h1>{DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}</h1>
-            ) : (
-              <h1>Negociação finalizada</h1>
-            )}
-            <button
-              className={styles.clientBtn}
-              onMouseEnter={() => {
-                setShowClientPopup(true);
-              }}
-              onMouseLeave={() => {
-                setShowClientPopup(false);
-              }}
-              onClick={() => {
-                if (!deal?.client?.name) return;
+            <div className={styles.titleCard}>
+              <button
+                className={styles.closeBtn}
+                type="button"
+                onClick={() => onClose()}
+              >
+                <MdClose />
+              </button>
 
-                router.push(`/clientes?clientId=${deal.client.id}&team=true`);
-              }}
-            >
-              <h2>{deal?.client?.name ?? ""}</h2>
-            </button>
-            {showClientPopup && (
-              <div className={styles.boxClientPopup}>
-                <h3>{deal?.client?.name ?? ""}</h3>
-                <p>{deal?.client?.phone ?? ""}</p>
+              <div className={styles.titleCardEdit}>
+                {deal.status === "CLOSED" ? (
+                  <h4>
+                    {DEAL_STEP_TYPE_LABEL[deal.currentStep as DealStepType]}
+                  </h4>
+                ) : (
+                  <h4>Negociação finalizada</h4>
+                )}
+
+                <div
+                  onMouseEnter={() => {
+                    setShowClientPopup(true);
+                  }}
+                  onMouseLeave={() => {
+                    setShowClientPopup(false);
+                  }}
+                  className={styles.popupClient}
+                >
+                  <button
+                    className={styles.clientBtn}
+                    onClick={() => {
+                      if (!deal?.client?.name) return;
+
+                      router.push(
+                        `/clientes?clientId=${deal.client.id}&team=true`,
+                      );
+                    }}
+                  >
+                    <h4>{deal?.client?.name ?? ""}</h4>
+                  </button>
+                </div>
               </div>
-            )}
 
-            <button
-              className={styles.closeBtn}
-              type="button"
-              onClick={() => onClose()}
-            >
-              <MdClose />
-            </button>
+              <button
+                className={styles.closeBtnInvisble}
+                type="button"
+                onClick={() => onClose()}
+              >
+                <MdClose />
+              </button>
+            </div>
 
             {error && <p className={styles.error}>{error}</p>}
 
             <div className={styles.paymentTitle}>
-              <div className={styles.paymentBox}>
-                <h3>Valor do imóvel</h3>
-                <h4>{real(Number(deal.propertyValue ?? 0))}</h4>
+              <div className={styles.payment}>
+                <p>Valor</p>
+                <h5>{real(Number(deal.propertyValue ?? 0))}</h5>
               </div>
 
-              <div className={styles.paymentBox}>
-                <h3>Método de pagamento</h3>
-                <h4>{deal.paymentMethod === "CASH" && "À Vista"}</h4>
-                <h4>{deal.paymentMethod === "FINANCING" && "Financiado"}</h4>
-                <h4>
+              <div className={styles.payment}>
+                <p>Método</p>
+                <h5>{deal.paymentMethod === "CASH" && "À Vista"}</h5>
+                <h5>{deal.paymentMethod === "FINANCING" && "Financiado"}</h5>
+                <h5>
                   {deal.paymentMethod === "CREDIT_LETTER" && "Carta de Crédito"}
-                </h4>
+                </h5>
               </div>
 
-              <div className={styles.paymentBox}>
-                <h3> Valor total da comissão </h3>
-                <h4>{real(Number(deal.commissionAmount))}</h4>
+              <div className={styles.payment}>
+                <p>Comissão</p>
+                <h5>{real(Number(deal.commissionAmount))}</h5>
               </div>
             </div>
 
-            {deal.paymentMethod === "CASH" && (
-              <>
-                <div className={styles.paymentMethodStyle}>
-                  {deal.downPaymentValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>Entrada</h3>
-                      <h4>{real(Number(deal.downPaymentValue))}</h4>
-                    </div>
-                  )}
-                  <div className={styles.paymentBox}>
-                    <h3>Em dinheiro</h3>
-                    <h4>{real(Number(deal.cashValue))}</h4>
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>FGTS</h3>
-                    <h4>{real(Number(deal.fgtsValue))}</h4>
-                  </div>
-                </div>
-              </>
-            )}
+            <div className={styles.paymentTitle}>
+              <div className={styles.payment}>
+                <p>Entrada</p>
+                <h5>{real(Number(deal.downPaymentValue))}</h5>
+              </div>
+              <div className={styles.payment}>
+                <p>FGTS</p>
+                <h5>{real(Number(deal.fgtsValue))}</h5>
+              </div>
 
-            {deal.paymentMethod === "FINANCING" && (
-              <>
-                <div className={styles.paymentMethodStyle}>
-                  {deal.downPaymentValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>Entrada</h3>
-                      <h4>{real(Number(deal.downPaymentValue))}</h4>
-                    </div>
-                  )}
-                  {deal.subsidyValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>Subsídio</h3>
-                      <h4>{real(Number(deal.subsidyValue))}</h4>
-                    </div>
-                  )}
-                  {deal.fgtsValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>FGTS</h3>
-                      <h4>{real(Number(deal.fgtsValue))}</h4>
-                    </div>
-                  )}
-                  <div className={styles.paymentBox}>
-                    <h3>Financiado</h3>
-                    <h4>{real(Number(deal.financingValue))}</h4>
-                  </div>
+              {deal.paymentMethod === "CASH" && (
+                <div className={styles.payment}>
+                  <p>Em dinheiro</p>
+                  <h5>{real(Number(deal.cashValue))}</h5>
                 </div>
-              </>
-            )}
+              )}
 
-            {deal.paymentMethod === "CREDIT_LETTER" && (
-              <>
-                <div className={styles.paymentMethodStyle}>
-                  {deal.downPaymentValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>Entrada</h3>
-                      <h4>{real(Number(deal.downPaymentValue))}</h4>
-                    </div>
-                  )}
-                  {deal.fgtsValue && (
-                    <div className={styles.paymentBox}>
-                      <h3>FGTS</h3>
-                      <h4>{real(Number(deal.fgtsValue))}</h4>
-                    </div>
-                  )}
-                  <div className={styles.paymentBox}>
-                    <h3>Carta de crédito</h3>
-                    <h4>{real(Number(deal.creditLetterValue))}</h4>
-                  </div>
-                </div>
-              </>
-            )}
-
-            <div className={styles.paymentMethodStyle}>
-              {deal.installmentValue === null && (
+              {deal.paymentMethod === "FINANCING" && (
                 <>
-                  <div className={styles.paymentBox}>
-                    <h3>Parcela</h3>
-                    <h4>{real(Number(deal.installmentValue))}</h4>
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>N° parcelas</h3>
-                    <h4>{deal.installmentCount}</h4>
+                  {Number(deal.subsidyValue) > 0 && (
+                    <div className={styles.payment}>
+                      <p>Subsídio</p>
+                      <h5>{real(Number(deal.subsidyValue))}</h5>
+                    </div>
+                  )}
+
+                  <div className={styles.payment}>
+                    <p>Financiado</p>
+                    <h5>{real(Number(deal.financingValue))}</h5>
                   </div>
                 </>
               )}
-              {deal.bonusInstallmentValue === null && (
-                <>
-                  <div className={styles.paymentBox}>
-                    <h3>Reforços</h3>
-                    <h4>{real(Number(deal.bonusInstallmentValue))}</h4>
-                  </div>
-                  <div className={styles.paymentBox}>
-                    <h3>N° reforços</h3>
-                    <h4>{deal.bonusInstallmentCount}</h4>
-                  </div>
-                </>
+
+              {deal.paymentMethod === "CREDIT_LETTER" && (
+                <div className={styles.payment}>
+                  <p>Carta de crédito</p>
+                  <h5>{real(Number(deal.creditLetterValue))}</h5>
+                </div>
               )}
             </div>
 
-            <div className={styles.boxCommissionShare}>
-              <div className={styles.splitCommissionTitle}>
-                <h2>Comissão</h2>
+            {Number(deal.installmentValue) +
+              Number(deal.bonusInstallmentValue) >
+              0 && (
+              <div className={styles.paymentTitle}>
+                {Number(deal.installmentValue) > 0 && (
+                  <div className={styles.payment}>
+                    <p>Parcela</p>
+                    <h5>
+                      {real(Number(deal.installmentValue))} x
+                      {deal.installmentCount}
+                    </h5>
+                  </div>
+                )}
+
+                {Number(deal.bonusInstallmentValue) > 0 && (
+                  <div className={styles.payment}>
+                    <p>Reforços</p>
+                    <h5>
+                      {real(Number(deal.bonusInstallmentValue))} x
+                      {deal.bonusInstallmentCount}
+                    </h5>
+                  </div>
+                )}
               </div>
+            )}
+
+            <div className={styles.boxInfos}>
+              <p>Comissão</p>
 
               {splits.map((s, i) => (
                 <div key={i} className={styles.border}>
                   <div className={styles.boxSplitCommission}>
-                    <h3>
+                    <h5>
                       {s.isCompany
                         ? "Imobiliária"
                         : s.userId != null
                           ? (userMap.get(Number(s.userId)) ?? String(s.userId))
                           : "—"}
-                    </h3>
-                    <h3>{real(Number(computedAmountFor(i)))}</h3>
-                    <h3>{s.notes ?? ""}</h3>
+                    </h5>
+                    <p>{real(Number(computedAmountFor(i)))}</p>
+                    <span>{s.notes ?? ""}</span>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className={styles.boxCommissionShare}>
-              <div className={styles.splitCommissionTitle}>
-                <h2>Resumo</h2>
-              </div>
-              <div className={styles.border}>
-                <div className={styles.boxSplitCommission}>
-                  <h3>Criado: {formatDateForFinish(deal.createdAt)}</h3>
-                  <h3>Criado por: {deal?.client?.creator?.name ?? ""}</h3>
-                  <h3>Finalizado: {formatDateForFinish(deal.finalizedAt)}</h3>
+            <div className={styles.boxInfos}>
+              <p>Resumo</p>
+
+              <div className={styles.boxGrid}>
+                <div className={`${styles.boxInfo} ${styles.firstLine}`}>
+                  <p className={styles.text}>Criado:</p>
+                  <span>{formatDateForFinish(deal.createdAt)}</span>
                 </div>
-                <div className={styles.boxSplitCommission}>
-                  <h3>Finalizado em: {saleDuration}</h3>
+
+                <div className={`${styles.boxInfo} ${styles.firstLine}`}>
+                  <p className={styles.text}>Criado por:</p>
+                  <span>{deal?.creator?.name ?? ""}</span>
+                </div>
+
+                <div className={`${styles.boxInfo} ${styles.firstLine}`}>
+                  <p className={styles.text}>Finalizado:</p>
+                  <span>
+                    {deal.finalizedAt
+                      ? formatDateForFinish(deal.finalizedAt)
+                      : "Em andamento"}
+                  </span>
+                </div>
+
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Venda feita em:</p>
+                  <span>{negociationDuration}</span>
+                </div>
+
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Processo:</p>
+                  <span>{saleDuration ? saleDuration : "Em andamento"}</span>
+                </div>
+
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Tempo total:</p>
+                  <span>
+                    {negociationTotal ? negociationTotal : "Em andamento"}
+                  </span>
                 </div>
               </div>
             </div>
 
-            <div className={styles.boxCommissionShare}>
-              <div className={styles.splitCommissionTitle}>
-                <h2>Dados do cliente</h2>
-              </div>
-              <div className={styles.border}>
-                <div className={styles.boxSplitCommission}>
-                  <h3>Contato: {deal?.client?.phone ?? ""}</h3>
-                  {deal?.client?.isInvestor && <h3>Cliente investidor</h3>}
-                  {deal?.client?.dateOfBirth && (
-                    <h3>{formatDateForFinish(deal?.client?.dateOfBirth)}</h3>
-                  )}
+            <div className={styles.boxInfos}>
+              <p>Dados do cliente</p>
+
+              <div className={styles.boxGrid}>
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Contato:</p>
+                  <span>{deal?.client?.phone ?? ""}</span>
+                </div>
+
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Cliente Investidor:</p>
+                  <span>{deal?.client?.isInvestor ? "Sim" : "Não"}</span>
+                </div>
+
+                <div className={styles.boxInfo}>
+                  <p className={styles.text}>Data de aniversário:</p>
+                  <span>{formatDateForFinish(deal?.client?.dateOfBirth)}</span>
                 </div>
               </div>
             </div>
 
-            <div className={styles.btnUpdateAndStep}>
+            <div className={styles.btnCancelAndConfirm}>
               {deal.status === "FINISHED" && (
                 <button
-                  className={styles.btnBackStep}
+                  className={`btn-action glass ${styles.btnCancel}`}
                   type="button"
                   onClick={(e) => {
                     handleChangeStep(e, "back");
                   }}
                 >
-                  Reativar negociação
+                  <span>Reativar negociação</span>
                 </button>
               )}
             </div>
           </div>
 
-          <div className={styles.modalRight}>
+          <div className={`glass ${styles.modalRight}`}>
             <div className={styles.docCostSection}>
-              <h2>Valor de documentação</h2>
-
-              <div className={styles.addDoc}>
-                <input
-                  type="text"
-                  placeholder="Documentação"
-                  value={docCostLabel}
-                  onChange={(e) => setDocCostLabel(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="Documentação"
-                  value={real(docCostValue)}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setDocCostValue(numeric);
-                  }}
-                />
-                <input
-                  type="text"
-                  placeholder="Obs"
-                  value={docCostNote}
-                  onChange={(e) => setDocCostNote(e.target.value)}
-                />
-                <button
-                  className={styles.btnSave}
-                  onClick={handleAddDocCost}
-                  disabled={!docCostLabel.trim()}
-                >
-                  <RiSave3Fill />
-                </button>
+              <div className={styles.titleDocs}>
+                <h5>Valor de documentação</h5>
               </div>
 
-              <div className={styles.docList}>
+              <div className={styles.addDoc}>
+                {isOpenDocCost ? (
+                  <>
+                    <span>Editando</span>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      type="text"
+                      className={`form-base ${styles.addNoteForm}`}
+                      placeholder="Documentação"
+                      value={docCostLabel}
+                      onChange={(e) => setDocCostLabel(e.target.value)}
+                    />
+                    <input
+                      type="text"
+                      className={`form-base ${styles.addNoteForm}`}
+                      placeholder="Documentação"
+                      value={real(docCostValue)}
+                      onChange={(e) => {
+                        const numeric =
+                          Number(e.target.value.replace(/\D/g, "")) / 100;
+                        setDocCostValue(numeric);
+                      }}
+                    />
+                    <input
+                      type="text"
+                      className={`form-base ${styles.addNoteForm}`}
+                      placeholder="Obs"
+                      value={docCostNote}
+                      onChange={(e) => setDocCostNote(e.target.value)}
+                    />
+                    <button
+                      className={styles.btnSave}
+                      onClick={handleAddDocCost}
+                      disabled={!docCostLabel.trim()}
+                    >
+                      <RiSave3Fill />
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <div className={styles.list}>
                 {docCost.length === 0 && (
                   <p>Nenhuma documentação encontrada.</p>
                 )}
                 {docCost.map((doc) => (
-                  <div key={doc.id} className={styles.docItem}>
+                  <div key={doc.id} className={styles.item}>
                     {isOpenDocCost === doc.id ? (
                       <>
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Documentação"
                           value={docCostLabel}
                           onChange={(e) => setDocCostLabel(e.target.value)}
                         />
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Documentação"
                           value={real(docCostValue)}
                           onChange={(e) => {
@@ -681,159 +707,187 @@ export default function FinishDeal({
                         />
                         <input
                           type="text"
+                          className={`form-base ${styles.addNoteForm}`}
                           placeholder="Obs"
                           value={docCostNote}
                           onChange={(e) => setDocCostNote(e.target.value)}
                         />
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => handleEditDocCost(doc.id)}
-                        >
-                          <FaCheck />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenDocCost(undefined);
-                            setDocCostLabel("");
-                            setDocCostValue(0);
-                            setDocCostNote("");
-                          }}
-                        >
-                          <FaTimes />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => handleEditDocCost(doc.id)}
+                          >
+                            <FaCheck />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenDocCost(undefined);
+                              setDocCostLabel("");
+                              setDocCostValue(0);
+                              setDocCostNote("");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </>
                     ) : (
-                      <>
-                        <h3>{doc.label}</h3>
-                        <h3>{real(Number(doc.value))}</h3>
-                        <h3>{doc.notes}</h3>
+                      <div className={styles.doc}>
+                        <div className={styles.titleDoc}>
+                          <span>{doc.label}</span>
+                          <span>{real(Number(doc.value))}</span>
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenDocCost(doc.id);
-                            setDocCostLabel(doc.label);
-                            setDocCostValue(Number(doc.value));
-                            setDocCostNote(doc.notes || "");
-                          }}
-                        >
-                          <RiPencilFill />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => handleDeleteDocCost(doc.id)}
-                        >
-                          <RiEraserFill />
-                        </button>
-                      </>
+                          <div className={styles.btnsNote}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenDocCost(doc.id);
+                                setDocCostLabel(doc.label);
+                                setDocCostValue(Number(doc.value));
+                                setDocCostNote(doc.notes || "");
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={() => handleDeleteDocCost(doc.id)}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </div>
+                        </div>
+                        <div className={styles.lineDoc}>
+                          <span>{doc.notes}</span>
+                        </div>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
-              <h3 className={styles.docCost}>Total: {real(docCostTotal)}</h3>
+              <p className={styles.docCost}>Total: {real(docCostTotal)}</p>
             </div>
-
             <div className={styles.noteSection}>
-              <h2>Notas</h2>
-
+              <h5>Notas</h5>
               <div className={styles.addNote}>
-                <input
-                  type="text"
-                  placeholder="Nota"
-                  value={newNote}
-                  onChange={(e) => setNewNote(e.target.value)}
-                />
+                {isOpenNote ? (
+                  <>
+                    <span>Editando</span>
+                  </>
+                ) : (
+                  <>
+                    <input
+                      className={`form-base ${styles.addNoteForm}`}
+                      type="text"
+                      placeholder="Nota"
+                      value={newNote}
+                      onChange={(e) => setNewNote(e.target.value)}
+                    />
 
-                <button
-                  className={styles.btnSave}
-                  onClick={handleAddNote}
-                  disabled={!newNote.trim()}
-                >
-                  <RiSave3Fill />
-                </button>
+                    <button
+                      type="button"
+                      className={styles.btnSave}
+                      onClick={handleAddNote}
+                      disabled={!newNote.trim()}
+                    >
+                      <RiSave3Fill />
+                    </button>
+                  </>
+                )}
               </div>
 
-              <div className={styles.noteList}>
+              <div className={`glass ${styles.list}`}>
                 {note.length === 0 && (
                   <p>Nenhuma nota do cliente encontrada.</p>
                 )}
                 {note.map((note) => (
-                  <div key={note.id} className={styles.noteItem}>
+                  <div key={note.id} className={styles.item}>
                     {isOpenNote === note.id ? (
                       <>
                         <input
+                          className={`form-base ${styles.inputNote}`}
                           type="text"
                           placeholder="Nota"
                           value={newNote}
                           onChange={(e) => setNewNote(e.target.value)}
                         />
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => handleEditNote(note.id)}
-                        >
-                          <FaCheck />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenNote(undefined);
-                            setNewNote("");
-                          }}
-                        >
-                          <FaTimes />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => handleEditNote(note.id)}
+                          >
+                            <FaCheck />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(undefined);
+                              setNewNote("");
+                            }}
+                          >
+                            <FaTimes />
+                          </button>
+                        </div>
                       </>
                     ) : (
                       <>
-                        <h3>{note.content}</h3>
+                        <span>{note.content}</span>
 
-                        <button
-                          className={styles.btnEditDocValue}
-                          type="button"
-                          onClick={() => {
-                            setIsOpenNote(note.id);
-                            setNewNote(note.content);
-                          }}
-                        >
-                          <RiPencilFill />
-                        </button>
-                        <button
-                          className={styles.btnDelDocValue}
-                          type="button"
-                          onClick={() => handleDeleteNote(note.id)}
-                        >
-                          <RiEraserFill />
-                        </button>
+                        <div className={styles.btnsNote}>
+                          <button
+                            className={styles.btnEditDocValue}
+                            type="button"
+                            onClick={() => {
+                              setIsOpenNote(note.id);
+                              setNewNote(note.content);
+                            }}
+                          >
+                            <RiPencilFill />
+                          </button>
+                          <button
+                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                            type="button"
+                            onClick={() => handleDeleteNote(note.id)}
+                          >
+                            <RiEraserFill />
+                          </button>
+                        </div>
                       </>
                     )}
                   </div>
                 ))}
               </div>
             </div>
+
+            <div className={styles.updateBox}>
+              <span>
+                Atualizado a última vez por: {deal?.updater?.name ?? "—"}.{" "}
+                {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
+              </span>
+              <span>
+                Criado por: {deal?.creator?.name ?? "—"}·{" "}
+                {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
+              </span>
+            </div>
           </div>
         </div>
-
-        <div className={styles.footerCard}>
-          <h6>
-            Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
-            {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-          </h6>
-          <h6>
-            {" "}
-            Criado por: {deal?.creator?.name ?? "—"} ·{" "}
-            {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-          </h6>
-        </div>
       </div>
+
+      {showClientPopup && (
+        <div className={`glass ${styles.popup} ${styles.clientPopup}`}>
+          <h5>{deal?.client?.name ?? ""}</h5>
+          <span>{deal?.client?.phone ?? ""}</span>
+        </div>
+      )}
     </div>
   );
 }

@@ -123,28 +123,28 @@ export default function Documentation() {
 
   return (
     <div className={styles.page}>
-      <main className={styles.main}>
+      <main className={`glass ${styles.main}`}>
         <div className={styles.description}>
-          <h3>Configurar valor padrão de documentação</h3>
-          <h5>Configure aqui os valores médios praticados na sua região.</h5>
-          <p className={styles.warning}>
+          <h4>Configurar valor padrão de documentação</h4>
+          <p>Configure aqui os valores médios praticados na sua região.</p>
+          <span className={styles.warning}>
             Esses valores serão utilizados apenas como referência para gerar uma
             estimativa de valor de documentação.
-          </p>
+          </span>
           {error && <p className={styles.error}>{error}</p>}
         </div>
         {docsNames.map((doc) => (
           <div key={doc.key} className={styles.doc}>
-            <h4>{doc.label}</h4>
+            <p>{doc.label}</p>
             <div className={styles.inputAndPercent}>
               <div className={styles.inputWrapper}>
                 <input
                   type="text"
-                  className={
+                  className={`form-base ${
                     doc.type === "percent"
                       ? styles.inputPercent
                       : styles.inputValue
-                  }
+                  }`}
                   value={
                     docValues[doc.key] !== undefined
                       ? doc.type === "percent"
@@ -179,26 +179,18 @@ export default function Documentation() {
         ))}
         <div className={styles.btns}>
           <button
-            className={styles.btnReset}
+            className={`btn-action glass ${styles.btnSave} ${styles.btnReset}`}
             onClick={handleResetDocs}
             type="button"
           >
-            {loading === "reset" ? (
-              <h4>Restaurando...</h4>
-            ) : (
-              <h4>Restaurar as documentações</h4>
-            )}
+            {loading === "reset" ? <h5>Restaurando...</h5> : <h5>Restaurar</h5>}
           </button>
           <button
-            className={styles.btnSave}
+            className={`btn-action glass ${styles.btnSave}`}
             onClick={handleSaveDocs}
             type="button"
           >
-            {loading === "save" ? (
-              <h4>Salvando...</h4>
-            ) : (
-              <h4>Salvar as documentações</h4>
-            )}
+            {loading === "save" ? <h5>Salvando...</h5> : <h5>Salvar</h5>}
           </button>
         </div>
       </main>

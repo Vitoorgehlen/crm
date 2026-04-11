@@ -6,22 +6,18 @@
 
 .contant {
   display: flex;
-  margin-top: 20px;
+  margin-top: 13px;
   width: 90%;
   max-width: 500px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 5px;
-
-  background: var(--cardBackground);
   border: 1px solid var(--shadowColor);
-  border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border-radius: 6px;
 }
-.contant h2 {
+
+.contant h5 {
   color: var(--primaryColor);
 }
 
@@ -38,7 +34,6 @@
   width: 70px;
   height: 70px;
   color: #dbf017;
-  font-weight: 700;
   background: linear-gradient(135deg, #a7b054, #323325);
   border: 1px solid #dbf017;
   border-radius: 100px;
@@ -56,7 +51,6 @@
   width: 70px;
   height: 70px;
   color: #18b2ef;
-  font-weight: 700;
   background: linear-gradient(135deg, #7dcff0, #1f2c32);
   border: 1px solid #18b2ef;
   border-radius: 100px;
@@ -74,7 +68,6 @@
   width: 70px;
   height: 70px;
   color: #ff66b3;
-  font-weight: 700;
   background: linear-gradient(135deg, #f79ac0, #2b1824);
   border: 1px solid #ff66b3;
   border-radius: 100px;
@@ -92,7 +85,6 @@
   width: 70px;
   height: 70px;
   color: #4a4b3d;
-  font-weight: 700;
   background: linear-gradient(135deg, #dbf017, #d9dda5);
   border: 1px solid #4a4b3d;
   border-radius: 100px;
@@ -110,7 +102,6 @@
   width: 70px;
   height: 70px;
   color: #131c21;
-  font-weight: 700;
   background: linear-gradient(135deg, #7dcff0, #e5f2f7);
   border: 1px solid #131c21;
   border-radius: 100px;
@@ -128,7 +119,6 @@
   width: 70px;
   height: 70px;
   color: #261420;
-  font-weight: 700;
   background: linear-gradient(135deg, #f79ac0, #fce8f1);
   border: 1px solid #261420;
   border-radius: 100px;
@@ -140,4 +130,10 @@
 
 .btnPink:hover {
   background: linear-gradient(135deg, #fce8f1, #f79ac0);
+}
+
+@media (max-width: 768px) {
+  .contant {
+    margin-top: 0;
+  }
 }

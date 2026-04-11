@@ -7,10 +7,8 @@ import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
 import FinishDeal from "@/components/Deal/FinishDeal/FinishDeal";
 import { Deal, CloseDealPayload, User } from "@/types/index";
-import { BsFileEarmarkPlus } from "react-icons/bs";
 import { formatDateForFinish } from "@/utils/dateUtils";
-import { IoHourglassOutline } from "react-icons/io5";
-import DealsHeader from "@/components/searchbar/page";
+import HeaderPage from "@/components/searchbar/page";
 import { useQueryState } from "nuqs";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -354,7 +352,7 @@ export default function FinishDeals() {
     try {
       const params = new URLSearchParams();
 
-      if (search.trim()) params.append("name", search.trim());
+      if (search.trim()) params.append("search", search.trim());
       if (selectedYear) params.append("year", String(selectedYear));
       params.append("progressDeals", progressDeals ? "true" : "false");
       params.append("teamDeals", teamDeals ? "true" : "false");
@@ -388,6 +386,7 @@ export default function FinishDeals() {
       params.append("teamDeals", teamDeals ? "true" : "false");
       params.append("progressDeals", progressDeals ? "true" : "false");
       if (teamDeals && userId) params.append("userId", userId);
+      if (search.trim()) params.append("search", search.trim());
 
       const url = `${API}/deals-total-finished?${params.toString()}`;
 
@@ -404,7 +403,7 @@ export default function FinishDeals() {
     } catch (err: unknown) {
       console.error(err);
     }
-  }, [token, teamDeals, userId, progressDeals]);
+  }, [token, teamDeals, userId, progressDeals, search]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -458,40 +457,19 @@ export default function FinishDeals() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Negociações finalizadas{teamDeals ? " da equipe" : ""}</h1>
-        </div>
-
-        <div className={styles.headerContent}>
-          <div className={styles.searchbar}>
-            <DealsHeader
-              search={search}
-              setSearch={setSearch}
-              teamDeals={teamDeals}
-              setTeamDeals={setTeamDeals}
-              users={users}
-              selectedUser={selectedUser}
-              setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
-              permissions={permissions}
-              onCreate={openCreate}
-              loading={loading}
-            />
-            <button
-              className={progressDeals ? styles.btnActive : styles.btnDisable}
-              onClick={() => setProgressDeals((prev) => !prev)}
-              type="button"
-            >
-              <IoHourglassOutline />
-            </button>
-            <button
-              className={styles.addDeal}
-              onClick={openCreate}
-              type="button"
-            >
-              <BsFileEarmarkPlus />
-            </button>
-          </div>
-        </div>
+        <HeaderPage
+          title="Negociações em finalizadas"
+          search={search}
+          setSearch={setSearch}
+          teamMode={teamDeals}
+          add={true}
+          setTeamMode={setTeamDeals}
+          users={users}
+          selectedUser={selectedUser}
+          setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
+          permissions={permissions}
+          onCreate={openCreate}
+        />
 
         <div className={styles.box}>
           {isCreateOpen && (
@@ -522,7 +500,7 @@ export default function FinishDeals() {
                   <button
                     key={year}
                     type="button"
-                    className={`${styles.yearBtn} ${
+                    className={`glass ${styles.yearBtn} ${
                       active ? styles.yearBtnActive : ""
                     }`}
                     onClick={() => toggleYear(year)}
@@ -535,7 +513,7 @@ export default function FinishDeals() {
 
             {selectedYear !== null && groupedByYearMonth[selectedYear] && (
               <>
-                <div className={styles.monthsList}>
+                <div className={`glass ${styles.monthsList}`}>
                   {Object.keys(groupedByYearMonth[selectedYear])
                     .map((k) => Number(k))
                     .sort((a, b) => a - b)
@@ -544,22 +522,17 @@ export default function FinishDeals() {
                         groupedByYearMonth[selectedYear][monthIndex] || [];
                       const active = selectedMonth === monthIndex;
                       return (
-                        <div key={monthIndex} className={styles.monthItem}>
-                          <div className={styles.monthHeader}>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                toggleMonth(selectedYear, monthIndex)
-                              }
-                              className={`${styles.monthToggle} ${
-                                active ? styles.monthToggleActive : ""
-                              }`}
-                            >
-                              <h3>{monthNames[monthIndex]}</h3>
-                              <h5>({list.length})</h5>
-                            </button>
-                          </div>
-                        </div>
+                        <button
+                          key={monthIndex}
+                          type="button"
+                          onClick={() => toggleMonth(selectedYear, monthIndex)}
+                          className={`glass ${styles.monthToggle} ${
+                            active && styles.monthToggleActive
+                          }`}
+                        >
+                          <p>{monthNames[monthIndex]}</p>
+                          <span>({list.length})</span>
+                        </button>
                       );
                     })}
                 </div>
@@ -581,78 +554,57 @@ export default function FinishDeals() {
                         <button
                           key={d.id}
                           type="button"
-                          className={`${styles.card} ${
+                          className={`glass ${styles.card} ${
                             d.status === "CLOSED" ? styles.inProgress : ""
                           }`}
                           onClick={() => openEdit(d)}
                         >
-                          <div>
-                            <h3>{d.client?.name ?? "— Cliente"}</h3>
-                            {d.status === "FINISHED" ? (
-                              <div>{formatDateForFinish(d.closedAt)}</div>
-                            ) : (
-                              <p>Em andamento</p>
-                            )}
-                            {teamDeals && (
-                              <h6>
-                                {d.creator?.name || "Usuário não encontrado"}
-                              </h6>
-                            )}
-                          </div>
+                          <h5>{d.client?.name ?? "— Cliente"}</h5>
+                          {d.status === "FINISHED" ? (
+                            <span>{formatDateForFinish(d.closedAt)}</span>
+                          ) : (
+                            <p>Em andamento</p>
+                          )}
+                          {teamDeals && (
+                            <span>
+                              {d.creator?.name || "Usuário não encontrado"}
+                            </span>
+                          )}
                         </button>
                       ))}
-                    {dealsForSelectedMonth.length === 0 && (
-                      <p>Nenhuma negociação neste mês.</p>
-                    )}
                   </div>
                 )}
               </>
             )}
           </div>
           <div className={styles.pendingSection}>
-            <div className={styles.cashStatsCardDiv}>
-              <p>
-                <strong>Negociações finalizadas:</strong>{" "}
-                {selectedYearStats.dealsFinish}
-              </p>
-              {selectedYearStats.dealsToFinish > 1 ? (
-                <p>
-                  <strong>Negociações em aberto:</strong>{" "}
-                  {selectedYearStats.dealsToFinish}
-                </p>
-              ) : (
-                ""
+            <p>Negociações finalizadas: {selectedYearStats.dealsFinish}</p>
+            {selectedYearStats.dealsToFinish > 1 && (
+              <p>Negociações em aberto: {selectedYearStats.dealsToFinish}</p>
+            )}
+            <p>
+              Valor de venda ano:{" "}
+              {real(Number(selectedYearStats.propertysValue))}
+            </p>
+            <p>
+              Imóvel mais caro:{" "}
+              {real(Number(selectedYearStats.propertyMaxValue))}
+            </p>
+            <p>
+              Imóvel mais barato:{" "}
+              {real(Number(selectedYearStats.propertyMinValue))}
+            </p>
+            <p>
+              Média dos imóveis:{" "}
+              {real(
+                Number(
+                  selectedYearStats.propertysValue /
+                    selectedYearStats.propertyTotal,
+                ),
               )}
-              <p>
-                <strong>Valor de venda ano:</strong>{" "}
-                {real(Number(selectedYearStats.propertysValue))}
-              </p>
-              <p>
-                <strong>Imóvel mais caro:</strong>{" "}
-                {real(Number(selectedYearStats.propertyMaxValue))}
-              </p>
-              <p>
-                <strong>Imóvel mais barato:</strong>{" "}
-                {real(Number(selectedYearStats.propertyMinValue))}
-              </p>
-              <p>
-                <strong>Média dos imóveis:</strong>{" "}
-                {real(
-                  Number(
-                    selectedYearStats.propertysValue /
-                      selectedYearStats.propertyTotal,
-                  ),
-                )}
-              </p>
-              <p>
-                <strong>Venda mais rápida:</strong> {selectedYearStats.timeMin}{" "}
-                dias
-              </p>
-              <p>
-                <strong>Venda mais demorada:</strong>{" "}
-                {selectedYearStats.timeMax} dias
-              </p>
-            </div>
+            </p>
+            <p>Venda mais rápida: {selectedYearStats.timeMin} dias</p>
+            <p>Venda mais demorada: {selectedYearStats.timeMax} dias</p>
           </div>
 
           {selectedDeal && (

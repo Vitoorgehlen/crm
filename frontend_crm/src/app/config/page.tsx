@@ -135,22 +135,20 @@ export default function Config() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>
-            {isConfigUser && "Minhas "}
-            Configurações
-            {isConfigTeam && " da Equipe"}
-            {isOpenPermissions && " das Permissões"}
-            {isConfigCompany}
-          </h1>
-        </div>
-
         <div className={styles.headerContent}>
+          <div className={styles.title}>
+            <h3>Configurações</h3>
+            <h5>
+              {isConfigTeam && "da equipe"}
+              {isOpenPermissions && "das permissões"}
+              {isConfigCompany && "de documentação"}
+            </h5>
+          </div>
           <div className={styles.headerIcons}>
             <button
               className={`${
-                isConfigUser ? styles.btnSettingActive : styles.btnSetting
-              }`}
+                isConfigUser ? "btn-action-active" : "btn-action-inactive"
+              } btn-action glass`}
               onClick={() => {
                 setIsConfigUser(true);
                 setIsConfigTeam(false);
@@ -158,14 +156,13 @@ export default function Config() {
                 setIsConfigCompany(false);
               }}
             >
-              <FaUserEdit className={styles.icon} />
-              <h3>Suas configurações</h3>
+              <FaUserEdit />
             </button>
             {permissions.includes("USER_UPDATE") && (
               <button
                 className={`${
-                  isConfigTeam ? styles.btnSettingActive : styles.btnSetting
-                }`}
+                  isConfigTeam ? "btn-action-active" : "btn-action-inactive"
+                } btn-action glass`}
                 onClick={() => {
                   setIsConfigUser(false);
                   setIsConfigTeam(true);
@@ -173,17 +170,16 @@ export default function Config() {
                   setIsConfigCompany(false);
                 }}
               >
-                <FaUsersCog className={styles.icon} />
-                <h3>Configurações da equipe</h3>
+                <FaUsersCog />
               </button>
             )}
             {user?.role === "ADMIN" && (
               <button
                 className={`${
                   isOpenPermissions
-                    ? styles.btnSettingActive
-                    : styles.btnSetting
-                }`}
+                    ? "btn-action-active"
+                    : "btn-action-inactive"
+                } btn-action glass`}
                 onClick={() => {
                   setIsConfigUser(false);
                   setIsConfigTeam(false);
@@ -191,15 +187,14 @@ export default function Config() {
                   setIsConfigCompany(false);
                 }}
               >
-                <FaUnlockAlt className={styles.icon} />
-                <h3>Permissões da equipe</h3>
+                <FaUnlockAlt />
               </button>
             )}
             {user?.role === "ADMIN" && (
               <button
                 className={`${
-                  isConfigCompany ? styles.btnSettingActive : styles.btnSetting
-                }`}
+                  isConfigCompany ? "btn-action-active" : "btn-action-inactive"
+                } btn-action glass`}
                 onClick={() => {
                   setIsConfigUser(false);
                   setIsConfigTeam(false);
@@ -207,8 +202,7 @@ export default function Config() {
                   setIsConfigCompany(true);
                 }}
               >
-                <GrConfigure className={styles.icon} />
-                <h3>Configurar documentos</h3>
+                <GrConfigure />
               </button>
             )}
           </div>
@@ -219,11 +213,11 @@ export default function Config() {
             {isConfigTeam && (
               <div className={styles.contentConfig}>
                 <button
-                  className={styles.createUser}
+                  className={`glass ${styles.createUser}`}
                   type="button"
                   onClick={() => setIsOpenCreateUsers(true)}
                 >
-                  <h2>Criar usuário</h2>
+                  <h5>Criar usuário</h5>
                   <FaUserPlus />
                 </button>
                 <div className={styles.userList}>
@@ -234,41 +228,41 @@ export default function Config() {
                       .slice()
                       .reverse()
                       .map((u) => (
-                        <div key={u.id} className={styles.editUser}>
+                        <div key={u.id} className={`glass ${styles.editUser}`}>
                           {u.role === "ADMIN" ? (
                             <div className={styles.editUserLabels}>
                               <div className={styles.boxClose}>
-                                <h3>{u.name}</h3>
+                                <h5>{u.name}</h5>
                               </div>
                               <div className={styles.box}>
-                                <h5>
+                                <p>
                                   {RoleLabels[u.role || "Cargo não encontrado"]}
-                                </h5>
+                                </p>
                               </div>
                             </div>
                           ) : (
                             <>
                               <div className={styles.editUserLabels}>
                                 <div className={styles.boxClose}>
-                                  <h3>{u.name}</h3>
+                                  <h5>{u.name}</h5>
                                 </div>
                                 <div className={styles.box}>
                                   <p>{u.email}</p>
                                 </div>
                                 <div className={styles.box}>
-                                  <h5>
+                                  <span>
                                     {
                                       RoleLabels[
                                         u.role || "Cargo não encontrado"
                                       ]
                                     }
-                                  </h5>
+                                  </span>
                                 </div>
                               </div>
                               <div className={styles.btnsUser}>
                                 <button
                                   type="button"
-                                  className={styles.btnEditUser}
+                                  className={`btn-action glass ${styles.btnEditUser}`}
                                   onClick={() => {
                                     setIsOpenEditUsers(true);
                                     setUserEdit(u);
@@ -279,7 +273,7 @@ export default function Config() {
                                 {user?.role === "ADMIN" && (
                                   <button
                                     type="button"
-                                    className={styles.btnDeleteUser}
+                                    className={`btn-action glass ${styles.btnEditUser} ${styles.btnDeleteUser}`}
                                     onClick={() => {
                                       deleteUser(u);
                                     }}
@@ -304,13 +298,13 @@ export default function Config() {
             <EditMe u={user} onUpdate={() => handleUpdate()} />
 
             <button
-              className={styles.btnLogout}
+              className={`btn-action glass ${styles.btnLogout}`}
               onClick={handleLogout}
               type="button"
             >
-              <h3>
+              <h5>
                 <MdOutlinePowerOff /> Desconectar
-              </h3>
+              </h5>
             </button>
           </div>
         )}

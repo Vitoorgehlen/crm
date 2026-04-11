@@ -64,6 +64,7 @@ router.get('/deals', loginRequired, async (req, res) => {
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
   const search = String(req.query.name || '').trim();
+  const dealId = req.query.dealId ? Number(req.query.dealId) : undefined;
 
   const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;
   const statusClientQ = typeof req.query.statusClient === 'string' ? req.query.statusClient : undefined;
@@ -76,7 +77,7 @@ router.get('/deals', loginRequired, async (req, res) => {
   const limit = Number(req.query.limit || 50);
 
   try {
-    const deal = await getDeals(userId, { search, status, statusClient, paymentMethod }, page, limit);
+    const deal = await getDeals(userId, { search, dealId, status, statusClient, paymentMethod }, page, limit);
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -89,7 +90,7 @@ router.get('/deals-finished', loginRequired, async (req, res) => {
   const { id: userId } = user;
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
-  const name = String(req.query.name || '').trim();
+  const search = String(req.query.search || '').trim();
   const teamDeals = req.query.teamDeals === 'true';
   const targetId = Number(req.query.userId) || null;
   const progressDeals = req.query.progressDeals === 'true';
@@ -98,7 +99,7 @@ router.get('/deals-finished', loginRequired, async (req, res) => {
   const year = Number(req.query.year) || currentYear;
 
   try {
-    const deal = await getFinishedDealsYears(userId, { name, progressDeals, teamDeals, targetId, year } );
+    const deal = await getFinishedDealsYears(userId, { search, progressDeals, teamDeals, targetId, year } );
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -111,12 +112,14 @@ router.get('/deals-total-finished', loginRequired, async (req, res) => {
   const { id: userId } = user;
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
+  const search = String(req.query.search || '').trim();
+
   const teamDeals = req.query.teamDeals === 'true';
   const progressDeals = req.query.progressDeals === 'true';
   const targetId = Number(req.query.userId) || null;
 
   try {
-    const deal = await getTotalDealsOfYear(userId, progressDeals, teamDeals, targetId);
+    const deal = await getTotalDealsOfYear(userId, progressDeals, teamDeals, search,targetId);
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -129,7 +132,8 @@ router.get('/team-deals', loginRequired, async (req, res) => {
   const { id: userId } = user;
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
-  const search = String(req.query.name || '').trim();
+  const search = String(req.query.search || '').trim();
+  const dealId = req.query.dealId ? Number(req.query.dealId) : undefined;
 
   const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;
   const statusClientQ = typeof req.query.statusClient === 'string' ? req.query.statusClient : undefined;
@@ -144,7 +148,7 @@ router.get('/team-deals', loginRequired, async (req, res) => {
   const selectedUserId = req.query.userId ? Number(req.query.userId) : undefined;
 
   try {
-    const deal = await getTeamDeals(userId, { search, status, statusClient, paymentMethod, selectedUserId }, page, limit);
+    const deal = await getTeamDeals(userId, { search, dealId, status, statusClient, paymentMethod, selectedUserId }, page, limit);
     res.json(deal);
   } catch (err) {
     console.log(err);

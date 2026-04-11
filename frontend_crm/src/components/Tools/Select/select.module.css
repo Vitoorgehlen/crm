@@ -1,0 +1,72 @@
+.container {
+  width: 100%;
+  max-width: 150px;
+}
+
+/* input principal */
+.control {
+  background: none !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 8px;
+  cursor: pointer !important;
+  width: 100%;
+}
+
+.control:hover {
+  border: 1px solid var(--primaryColor) !important;
+}
+
+/* menu dropdown */
+.menu {
+  background: rgba(255, 255, 255, 0.1) !important;
+  backdrop-filter: blur(10px);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+/* cada opção */
+.option {
+  cursor: pointer;
+  color: var(--primaryText) !important;
+  font-size: 15px !important;
+  font-weight: 300 !important;
+}
+
+/* hover */
+.optionFocused {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  color: var(--primaryColor) !important;
+}
+
+/* selecionado */
+.optionSelected {
+  background-color: var(--primaryColor) !important;
+  color: var(--mainBackground) !important;
+}
+
+.singleValue {
+  color: var(--textBase) !important;
+  font-size: 14px;
+  font-weight: 200;
+}
+
+.input {
+  color: var(--primaryText) !important;
+  caret-color: var(--textBase) !important;
+  font-size: 14px;
+  font-weight: 200;
+}
+
+.indicatorSeparator {
+  background-color: var(--textBase) !important;
+  width: 1px;
+}
+
+.dropdownIndicator {
+  color: var(--textBase) !important;
+}
+
+.control:hover .dropdownIndicator {
+  color: var(--primaryColor) !important;
+}

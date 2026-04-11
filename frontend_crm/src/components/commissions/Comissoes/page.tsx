@@ -21,7 +21,7 @@ export default function CommissionCard({ deals }: any) {
   const [goals, setGoals] = useState<Goals[]>([]);
   const [editGoal, setEditGoal] = useState(false);
   const [annualGoal, setAnnualGoal] = useState(
-    goals.find((goal) => goal.year === new Date().getFullYear())
+    goals.find((goal) => goal.year === new Date().getFullYear()),
   );
   const [annualGoalValue, setAnnualGoalValue] = useState(0);
 
@@ -406,7 +406,7 @@ export default function CommissionCard({ deals }: any) {
   useEffect(() => {
     if (goals.length > 0) {
       const currentYearGoal = goals.find(
-        (goal) => goal.year === new Date().getFullYear()
+        (goal) => goal.year === new Date().getFullYear(),
       );
 
       setAnnualGoal(currentYearGoal);
@@ -418,139 +418,136 @@ export default function CommissionCard({ deals }: any) {
     <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.boxSteps}>
-          <div className={styles.cashStatsCard}>
-            <div className={styles.cashStatsCardDiv}>
-              <div className={styles.cardGoal}>
-                {selectedYear === new Date().getFullYear() ? (
-                  <div className={styles.infoCard}>
-                    <strong>Meta anual:</strong>
-                    {annualGoal !== undefined ? (
-                      <>
-                        {editGoal ? (
-                          <button
-                            type="button"
-                            className={styles.btnGoal}
-                            onClick={() => handleEditGoal(annualGoal, false)}
-                          >
-                            <RiSave3Fill />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.btnGoal}
-                            onClick={() => setEditGoal(true)}
-                          >
-                            <RiPencilFill />
-                          </button>
-                        )}
+          <div className={`glass ${styles.cashStatsCard}`}>
+            <div className={styles.cardGoal}>
+              {selectedYear === new Date().getFullYear() ? (
+                <div className={styles.infoCard}>
+                  <strong>Meta anual:</strong>
+                  {annualGoal !== undefined ? (
+                    <>
+                      {editGoal ? (
+                        <button
+                          type="button"
+                          className={styles.btnGoal}
+                          onClick={() => handleEditGoal(annualGoal, false)}
+                        >
+                          <RiSave3Fill />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className={styles.btnGoal}
+                          onClick={() => setEditGoal(true)}
+                        >
+                          <RiPencilFill />
+                        </button>
+                      )}
 
-                        {editGoal ? (
-                          <button
-                            type="button"
-                            className={styles.btnDelGoal}
-                            onClick={() => setEditGoal(false)}
-                          >
-                            <MdCancel />
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            className={styles.btnDelGoal}
-                            onClick={() => handleDeleteGoal(annualGoal)}
-                          >
-                            <RiEraserFill />
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <button
-                        type="button"
-                        className={styles.btnGoal}
-                        onClick={() => handleAddGoal(false)}
-                      >
-                        <RiSave3Fill />
-                      </button>
-                    )}
-                  </div>
-                ) : (
-                  <div className={styles.infoCard}>
-                    <strong>Meta de {selectedYear}:</strong>
+                      {editGoal ? (
+                        <button
+                          type="button"
+                          className={`${styles.btnGoal} ${styles.btnDelGoal}`}
+                          onClick={() => setEditGoal(false)}
+                        >
+                          <MdCancel />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          className={`${styles.btnGoal} ${styles.btnDelGoal}`}
+                          onClick={() => handleDeleteGoal(annualGoal)}
+                        >
+                          <RiEraserFill />
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.btnGoal}
+                      onClick={() => handleAddGoal(false)}
+                    >
+                      <RiSave3Fill />
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className={styles.infoCard}>
+                  <strong>Meta de {selectedYear}:</strong>
+                </div>
+              )}
+              {(editGoal || annualGoal === undefined) &&
+              selectedYear === new Date().getFullYear() ? (
+                <input
+                  type="text"
+                  className="glass"
+                  value={real(Number(annualGoalValue))}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setAnnualGoalValue(numeric);
+                  }}
+                />
+              ) : (
+                <p>{real(Number(annualGoalValue))}</p>
+              )}
+            </div>
+            {annualGoalValue > 0 && (
+              <>
+                {annualGoalValue - selectedYearStats.total > 0 && (
+                  <div className={styles.card}>
+                    <h5>Falta:</h5>
+                    <p>
+                      {real(Number(annualGoalValue - selectedYearStats.total))}
+                    </p>
                   </div>
                 )}
-                {(editGoal || annualGoal === undefined) &&
-                selectedYear === new Date().getFullYear() ? (
-                  <input
-                    type="text"
-                    value={real(Number(annualGoalValue))}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setAnnualGoalValue(numeric);
-                    }}
-                  />
-                ) : (
-                  <p>{real(Number(annualGoalValue))}</p>
-                )}
-              </div>
-              {annualGoalValue > 0 && (
-                <>
-                  {annualGoalValue - selectedYearStats.total > 0 && (
+                <div className={styles.card}>
+                  <h5>Média desejada:</h5>
+                  <p>{real(Number(annualGoalValue / 12))}</p>
+                </div>
+                {selectedYear === new Date().getFullYear() &&
+                  annualGoalValue - selectedYearStats.total > 0 && (
                     <div className={styles.card}>
-                      <h4>Falta:</h4>
+                      <h5>Meta até fim do ano p/ bater média</h5>
                       <p>
                         {real(
-                          Number(annualGoalValue - selectedYearStats.total)
+                          Number(
+                            (annualGoalValue - selectedYearStats.total) /
+                              (12 - new Date().getMonth()),
+                          ),
                         )}
                       </p>
                     </div>
                   )}
-                  <div className={styles.card}>
-                    <h4>Média desejada:</h4>
-                    <p>{real(Number(annualGoalValue / 12))}</p>
-                  </div>
-                  {selectedYear === new Date().getFullYear() &&
-                    annualGoalValue - selectedYearStats.total > 0 && (
-                      <div className={styles.card}>
-                        <h4>Meta até fim do ano p/ bater média</h4>
-                        <p>
-                          {real(
-                            Number(
-                              (annualGoalValue - selectedYearStats.total) /
-                                (12 - new Date().getMonth())
-                            )
-                          )}
-                        </p>
-                      </div>
-                    )}
-                </>
-              )}
-              <div className={styles.card}>
-                <h4 className={styles.received}>Total de comissões: </h4>
-                <p>{real(Number(selectedYearStats.total))}</p>
-              </div>
-              <div className={styles.card}>
-                <h4 className={styles.received}>Recebido:</h4>
-                <p>{real(Number(selectedYearStats.received))}</p>
-              </div>
-              <div className={styles.card}>
-                <h4 className={styles.toReceived}>A receber:</h4>
-                <p>{real(Number(selectedYearStats.toReceived))}</p>
-              </div>
-              <div className={styles.card}>
-                <h4>Média:</h4>
-                <p>{real(Number(selectedYearStats.monthAverage))}</p>
-              </div>
-              <div className={styles.card}>
-                <h4>Comparação com {new Date().getFullYear() - 1}:</h4>
-                <p>{selectedYearStats.comparStats.toFixed(2)}%</p>
-              </div>
-              <div className={styles.card}>
-                <h4>
-                  Comparação até {monthNames[new Date().getMonth()]} de{" "}
-                  {new Date().getFullYear() - 1}:
-                </h4>
-                <p>{selectedYearStats.comparStatsFair.toFixed(2)}%</p>
-              </div>
+              </>
+            )}
+            <div className={styles.card}>
+              <h5 className={styles.received}>Total de comissões: </h5>
+              <p>{real(Number(selectedYearStats.total))}</p>
+            </div>
+            <div className={styles.card}>
+              <h5 className={styles.received}>Recebido:</h5>
+              <p>{real(Number(selectedYearStats.received))}</p>
+            </div>
+            <div className={styles.card}>
+              <h5 className={styles.toReceived}>A receber:</h5>
+              <p>{real(Number(selectedYearStats.toReceived))}</p>
+            </div>
+            <div className={styles.card}>
+              <h5>Média:</h5>
+              <p>{real(Number(selectedYearStats.monthAverage))}</p>
+            </div>
+            <div className={styles.card}>
+              <h5>Comparação com {new Date().getFullYear() - 1}:</h5>
+              <p>{selectedYearStats.comparStats.toFixed(2)}%</p>
+            </div>
+            <div className={styles.card}>
+              <h5>
+                Comparação até {monthNames[new Date().getMonth()]} de{" "}
+                {new Date().getFullYear() - 1}:
+              </h5>
+              <p>{selectedYearStats.comparStatsFair.toFixed(2)}%</p>
             </div>
           </div>
           <div className={styles.finishedDealsByYearWrap}>
@@ -562,7 +559,7 @@ export default function CommissionCard({ deals }: any) {
                 const monthsObj = groupedByYearMonth[year] || {};
                 const total = Object.values(monthsObj).reduce(
                   (s, arr) => s + arr.length,
-                  0
+                  0,
                 );
                 const active = selectedYear === year;
                 return (
@@ -582,7 +579,7 @@ export default function CommissionCard({ deals }: any) {
 
             {selectedYear !== null && groupedByYearMonth[selectedYear] && (
               <>
-                <div className={styles.monthsList}>
+                <div className={`glass ${styles.monthsList}`}>
                   {Object.keys(groupedByYearMonth[selectedYear])
                     .map((k) => Number(k))
                     .sort((a, b) => a - b)
@@ -598,12 +595,12 @@ export default function CommissionCard({ deals }: any) {
                               onClick={() =>
                                 toggleMonth(selectedYear, monthIndex)
                               }
-                              className={`${styles.monthToggle} ${
-                                active ? styles.monthToggleActive : ""
+                              className={`glass ${styles.monthToggle} ${
+                                active && styles.monthToggleActive
                               }`}
                             >
-                              <h3>{monthNames[monthIndex]}</h3>
-                              <h5>({list.length})</h5>
+                              <h5>{monthNames[monthIndex]}</h5>
+                              <p>({list.length})</p>
                             </button>
                           </div>
                         </div>
@@ -625,10 +622,10 @@ export default function CommissionCard({ deals }: any) {
                           return paidAtB - paidAtA;
                         }
                         const updatedAtA = new Date(
-                          a.updatedAt || a.createdAt || ""
+                          a.updatedAt || a.createdAt || "",
                         ).getTime();
                         const updatedAtB = new Date(
-                          b.updatedAt || b.createdAt || ""
+                          b.updatedAt || b.createdAt || "",
                         ).getTime();
                         return updatedAtB - updatedAtA;
                       })
@@ -636,14 +633,14 @@ export default function CommissionCard({ deals }: any) {
                         <button
                           key={d.id}
                           type="button"
-                          className={styles.cardDeals}
+                          className={`glass ${styles.cardDeals}`}
                           onClick={() => router.push("/finalizados")}
                         >
                           <div>
-                            <h3>{d.client?.name ?? "— Cliente"}</h3>
-                            <div>
+                            <h4>{d.client?.name ?? "— Cliente"}</h4>
+                            <span>
                               {formatDateForFinish(d.DealShare?.[0]?.paidAt)}
-                            </div>
+                            </span>
                             <div>
                               {d.DealShare?.map((share) => (
                                 <div key={share.id}>
@@ -666,17 +663,17 @@ export default function CommissionCard({ deals }: any) {
             )}
           </div>
 
-          <div className={styles.pendingSection}>
-            <h2>A receber</h2>
+          <div className={`glass ${styles.pendingSection}`}>
+            <h4>A receber</h4>
             {pendingDeals.length === 0 ? (
-              <p>Sem comissões a receber.</p>
+              <span>Sem comissões a receber.</span>
             ) : (
               <div className={styles.pendingList}>
                 {pendingDeals
                   .sort(
                     (a, b) =>
                       new Date(b.createdAt || b.updatedAt || 0).getTime() -
-                      new Date(a.createdAt || a.updatedAt || 0).getTime()
+                      new Date(a.createdAt || a.updatedAt || 0).getTime(),
                   )
                   .map((d) => (
                     <div
@@ -685,7 +682,7 @@ export default function CommissionCard({ deals }: any) {
                       onClick={() => router.push("/fechados")}
                     >
                       <div>
-                        <h4>{d.client?.name ?? "— Cliente"}</h4>
+                        <h5>{d.client?.name ?? "— Cliente"}</h5>
                         <p>
                           <strong>Etapa:</strong>{" "}
                           {translateDealStep(d.currentStep)}
@@ -693,14 +690,14 @@ export default function CommissionCard({ deals }: any) {
                         <div>
                           {d.DealShare?.map((share) => (
                             <div key={share.id}>
-                              <h6>
+                              <span>
                                 <strong>Total:</strong>{" "}
                                 {real(Number(share.amount))}
-                              </h6>
-                              <h6>
+                              </span>
+                              <span>
                                 <strong>Recebido:</strong>{" "}
                                 {real(Number(share.received))}
-                              </h6>
+                              </span>
                             </div>
                           ))}
                         </div>

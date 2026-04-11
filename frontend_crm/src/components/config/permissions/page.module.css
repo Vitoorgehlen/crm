@@ -1,52 +1,53 @@
-.allTable {
+.main {
   width: 100%;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-bottom: 40px;
+  margin-bottom: 10px;
+}
+
+.allTable {
+  background-color: rgba(255, 255, 255, 0.1);
+  padding: 6px;
+  border-radius: 6px;
 }
 
 .table {
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
   border-collapse: collapse;
-  color: var(--primaryText);
-  border: 1px solid var(--shadowColor);
   border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  color: var(--primaryText);
 }
 
 .table thead {
-  background: var(--cardBackground2);
+  background: var(--mainBackground);
+}
+
+.table thead th {
+  text-align: center;
+  font-size: 16px;
 }
 
 .table th {
-  text-align: center;
-  padding: 10px;
-  border-bottom: 1px solid var(--shadowColor);
-  font-weight: 600;
+  text-align: left;
+  padding: 12px;
+  border-bottom: 1px solid var(--primaryColor);
 }
 
 .table td {
-  padding: 8px 10px;
+  padding: 5px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--textBase);
   text-align: center;
-  border-bottom: 1px solid var(--shadowColor);
 }
 
 .table td:first-child {
-  text-align: left;
-}
-
-.table tbody tr:nth-child(odd) {
-  background: var(--sidebarBackground);
-}
-
-.table tbody tr:nth-child(even) {
-  background: var(--cardBackground2);
+  max-width: 220px;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .table td input[type="checkbox"] {
@@ -71,68 +72,76 @@
   flex-direction: row;
   justify-content: center;
   align-items: center;
-  width: 90%;
+  width: 100%;
   max-width: 1200px;
-  padding: 10px 0;
+  padding: 10px;
   gap: 20px;
-}
-
-.btnReset {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--errorColor2);
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-}
-
-.btnReset:hover {
-  color: var(--primaryText);
-  background: var(--errorColorD);
 }
 
 .btnSave {
   margin-top: 20px;
   padding: 5px;
   color: var(--primaryColor);
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border-radius: 5px;
+  border: none;
+  border-radius: 6px;
   max-width: 500px;
-  width: 80%;
+  width: 35%;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
+  border: 1px solid var(--textBase);
 }
 
 .btnSave:hover {
   color: var(--primaryText);
-  background: var(--warningColorD);
   border: 1px solid var(--primaryColor);
 }
 
+.btnReset {
+  color: var(--errorColor);
+}
+
+.btnReset:hover {
+  background-color: var(--errorColor);
+  border: 1px solid var(--textBase);
+}
+
 @media (max-width: 768px) {
-  .allTable {
+  .main {
     width: 100%;
-    padding: 5px;
+  }
+
+  .allTable {
+    overflow-x: auto;
+    width: 100%;
+    border-radius: 0;
+  }
+
+  .table td:first-child {
+    max-width: 120px;
   }
 
   .table th {
-    font-size: xx-small;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    padding: 10px 0;
+    font-size: 10px !important;
+    font-weight: 100;
+  }
+
+  .table th:first-child {
+    writing-mode: horizontal-tb;
+    transform: rotate(0deg);
+    padding: 10px 0;
+    font-size: 10px !important;
+    font-weight: 100;
   }
 
   .table td {
-    font-size: var(--font-5);
+    font-size: 12px;
+    padding: 4px 0;
+  }
+
+  .check,
+  .noCheck {
+    font-size: 0.9rem;
   }
 }

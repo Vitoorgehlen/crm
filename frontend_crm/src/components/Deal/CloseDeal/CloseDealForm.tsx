@@ -17,6 +17,7 @@ import {
   MdCheckBoxOutlineBlank,
   MdCheckBox,
 } from "react-icons/md";
+import CustomSelect from "@/components/Tools/Select/CustomSelect";
 
 export default function CloseDealForm({
   isOpen,
@@ -106,6 +107,25 @@ export default function CloseDealForm({
   const totalAmounts = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.amount ?? 0), 0);
   }, [splits]);
+
+  const paymentMethodOptions = useMemo(() => {
+    return Object.entries(PaymentMethod).map(([key, { label }]) => ({
+      value: key as PaymentMethod,
+      label: label,
+    }));
+  }, []);
+
+  const selectedPaymentMethodOption = paymentMethodOptions.find(
+    (opt) => opt.value === paymentMethod,
+  );
+
+  const userOptions = [
+    { value: 0, label: "Empresa" },
+    ...companyUsers.map((u) => ({
+      value: u.id,
+      label: u.name ?? `Usuário ${u.id}`,
+    })),
+  ];
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -454,10 +474,9 @@ export default function CloseDealForm({
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.title}>
-          <div className={styles.titleName}>
-            <h4>Fechar com:</h4>
-            <h2>{deal?.client?.name ?? ""}</h2>
-          </div>
+          <p>Fechar com:</p>
+          <h4>{deal?.client?.name ?? ""}</h4>
+
           <button
             className={styles.closeBtn}
             type="button"
@@ -470,8 +489,8 @@ export default function CloseDealForm({
         </div>
 
         <div className={styles.titleCash}>
-          <h2
-            className={`${styles.balance} ${
+          <h5
+            className={`${
               isPositive
                 ? styles.positive
                 : isNegative
@@ -480,456 +499,175 @@ export default function CloseDealForm({
             }`}
           >
             {balanceText}
-          </h2>
+          </h5>
         </div>
 
         {error && <p className={styles.error}>{error}</p>}
 
         <div className={styles.paymentTitle}>
-          <h3>Valor do imóvel</h3>
-          <h3>Valor total da comissão</h3>
-          <h3>Método de pagamento</h3>
-        </div>
-        <div className={styles.payment}>
-          <input
-            type="text"
-            value={propertyValue.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            onChange={(e) => {
-              const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-              setPropertyValue(numeric);
-            }}
-            placeholder="Valor do imóvel"
-          />
-          <input
-            type="text"
-            value={commissionAmount.toLocaleString("pt-BR", {
-              style: "currency",
-              currency: "BRL",
-            })}
-            onChange={(e) => {
-              const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-              setCommissionAmount(numeric);
-            }}
-            placeholder="Valor da comissão"
-          />
+          <div className={styles.payment}>
+            <p>Valor do imóvel</p>
+            <input
+              type="text"
+              className={`form-base ${styles.form}`}
+              value={propertyValue.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+              onChange={(e) => {
+                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
+                setPropertyValue(numeric);
+              }}
+              placeholder="Valor do imóvel"
+            />
+          </div>
+          <div className={styles.payment}>
+            <p>Valor total da comissão</p>
+            <input
+              type="text"
+              className={`form-base ${styles.form}`}
+              value={commissionAmount.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+              onChange={(e) => {
+                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
+                setCommissionAmount(numeric);
+              }}
+              placeholder="Valor da comissão"
+            />
+          </div>
+          {paymentMethod === "FINANCING" && (
+            <div className={styles.payment}>
+              <p>Instituição</p>
+              <p>financeira</p>
+              <input
+                type="text"
+                className={`form-base ${styles.inputBank}`}
+                placeholder="Banco"
+                onChange={(e) => setFinancialInstitution(e.target.value)}
+                value={financialInstitution}
+              />
+            </div>
+          )}
 
-          <select
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value as PaymentMethod)}
-            required
+          <div className={styles.payment}>
+            <p>Método de pagamento</p>
+            <CustomSelect
+              options={paymentMethodOptions}
+              value={selectedPaymentMethodOption || null}
+              onChange={(option) => {
+                if (option) {
+                  setPaymentMethod(option.value);
+                }
+              }}
+            />
+          </div>
+        </div>
+
+        <div className={styles.nameBtnInstallment}>
+          <button
+            className={`${styles.btnInstallment} 
+            ${installment && styles.btnInstallmentActive}`}
+            onClick={() => setInstallment((prev) => !prev)}
+            type="button"
           >
-            {Object.entries(PaymentMethod).map(([key, { label }]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
+            <div className={styles.nameBtnInstallment}>
+              {installment ? (
+                <p>Cancelar parcelamento</p>
+              ) : (
+                <p>Parcelar entrada</p>
+              )}
+              {installment ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
+            </div>
+          </button>
         </div>
 
-        {paymentMethod === "CASH" && (
+        {installment && (
           <>
-            <div className={styles.paymentTitle}>
-              <h3>Entrada</h3>
-              <h3>Valor a vista</h3>
-              <h3>FGTS</h3>
+            <div
+              className={`${styles.paymentTitle} ${styles.paymentTitleMobile}`}
+            >
+              <div className={styles.payment}>
+                <p>Valor da parcela</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="Parcelamento"
+                  value={installmentValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setInstallmentValue(numeric);
+                  }}
+                />
+              </div>
+              <div className={styles.payment}>
+                <p>Quantidade de parcelas</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="Qtd de parcelas"
+                  value={installmentCount}
+                  onChange={(e) => setInstallmentCount(Number(e.target.value))}
+                />
+              </div>
+              <div className={styles.payment}>
+                <p>Valor do reforço</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="Reforço"
+                  value={bonusInstallmentValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setBonusInstallmentValue(numeric);
+                  }}
+                />
+              </div>
+              <div className={styles.payment}>
+                <p>Quantidade de reforços</p>
+                <input
+                  type="text"
+                  className={`form-base ${styles.form}`}
+                  placeholder="Qtd de reforços"
+                  value={bonusInstallmentCount}
+                  onChange={(e) =>
+                    setBonusInstallmentCount(Number(e.target.value))
+                  }
+                />
+              </div>
             </div>
-            <div className={styles.payment}>
-              <input
-                type="text"
-                placeholder="Valor de entrada"
-                value={downPaymentValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setDownPaymentValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Valor a vista"
-                value={cashValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setCashValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="FGTS"
-                value={fgtsValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFgtsValue(numeric);
-                }}
-              />
-            </div>
-
-            <div className={styles.nameBtnInstallment}>
-              <button
-                className={`${styles.btnInstallment} ${
-                  installment ? styles.btnInstallmentActive : ""
-                }`}
-                onClick={() => setInstallment((prev) => !prev)}
-                type="button"
-              >
-                <div className={styles.nameBtnInstallment}>
-                  <h2>Parcelar entrada</h2>
-                  {installment ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
-                </div>
-              </button>
-            </div>
-            {installment && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor da parcela</h3>
-                  <h3>Qtd. Parcelas</h3>
-                  <h3>Valor do reforço</h3>
-                  <h3>Qtd. Reforços</h3>
-                </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Parcelamento"
-                    value={installmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de parcelas"
-                    value={installmentCount}
-                    onChange={(e) =>
-                      setInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder="Reforço"
-                    value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setBonusInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de reforços"
-                    value={bonusInstallmentCount}
-                    onChange={(e) =>
-                      setBonusInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {paymentMethod === "FINANCING" && (
-          <>
-            <div className={styles.paymentTitle}>
-              <h3>Valor de entrada</h3>
-              <h3>Subsídio</h3>
-              <h3>FGTS</h3>
-              <h3>Valor de financiamento</h3>
-            </div>
-            <div className={styles.payment}>
-              <input
-                type="text"
-                placeholder="Valor de entrada"
-                value={downPaymentValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setDownPaymentValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Valor de subsídio"
-                value={subsidyValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setSubsidyValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="FGTS"
-                value={fgtsValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFgtsValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Valor de Financiamento"
-                value={financingValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFinancingValue(numeric);
-                }}
-              />
-            </div>
-
-            <div className={styles.nameBtnInstallment}>
-              <button
-                className={`${styles.btnInstallment} ${
-                  installment ? styles.btnInstallmentActive : ""
-                }`}
-                onClick={() => setInstallment((prev) => !prev)}
-                type="button"
-              >
-                <div className={styles.nameBtnInstallment}>
-                  <h2>Parcelar entrada</h2>
-                  {installment ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
-                </div>
-              </button>
-            </div>
-            {installment && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor da parcela</h3>
-                  <h3>Qtd. Parcelas</h3>
-                  <h3>Valor do reforço</h3>
-                  <h3>Qtd. Reforços</h3>
-                </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Parcelamento"
-                    value={installmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de parcelas"
-                    value={installmentCount}
-                    onChange={(e) =>
-                      setInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder="Reforço"
-                    value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setBonusInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de reforços"
-                    value={bonusInstallmentCount}
-                    onChange={(e) =>
-                      setBonusInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                </div>
-              </>
-            )}
-          </>
-        )}
-
-        {paymentMethod === "CREDIT_LETTER" && (
-          <>
-            <div className={styles.paymentTitle}>
-              <h3>Valor de entrada</h3>
-              <h3>FGTS</h3>
-              <h3>Valor da carta de crédito</h3>
-            </div>
-            <div className={styles.payment}>
-              <input
-                type="text"
-                placeholder="Valor de entrada"
-                value={downPaymentValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setDownPaymentValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="FGTS"
-                value={fgtsValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFgtsValue(numeric);
-                }}
-              />
-              <input
-                type="text"
-                placeholder="Valor da carta de crédito"
-                value={creditLetterValue.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setCreditLetterValue(numeric);
-                }}
-              />
-            </div>
-
-            <div className={styles.nameBtnInstallment}>
-              <button
-                className={`${styles.btnInstallment} ${
-                  installment ? styles.btnInstallmentActive : ""
-                }`}
-                onClick={() => setInstallment((prev) => !prev)}
-                type="button"
-              >
-                <div className={styles.nameBtnInstallment}>
-                  <h2>Parcelar entrada</h2>
-                  {installment ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
-                </div>
-              </button>
-            </div>
-
-            {installment && (
-              <>
-                <div className={styles.paymentTitle}>
-                  <h3>Valor da parcela</h3>
-                  <h3>Qtd. Parcelas</h3>
-                  <h3>Valor do reforço</h3>
-                  <h3>Qtd. Reforços</h3>
-                </div>
-                <div className={styles.payment}>
-                  <input
-                    type="text"
-                    placeholder="Parcelamento"
-                    value={installmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de parcelas"
-                    value={installmentCount}
-                    onChange={(e) =>
-                      setInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                  <input
-                    type="text"
-                    placeholder="Reforço"
-                    value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setBonusInstallmentValue(numeric);
-                    }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Qtd de reforços"
-                    value={bonusInstallmentCount}
-                    onChange={(e) =>
-                      setBonusInstallmentCount(Number(e.target.value))
-                    }
-                  />
-                </div>
-              </>
-            )}
           </>
         )}
 
         <div className={styles.boxCommissionShare}>
           <div className={styles.splitCommissionTitle}>
-            <h2>Divisão da comissão</h2>
+            <p>Divisão da comissão</p>
             <button
-              className={`
-                                ${styles.btnCommission} ${
-                                  splitMethod === "percentage"
-                                    ? styles.btnActive
-                                    : ""
-                                }`}
+              className={`btn-action
+                ${styles.btnCommission} 
+                ${splitMethod === "percentage" && styles.btnActive}`}
               type="button"
               onClick={() => setSplitMethod("percentage")}
             >
-              por %
+              %
             </button>
             <button
-              className={`
-                                ${styles.btnCommission} ${
-                                  splitMethod === "amount"
-                                    ? styles.btnActive
-                                    : ""
-                                }`}
+              className={`btn-action
+                ${styles.btnCommission} 
+                ${splitMethod === "amount" && styles.btnActive}`}
               type="button"
               onClick={() => setSplitMethod("amount")}
             >
-              por valor
+              R$
             </button>
             <button
               className={styles.addSplit}
@@ -940,112 +678,114 @@ export default function CloseDealForm({
             </button>
           </div>
 
-          {splits.map((s, i) => (
-            <div key={i} className={styles.border}>
-              <div className={styles.boxSplitCommission}>
-                <select
-                  value={s.isCompany ? "company" : (s.userId ?? "")}
-                  onChange={(e) => {
-                    const isCompany = e.target.value === "company";
-                    updateSplit(i, {
-                      isCompany,
-                      userId: isCompany ? null : Number(e.target.value),
-                    });
-                  }}
-                >
-                  <option value="company">Empresa</option>
-                  {companyUsers.map((u) => (
-                    <option key={u.id} value={u.id}>
-                      {u.name ?? `Usuário ${u.id}`}
-                    </option>
-                  ))}
-                </select>
+          {splits.map((s, i) => {
+            const selectedOption = s.isCompany
+              ? userOptions.find((opt) => opt.value === 0) || null
+              : userOptions.find((opt) => opt.value === s.userId) || null;
 
-                {splitMethod === "percentage" ? (
-                  <>
-                    <input
-                      type="type"
-                      style={{ width: 90 }}
-                      value={s.percentage === 0 ? "" : s.percentage}
-                      onChange={(e) => {
-                        let value = e.target.value;
-                        value = value.replace(",", ".");
+            return (
+              <div key={i} className={styles.border}>
+                <div className={styles.boxSplitCommission}>
+                  <CustomSelect
+                    options={userOptions}
+                    value={selectedOption}
+                    onChange={(option) => {
+                      if (!option) return;
 
-                        if (value === "") {
-                          updateSplit(i, { percentage: 0 });
-                          return;
-                        }
+                      const isCompany = option.value === null;
 
-                        const parsed = parseFloat(value);
+                      updateSplit(i, {
+                        isCompany,
+                        userId: isCompany ? null : Number(option.value),
+                      });
+                    }}
+                  />
 
-                        if (!isNaN(parsed)) {
+                  {splitMethod === "percentage" ? (
+                    <>
+                      <input
+                        type="type"
+                        className={`form-base ${styles.form}`}
+                        style={{ width: 90 }}
+                        value={s.percentage === 0 ? "" : s.percentage}
+                        onChange={(e) => {
+                          let value = e.target.value;
+                          value = value.replace(",", ".");
+
+                          if (value === "") {
+                            updateSplit(i, { percentage: 0 });
+                            return;
+                          }
+
+                          const parsed = parseFloat(value);
+
+                          if (!isNaN(parsed)) {
+                            updateSplit(i, {
+                              percentage: Math.min(parseFloat(value), 100),
+                            });
+                          }
+                        }}
+                      />
+                      <span> ≈ R$ {computedAmountFor(i)}</span>
+                    </>
+                  ) : (
+                    <>
+                      <input
+                        type="text"
+                        className={`form-base ${styles.form}`}
+                        style={{ width: 120 }}
+                        value={real(Number(s.amount ?? 0))}
+                        onChange={(e) => {
+                          const numeric =
+                            Number(e.target.value.replace(/\D/g, "")) / 100;
                           updateSplit(i, {
-                            percentage: Math.min(parseFloat(value), 100),
+                            amount: numeric,
                           });
-                        }
-                      }}
-                    />
-                    <h3 className={styles.textSplit}>
-                      {" "}
-                      ≈ R$ {computedAmountFor(i)}
-                    </h3>
-                  </>
-                ) : (
-                  <>
-                    <input
-                      type="text"
-                      style={{ width: 120 }}
-                      value={real(Number(s.amount ?? 0))}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        updateSplit(i, {
-                          amount: numeric,
-                        });
-                      }}
-                      placeholder="Valor"
-                    />
-                  </>
-                )}
+                        }}
+                        placeholder="Valor"
+                      />
+                    </>
+                  )}
 
-                <input
-                  className={styles.textObs}
-                  type="text"
-                  placeholder="Observação"
-                  value={s.notes ?? ""}
-                  onChange={(e) =>
-                    updateSplit(i, {
-                      notes: e.target.value,
-                    })
-                  }
-                />
+                  <input
+                    type="text"
+                    className={`form-base ${styles.form}`}
+                    placeholder="Observação"
+                    value={s.notes ?? ""}
+                    onChange={(e) =>
+                      updateSplit(i, {
+                        notes: e.target.value,
+                      })
+                    }
+                  />
 
-                <button
-                  className={styles.removeSplit}
-                  type="button"
-                  onClick={() => removeSplit(i)}
-                >
-                  <IoRemoveCircle />
-                </button>
+                  <button
+                    className={`${styles.addSplit} ${styles.removeSplit}`}
+                    type="button"
+                    onClick={() => removeSplit(i)}
+                  >
+                    <IoRemoveCircle />
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
-          <div style={{ marginTop: 8 }}>
+          <div className={styles.sum}>
             {splitMethod === "percentage" ? (
-              <h3>Somatório: {totalPercentage.toFixed(2)}%</h3>
+              <span>Somatório: {totalPercentage.toFixed(2)}%</span>
             ) : (
-              <h3>
+              <span>
                 Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
                 {commissionAmount.toFixed(2)}
-              </h3>
+              </span>
             )}
           </div>
         </div>
 
         <div className={styles.btnCancelAndConfirm}>
           <button
-            className={styles.btnCancel}
+            className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
             type="button"
             onClick={() => onClose()}
           >
@@ -1053,25 +793,25 @@ export default function CloseDealForm({
           </button>
 
           <button
-            className={styles.btnConfirm}
+            className={`btn-action glass ${styles.btnDeal} ${styles.btnConfirm}`}
             type="button"
             onClick={() => handleSubmit()}
             disabled={loading}
           >
-            {loading ? "Enviando..." : "Fechar negociação"}
+            {loading ? "Confirmando..." : "Confirmar"}
           </button>
         </div>
 
         <div className={styles.footerCard}>
-          <h6>
+          <span>
             Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
             {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-          </h6>
-          <h6>
+          </span>
+          <span>
             {" "}
             Criado por: {deal?.creator?.name ?? "—"} ·{" "}
             {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-          </h6>
+          </span>
         </div>
       </div>
     </div>

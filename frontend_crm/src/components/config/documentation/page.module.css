@@ -10,8 +10,6 @@
   max-width: 1200px;
   padding: 15px;
   border-radius: 5px;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
   color: var(--primaryText);
   display: flex;
   flex-direction: column;
@@ -28,11 +26,6 @@
   color: var(--primaryColor);
 }
 
-.error {
-  color: var(--errorColor2);
-  font-size: var(--font-5);
-}
-
 .doc {
   display: flex;
   align-items: center;
@@ -40,10 +33,6 @@
   margin-bottom: 5px;
   width: 100%;
   max-width: 800px;
-}
-
-.label {
-  margin: 0;
 }
 
 .inputAndPercent {
@@ -55,44 +44,30 @@
   display: inline-block;
 }
 
-.suffix {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none; /* 🔥 importante */
+.inputValue {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  max-width: 100px;
   color: var(--primaryText);
 }
 
 .inputPercent {
-  padding-right: 20px; /* espaço pro % */
-  text-align: right;
-}
-
-.inputPercent {
+  padding-right: 20px;
   align-items: center;
   padding: 5px 23px 5px 5px;
-  border-radius: 5px;
-  width: 100%;
   max-width: 100px;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  transition: 200ms;
   color: var(--primaryText);
   text-align: right;
   gap: 5px;
 }
 
-.inputValue {
-  display: flex;
-  align-items: center;
-  padding: 5px;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 100px;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  transition: 200ms;
+.suffix {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
   color: var(--primaryText);
 }
 
@@ -108,67 +83,36 @@
   margin-top: 20px;
   padding: 5px;
   color: var(--primaryColor);
-  background: var(--cardBackground);
   border: none;
-  border-radius: 5px;
-  max-width: 200px;
-  width: 80%;
+  border-radius: 6px;
+  max-width: 500px;
+  width: 35%;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-
-  border: 1px solid var(--primaryColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--textBase);
 }
 
 .btnSave:hover {
   color: var(--primaryText);
-  background: var(--cardBackground2);
+  border: 1px solid var(--primaryColor);
 }
 
 .btnReset {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--errorColor2);
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  border: none;
-  border-radius: 5px;
-  max-width: 200px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  color: var(--errorColor);
 }
 
 .btnReset:hover {
-  color: var(--primaryText);
-  background: var(--errorColorD);
+  background-color: var(--errorColor);
+  border: 1px solid var(--textBase);
 }
 
 @media (max-width: 768px) {
+  .main {
+    width: 100%;
+    padding: 15px 10px;
+    color: var(--primaryText);
+  }
+
   .description {
-    text-align: center;
-  }
-
-  .doc {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 5px;
-  }
-
-  .btns {
-    gap: 10px;
+    margin-bottom: 10px;
   }
 }

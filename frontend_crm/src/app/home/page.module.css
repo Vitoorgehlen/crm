@@ -5,7 +5,6 @@
   justify-content: center;
   align-items: center;
   padding-bottom: 20px;
-  background-color: var(--mainBackground);
 }
 
 .title {
@@ -178,7 +177,6 @@
     width: 100%;
     padding-right: 10px;
     margin-top: 10px;
-    font-size: var(--font-4);
   }
 
   .contentSection {

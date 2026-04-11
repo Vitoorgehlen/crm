@@ -3,18 +3,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import styles from "./page.module.css";
-import DealForm from "@/components/Deal/DealForm/DealForm";
 import { ClientStatus, Deal, CloseDealPayload, User } from "@/types/index";
-import { BsFileEarmarkPlus } from "react-icons/bs";
-import { IoStar, IoStarOutline } from "react-icons/io5";
+import { IoCloseOutline, IoStar, IoStarOutline } from "react-icons/io5";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { useQueryState } from "nuqs";
-import DealsHeader from "@/components/searchbar/page";
 import { fetchDealsList, fetchMultipleDeals } from "@/utils/fetchDeals";
+import { getTotal } from "@/utils/sumPreviusDocs";
+import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
+import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import HeaderPage from "@/components/searchbar/page";
+import DealForm from "@/components/Deal/DealForm/DealForm";
+import styles from "./page.module.css";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
-
 interface DealListProps {
   selectedStatusDeal: "POTENTIAL_CLIENTS" | "OLD_CLIENTS";
   title: string;
@@ -29,12 +30,13 @@ export default function DealList({
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
 
+  const [dealId, setDealId] = useQueryState("dealId");
   const [users, setUsers] = useState<User[]>([]);
 
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [limit, setLimit] = useState(initialLimit);
+  const [limit] = useState(initialLimit);
 
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
@@ -79,6 +81,38 @@ export default function DealList({
           ),
     [selectedStatusDeal],
   );
+
+  const visibleStatusList = dealId
+    ? statusList
+    : statusList.filter(
+        (statusObj) => (dealsByStatus[statusObj.dbValue] || []).length > 0,
+      );
+
+  function sumTotal(deal: Deal) {
+    const total = getTotal(
+      deal.paymentMethod,
+      Number(deal.downPaymentValue || 0),
+      Number(deal.subsidyValue || 0),
+      Number(deal.cashValue || 0),
+      Number(deal.fgtsValue || 0),
+      Number(deal.financingValue || 0),
+      Number(deal.creditLetterValue || 0),
+    );
+    if (total <= 0) return "R$ 0,00";
+    const totalCash = total.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    });
+    const text =
+      deal.paymentMethod === "FINANCING"
+        ? "Financiado"
+        : deal.paymentMethod === "CASH"
+          ? "Á Vista"
+          : deal.paymentMethod === "CREDIT_LETTER"
+            ? "Com carta de crédito"
+            : "";
+    return `${totalCash} ${text}`;
+  }
 
   function openCreate() {
     setIsCreateOpen(true);
@@ -168,6 +202,11 @@ export default function DealList({
     if (!token) return;
     setLoading(true);
 
+    if (dealId) {
+      await fetchDealById();
+      return;
+    }
+
     try {
       const result = await fetchDealsList({
         token,
@@ -179,7 +218,9 @@ export default function DealList({
         page: pageToFetch,
         status: selectedStatusDeal,
         statusClient,
+        dealId,
       });
+
       setDealsByStatus((prev) => ({
         ...prev,
         [statusClient]: result.deals,
@@ -201,9 +242,43 @@ export default function DealList({
     }
   };
 
+  const fetchDealById = useCallback(async () => {
+    if (!token || !dealId) return;
+    setLoading(true);
+
+    const params = new URLSearchParams();
+    params.append("dealId", dealId);
+
+    try {
+      const res = await fetch(`${API}/team-deals?${params.toString()}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro");
+
+      if (data.data && data.data.length > 0) {
+        setSelectedDeal(data.data[0]);
+        // setIsEditOpen(true);
+        setDealsByStatus({
+          [data.data[0].statusClient]: [data.data[0]],
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token, dealId]);
+
   const fetchAllStatusesData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
+
+    if (dealId) {
+      await fetchDealById();
+      return;
+    }
 
     try {
       const items = statusList.map((statusObj) => ({
@@ -264,15 +339,6 @@ export default function DealList({
   };
 
   useEffect(() => {
-    const handleResize = () => {
-      setLimit(window.innerWidth <= 768 ? 6 : 10);
-    };
-    handleResize();
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  useEffect(() => {
     if (isLoading) return;
     if (!token) {
       router.push("/login");
@@ -280,7 +346,11 @@ export default function DealList({
     }
 
     const timer = setTimeout(() => {
-      fetchAllStatusesData();
+      if (dealId) {
+        fetchDealById();
+      } else {
+        fetchAllStatusesData();
+      }
     }, 400);
 
     return () => clearTimeout(timer);
@@ -292,6 +362,7 @@ export default function DealList({
     userId,
     fetchAllStatusesData,
     router,
+    fetchDealById,
   ]);
 
   useEffect(() => {
@@ -299,39 +370,39 @@ export default function DealList({
     fetchUsers();
   }, [token]);
 
+  useEffect(() => {
+    if (!dealId) {
+      setIsEditOpen(false);
+      setSelectedDeal(null);
+      return;
+    }
+
+    const allDeals = Object.values(dealsByStatus).flat();
+    const deal = allDeals.find((d) => String(d.id) === dealId);
+
+    if (deal && userId) {
+      setSelectedDeal(deal);
+      setIsEditOpen(true);
+    }
+  }, [dealId, dealsByStatus]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>
-            {title}
-            {teamDeals && " da equipe"}
-          </h1>
-        </div>
-
-        <div className={styles.headerContent}>
-          <div className={styles.searchbar}>
-            <DealsHeader
-              search={search}
-              setSearch={setSearch}
-              teamDeals={teamDeals}
-              setTeamDeals={setTeamDeals}
-              users={users}
-              selectedUser={selectedUser}
-              setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
-              permissions={permissions}
-              onCreate={openCreate}
-              loading={loading}
-            />
-            <button
-              className={styles.addDeal}
-              onClick={openCreate}
-              type="button"
-            >
-              <BsFileEarmarkPlus />
-            </button>
-          </div>
-        </div>
+        <HeaderPage
+          title={title}
+          search={search}
+          setSearch={setSearch}
+          teamMode={teamDeals}
+          add={true}
+          setTeamMode={setTeamDeals}
+          users={users}
+          selectedUser={selectedUser}
+          setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
+          permissions={permissions}
+          onCreate={openCreate}
+          showClearButton={!!dealId}
+        />
 
         <div className={styles.box}>
           {isCreateOpen && (
@@ -342,147 +413,172 @@ export default function DealList({
               onClose={() => {
                 setIsCreateOpen(false);
                 setSelectedDeal(null);
+                setDealId(null);
               }}
               onSubmit={handleCreate}
             />
           )}
         </div>
 
-        <div>
-          {statusList.map((statusObj) => {
-            const statusKey = statusObj.dbValue.toString().toLowerCase();
-            const statusClass = (styles as any)[`status_${statusKey}`] ?? "";
-            const currentDeals = dealsByStatus[statusObj.dbValue] || [];
-            const currentPage = currentPageByStatus[statusObj.dbValue] || 1;
-            const totalPages = totalPagesByStatus[statusObj.dbValue] || 1;
-
-            return (
-              <div
-                className={`${styles.statusCard} ${statusClass}`}
-                key={statusObj.dbValue}
-              >
-                <h4 className={styles.statusName}>{statusObj.label}</h4>
-
-                {loading && currentDeals.length === 0 ? (
-                  <div className={styles.loadingStatus}>
-                    <p>Carregando negociações...</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className={styles.dealList}>
-                      {currentDeals
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            (b.client?.isPriority ? 1 : 0) -
-                            (a.client?.isPriority ? 1 : 0),
-                        )
-                        .map((deal, index) => (
-                          <button
-                            key={deal.id || index}
-                            type="button"
-                            className={`
-                            ${
-                              deal.client?.deleteRequest
-                                ? styles.dealDelete
-                                : deal.deleteRequest
-                                  ? styles.dealDelete
-                                  : styles.deal
-                            }`}
-                            onClick={() => openEdit(deal)}
-                          >
-                            {deal.client?.isPriority ? (
-                              <div className={styles.titleCard}>
-                                <IoStar
-                                  className={styles.btnPriorityActiveCard}
-                                />
-                                <h4 className={styles.lastContact}>
-                                  {getDaysSinceLastContact(
-                                    deal.updatedAt ?? deal.createdAt ?? "",
-                                  )}
-                                </h4>
-                              </div>
-                            ) : (
-                              <div className={styles.titleCard}>
-                                <IoStarOutline
-                                  className={styles.btnPriorityCard}
-                                />
-                                <h4 className={styles.lastContact}>
-                                  {getDaysSinceLastContact(
-                                    deal.updatedAt ?? deal.createdAt ?? "",
-                                  )}
-                                </h4>
-                              </div>
-                            )}
-
-                            <h3>
-                              {deal.client?.name || "Cliente não informado"}
-                            </h3>
-                            <h4>{statusObj.label}</h4>
-                            {teamDeals && (
-                              <h6>
-                                {deal.creator?.name || "Usuário não encontrado"}
-                              </h6>
-                            )}
-                          </button>
-                        ))}
-                    </div>
-
-                    {totalPages > 1 && (
-                      <div className={styles.pagination}>
-                        <button
-                          disabled={currentPage <= 1 || loading}
-                          onClick={() =>
-                            handlePageChange(statusObj.dbValue, currentPage - 1)
-                          }
-                        >
-                          Anterior
-                        </button>
-
-                        <span>
-                          {currentPage} / {totalPages}
-                        </span>
-
-                        <button
-                          disabled={currentPage >= totalPages || loading}
-                          onClick={() =>
-                            handlePageChange(statusObj.dbValue, currentPage + 1)
-                          }
-                        >
-                          Próxima
-                        </button>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            );
-          })}
-
-          {/* Verificar se todos os status estão vazios */}
-          {Object.values(dealsByStatus).every((deals) => deals.length === 0) &&
-            !loading && (
-              <div className={styles.noItens}>
-                <p>Nenhuma negociação encontrada</p>
-              </div>
-            )}
-
-          {selectedDeal && (
-            <DealForm
-              mode="edit"
-              isOpen={isEditOpen}
-              deal={selectedDeal}
-              onClose={() => {
-                setIsEditOpen(false);
-                setSelectedDeal(null);
+        {dealId && (
+          <div className={styles.btnUncheck}>
+            <button
+              className={`btn-action glass ${styles.uncheck}`}
+              onClick={() => {
+                setDealId(null);
+                setTeamDeals(false);
               }}
-              onSubmit={handleEdit}
-              onCloseDeal={closeDealShares}
-              onDelete={handleDeleteDeal}
-            />
-          )}
-        </div>
+            >
+              <IoCloseOutline />
+            </button>
+          </div>
+        )}
+
+        {Object.values(dealsByStatus).every((deals) => deals.length === 0) &&
+        !loading ? (
+          <div className={styles.noItens}>
+            <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
+            <p>
+              Verifique se você tem alguma negociação criada ou entre em contato
+              para corrigirmos esse erro.
+            </p>
+          </div>
+        ) : (
+          <div className={styles.cardsDeals}>
+            {visibleStatusList.map((statusObj) => {
+              const statusKey = statusObj.dbValue.toString().toLowerCase();
+              const statusClass = (styles as any)[`status_${statusKey}`] ?? "";
+              const currentDeals = dealsByStatus[statusObj.dbValue] || [];
+              const currentPage = currentPageByStatus[statusObj.dbValue] || 1;
+              const totalPages = totalPagesByStatus[statusObj.dbValue] || 1;
+
+              return currentDeals.length === 0 ? null : (
+                <div
+                  className={`${styles.statusCard} ${statusClass}`}
+                  key={statusObj.dbValue}
+                >
+                  {totalPages > 1 ? (
+                    <div className={styles.pagination}>
+                      <button
+                        className={`
+                            arrow-pagination ${
+                              (currentPage <= 1 || loading) &&
+                              "arrow-pagination-disable"
+                            }
+                            `}
+                        onClick={() =>
+                          handlePageChange(statusObj.dbValue, currentPage - 1)
+                        }
+                      >
+                        <FaArrowAltCircleLeft />
+                      </button>
+                      <div className={styles.displayNamePage}>
+                        <h4>{statusObj.label}</h4>
+                        <span>
+                          <span className={styles.currentPage}>
+                            {currentPage}
+                          </span>
+                          /{totalPages}
+                        </span>
+                      </div>
+
+                      <button
+                        className={`
+                            arrow-pagination ${
+                              (currentPage >= totalPages || loading) &&
+                              "arrow-pagination-disable"
+                            }
+                              `}
+                        onClick={() =>
+                          handlePageChange(statusObj.dbValue, currentPage + 1)
+                        }
+                      >
+                        <FaArrowAltCircleRight />
+                      </button>
+                    </div>
+                  ) : (
+                    <h4 className={styles.statusName}>{statusObj.label}</h4>
+                  )}
+                  {loading && currentDeals.length === 0 ? (
+                    <div className={styles.loadingStatus}>
+                      <AiOutlineLoading3Quarters />
+                    </div>
+                  ) : (
+                    <>
+                      <div className={styles.dealList}>
+                        {currentDeals
+                          .slice()
+                          .sort(
+                            (a, b) =>
+                              (b.client?.isPriority ? 1 : 0) -
+                              (a.client?.isPriority ? 1 : 0),
+                          )
+                          .map((deal, index) => (
+                            <button
+                              key={deal.id || index}
+                              type="button"
+                              className={`glass ${styles.deal}
+                              ${(deal.client?.deleteRequest || deal.deleteRequest) && "glass-danger"}`}
+                              onClick={() => openEdit(deal)}
+                            >
+                              <div className={styles.dealInfos}>
+                                <div className={styles.dealHeader}>
+                                  {deal.client?.isPriority ? (
+                                    <IoStar className={styles.btnPriority} />
+                                  ) : (
+                                    <IoStarOutline />
+                                  )}
+
+                                  <h5>
+                                    {deal.client?.name ||
+                                      "Cliente não informado"}
+                                  </h5>
+                                  <div></div>
+                                </div>
+                                <div className={styles.dealFooter}>
+                                  <p className={styles.lastContact}>
+                                    {getDaysSinceLastContact(
+                                      deal.updatedAt ?? deal.createdAt ?? "",
+                                    )}
+                                  </p>
+                                  <span>{sumTotal(deal)}</span>
+                                  <p className={styles.lastContactInvisible}>
+                                    {getDaysSinceLastContact(
+                                      deal.updatedAt ?? deal.createdAt ?? "",
+                                    )}
+                                  </p>
+                                </div>
+                                {teamDeals && (
+                                  <span className={styles.user}>
+                                    {deal.creator?.name || ""}
+                                  </span>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </main>
+      {selectedDeal && (
+        <DealForm
+          mode="edit"
+          isOpen={isEditOpen}
+          deal={selectedDeal}
+          onClose={() => {
+            setIsEditOpen(false);
+            setSelectedDeal(null);
+          }}
+          onSubmit={handleEdit}
+          onCloseDeal={closeDealShares}
+          onDelete={handleDeleteDeal}
+        />
+      )}
     </div>
   );
 }

@@ -81,12 +81,37 @@ export async function getDealsByClient(id: number, userId: number) {
 
 export async function getDeals(
   userId: number,
-  filter: { search?: string; status?: string[]; statusClient?: string[]; paymentMethod?: string},
+  filter: { search?: string; dealId?: number; status?: string[]; statusClient?: string[]; paymentMethod?: string},
   page: number,
   limit: number,
 ) {
   const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
   if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+
+  if (filter.dealId) {
+    const data = await prisma.deal.findMany({
+      where: {
+        id: filter.dealId,
+        createdBy: userId,
+      },
+      include: {
+        client: true,
+        creator: { select: { id: true, name: true } },
+        updater: { select: { id: true, name: true } },
+        DealShare: {
+          include: {
+            user: { select: { id: true, name: true } }
+          }
+        }
+      }
+    });
+
+    const total = await prisma.deal.count({
+      where: { createdBy: userId }
+    });
+
+    return { data, total };
+  }
 
   const where: any = {
     createdBy: userId,
@@ -152,7 +177,7 @@ export async function getDeals(
 
 export async function getFinishedDealsYears(
   userId: number,
-  filter: { name?: string; progressDeals: boolean; teamDeals? : boolean; targetId?: number | null; year: number},
+  filter: { search?: string; progressDeals: boolean; teamDeals? : boolean; targetId?: number | null; year: number},
 ) {
   if (filter.teamDeals || filter.targetId) {
     const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
@@ -175,11 +200,11 @@ export async function getFinishedDealsYears(
   if (filter.progressDeals) where.status = { in: ['FINISHED', 'CLOSED'] };
   else where.status = { in: ['FINISHED'] };
 
-  if (filter?.name && filter.name.trim()) {
+  if (filter?.search && filter.search.trim()) {
     where.client = {
       OR: [
-        { name: { contains: filter.name, mode: 'insensitive' }},
-        { phone: { contains: filter.name, mode: 'insensitive' }}
+        { name: { contains: filter.search, mode: 'insensitive' }},
+        { phone: { contains: filter.search, mode: 'insensitive' }}
       ]
     }
   }
@@ -220,6 +245,7 @@ export async function getTotalDealsOfYear(
   userId: number,
   progressDeals: boolean,
   teamDeals: boolean,
+  search?: string | null,
   targetId?: number | null
 ) {
   if (teamDeals) {
@@ -242,21 +268,28 @@ export async function getTotalDealsOfYear(
       { year: number; month: number; total: number }[]
     >`
       SELECT
-        EXTRACT(YEAR FROM "closedAt") AS year,
-        EXTRACT(MONTH FROM "closedAt") AS month,
+        EXTRACT(YEAR FROM d."closedAt") AS year,
+        EXTRACT(MONTH FROM d."closedAt") AS month,
         COUNT(*)::int AS total
-      FROM "Deal"
+      FROM "Deal" d
+      JOIN "Client" c ON c."id" = d."clientId"
       WHERE
-        "closedAt" IS NOT NULL
-        AND "status"::text IN (${Prisma.join(statusFilter)})
+        d."closedAt" IS NOT NULL
+        AND d."status"::text IN (${Prisma.join(statusFilter)})
+
+        ${search
+          ? Prisma.sql`AND c."name" ILIKE ${'%' + search + '%'}`
+          : Prisma.sql``}
+
         ${!teamDeals && !targetId
-          ? Prisma.sql`AND "createdBy" = ${userId}`
+          ? Prisma.sql`AND d."createdBy" = ${userId}`
           : teamDeals && !targetId
-            ? Prisma.sql`AND "companyId" = ${user.companyId}`
+            ? Prisma.sql`AND d."companyId" = ${user.companyId}`
             : targetId
-              ? Prisma.sql`AND "createdBy" = ${targetId}`
+              ? Prisma.sql`AND d."createdBy" = ${targetId}`
               : Prisma.sql``
         }
+
       GROUP BY year, month
       ORDER BY year DESC, month ASC
     `;
@@ -292,7 +325,7 @@ export async function getTotalDealsOfYear(
 
 export async function getTeamDeals(
   userId: number,
-  filter: { search?: string; status?: string[]; statusClient?: string[]; paymentMethod?: string; selectedUserId?: number },
+  filter: { search?: string; dealId?: number; status?: string[]; statusClient?: string[]; paymentMethod?: string; selectedUserId?: number },
   page: number,
   limit: number
 ) {
@@ -304,6 +337,27 @@ export async function getTeamDeals(
     if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
 
     const where: any = { companyId: user.companyId }
+
+    if (filter.dealId) {
+      const data = await prisma.deal.findMany({
+        where: {
+          ...where,
+          id: filter.dealId,
+        },
+        include: {
+          client: true,
+          creator: { select: { id: true, name: true } },
+          updater: { select: { id: true, name: true } },
+          DealShare: {
+            include: {
+              user: { select: { id: true, name: true } }
+            }
+          }
+        }
+      });
+
+      return { data, total: data.length };
+    }
 
     if (filter?.search && filter.search.trim()) {
       where.client = {

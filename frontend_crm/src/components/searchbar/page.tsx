@@ -1,34 +1,41 @@
 "use client";
 
-import { IoMdSearch } from "react-icons/io";
-import { HiUserGroup } from "react-icons/hi2";
-import styles from "./page.module.css";
 import { User } from "@/types";
+import { HiUserGroup } from "react-icons/hi2";
+import { BsFileEarmarkPlus } from "react-icons/bs";
+import { AiOutlineUserAdd } from "react-icons/ai";
+import UserSelect from "../Tools/Select/UserSelect";
+import styles from "./page.module.css";
 
-interface DealsHeaderProps {
+interface HeaderProps {
+  title: string;
   search: string;
   setSearch: (value: string) => void;
-  teamDeals: boolean;
-  setTeamDeals: (value: boolean) => void;
+  add: boolean;
+  teamMode: boolean;
+  setTeamMode: (value: boolean) => void;
   users: User[];
   selectedUser: User | null;
   setSelectedUser: (user: User | null) => void;
   permissions: string[];
   onCreate: () => void;
-  loading: boolean;
+  showClearButton?: boolean;
 }
 
-export default function DealsHeader({
+export default function HeaderPage({
+  title,
   search,
   setSearch,
-  teamDeals,
-  setTeamDeals,
+  teamMode: teamDeals,
+  add,
+  setTeamMode: setTeamDeals,
   users,
   selectedUser,
   setSelectedUser,
   permissions,
-  loading,
-}: DealsHeaderProps) {
+  onCreate,
+  showClearButton,
+}: HeaderProps) {
   const handleToggleTeamDeals = () => {
     const newValue = !teamDeals;
     setTeamDeals(newValue);
@@ -37,48 +44,57 @@ export default function DealsHeader({
   };
   return (
     <div className={styles.headerContent}>
-      <div className={styles.serchDeal}>
-        <button className={styles.btnSearch} type="button" disabled={loading}>
-          <IoMdSearch />
-        </button>
-        <input
-          type="text"
-          placeholder="Pesquise pelo nome"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
+      <div className={`${teamDeals && styles.titleTeam} ${styles.title}`}>
+        <h3>{title}</h3>
+        <h5>{teamDeals && " da equipe"}</h5>
       </div>
-
-      {teamDeals && (
-        <div className={styles.selectUser}>
-          <select
-            value={selectedUser ? selectedUser.id : ""}
-            onChange={(e) => {
-              const user = users.find((u) => u.id === Number(e.target.value));
-              setSelectedUser(user || null);
-            }}
-          >
-            <option value={""}>Todos</option>
-            {users.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-
       <div className={styles.headerIcons}>
-        {permissions.includes("ALL_DEAL_READ") && (
-          <button
-            className={`${styles.btnFilter} ${
-              teamDeals ? styles.btnFilterActive : ""
-            }`}
-            onClick={handleToggleTeamDeals}
-            type="button"
-          >
-            <HiUserGroup />
-          </button>
+        {!showClearButton && (
+          <>
+            <input
+              className={`${styles.serchDeal} form-base`}
+              type="text"
+              placeholder={`${
+                title === "Clientes" ? "Buscar clientes" : "Buscar negociações"
+              } ${teamDeals ? "da equipe" : ""}`}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+
+            {teamDeals && (
+              <UserSelect
+                users={users}
+                value={selectedUser}
+                onChange={setSelectedUser}
+              />
+            )}
+
+            {permissions.includes("ALL_DEAL_READ") && (
+              <button
+                className={`${
+                  teamDeals ? "btn-action-active" : "btn-action-inactive"
+                } btn-action glass`}
+                onClick={handleToggleTeamDeals}
+                type="button"
+              >
+                <HiUserGroup />
+              </button>
+            )}
+
+            {permissions.includes("DEAL_CREATE") && add && (
+              <button
+                className={`${styles.addDeal} btn-action glass`}
+                onClick={onCreate}
+                type="button"
+              >
+                {title === "Clientes" ? (
+                  <AiOutlineUserAdd />
+                ) : (
+                  <BsFileEarmarkPlus />
+                )}
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

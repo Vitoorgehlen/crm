@@ -4,17 +4,14 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.8);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
+  padding: 0 20px;
 }
-
-.overlay h2 {
-  color: var(--primaryText);
-}
-
+/* 
 .overlay input,
 .overlay select {
   padding: 8px;
@@ -48,11 +45,11 @@
 
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-}
+} */
 
 .modal {
   background: var(--mainBackground);
-  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  padding: 15px;
   gap: 4px;
   border-radius: 10px;
   max-width: 500px;
@@ -70,47 +67,68 @@
   justify-content: space-between;
 }
 
+.createUserLabels {
+  color: var(--primaryText);
+  width: 100%;
+}
+
+.box {
+  display: flex;
+  width: 100%;
+  gap: 3px;
+  margin-bottom: 3px;
+  justify-content: space-around;
+}
+
+.boxClose {
+  justify-content: space-between;
+  align-items: center;
+  padding-left: 20px;
+  height: 38px;
+  margin-top: 5px;
+}
+
+.labelUser {
+  color: var(--primaryText);
+  width: 100%;
+}
+
 .closeBtn {
   background: transparent;
   border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-size: 1.5rem;
   color: var(--primaryText);
   cursor: pointer;
+  margin-left: 10px;
 }
 
-.error {
-  color: var(--errorColor2);
-  font-size: var(--font-5);
+.closeBtn:hover {
+  color: var(--errorColor);
 }
 
 .btnUpdate {
-  margin-top: 15px;
-  padding: 10px 20px;
+  width: 150px;
+  padding: 10px;
   color: var(--primaryColor);
-  background: var(--cardBackground);
   border: 1px solid var(--shadowColor);
-  border-radius: 20px;
+  border-radius: 6px;
   cursor: pointer;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .btnUpdate:hover {
-  color: var(--primaryText);
+  color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--cardBackground2);
+  background: var(--mainBackground);
 }
 
 .btnEditUser {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--cardBackground);
-  padding: 10px;
-  border-radius: 5px;
-  border: none;
+  border-radius: 6px;
   cursor: pointer;
   color: var(--primaryText);
   font-size: 1.3rem;
@@ -120,32 +138,12 @@
 .btnEditUser:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
+  background: var(--mainBackground);
 }
 
-.btnEditUserActive {
-  display: flex;
-  align-items: center;
-  padding: 10px;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  border: 1px solid var(--shadowColor);
-}
-
-.btnEditUserActive:hover {
-  color: var(--errorColor2);
-  border: 1px solid var(--errorColor2);
-  background: var(--cardBackgroundHover);
-}
-
-.createUserLabels {
-  color: var(--primaryText);
-  width: 100%;
+.close:hover {
+  color: var(--errorColor);
+  border: 1px solid var(--errorColor);
 }
 
 .labelSettingUser {
@@ -154,20 +152,5 @@
 }
 
 .labelSettingUser::placeholder {
-  color: var(--sidebarBackground);
-}
-
-.box {
-  display: flex;
-  width: 100%;
-  gap: 3px;
-  margin-bottom: 3px;
-  justify-content: center;
-}
-
-.boxClose {
-  display: flex;
-  width: 100%;
-  justify-content: space-between;
-  margin-bottom: 3px;
+  color: var(--textBase);
 }

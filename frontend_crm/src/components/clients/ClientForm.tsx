@@ -9,6 +9,9 @@ import { IoStar, IoStarOutline } from "react-icons/io5";
 import { MdRadioButtonChecked, MdRadioButtonUnchecked } from "react-icons/md";
 
 import styles from "./ClientForm.module.css";
+import DayPicker from "../Tools/DatePicker/DayPicker/DayPicker";
+import { parseISO } from "date-fns";
+import { format } from "date-fns";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,7 +26,7 @@ export default function ClientsForm({
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState<Date | null>(null);
   const [isInvestor, setIsInvestor] = useState(false);
   const [isPriority, setIsPriority] = useState(false);
 
@@ -59,7 +62,7 @@ export default function ClientsForm({
   function clearForm() {
     setName("");
     setPhone("");
-    setDateOfBirth("");
+    setDateOfBirth(null);
     setIsInvestor(false);
     setIsPriority(false);
     setError("");
@@ -99,15 +102,13 @@ export default function ClientsForm({
       const payload: Partial<Client> = {
         name,
         dateOfBirth: dateOfBirth
-          ? new Date(dateOfBirth).toISOString()
+          ? format(dateOfBirth, "yyyy-MM-dd")
           : undefined,
         isInvestor,
         isPriority,
       };
 
       if (phone.trim() !== "") payload.phone = phone;
-      if (dateOfBirth.trim() !== "") payload.dateOfBirth = dateOfBirth;
-
       const maybePromise = submitFunction(payload);
       await Promise.resolve(maybePromise);
 
@@ -168,7 +169,7 @@ export default function ClientsForm({
     if (client) {
       setName(client.name || "");
       setPhone(client.phone || "");
-      setDateOfBirth(client.dateOfBirth || "");
+      setDateOfBirth(client.dateOfBirth ? parseISO(client.dateOfBirth) : null);
       setIsInvestor(client.isInvestor || false);
       setIsPriority(client.isPriority || false);
     }
@@ -196,9 +197,12 @@ export default function ClientsForm({
               )}
             </button>
             {mode === "create" ? (
-              <h2>Adicionar novo cliente</h2>
+              <h4 className={styles.name}>Adicionar cliente</h4>
             ) : (
-              <h2>Editar: {client?.name}</h2>
+              <div className={styles.titleName}>
+                <span>Editar: </span>
+                <h4 className={styles.name}>{client?.name}</h4>
+              </div>
             )}
             <button type="button" onClick={onClose} className={styles.closeBtn}>
               <MdClose />
@@ -206,94 +210,102 @@ export default function ClientsForm({
           </div>
 
           {error && <p className={styles.erro}>{error}</p>}
-
-          <input
-            type="text"
-            placeholder="Nome"
-            onChange={(e) => setName(e.target.value)}
-            value={name}
-            required
-          />
-
-          <input
-            type="tel"
-            placeholder="Contato (opcional)"
-            value={phone}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const input = e.target;
-              let value = input.value.replace(/\D/g, "");
-
-              if (value.length > 11) value = value.slice(0, 11);
-
-              const nativeEvent = e.nativeEvent as InputEvent;
-              const isDeleting =
-                nativeEvent.inputType === "deleteContentBackward";
-
-              if (!isDeleting) {
-                if (value.length > 6) {
-                  value = value.replace(
-                    /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
-                    "($1) $2 $3-$4",
-                  );
-                } else if (value.length > 2) {
-                  value = value.replace(
-                    /^(\d{2})(\d{0,1})(\d{0,4}).*/,
-                    "($1) $2 $3",
-                  );
-                } else if (value.length > 0) {
-                  value = value.replace(/^(\d{0,2}).*/, "($1");
-                }
-              }
-
-              setPhone(value);
-            }}
-          />
-
-          <input
-            type="date"
-            placeholder="Data de nascimento (opcional)"
-            onChange={(e) => setDateOfBirth(e.target.value)}
-            value={dateOfBirth}
-          />
-
-          <label>
-            <h3>Investidor{isInvestor ? ": Sim" : "?"}</h3>
-            <button
-              className={styles.investorBtn}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                setIsInvestor((prev) => !prev);
-              }}
-            >
-              {isInvestor ? (
-                <MdRadioButtonChecked className={styles.investorBtnCheck} />
-              ) : (
-                <MdRadioButtonUnchecked className={styles.investorBtnUnC} />
-              )}
-            </button>
+          <div className={styles.line}>
             <input
-              type="checkbox"
-              className={styles.investorInput}
-              checked={isInvestor}
-              onChange={(e) => setIsInvestor(e.target.checked)}
+              type="text"
+              className={`form-base ${styles.form}`}
+              placeholder="Nome"
+              onChange={(e) => setName(e.target.value)}
+              value={name}
+              required
             />
-          </label>
+
+            <input
+              type="tel"
+              className={`form-base ${styles.form}`}
+              placeholder="Contato (opcional)"
+              value={phone}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const input = e.target;
+                let value = input.value.replace(/\D/g, "");
+
+                if (value.length > 11) value = value.slice(0, 11);
+
+                const nativeEvent = e.nativeEvent as InputEvent;
+                const isDeleting =
+                  nativeEvent.inputType === "deleteContentBackward";
+
+                if (!isDeleting) {
+                  if (value.length > 6) {
+                    value = value.replace(
+                      /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
+                      "($1) $2 $3-$4",
+                    );
+                  } else if (value.length > 2) {
+                    value = value.replace(
+                      /^(\d{2})(\d{0,1})(\d{0,4}).*/,
+                      "($1) $2 $3",
+                    );
+                  } else if (value.length > 0) {
+                    value = value.replace(/^(\d{0,2}).*/, "($1");
+                  }
+                }
+
+                setPhone(value);
+              }}
+            />
+          </div>
+          <div className={styles.line}>
+            <DayPicker
+              value={dateOfBirth}
+              onChange={(date) => setDateOfBirth(date)}
+              placeholder="Data de nascimento (opcional)"
+            />
+
+            <label>
+              <button
+                className={`form-base ${styles.form} ${styles.btnIvestor} 
+                ${isInvestor && styles.btnInvestorActive}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsInvestor((prev) => !prev);
+                }}
+              >
+                <p>Investidor: </p>
+
+                {isInvestor ? <p>Sim</p> : <p>Não</p>}
+              </button>
+              <input
+                type="checkbox"
+                className={styles.investorInput}
+                checked={isInvestor}
+                onChange={(e) => setIsInvestor(e.target.checked)}
+              />
+            </label>
+          </div>
+
           {mode === "create" ? (
-            <button
-              className={styles.btnAddClient}
-              type="button"
-              onClick={(e) => handleSubmit(e, onSubmit)}
-            >
-              {loading === "save" ? "Enviando..." : "Enviar"}
-            </button>
+            <div className={styles.btnDelAndUp}>
+              <button
+                className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
+                type="button"
+                onClick={(e) => handleSubmit(e, onSubmit)}
+              >
+                {loading === "save" ? "Enviando..." : "Enviar"}
+              </button>
+            </div>
           ) : (
             <div className={styles.btnDelAndUp}>
               {client && client.deleteRequest ? (
-                <div className={styles.delClient}>Solicitação enviada</div>
+                <div
+                  className={`btn-action glass ${styles.btnDeal} ${styles.deleteRequest}`}
+                >
+                  <span>Solicitação enviada</span>
+                </div>
               ) : (
                 <button
-                  className={styles.btnDelClient}
+                  className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
                   type="button"
                   onClick={() => deleteClient()}
                 >
@@ -301,7 +313,7 @@ export default function ClientsForm({
                 </button>
               )}
               <button
-                className={styles.btnAddClient}
+                className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
                 type="button"
                 onClick={(e) => handleSubmit(e, onSubmit)}
               >
@@ -310,16 +322,17 @@ export default function ClientsForm({
             </div>
           )}
         </div>
+
         {mode === "edit" && (
           <div className={styles.footerCard}>
-            <h6>
+            <span>
               Atualizado a última vez por: {client?.updater?.name ?? "—"}.{" "}
               {formatDateForCards(client?.updatedAt)}
-            </h6>
-            <h6>
+            </span>
+            <span>
               Criado por: {client?.creator?.name ?? "—"}.{" "}
               {formatDateForCards(client?.createdAt)}
-            </h6>
+            </span>
           </div>
         )}
       </div>

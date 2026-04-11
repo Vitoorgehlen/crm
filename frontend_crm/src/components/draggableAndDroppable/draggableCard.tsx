@@ -24,7 +24,11 @@ export default function DraggableCard({ deal, children }: Props) {
   return (
     <div ref={setNodeRef} style={style} className={styles.drag}>
       {children}
-      <div {...attributes} {...listeners} className={styles.dragHandle}>
+      <div
+        {...attributes}
+        {...listeners}
+        className={`glass ${styles.dragHandle}`}
+      >
         <BsArrows />
       </div>
     </div>

@@ -5,9 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import DealForm from "@/components/Deal/DealForm/DealForm";
-import ClosedDeal from "@/components/Deal/ClosedDeal/ClosedDeal";
 import {
-  Client,
   Deal,
   CloseDealPayload,
   DEAL_STEP_TYPE_LABEL,
@@ -28,13 +26,14 @@ import {
   restrictToHorizontalAxis,
   restrictToVerticalAxis,
 } from "@dnd-kit/modifiers";
-import { BsFileEarmarkPlus } from "react-icons/bs";
 import { PaymentMethod } from "@/types/index";
-import DealsHeader from "@/components/searchbar/page";
+import HeaderPage from "@/components/searchbar/page";
 import DraggableCard from "@/components/draggableAndDroppable/draggableCard";
 import DroppableColumn from "@/components/draggableAndDroppable/droppable";
 import { useQueryState } from "nuqs";
 import { fetchDealsList, fetchMultipleDeals } from "@/utils/fetchDeals";
+import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
+import ClosedDeal from "@/components/Deal/ClosedDeal/ClosedDeal";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 const LIMIT = 5;
@@ -423,33 +422,19 @@ export default function Deals() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Negociações em andamento{teamDeals ? " da equipe" : ""}</h1>
-        </div>
-
-        <div className={styles.headerContent}>
-          <div className={styles.searchbar}>
-            <DealsHeader
-              search={search}
-              setSearch={setSearch}
-              teamDeals={teamDeals}
-              setTeamDeals={setTeamDeals}
-              users={users}
-              selectedUser={selectedUser}
-              setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
-              permissions={permissions}
-              onCreate={openCreate}
-              loading={loading}
-            />
-            <button
-              className={styles.addDeal}
-              onClick={openCreate}
-              type="button"
-            >
-              <BsFileEarmarkPlus />
-            </button>
-          </div>
-        </div>
+        <HeaderPage
+          title="Negociações em andamento"
+          search={search}
+          setSearch={setSearch}
+          teamMode={teamDeals}
+          add={true}
+          setTeamMode={setTeamDeals}
+          users={users}
+          selectedUser={selectedUser}
+          setSelectedUser={(user) => setUserId(user?.id?.toString() || "")}
+          permissions={permissions}
+          onCreate={openCreate}
+        />
 
         <div className={styles.box}>
           {isCreateOpen && (
@@ -488,13 +473,10 @@ export default function Deals() {
                 return (
                   <section key={method} className={styles.methodSection}>
                     <header className={styles.methodHeader}>
-                      <h3>{PAYMENT_METHOD_LABEL[method]}</h3>
-                      <h4 className={styles.methodCount}>
-                        {currentDeals.length}{" "}
-                        {currentDeals.length === 1
-                          ? "negociação"
-                          : "negociações"}
-                      </h4>
+                      <h5>{PAYMENT_METHOD_LABEL[method]}</h5>
+                      <span className={styles.methodCount}>
+                        ({currentDeals.length})
+                      </span>
                     </header>
 
                     <div className={styles.methodWorkflow}>
@@ -507,10 +489,10 @@ export default function Deals() {
                             key={`${method}-${step}`}
                             id={`${method}-${step}`}
                           >
-                            <div className={styles.column}>
-                              <h5 className={styles.stepName}>
+                            <div className={`glass ${styles.column}`}>
+                              <p className={styles.stepName}>
                                 {DEAL_STEP_TYPE_LABEL[step]}
-                              </h5>
+                              </p>
                               <div className={styles.dealList}>
                                 {columnDeals.map((dealItem) => (
                                   <DraggableCard
@@ -519,18 +501,25 @@ export default function Deals() {
                                   >
                                     <button
                                       type="button"
-                                      className={styles.card}
+                                      className={`glass ${styles.card}`}
                                       onClick={() => openEdit(dealItem)}
                                     >
-                                      <h3>
+                                      <h5>
                                         {dealItem.client?.name ||
                                           "Cliente não informado"}
-                                      </h3>
+                                      </h5>
+                                      <span className={styles.lastContact}>
+                                        {`Fechada: ${getDaysSinceLastContact(
+                                          dealItem.closedAt ??
+                                            dealItem.createdAt ??
+                                            "",
+                                        )}`}
+                                      </span>
                                       {teamDeals && (
-                                        <h6>
+                                        <span>
                                           {dealItem.creator?.name ||
                                             "Usuário não encontrado"}
-                                        </h6>
+                                        </span>
                                       )}
                                     </button>
                                   </DraggableCard>

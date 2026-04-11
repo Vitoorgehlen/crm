@@ -6,76 +6,31 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  padding-bottom: 10px;
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px 10px 10px;
-  color: var(--primaryText);
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
-}
-
-.headerContent {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.searchbar {
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  padding: 0 20px;
-  max-width: 1200px;
-  gap: 10px;
-}
-
-.addDeal {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-}
-
-.addDeal:hover {
-  background: var(--cardBackgroundHover);
 }
 
 .boxSteps {
   display: flex;
   flex-direction: column;
-  width: calc(100% - 30px);
-  margin: 10px 15px;
+  width: 100%;
+  margin: 10px 0;
   padding: 10px;
 }
 
 .methodHeader {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   width: 100%;
   text-align: center;
-  color: var(--primaryColor);
+  color: var(--textBase);
+  gap: 5px;
 }
 
-.methodHeader h4 {
-  font-weight: 400;
-  color: var(--tercearyText);
+.methodHeader h5 {
+  color: var(--primaryText);
 }
 
 .methodWorkflow {
@@ -101,12 +56,7 @@
   text-align: center;
   border-radius: 10px;
   padding: 10px;
-  color: var(--sidebarBackground);
-  background: var(--cardBackgroundHover);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  color: var(--textBase);
 }
 
 .dealList {
@@ -114,18 +64,15 @@
   flex-direction: column;
   width: 100%;
   margin: 10px auto;
-  padding: 0 20px;
   justify-content: center;
   align-items: center;
   text-align: center;
-  gap: 20px;
+  gap: 10px;
 }
 
 .card {
   width: 100%;
-  min-width: 200px;
   color: var(--primaryText);
-  background: var(--cardBackground2);
   border-radius: 8px 8px 0 0;
   padding: 15px;
   display: flex;
@@ -133,14 +80,15 @@
   justify-content: center;
   cursor: pointer;
   border: none;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .card:hover {
-  background: var(--cardBackground2Hover);
+  background: var(--cardBackground);
+}
+
+.lastContact {
+  color: var(--textBase);
+  font-size: 11px;
 }
 
 .divError {
@@ -153,20 +101,11 @@
   .page {
     overflow-x: clip;
   }
-  .header h1 {
-    font-size: x-large;
-  }
-
-  .searchbar {
-    width: 90%;
-  }
 
   .dealList {
-    gap: 10px;
-  }
-
-  .main {
-    height: 100%;
+    gap: 6px;
+    width: 100%;
+    justify-content: space-between;
   }
 
   .methodWorkflow {

@@ -7,115 +7,52 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
-}
-
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px 10px 10px;
-  color: var(--primaryText);
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
 }
 
 .headerContent {
   display: flex;
-  flex-direction: row;
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-  padding: 0 20px;
   width: 100%;
-  max-width: 1200px;
+  gap: 20px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 30px;
+  padding: 20px 0 22px 0;
+  color: var(--primaryText);
 }
 
 .headerIcons {
   display: flex;
   flex-direction: row;
-  gap: 20px;
-}
-
-.btnSetting {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--sidebarBackground);
-  font-size: 0.9rem;
-  gap: 5px;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
   align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  gap: 10px;
+  margin-top: 15px;
+  margin-right: 10px;
 }
 
-.btnSettingActive {
-  margin-top: 20px;
-  padding: 5px;
-  gap: 5px;
-  color: var(--primaryColor);
-  background: var(--cardBackground2);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSetting:hover {
-  background: var(--cardBackgroundHover);
-}
-
-.btnSettingActive:hover {
-  background: var(--cardBackground2Hover);
-}
-
+.btn,
 .addDeal {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 20px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
   color: var(--primaryText);
-  font-size: 1.3rem;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
-.addDeal:hover {
-  background: var(--cardBackgroundHover);
+.btn {
+  background-color: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.boxCard {
-  width: 100%;
+.headerIcons button:hover {
+  border: 1px solid var(--primaryColor);
+}
+
+.btnActive {
+  border: 1px solid var(--primaryColor);
+  color: var(--primaryColor);
 }
 
 .cardBox {
@@ -123,7 +60,23 @@
 }
 
 @media (max-width: 768px) {
-  .header h1 {
-    font-size: x-large;
+  .headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .title {
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
+  }
+
+  .headerIcons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 13px;
   }
 }

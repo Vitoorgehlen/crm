@@ -18,7 +18,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Commissions() {
   const router = useRouter();
-  const { token, isLoading } = useAuth();
+  const { token, permissions, isLoading } = useAuth();
 
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -313,16 +313,14 @@ export default function Commissions() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
-        <div className={styles.header}>
-          <h1>Comissões</h1>
-          {/* <h1>Comissões{teamDeals ? ' da equipe' : ''}</h1> */}
-        </div>
-
         <div className={styles.headerContent}>
+          <div className={styles.title}>
+            <h3>{isOpenCommission ? "Comissões" : "Despesas"}</h3>
+          </div>
           <div className={styles.headerIcons}>
             <button
-              className={`${
-                isOpenCommission ? styles.btnSettingActive : styles.btnSetting
+              className={`btn-action glass ${styles.btn}
+                ${isOpenCommission && styles.btnActive}
               }`}
               onClick={() => {
                 setTab("commission");
@@ -330,11 +328,10 @@ export default function Commissions() {
               type="button"
             >
               <BsCashCoin />
-              <h3>Comissões</h3>
             </button>
             <button
-              className={`${
-                isOpenExpense ? styles.btnSettingActive : styles.btnSetting
+              className={`btn-action glass ${styles.btn}
+                ${isOpenExpense && styles.btnActive}
               }`}
               onClick={() => {
                 setTab("expense");
@@ -342,18 +339,16 @@ export default function Commissions() {
               type="button"
             >
               <FaCashRegister />
-              <h3>Despesas</h3>
             </button>
-          </div>
-
-          <div className={styles.headerIcons}>
-            <button
-              className={styles.addDeal}
-              onClick={openCreate}
-              type="button"
-            >
-              <BsFileEarmarkPlus />
-            </button>
+            {permissions.includes("DEAL_CREATE") && (
+              <button
+                className={`${styles.addDeal} btn-action glass`}
+                onClick={openCreate}
+                type="button"
+              >
+                <BsFileEarmarkPlus />
+              </button>
+            )}
           </div>
         </div>
 

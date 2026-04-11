@@ -5,27 +5,22 @@
   justify-content: center;
 }
 
-.cashStatsCard {
+.expenseMain {
   display: flex;
-  flex-direction: column;
-  width: 30%;
-  max-width: 350px;
-  background: var(--cardBackground);
-  padding: 10px;
-  border-radius: 8px;
-  justify-content: space-between;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  width: 100%;
+  justify-content: space-around;
+  padding: 20px;
+  gap: 20px;
 }
 
-.cashStatsCardDiv {
+.cashStatsCardExpense {
   display: flex;
   flex-direction: column;
   width: 100%;
-  gap: 5px;
+  padding: 10px;
+  border-radius: 8px;
+  justify-content: space-between;
+  margin-bottom: 15px;
 }
 
 .cardGoal {
@@ -34,59 +29,20 @@
   align-items: center;
   justify-content: space-around;
   color: var(--primaryText);
-  background: var(--cardBackground2);
   width: 100%;
   border-radius: 8px;
   padding: 10px;
   text-align: center;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: var(--mainBackground);
+  border: 1px solid var(--textBase);
 }
 
-.cardGoal input {
-  border: none;
-  outline: none;
-  width: 90%;
-  border: 1px solid var(--shadowColor);
-  border-radius: 2px;
-  padding: 2px 5px;
-}
-
-.cardGoal input:focus,
-.cardGoal input:active,
-.cardGoal input:hover {
-  border: 1px solid var(--primaryColor);
-}
-
-.main input,
-.main select {
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  max-width: 90px;
-  border: none;
-  outline: none;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-
-  border: 1px solid var(--shadowColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.infoCard {
+.infoCardExpense {
   display: flex;
-  flex-direction: row;
-  font-size: 1rem;
-}
-
-.infoCard button {
-  font-size: 1rem;
+  align-items: center;
+  gap: 5px;
+  justify-content: space-around;
+  width: 100%;
 }
 
 .card {
@@ -94,29 +50,28 @@
   max-width: 500px;
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px solid var(--shadowColor);
+  border-bottom: 1px solid var(--textBase);
 }
 
-.card input,
-.cardAddExpense input {
-  max-width: 300px;
+.received {
+  color: var(--textBase);
+}
+
+.card span {
+  color: var(--primaryText);
 }
 
 .btnSave {
   color: var(--primaryColor);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border: none;
+  background: var(--mainBackground);
   border-radius: 5px;
   max-width: 50px;
   width: 80%;
   cursor: pointer;
   transition: 200ms;
+  margin: 2px;
 
-  border: 1px solid var(--primaryColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--textBase);
 }
 
 .cardAddExpense {
@@ -125,55 +80,33 @@
   justify-content: space-between;
 }
 
-.card h4 {
-  font-size: var(--font-4);
-  font-weight: 600;
-}
-
-.received {
-  color: var(--secondaryText);
-}
-
-.card p {
-  font-size: var(--font-4);
-  font-weight: 400;
-}
-
-.expenseBox {
-  display: flex;
-  width: 100%;
-  justify-content: space-around;
-  padding: 20px;
-  gap: 20px;
-}
-
 .dealsTable {
   width: 100%;
   max-width: 1200px;
   border-collapse: collapse;
   border-radius: 5px;
   color: var(--primaryText);
-  border: 1px solid var(--shadowColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .dealsTable thead {
-  background: var(--cardBackground2);
+  background: var(--mainBackground);
+}
+
+.dealsTable thead th {
+  text-align: center;
+  font-size: 16px;
 }
 
 .dealsTable th {
   text-align: left;
   padding: 12px;
-  border-bottom: 1px solid var(--shadowColor);
-  font-weight: 600;
+  border-bottom: 1px solid var(--primaryColor);
 }
 
 .dealsTable td {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--shadowColor);
+  padding: 5px;
+  font-size: 14px;
+  border-bottom: 1px solid var(--textBase);
   text-align: center;
 }
 
@@ -193,122 +126,101 @@
 }
 
 .dealsTable tbody tr:nth-child(odd) {
-  background: var(--sidebarBackground);
+  background: var(--textBase);
 }
 
 .dealsTable tbody tr:nth-child(even) {
-  background: var(--cardBackgroundHover);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.cashStatsCardExpense {
-  display: flex;
-  flex-direction: column;
+.main input {
+  margin: 3px;
+  border-radius: 5px;
   width: 100%;
-  background: var(--cardBackground);
-  padding: 10px;
-  border-radius: 8px;
-  justify-content: space-between;
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  max-width: 90px;
+  color: var(--primaryText);
+  background: rgba(255, 255, 255, 0.1);
 }
 
-.infoCardExpense {
+.infoCard {
   display: flex;
-  justify-content: space-around;
-  width: 100%;
+  flex-direction: row;
+  font-size: 1rem;
+}
+
+.infoCard button {
+  font-size: 1rem;
 }
 
 .btnIsPaid {
-  display: flex;
-  align-items: center;
-  height: 35px;
-  padding: 4px;
   color: var(--primaryText);
-  background: var(--tercearyText);
-  font-size: var(--font-5);
-  border: solid 1px var(--primaryText);
+  background: var(--mainBackground);
   border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  max-width: 90px;
+  width: 100%;
+  height: 35px;
+  padding: 0 5px;
   cursor: pointer;
+  transition: 200ms;
+
+  border: 1px solid var(--textBase);
+}
+
+.btnIsPaid:hover {
+  border: 1px solid var(--primaryColor);
 }
 
 .btnIsPaidActive {
-  display: flex;
-  align-items: center;
-  height: 35px;
-  padding: 4px;
-  color: var(--primaryText);
-  background-color: var(--successColor);
-  font-size: var(--font-5);
-  border: solid 1px var(--primaryColor);
-  border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
+  background-color: var(--textBase);
+  border: 1px solid var(--mainBackground);
+  color: var(--mainBackground);
+}
 
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  cursor: pointer;
+.edit {
+  display: flex;
+  gap: 3px;
+  padding: 0 3px;
 }
 
 .btnEdit {
   border: none;
-  color: var(--tercearyText);
+  color: var(--mainBackground);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnEdit:hover {
-  color: var(--successColor);
+  color: var(--primaryColor);
 }
 
 .btnDel {
   border: none;
   margin-left: 5px;
-  color: var(--errorColor);
+  color: var(--mainBackground);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDel:hover {
-  color: var(--errorColor2);
+  color: var(--errorColor);
 }
 
 @media (max-width: 768px) {
-  .cashStatsCard {
-    width: 100%;
+  .expenseMain {
+    flex-direction: column;
+    padding: 10px;
+    gap: 0;
   }
 
-  .dealsTable {
-    width: 100%;
-    max-width: 770px;
-
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+  .cashStatsCardExpense {
+    margin-bottom: 10px;
   }
 
-  .dealsTable thead {
-    background: var(--cardBackground2);
+  .cardGoal {
+    padding: 5px;
   }
 
-  .dealsTable th {
-    text-align: center;
-    padding: 12px;
-  }
-
-  .dealsTable td {
-    padding: 10px 5px;
-  }
-
-  .dealsTable tbody tr:nth-child(odd) {
-    background: var(--sidebarBackground);
-  }
-
-  .dealsTable tbody tr:nth-child(even) {
-    background: var(--cardBackgroundHover);
+  .cardGoal h3 {
+    font-size: 16px;
   }
 }

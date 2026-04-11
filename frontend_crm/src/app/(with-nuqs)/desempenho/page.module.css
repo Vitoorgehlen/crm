@@ -6,7 +6,7 @@
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
+  align-items: center;
   overflow-y: auto;
 }
 
@@ -15,117 +15,53 @@
   overflow-x: hidden;
 }
 
-.header {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 10px 10px 10px;
-  color: var(--primaryText);
-  margin: 0 auto;
-  width: 100%;
-  max-width: 1200px;
-}
-
 .headerContent {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   margin: 0 auto;
-  padding: 0 20px;
   width: 100%;
-  max-width: 1200px;
-}
-
-.headerBtns {
-  display: flex;
-  align-items: center;
-  height: 38px;
-  flex-direction: row;
   gap: 20px;
 }
 
-.headerBtns input,
-.headerBtns select {
-  padding: 8px;
-  margin: 3px;
-  border: 1px solid var(--shadowColor);
-  border-radius: 5px;
-  width: 100%;
-  outline: none;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-.headerBtns select option {
-  color: black;
-}
-
-.headerBtns input {
-  padding: 8px;
-  margin: 3px;
-  border: 1px solid var(--shadowColor);
-  border-radius: 5px;
-  width: 100%;
-  outline: none;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-}
-
-.headerBtns select::placeholder,
-.headerBtns input::placeholder {
-  color: var(--sidebarBackground);
-}
-
-.headerBtns select:focus,
-.headerBtns select:active,
-.headerBtns select:hover,
-.headerBtns input:focus,
-.headerBtns input:active,
-.headerBtns input:hover {
-  border: 1px solid var(--primaryColor);
-  box-shadow: none !important;
-  background: var(--cardBackgroundHover);
-}
-
-.btnSetting {
+.title {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-around;
-  width: 300px;
-  height: 100%;
-  border-radius: 5px;
-  background: var(--cardBackground);
-  border: 1px solid var(--shadowColor);
-  text-decoration: none;
+  margin-left: 30px;
+  padding: 20px 0 22px 0;
   color: var(--primaryText);
-  cursor: pointer;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
-.btnSetting:hover {
-  background: var(--cardBackgroundHover);
+.headerIcons {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-top: 15px;
+  margin-right: 10px;
+}
+
+.search {
+  color: var(--primaryText);
+}
+
+.headerIcons button:hover {
   border: 1px solid var(--primaryColor);
-  color: var(--primaryColor);
 }
 
 .list {
   display: flex;
   flex-direction: column;
   width: 100%;
+  max-width: 1200px;
   align-items: center;
   justify-content: center;
   margin: 20px 0;
-  border-radius: 50px;
-  padding: 0 10px;
+  padding: 10px;
+  border-radius: 6px;
   box-sizing: border-box;
 }
 
@@ -137,42 +73,37 @@
   color: var(--tercearyText);
 }
 
-.clientList {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  align-items: center;
-  justify-content: center;
-  margin-top: 40px;
+.listEmpty {
+  margin: 80px 0;
+  padding: 10px;
+  border-radius: 6px;
+  max-width: 300px;
+  text-align: center;
+  color: var(--primaryText);
 }
 
 .dealsTable {
   width: 100%;
-  max-width: 1200px;
   border-collapse: collapse;
   border-radius: 5px;
   color: var(--primaryText);
   border: 1px solid var(--shadowColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .dealsTable thead {
-  background: var(--cardBackground2);
+  background: var(--sidebarBackground);
 }
 
 .dealsTable th {
   text-align: left;
   padding: 12px;
-  border-bottom: 1px solid var(--shadowColor);
+  border-bottom: 1px solid var(--primaryColor);
   font-weight: 600;
 }
 
 .dealsTable td {
   padding: 10px 12px;
-  border-bottom: 1px solid var(--shadowColor);
+  border-bottom: 1px solid var(--mainBackground);
   text-align: center;
 }
 
@@ -181,11 +112,11 @@
 }
 
 .dealsTable tbody tr:nth-child(odd) {
-  background: var(--sidebarBackground);
+  background: var(--textBase);
 }
 
 .dealsTable tbody tr:nth-child(even) {
-  background: var(--cardBackgroundHover);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -261,7 +192,7 @@
   }
 
   .dealsTable tbody tr:nth-child(odd) {
-    background: var(--sidebarBackground);
+    background: var(--textBase);
   }
 
   .dealsTable tbody tr:nth-child(even) {
@@ -271,5 +202,27 @@
   .dealsOfMonth {
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .headerContent {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .title {
+    text-align: center;
+    padding: 10px 0;
+    margin: 0;
+  }
+
+  .headerIcons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    margin-top: 13px;
   }
 }

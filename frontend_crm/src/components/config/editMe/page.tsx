@@ -48,7 +48,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
         finalEmail,
         finalEmail2,
         finalPassword,
-        finalPassword2
+        finalPassword2,
       );
 
       if (!payload) {
@@ -97,7 +97,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
     email: string,
     email2: string,
     password: string,
-    password2: string
+    password2: string,
   ) => {
     try {
       if (name.length < 4 || name.length > 25) {
@@ -133,7 +133,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
         const passReq = /(?=.*[a-z])(?=.*[A-Z])/;
         if (!passReq.test(password)) {
           setError(
-            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula"
+            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula",
           );
           return;
         }
@@ -155,35 +155,40 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       <ThemeSwitcher />
 
       <input
-        className={styles.labelSettingTitle}
+        className={`${styles.labelSetting} ${styles.title} form-base`}
         value={myNewName}
         onChange={(e) => setMyNewName(e.target.value)}
       />
 
       <button
-        className={`${
-          isOpenEmail ? styles.btnSettingActive : styles.btnSetting
-        }`}
+        className={`${styles.btnSetting} 
+        ${isOpenEmail && styles.btnSettingActive} form-base`}
         type="button"
         onClick={() => setIsOpenEmail((prev) => !prev)}
       >
-        <h3>
+        <h5>
           Alterar seu e-mail{" "}
-          {isOpenEmail ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
-        </h3>
+          {isOpenEmail ? (
+            <MdKeyboardArrowDown className={styles.active} />
+          ) : (
+            <MdKeyboardArrowRight />
+          )}
+        </h5>
       </button>
       {isOpenEmail && (
         <div className={styles.labelsSetting}>
-          <p>E-mail atual: {u?.email}</p>
+          <p>
+            E-mail atual: <span>{u?.email}</span>
+          </p>
 
           <input
-            className={styles.labelSetting}
+            className={`${styles.labelSetting} form-base`}
             type="email"
             placeholder="Novo e-mail"
             onChange={(e) => setMyNewEmail(e.target.value)}
           />
           <input
-            className={styles.labelSetting}
+            className={`${styles.labelSetting} form-base`}
             type="email"
             placeholder="Confirme e-mail"
             onChange={(e) => setMyNewEmail2(e.target.value)}
@@ -192,27 +197,30 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       )}
 
       <button
-        className={`${
-          isOpenPassword ? styles.btnSettingActive : styles.btnSetting
-        }`}
+        className={`${styles.btnSetting} 
+        ${isOpenEmail && styles.btnSettingActive} form-base`}
         type="button"
         onClick={() => setIsOpenPassword((prev) => !prev)}
       >
-        <h3>
+        <h5>
           Alterar sua senha{" "}
-          {isOpenPassword ? <MdKeyboardArrowDown /> : <MdKeyboardArrowRight />}
-        </h3>
+          {isOpenPassword ? (
+            <MdKeyboardArrowDown className={styles.active} />
+          ) : (
+            <MdKeyboardArrowRight />
+          )}
+        </h5>
       </button>
       {isOpenPassword && (
         <div className={styles.labelsSetting}>
           <input
-            className={styles.labelSetting}
+            className={`${styles.labelSetting} form-base`}
             type="password"
             placeholder="Nova senha"
             onChange={(e) => setMyNewPassword(e.target.value)}
           />
           <input
-            className={styles.labelSetting}
+            className={`${styles.labelSetting} form-base`}
             type="password"
             placeholder="Confirme a senha"
             onChange={(e) => setMyNewPassword2(e.target.value)}
@@ -221,8 +229,12 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       )}
 
       {error && <p className={styles.erro}>{error}</p>}
-      <button className={styles.btnSave} onClick={handleEditMe} type="button">
-        {loading ? <h3>Salvando...</h3> : <h3>Salvar alterações</h3>}
+      <button
+        className={`btn-action glass ${styles.btnSave}`}
+        onClick={handleEditMe}
+        type="button"
+      >
+        {loading ? <h5>Salvando...</h5> : <h5>Salvar alterações</h5>}
       </button>
     </form>
   );

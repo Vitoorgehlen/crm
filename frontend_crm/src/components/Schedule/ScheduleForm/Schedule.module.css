@@ -20,8 +20,6 @@
 .overlayEdit h3 {
   color: var(--primaryText);
   align-items: start;
-  font-size: var(--font-5);
-  font-weight: 400;
   width: 100%;
 }
 
@@ -52,7 +50,7 @@
 }
 .modalLeft select::placeholder,
 .modalLeft input::placeholder {
-  color: var(--sidebarBackground);
+  color: var(--textBase);
 }
 
 .modal {
@@ -100,11 +98,6 @@
   font-size: 1.5rem;
   color: var(--primaryText);
   cursor: pointer;
-}
-
-.error {
-  color: var(--errorColor2);
-  font-size: var(--font-5);
 }
 
 .paymentTitle {

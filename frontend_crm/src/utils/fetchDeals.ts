@@ -6,6 +6,7 @@ interface FetchDealsParams {
   search?: string;
   teamDeals?: boolean;
   userId?: string | null;
+  dealId?: string | null;
   limit: number;
   page?: number;
   status?: string;
@@ -35,7 +36,7 @@ export async function fetchDeals(
     if (status && status.length > 0) params.set('status', status.join(','));
     if (statusClient && statusClient.length > 0) params.set('statusClient', statusClient.join(','));
     if (selectedUser) params.set('selectedUser', String(selectedUser));
-
+  
     const url = `${apiBase.replace(/\/$/, '')}${basePath}${params.toString() ? `?${params.toString()}` : ''}`;
 
     const res = await fetch(url, {
@@ -59,6 +60,7 @@ export async function fetchDealsList(params: FetchDealsParams): Promise<FetchDea
     search = "",
     teamDeals = false,
     userId,
+    dealId,
     limit,
     page = 1,
     status,
@@ -75,6 +77,8 @@ export async function fetchDealsList(params: FetchDealsParams): Promise<FetchDea
   if (page) queryParams.append("page", String(page));
   if (limit) queryParams.append("limit", String(limit));
   if (teamDeals && userId) queryParams.append("userId", String(userId));
+  if (userId) queryParams.append("userId", userId);
+  if (dealId) queryParams.append("dealId", dealId);
 
   const url = teamDeals
     ? `${apiUrl}/team-deals?${queryParams.toString()}`
@@ -106,7 +110,7 @@ interface FetchMultipleParams {
   userId?: string | null;
   limit: number;
   items: Array<{
-    key: string; // identificador único (ex: statusClient ou paymentMethod)
+    key: string; 
     status?: string;
     statusClient?: string;
     paymentMethod?: PaymentMethod;

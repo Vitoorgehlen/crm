@@ -1,0 +1,61 @@
+.input {
+  color: var(--primaryText) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.input:hover {
+  border: 1px solid var(--primaryColor) !important;
+}
+
+/* calendário inteiro */
+.calendar {
+  background: var(--mainBackground) !important;
+  border: 1px solid var(--textBase) !important;
+  border: none !important;
+}
+
+/* dias */
+.day {
+  color: var(--primaryText);
+  border: 1px solid var(--mainBackground) !important;
+}
+
+:global(.react-datepicker__header) {
+  background-color: var(--textBase) !important;
+  border-bottom: 1px solid var(--primaryColor) !important;
+}
+
+:global(.react-datepicker__day--selected) {
+  background-color: var(--primaryColor) !important;
+  color: var(--mainBackground) !important;
+}
+
+:global(.react-datepicker__day--keyboard-selected) {
+  background-color: var(--mainBackground) !important;
+  color: var(--primaryText) !important;
+  border: 1px solid var(--primaryColor) !important;
+  border-radius: 6px;
+}
+
+:global(.react-datepicker__current-month) {
+  color: var(--primaryText) !important;
+  font-weight: 600;
+}
+
+:global(.react-datepicker__day-name) {
+  color: var(--textBase) !important;
+}
+
+:global(.react-datepicker__day:hover) {
+  background-color: var(--mainBackground) !important;
+  border: 1px solid var(--textBase) !important;
+  color: var(--primaryText) !important;
+}
+
+:global(.react-datepicker__day--today) {
+  border: 1px solid var(--primaryColor) !important;
+  border-radius: 6px;
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Client,
   ClientStatus,
@@ -25,6 +25,7 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { getTotal, sumDocs } from "@/utils/sumPreviusDocs";
+import CustomSelect from "@/components/Tools/Select/CustomSelect";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -332,6 +333,34 @@ export default function DealForm({
     }
   }, [token]);
 
+  const statusOptions = useMemo(() => {
+    return Object.entries(ClientStatus)
+      .filter(([key]) => {
+        if (mode === "create")
+          return key !== "REJECTED" && key !== "DROPPED_OUT";
+        return true;
+      })
+      .map(([key, { label }]) => ({
+        value: key as ClientStatus,
+        label: label,
+      }));
+  }, [mode]);
+
+  const selectedStatusOption = statusOptions.find(
+    (opt) => opt.value === statusClient,
+  );
+
+  const paymentMethodOptions = useMemo(() => {
+    return Object.entries(PaymentMethod).map(([key, { label }]) => ({
+      value: key as PaymentMethod,
+      label: label,
+    }));
+  }, []);
+
+  const selectedPaymentMethodOption = paymentMethodOptions.find(
+    (opt) => opt.value === paymentMethod,
+  );
+
   useEffect(() => {
     fetchDocs();
   }, [fetchDocs]);
@@ -463,7 +492,7 @@ export default function DealForm({
 
   return (
     <form
-      className={mode === "create" ? styles.overlay : styles.overlayEdit}
+      className={`${styles.overlay} ${mode === "edit" && styles.overlayEdit}`}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       onDragStart={handleDragStart}
@@ -477,9 +506,7 @@ export default function DealForm({
             <div className={styles.modalLeft}>
               <div className={styles.titleCard}>
                 <button
-                  className={
-                    mode === "create" ? styles.closeBtn : styles.closeBtnEdit
-                  }
+                  className={styles.closeBtn}
                   type="button"
                   onClick={() => onClose()}
                 >
@@ -488,10 +515,10 @@ export default function DealForm({
 
                 <div className={styles.titleCardEdit}>
                   {mode === "create" ? (
-                    <h2>Adicionar negociação</h2>
+                    <h4>Adicionar negociação</h4>
                   ) : (
                     <>
-                      <h4>Editar negociação</h4>
+                      <p>Editar negociação</p>
                       <div
                         onMouseEnter={() => {
                           setShowClientPopup(true);
@@ -511,21 +538,15 @@ export default function DealForm({
                             );
                           }}
                         >
-                          <h2>{deal?.client?.name ?? ""}</h2>
+                          <h4>{deal?.client?.name ?? ""}</h4>
                         </button>
-                        {showClientPopup && (
-                          <div className={styles.boxClientPopup}>
-                            <h3>{deal?.client?.name ?? ""}</h3>
-                            <p>{deal?.client?.phone ?? ""}</p>
-                          </div>
-                        )}
                       </div>
-                      <h6 className={styles.lastContact}>
+                      <span>
                         {`Último contato:
                       ${getDaysSinceLastContact(
                         deal?.updatedAt ?? deal?.createdAt ?? "",
                       )}`}
-                      </h6>
+                      </span>
                     </>
                   )}
                 </div>
@@ -542,176 +563,63 @@ export default function DealForm({
                       <IoStarOutline />
                     )}
                   </button>
-
-                  <div
-                    onMouseEnter={() => {
-                      setShowPopup(true);
-                      sumDocs(
-                        docValues,
-                        paymentMethod,
-                        downPaymentValue,
-                        subsidyValue,
-                        cashValue,
-                        fgtsValue,
-                        financingValue,
-                        creditLetterValue,
-                      );
-                    }}
-                    onMouseLeave={() => {
-                      setShowPopup(false);
-                    }}
-                    className={styles.btnDocValue2}
-                  >
-                    <BsCashCoin className={styles.btnDocValue} />
-                    {showPopup && (
-                      <div className={styles.boxDocValue}>
-                        <h4>Documentação aproximada</h4>
-                        {docsCalculated.map((doc) => {
-                          return (
-                            <div key={doc.label} className={styles.boxDoc}>
-                              <div className={styles.nameValue}>
-                                <h4>{doc.label}:</h4>
-                                <p>
-                                  R$
-                                  {doc.value.toLocaleString("pt-BR", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                                </p>
-                              </div>
-                              <div className={styles.description}>
-                                <p>{doc.description}</p>
-                              </div>
-                            </div>
-                          );
-                        })}
-
-                        {paymentMethod === "FINANCING" && (
-                          <>
-                            {Number(downPaymentValue) +
-                              Number(subsidyValue) +
-                              Number(cashValue) +
-                              Number(fgtsValue) +
-                              Number(financingValue) +
-                              Number(creditLetterValue) <
-                              500000 && (
-                              <div className={styles.boxDocTotal}>
-                                <h4>Total MCMV:</h4>
-                                <p>
-                                  R$
-                                  {docsCalculated
-                                    .reduce((acc, item) => {
-                                      if (item.label === "Financiar SBPE")
-                                        return acc;
-                                      return acc + item.value;
-                                    }, 0)
-                                    .toLocaleString("pt-BR", {
-                                      minimumFractionDigits: 2,
-                                      maximumFractionDigits: 2,
-                                    })}
-                                </p>
-                              </div>
-                            )}
-                            <div className={styles.boxDocTotal}>
-                              <h4>Total SBPE:</h4>
-                              <p>
-                                R$
-                                {docsCalculated
-                                  .reduce((acc, item) => {
-                                    if (item.label === "Financiar MCMV")
-                                      return acc;
-                                    return acc + item.value;
-                                  }, 0)
-                                  .toLocaleString("pt-BR", {
-                                    minimumFractionDigits: 2,
-                                    maximumFractionDigits: 2,
-                                  })}
-                              </p>
-                            </div>
-                          </>
-                        )}
-
-                        {paymentMethod === "CASH" && (
-                          <div className={styles.boxDocTotal}>
-                            <h4>Total:</h4>
-                            <p>
-                              R$
-                              {docsCalculated
-                                .reduce((acc, item) => {
-                                  if (
-                                    item.label === "Financiar MCMV" ||
-                                    item.label === "Financiar SBPE"
-                                  )
-                                    return acc;
-                                  return acc + item.value;
-                                }, 0)
-                                .toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                            </p>
-                          </div>
-                        )}
-
-                        {paymentMethod === "CREDIT_LETTER" && (
-                          <div className={styles.boxDocTotal}>
-                            <h4>Total:</h4>
-                            <p>
-                              R$
-                              {docsCalculated
-                                .reduce((acc, item) => {
-                                  if (
-                                    item.label === "Financiar MCMV" ||
-                                    item.label === "Financiar SBPE"
-                                  )
-                                    return acc;
-                                  return acc + item.value;
-                                }, 0)
-                                .toLocaleString("pt-BR", {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2,
-                                })}
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                  {mode === "edit" && (
+                    <div
+                      onMouseEnter={() => {
+                        setShowPopup(true);
+                        sumDocs(
+                          docValues,
+                          paymentMethod,
+                          downPaymentValue,
+                          subsidyValue,
+                          cashValue,
+                          fgtsValue,
+                          financingValue,
+                          creditLetterValue,
+                        );
+                      }}
+                      onMouseLeave={() => {
+                        setShowPopup(false);
+                      }}
+                    >
+                      <BsCashCoin className={styles.btnDocValue} />
+                    </div>
+                  )}
                 </div>
               </div>
 
               {error && <p className={styles.error}>{error}</p>}
+              {mode === "create" && (
+                <div className={styles.boxTitle}>
+                  <input
+                    list="clients"
+                    className={`form-base ${styles.changeClient}`}
+                    placeholder="Buscar cliente"
+                    value={searchClient}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSearchClient(value);
 
-              <div className={styles.box}>
-                <input
-                  list="clients"
-                  className={styles.changeClient}
-                  placeholder="Buscar cliente"
-                  value={searchClient}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setSearchClient(value);
+                      const foundClient = clients.find(
+                        (client) =>
+                          client.name.toLowerCase() === value.toLowerCase(),
+                      );
+                      setClientId(foundClient ? foundClient.id : undefined);
+                    }}
+                  />
 
-                    const foundClient = clients.find(
-                      (client) =>
-                        client.name.toLowerCase() === value.toLowerCase(),
-                    );
-                    setClientId(foundClient ? foundClient.id : undefined);
-                  }}
-                />
+                  <datalist id="clients">
+                    {clients
+                      .slice()
+                      .reverse()
+                      .map((client) => (
+                        <option
+                          key={client.id}
+                          value={client.name || "Cliente não encontrado"}
+                        />
+                      ))}
+                  </datalist>
 
-                <datalist id="clients">
-                  {clients
-                    .slice()
-                    .reverse()
-                    .map((client) => (
-                      <option
-                        key={client.id}
-                        value={client.name || "Cliente não encontrado"}
-                      />
-                    ))}
-                </datalist>
-                {mode === "create" && (
                   <button
                     className={styles.addClient}
                     onClick={() => setIsCreateOpen(true)}
@@ -719,73 +627,65 @@ export default function DealForm({
                   >
                     <AiOutlineUserAdd />
                   </button>
-                )}
+                </div>
+              )}
+              <div className={styles.box}>
+                <p>Status do cliente:</p>
+                <CustomSelect
+                  options={statusOptions}
+                  value={selectedStatusOption || null}
+                  onChange={(option) => {
+                    if (option) {
+                      setStatusClient(option.value);
+                    }
+                  }}
+                />
               </div>
 
-              <h3>Status do cliente</h3>
-              <select
-                value={statusClient}
-                onChange={(e) =>
-                  setStatusClient(e.target.value as ClientStatus)
-                }
-                required
-              >
-                {Object.entries(ClientStatus)
-                  .filter(([key]) => {
-                    if (mode === "create")
-                      return key !== "REJECTED" && key !== "DROPPED_OUT";
-                    return true;
-                  })
-                  .map(([key, { label }]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
+              <div className={styles.box}>
+                <p>Imóvel desejado:</p>
+                <textarea
+                  className={`form-base ${styles.formSearch}`}
+                  placeholder="O que o cliente busca em um imóvel?"
+                  onChange={(e) => setSearchProfile(e.target.value)}
+                  value={searchProfile}
+                />
+              </div>
 
-              <h3>Imóvel desejado</h3>
-              <input
-                type="text"
-                placeholder="O que o cliente busca em um imóvel?"
-                onChange={(e) => setSearchProfile(e.target.value)}
-                value={searchProfile}
-              />
-
-              <h3>Método de pagamento</h3>
-              <div className={styles.payment}>
-                <select
-                  value={paymentMethod}
-                  onChange={(e) =>
-                    setPaymentMethod(e.target.value as PaymentMethod)
-                  }
-                  required
-                >
-                  {Object.entries(PaymentMethod).map(([key, { label }]) => (
-                    <option key={key} value={key}>
-                      {label}
-                    </option>
-                  ))}
-                </select>
-
-                {paymentMethod === "FINANCING" && (
-                  <input
-                    type="text"
-                    placeholder="Banco do financiamento"
-                    onChange={(e) => setFinancialInstitution(e.target.value)}
-                    value={financialInstitution}
+              <div className={styles.box}>
+                <p>Método de pagamento:</p>
+                <div className={styles.paymentMethod}>
+                  {paymentMethod === "FINANCING" && (
+                    <input
+                      type="text"
+                      className={`form-base ${styles.inputBank}`}
+                      placeholder="Banco"
+                      onChange={(e) => setFinancialInstitution(e.target.value)}
+                      value={financialInstitution}
+                    />
+                  )}
+                  <CustomSelect
+                    options={paymentMethodOptions}
+                    value={selectedPaymentMethodOption || null}
+                    onChange={(option) => {
+                      if (option) {
+                        setPaymentMethod(option.value);
+                      }
+                    }}
                   />
-                )}
+                </div>
               </div>
 
               {paymentMethod === "CASH" && (
-                <>
-                  <div className={styles.paymentTitle}>
-                    <h3>Valor à vista</h3>
-                    <h3>FGTS</h3>
+                <div>
+                  <div className={styles.box}>
+                    <p>Valor à vista</p>
+                    <p>FGTS</p>
                   </div>
                   <div className={styles.payment}>
                     <input
                       type="text"
+                      className={`form-base ${styles.payment}`}
                       placeholder="Valor à vista"
                       value={downPaymentValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
@@ -799,6 +699,7 @@ export default function DealForm({
                     />
                     <input
                       type="text"
+                      className={`form-base ${styles.payment}`}
                       placeholder="FGTS"
                       value={fgtsValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
@@ -811,19 +712,20 @@ export default function DealForm({
                       }}
                     />
                   </div>
-                </>
+                </div>
               )}
 
               {paymentMethod === "FINANCING" && (
-                <>
-                  <div className={styles.paymentTitle}>
-                    <h3>Entrada </h3>
-                    <h3>Subsídio</h3>
-                    <h3>FGTS</h3>
-                    <h3>Financiamento</h3>
+                <div>
+                  <div className={styles.box}>
+                    <p>Entrada </p>
+                    <p>Subsídio</p>
+                    <p>FGTS</p>
+                    <p>Financiamento</p>
                   </div>
                   <div className={styles.payment}>
                     <input
+                      className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="Valor de entrada"
                       value={downPaymentValue.toLocaleString("pt-BR", {
@@ -837,6 +739,7 @@ export default function DealForm({
                       }}
                     />
                     <input
+                      className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="Valor de subsídio"
                       value={subsidyValue.toLocaleString("pt-BR", {
@@ -850,6 +753,7 @@ export default function DealForm({
                       }}
                     />
                     <input
+                      className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="FGTS"
                       value={fgtsValue.toLocaleString("pt-BR", {
@@ -863,6 +767,7 @@ export default function DealForm({
                       }}
                     />
                     <input
+                      className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="Valor de Financiamento"
                       value={financingValue.toLocaleString("pt-BR", {
@@ -876,18 +781,19 @@ export default function DealForm({
                       }}
                     />
                   </div>
-                </>
+                </div>
               )}
 
               {paymentMethod === "CREDIT_LETTER" && (
-                <>
-                  <div className={styles.paymentTitle}>
-                    <h3>Valor de entrada</h3>
-                    <h3>FGTS</h3>
-                    <h3>Valor da carta de crédito</h3>
+                <div>
+                  <div className={styles.box}>
+                    <p>Valor de entrada</p>
+                    <p>FGTS</p>
+                    <p>Valor da carta de crédito</p>
                   </div>
                   <div className={styles.payment}>
                     <input
+                      className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="Valor de entrada"
                       value={downPaymentValue.toLocaleString("pt-BR", {
@@ -902,6 +808,7 @@ export default function DealForm({
                     />
                     <input
                       type="text"
+                      className={`form-base ${styles.payment}`}
                       placeholder="FGTS"
                       value={fgtsValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
@@ -915,6 +822,7 @@ export default function DealForm({
                     />
                     <input
                       type="text"
+                      className={`form-base ${styles.payment}`}
                       placeholder="Valor da carta de crédito"
                       value={creditLetterValue.toLocaleString("pt-BR", {
                         minimumFractionDigits: 2,
@@ -927,10 +835,10 @@ export default function DealForm({
                       }}
                     />
                   </div>
-                </>
+                </div>
               )}
 
-              <h2>
+              <h3>
                 {getTotal(
                   paymentMethod,
                   downPaymentValue,
@@ -943,20 +851,69 @@ export default function DealForm({
                   style: "currency",
                   currency: "BRL",
                 })}
-              </h2>
+              </h3>
+
+              {mode === "create" ? (
+                <button
+                  className={`btn-action glass ${styles.btnDeal}`}
+                  type="button"
+                  onClick={(e) => handleSubmit(e, onSubmit, false)}
+                >
+                  {loading === "save" ? "Enviando" : "Enviar"}
+                </button>
+              ) : (
+                <div className={styles.footerCard}>
+                  {deal?.deleteRequest ? (
+                    <button
+                      className={`btn-action glass ${styles.btnDeal} ${styles.deleteRequest}`}
+                      onClick={() => router.push("/requisicoes")}
+                    >
+                      Solicitado
+                    </button>
+                  ) : (
+                    <button
+                      className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
+                      type="button"
+                      onClick={() => deleteDeal()}
+                    >
+                      {loading === "del" ? "Apagando" : "Apagar"}
+                    </button>
+                  )}
+
+                  <button
+                    className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
+                    type="button"
+                    onClick={(e) => handleSubmit(e, onSubmit, false)}
+                  >
+                    {loading === "save" ? "Atualizando" : "Atualizar"}
+                  </button>
+                  <button
+                    className={`btn-action glass ${styles.btnDeal} ${styles.btnSell}`}
+                    type="button"
+                    onClick={() => {
+                      if (!onCloseDeal)
+                        return setError("Função não disponível");
+                      setIsCloseOpen(true);
+                    }}
+                  >
+                    Vender
+                  </button>
+                </div>
+              )}
             </div>
             {mode === "edit" && (
-              <div className={styles.modalRight}>
+              <div className={`glass ${styles.modalRight}`}>
                 <div className={styles.noteSection}>
-                  <h2>Notas</h2>
+                  <h5>Notas</h5>
                   <div className={styles.addNote}>
                     {isOpenNote ? (
                       <>
-                        <h3>Editando</h3>
+                        <span>Editando</span>
                       </>
                     ) : (
                       <>
                         <input
+                          className={`form-base ${styles.addNoteForm}`}
                           type="text"
                           placeholder="Nota"
                           value={newNote}
@@ -975,7 +932,7 @@ export default function DealForm({
                     )}
                   </div>
 
-                  <div className={styles.noteList}>
+                  <div className={`glass ${styles.noteList}`}>
                     {note.length === 0 && (
                       <p>Nenhuma nota do cliente encontrada.</p>
                     )}
@@ -984,115 +941,195 @@ export default function DealForm({
                         {isOpenNote === note.id ? (
                           <>
                             <input
+                              className={`form-base ${styles.inputNote}`}
                               type="text"
                               placeholder="Nota"
                               value={newNote}
                               onChange={(e) => setNewNote(e.target.value)}
                             />
 
-                            <button
-                              className={styles.btnEditDocValue}
-                              type="button"
-                              onClick={() => handleEditNote(note.id)}
-                            >
-                              <FaCheck />
-                            </button>
-                            <button
-                              className={styles.btnDelDocValue}
-                              type="button"
-                              onClick={() => {
-                                setIsOpenNote(undefined);
-                                setNewNote("");
-                              }}
-                            >
-                              <FaTimes />
-                            </button>
+                            <div className={styles.btnsNote}>
+                              <button
+                                className={styles.btnEditDocValue}
+                                type="button"
+                                onClick={() => handleEditNote(note.id)}
+                              >
+                                <FaCheck />
+                              </button>
+                              <button
+                                className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                                type="button"
+                                onClick={() => {
+                                  setIsOpenNote(undefined);
+                                  setNewNote("");
+                                }}
+                              >
+                                <FaTimes />
+                              </button>
+                            </div>
                           </>
                         ) : (
                           <>
-                            <h3>{note.content}</h3>
+                            <span>{note.content}</span>
 
-                            <button
-                              className={styles.btnEditDocValue}
-                              type="button"
-                              onClick={() => {
-                                setIsOpenNote(note.id);
-                                setNewNote(note.content);
-                              }}
-                            >
-                              <RiPencilFill />
-                            </button>
-                            <button
-                              className={styles.btnDelDocValue}
-                              type="button"
-                              onClick={() => handleDeleteNote(note.id)}
-                            >
-                              <RiEraserFill />
-                            </button>
+                            <div className={styles.btnsNote}>
+                              <button
+                                className={styles.btnEditDocValue}
+                                type="button"
+                                onClick={() => {
+                                  setIsOpenNote(note.id);
+                                  setNewNote(note.content);
+                                }}
+                              >
+                                <RiPencilFill />
+                              </button>
+                              <button
+                                className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                                type="button"
+                                onClick={() => handleDeleteNote(note.id)}
+                              >
+                                <RiEraserFill />
+                              </button>
+                            </div>
                           </>
                         )}
                       </div>
                     ))}
                   </div>
                 </div>
+                <div className={styles.updateBox}>
+                  <span>
+                    Atualizado a última vez por: {deal?.updater?.name ?? "—"}.{" "}
+                    {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
+                  </span>
+                  <span>
+                    Criado por: {deal?.creator?.name ?? "—"}·{" "}
+                    {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
+                  </span>
+                </div>
               </div>
             )}
           </div>
-          {mode === "create" ? (
-            <button
-              className={styles.btnDeal}
-              type="button"
-              onClick={(e) => handleSubmit(e, onSubmit, false)}
-            >
-              {loading === "save" ? "Enviando" : "Enviar"}
-            </button>
-          ) : (
-            <div className={styles.footerCard}>
-              <div className={styles.btnUpdateAndStep}>
-                {deal?.deleteRequest ? (
-                  <div className={styles.deleteRequest}>Solicitado</div>
-                ) : (
-                  <button
-                    className={styles.btnDelete}
-                    type="button"
-                    onClick={() => deleteDeal()}
-                  >
-                    {loading === "del" ? "Apagando" : "Apagar"}
-                  </button>
-                )}
-
-                <button
-                  className={styles.btnUpdate}
-                  type="button"
-                  onClick={(e) => handleSubmit(e, onSubmit, false)}
-                >
-                  {loading === "save" ? "Atualizando" : "Atualizar"}
-                </button>
-                <button
-                  className={styles.btnSell}
-                  type="button"
-                  onClick={() => {
-                    if (!onCloseDeal) return setError("Função não disponível");
-                    setIsCloseOpen(true);
-                  }}
-                >
-                  Vender
-                </button>
-              </div>
-              <div className={styles.updateBox}>
-                <h6>
-                  Atualizado a última vez por: {deal?.updater?.name ?? "—"} ·{" "}
-                  {deal?.updatedAt ? formatDateForCards(deal.updatedAt) : "—"}
-                </h6>
-                <h6>
-                  {" "}
-                  Criado por: {deal?.creator?.name ?? "—"} ·{" "}
-                  {deal?.createdAt ? formatDateForCards(deal.createdAt) : "—"}
-                </h6>
-              </div>
-            </div>
-          )}
         </div>
+
+        {showClientPopup && (
+          <div className={`glass ${styles.popup} ${styles.clientPopup}`}>
+            <h5>{deal?.client?.name ?? ""}</h5>
+            <span>{deal?.client?.phone ?? ""}</span>
+          </div>
+        )}
+
+        {showPopup && (
+          <div className={`glass ${styles.popup} ${styles.docPopUp}`}>
+            <h5>Documentação aproximada</h5>
+            {docsCalculated.map((doc) => {
+              return (
+                <div key={doc.label} className={styles.boxDoc}>
+                  <div className={styles.nameValue}>
+                    <p>{doc.label}:</p>
+                    <span>
+                      R$
+                      {doc.value.toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                  <div className={styles.description}>
+                    <span>{doc.description}</span>
+                  </div>
+                </div>
+              );
+            })}
+
+            {paymentMethod === "FINANCING" && (
+              <>
+                {Number(downPaymentValue) +
+                  Number(subsidyValue) +
+                  Number(cashValue) +
+                  Number(fgtsValue) +
+                  Number(financingValue) +
+                  Number(creditLetterValue) <
+                  500000 && (
+                  <div className={styles.boxDocTotal}>
+                    <h5>Total MCMV:</h5>
+                    <p>
+                      R$
+                      {docsCalculated
+                        .reduce((acc, item) => {
+                          if (item.label === "Financiar SBPE") return acc;
+                          return acc + item.value;
+                        }, 0)
+                        .toLocaleString("pt-BR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                    </p>
+                  </div>
+                )}
+                <div className={styles.boxDocTotal}>
+                  <h5>Total SBPE:</h5>
+                  <p>
+                    R$
+                    {docsCalculated
+                      .reduce((acc, item) => {
+                        if (item.label === "Financiar MCMV") return acc;
+                        return acc + item.value;
+                      }, 0)
+                      .toLocaleString("pt-BR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {paymentMethod === "CASH" && (
+              <div className={styles.boxDocTotal}>
+                <h5>Total:</h5>
+                <p>
+                  R$
+                  {docsCalculated
+                    .reduce((acc, item) => {
+                      if (
+                        item.label === "Financiar MCMV" ||
+                        item.label === "Financiar SBPE"
+                      )
+                        return acc;
+                      return acc + item.value;
+                    }, 0)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </p>
+              </div>
+            )}
+
+            {paymentMethod === "CREDIT_LETTER" && (
+              <div className={styles.boxDocTotal}>
+                <h4>Total:</h4>
+                <p>
+                  R$
+                  {docsCalculated
+                    .reduce((acc, item) => {
+                      if (
+                        item.label === "Financiar MCMV" ||
+                        item.label === "Financiar SBPE"
+                      )
+                        return acc;
+                      return acc + item.value;
+                    }, 0)
+                    .toLocaleString("pt-BR", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
 
         {isCloseOpen && deal && (
           <CloseDealForm

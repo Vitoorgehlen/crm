@@ -11,69 +11,9 @@
   z-index: 999;
 }
 
-.overlay h2 {
-  color: var(--primaryText);
-}
-
-.overlay h3 {
-  color: var(--sidebarBackground);
-  align-items: start;
-  font-size: var(--font-5);
-  font-weight: 400;
-  width: 100%;
-}
-
-.overlay h6 {
-  color: var(--sidebarBackground);
-  font-size: var(--font-5);
-  font-weight: 400;
-}
-
-.overlay input,
-.overlay select {
-  padding: 8px;
-  margin: 3px;
-  color: var(--primaryText);
-  border-radius: 5px;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: var(--cardBackground);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.overlay input:focus,
-.overlay input:active,
-.overlay input:hover {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.overlay input::placeholder {
-  color: var(--sidebarBackground);
-}
-
-.overlay label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
 .modal {
   background: var(--mainBackground);
-  padding: 1.8rem 1.8rem 1rem 1.8rem;
+  padding: 20px;
   gap: 4px;
   border-radius: 10px;
   max-width: 500px;
@@ -118,6 +58,22 @@
   cursor: pointer;
 }
 
+.titleName {
+  display: flex;
+  gap: 10px;
+}
+
+.name {
+  color: var(--primaryColor);
+  overflow-wrap: break-word;
+  max-width: 280px;
+  text-align: center;
+}
+
+.titleName span {
+  color: var(--textBase);
+}
+
 .closeBtn {
   background: transparent;
   border: none;
@@ -128,22 +84,34 @@
 
 .erro {
   color: var(--errorColor2);
-  font-size: var(--font-5);
 }
 
-.investorBtn {
-  border: none;
-  outline: none;
-  font-size: var(--font-3);
+.line {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10px;
+  gap: 10px;
+}
+
+.form {
+  width: 100%;
+  max-width: 200px;
+  color: var(--primaryText);
+  margin-bottom: 10px;
+}
+
+.btnIvestor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 180px;
+  height: 35px;
   cursor: pointer;
 }
 
-.investorBtnCheck {
+.btnInvestorActive {
   color: var(--primaryColor);
-}
-
-.investorBtnUnC {
-  color: var(--primaryText);
+  border: 1px solid var(--primaryColor);
 }
 
 .investorInput {
@@ -151,92 +119,103 @@
   opacity: 0;
 }
 
-.btnAddClient {
+.btnDeal {
   padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 20px;
+  color: var(--primaryColor);
+  border-radius: 6px;
   width: 250px;
   cursor: pointer;
-  border: 1px solid var(--shadowColor);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+
+  border: 1px solid var(--textBase);
 }
 
-.btnAddClient:hover {
-  color: var(--primaryColor);
+.btnDeal:hover {
+  color: var(--primaryText);
   border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
+}
+
+.deleteRequest {
+  color: var(--primaryText);
+  max-width: 120px;
+  border: 1px solid var(--errorColor);
+  background: var(--errorColor);
+  cursor: default;
+  text-align: center;
+}
+
+.deleteRequest:hover {
+  border: 1px solid var(--errorColor);
+}
+
+.btnDelete {
+  color: var(--primaryText);
+  max-width: 120px;
+  border: 1px solid var(--textBase);
+}
+
+.btnDelete:hover {
+  background: var(--errorColor);
+  border: 1px solid var(--errorColor);
+}
+
+.btnUpdate {
+  color: var(--primaryText);
+  max-width: 120px;
+  border: 1px solid var(--textBase);
+}
+
+.btnUpdate:hover {
+  background: var(--mainBackground);
+  border: 1px solid var(--primaryColor);
 }
 
 .btnDelAndUp {
   display: flex;
   flex-direction: row;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   gap: 15px;
   margin-top: 20px;
 }
 
-.delClient {
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--errorColorD);
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 20px;
-  width: 250px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--errorColor2);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnDelClient {
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 20px;
-  width: 250px;
-  cursor: pointer;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnDelClient:hover {
-  background: var(--errorColorD);
-  border: 1px solid var(--errorColor2);
-}
-
 .footerCard {
   display: flex;
   flex-direction: column;
-  margin-top: 1rem;
-  text-align: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 20px;
 }
 
-.footerCard h6 {
-  color: var(--sidebarBackground);
-  font-size: x-small;
+.footerCard span {
+  text-align: center;
+  color: var(--textBase);
+  font-size: 10px;
 }
 
 @media (max-width: 768px) {
   .overlay {
-    padding: 0 10px;
+    padding: 0 20px;
   }
 
-  .titleForm h2 {
-    font-size: var(--font-3);
+  .titleForm {
+    margin-bottom: 10px;
   }
 
-  .btnAddClient {
+  .line {
+    flex-direction: column;
+    align-items: center;
+    margin-top: 0;
+    gap: 0;
+  }
+
+  .form {
+    width: 170px;
+    color: var(--primaryText);
+    margin-bottom: 10px;
+  }
+
+  .btnIvestor {
+    width: 170px;
     margin-top: 10px;
   }
 }

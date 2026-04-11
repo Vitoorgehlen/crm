@@ -7,6 +7,8 @@ import styles from "./page.module.css";
 import { Expense, ExpensePayload, ExpenseProps } from "@/types/index";
 import { RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
+import CustomSelect, { Option } from "@/components/Tools/Select/CustomSelect";
+import CustomDatePicker from "@/components/Tools/DatePicker/DayPicker/DayPicker";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,14 +20,14 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   const [firstExpense, setFirstExpense] = useState("");
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [selectYear, setSelectYear] = useState(
-    new Date().getFullYear().toString()
+    new Date().getFullYear().toString(),
   );
 
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
 
   const [newExpense, setNewExpense] = useState("");
   const [newExpenseValue, setNewExpenseValue] = useState<number | null>(null);
-  const [newDueDate, setNewDueDate] = useState("");
+  const [newDueDate, setNewDueDate] = useState<Date | null>(null);
   const [recurrenceType, setRecurrenceType] = useState("MONTHLY");
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
@@ -35,7 +37,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   function resetExpense() {
     setNewExpense("");
     setNewExpenseValue(null);
-    setNewDueDate("");
+    setNewDueDate(null);
     setRecurrenceType("MONTHLY");
   }
 
@@ -68,27 +70,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     return result;
   }, [firstExpense]);
 
-  function updateRangeByMonth(value: string) {
-    const [yearStr, monthStr] = value.split("-");
-    const year = Number(yearStr.trim());
-    const month = Number(monthStr.trim());
-
-    const filtered = expenses.filter((exp) => {
-      const expenseDate = new Date(exp.newDueDate);
-      const expenseMonth = expenseDate.getMonth();
-      const expenseYear = expenseDate.getFullYear();
-
-      return expenseMonth === month && expenseYear === year;
-    });
-
-    setFilteredExpenses(filtered);
-
-    if (yearStr !== selectYear) {
-      setSelectYear(yearStr);
-      fetchExpense();
-    }
-  }
-
   function real(v: number | undefined | null): string {
     if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
     return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -98,11 +79,11 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     if (newExpense === "") throw new Error("O nome deve ser preenchido");
     if (newExpenseValue === null)
       throw new Error("O valor deve ser preenchido");
-    if (newDueDate === "") throw new Error("A data deve ser preenchida");
+    if (newDueDate === null) throw new Error("A data deve ser preenchida");
     const payload: ExpensePayload = {
       label: newExpense,
       value: newExpenseValue,
-      newDueDate: newDueDate,
+      newDueDate: newDueDate?.toISOString(),
       isRecurring: recurrenceType !== "NONE",
       recurrenceType: recurrenceType !== "NONE" ? recurrenceType : undefined,
       isPaid: false,
@@ -131,7 +112,8 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     const payload: ExpensePayload = {
       label: newExpense !== "" ? newExpense : expense.label,
       value: newExpenseValue !== null ? newExpenseValue : expense.value,
-      newDueDate: newDueDate !== "" ? newDueDate : expense.newDueDate,
+      newDueDate:
+        newDueDate !== null ? newDueDate.toISOString() : expense.newDueDate,
       isRecurring: recurrenceType !== "NONE",
       recurrenceType: recurrenceType !== "NONE" ? recurrenceType : undefined,
       isPaid: expense.isPaid,
@@ -159,7 +141,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
 
   async function handleDeleteExpense(expense: Expense) {
     const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir a despesa ${expense.label}?`
+      `Tem certeza que deseja excluir a despesa ${expense.label}?`,
     );
     if (!confirmDelete) return;
 
@@ -221,6 +203,15 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     return rangeOfExpenses();
   }, [firstExpense, rangeOfExpenses]);
 
+  const options: Option<string>[] = months.map((m) => ({
+    value: `${m.year}-${m.month}`,
+    label: `${m.month + 1}/${m.year}`,
+  }));
+
+  const selected = useMemo(() => {
+    return options.find((o) => o.value === selectedMonth) || null;
+  }, [options, selectedMonth]);
+
   useEffect(() => {
     if (isLoading) return;
     if (!token) {
@@ -254,147 +245,116 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.expenseMain}>
-          <div className={styles.expenseBox}>
-            <div className={styles.cashStatsCardExpense}>
-              <div className={styles.cashStatsCardDiv}>
-                <div className={styles.cardGoal}>
-                  <div className={styles.infoCardExpense}>
-                    <strong>Despesas</strong>
-                    <select
-                      value={selectedMonth}
-                      onChange={(e) => {
-                        setSelectedMonth(e.target.value);
-                        updateRangeByMonth(e.target.value);
-                      }}
-                    >
-                      {months.map((m, index) => (
-                        <option key={index} value={`${m.year} - ${m.month}`}>
-                          {m.month + 1}/{m.year}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className={styles.card}>
-                  <h4 className={styles.received}>Média recebida:</h4>
-                  <p>{real(Number(selectedYearStats.monthAverage))}</p>
-                </div>
-                <div className={styles.card}>
-                  <h4 className={styles.received}>Total de despesas:</h4>
-                  <p>
-                    {real(
-                      Number(
-                        expenses.reduce(
-                          (acc, item) => acc + Number(item.value),
-                          0
-                        )
-                      )
-                    )}
-                  </p>
-                </div>
-                <div className={styles.card}>
-                  <h4 className={styles.received}>Total de despesas pagas:</h4>
-                  <p>
-                    {real(
-                      Number(
-                        expenses
-                          .filter((item) => item.isPaid)
-                          .reduce((acc, item) => acc + Number(item.value), 0)
-                      )
-                    )}
-                  </p>
-                </div>
-                <div className={styles.card}>
-                  <h4 className={styles.received}>Média líquida:</h4>
-                  <p>
-                    {real(
-                      Number(selectedYearStats.monthAverage) -
-                        Number(
-                          expenses.reduce(
-                            (acc, item) => acc + Number(item.value),
-                            0
-                          )
-                        )
-                    )}
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className={styles.cashStatsCardExpense}>
-              <div className={styles.cashStatsCardDiv}>
-                <div className={styles.cardGoal}>
-                  <strong>Adicionar despesa</strong>
-                </div>
-                <div className={styles.card}>
-                  <input
-                    type="text"
-                    placeholder="Despesa"
-                    value={newExpense}
-                    onChange={(e) => setNewExpense(e.target.value)}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Valor"
-                    value={real(newExpenseValue)}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setNewExpenseValue(numeric);
+          <div>
+            <div className={`glass ${styles.cashStatsCardExpense}`}>
+              <div className={`glass ${styles.cardGoal}`}>
+                <div className={styles.infoCardExpense}>
+                  <h3>Despesas</h3>
+                  <CustomSelect
+                    options={options}
+                    value={selected}
+                    onChange={(opt) => {
+                      if (!opt) return;
+                      setSelectedMonth(opt.value);
                     }}
                   />
                 </div>
-                <div className={styles.cardAddExpense}>
-                  <input
-                    type="date"
-                    onChange={(e) => setNewDueDate(e.target.value)}
-                    value={newDueDate}
-                  />
-                  {newExpense.length > 1 &&
-                    newExpenseValue !== null &&
-                    newDueDate.length > 1 && (
-                      <button
-                        type="button"
-                        className={styles.btnSave}
-                        onClick={handleAddExpense}
-                      >
-                        <strong>Criar</strong>
-                      </button>
-                    )}
-                  {/*                   
-                  <select
-                    value={recurrenceType}
-                    onChange={(e) => setRecurrenceType(e.target.value)}
-                  >
-                    <option value="NONE">Eventual</option>
-                    <option value="WEEKLY">Semanal</option>
-                    <option value="MONTHLY">Mensal</option>
-                    <option value="YEARLY">Anual</option>
-                  </select> */}
-                </div>
+              </div>
+              <div className={styles.card}>
+                <p className={styles.received}>Média recebida:</p>
+                <span>{real(Number(selectedYearStats.monthAverage))}</span>
+              </div>
+              <div className={styles.card}>
+                <p className={styles.received}>Total de despesas:</p>
+                <span>
+                  {real(
+                    Number(
+                      expenses.reduce(
+                        (acc, item) => acc + Number(item.value),
+                        0,
+                      ),
+                    ),
+                  )}
+                </span>
+              </div>
+              <div className={styles.card}>
+                <p className={styles.received}>Total de despesas pagas:</p>
+                <span>
+                  {real(
+                    Number(
+                      expenses
+                        .filter((item) => item.isPaid)
+                        .reduce((acc, item) => acc + Number(item.value), 0),
+                    ),
+                  )}
+                </span>
+              </div>
+              <div className={styles.card}>
+                <p className={styles.received}>Média líquida:</p>
+                <span>
+                  {real(
+                    Number(selectedYearStats.monthAverage) -
+                      Number(
+                        expenses.reduce(
+                          (acc, item) => acc + Number(item.value),
+                          0,
+                        ),
+                      ),
+                  )}
+                </span>
+              </div>
+            </div>
+            <div className={`glass ${styles.cashStatsCardExpense}`}>
+              <div className={`glass ${styles.cardGoal}`}>
+                <strong>Adicionar despesa</strong>
+              </div>
+              <div className={styles.card}>
+                <input
+                  type="text"
+                  className="form-base"
+                  placeholder="Despesa"
+                  value={newExpense}
+                  onChange={(e) => setNewExpense(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="form-base"
+                  placeholder="Valor"
+                  value={real(newExpenseValue)}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setNewExpenseValue(numeric);
+                  }}
+                />
+              </div>
+              <div className={styles.cardAddExpense}>
+                <CustomDatePicker value={newDueDate} onChange={setNewDueDate} />
+
+                {newExpense.length > 1 &&
+                  newExpenseValue !== null &&
+                  newDueDate !== null && (
+                    <button
+                      type="button"
+                      className={`glass ${styles.btnSave}`}
+                      onClick={handleAddExpense}
+                    >
+                      <strong>Criar</strong>
+                    </button>
+                  )}
               </div>
             </div>
           </div>
-          <div className={styles.expenseBox}>
-            <div className={styles.cashStatsCardExpense}>
-              <table className={styles.dealsTable}>
+          <div>
+            <div className={`glass ${styles.cashStatsCardExpense}`}>
+              <table className={`glass ${styles.dealsTable}`}>
                 <thead>
                   <tr>
                     <th>Conta</th>
                     <th>Dia Venc.</th>
                     <th>Valor</th>
                     <th>Pago</th>
-                    {/* <th>Recorrência</th> */}
-                    {isOpenEdit ? (
-                      <>
-                        <th>Confirmar</th>
-                        <th>Cancelar</th>
-                      </>
-                    ) : (
-                      <>
-                        <th>Editar</th>
-                        <th>Excluir</th>
-                      </>
-                    )}
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
@@ -408,21 +368,22 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                             <td>
                               <input
                                 type="text"
+                                className="form-base"
                                 placeholder="Despesa"
                                 value={newExpense}
                                 onChange={(e) => setNewExpense(e.target.value)}
                               />
                             </td>
                             <td>
-                              <input
-                                type="date"
+                              <CustomDatePicker
                                 value={newDueDate}
-                                onChange={(e) => setNewDueDate(e.target.value)}
+                                onChange={setNewDueDate}
                               />
                             </td>
                             <td>
                               <input
                                 type="text"
+                                className="form-base"
                                 placeholder="Valor"
                                 value={real(newExpenseValue)}
                                 onChange={(e) => {
@@ -435,9 +396,8 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                             </td>
                             <td>
                               <button
-                                className={`${styles.btnIsPaid} ${
-                                  exp.isPaid ? styles.btnIsPaidActive : ""
-                                }`}
+                                className={`glass ${styles.btnIsPaid} 
+                                ${exp.isPaid && styles.btnIsPaidActive}`}
                                 onClick={() => {
                                   handleEditExpense({
                                     ...exp,
@@ -448,37 +408,24 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                 {exp.isPaid ? "Pago" : "Pagar"}
                               </button>
                             </td>
-                            {/* <td>
-                              <select
-                                value={recurrenceType}
-                                onChange={(e) =>
-                                  setRecurrenceType(e.target.value)
-                                }
-                              >
-                                <option value="NONE">Eventual</option>
-                                <option value="WEEKLY">Semanal</option>
-                                <option value="MONTHLY">Mensal</option>
-                                <option value="YEARLY">Anual</option>
-                              </select>
-                            </td> */}
                             <td>
-                              <button
-                                className={styles.btnEdit}
-                                onClick={() => handleEditExpense(exp)}
-                              >
-                                <FaCheck />
-                              </button>
-                            </td>
-                            <td>
-                              <button
-                                className={styles.btnDel}
-                                onClick={() => {
-                                  setIsOpenEdit(null);
-                                  resetExpense();
-                                }}
-                              >
-                                <FaTimes />
-                              </button>
+                              <div className={styles.edit}>
+                                <button
+                                  className={styles.btnEdit}
+                                  onClick={() => handleEditExpense(exp)}
+                                >
+                                  <FaCheck />
+                                </button>
+                                <button
+                                  className={styles.btnDel}
+                                  onClick={() => {
+                                    setIsOpenEdit(null);
+                                    resetExpense();
+                                  }}
+                                >
+                                  <FaTimes />
+                                </button>
+                              </div>
                             </td>
                           </>
                         ) : (
@@ -494,9 +441,8 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                             </td>
                             <td>
                               <button
-                                className={`${styles.btnIsPaid} ${
-                                  exp.isPaid ? styles.btnIsPaidActive : ""
-                                }`}
+                                className={`glass ${styles.btnIsPaid} 
+                                ${exp.isPaid && styles.btnIsPaidActive}`}
                                 onClick={() => {
                                   handleEditExpense({
                                     ...exp,
@@ -507,33 +453,30 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                 {exp.isPaid ? "Pago" : "Pagar"}
                               </button>
                             </td>
-                            {/* <td>
-                              {exp.isRecurring ? exp.recurrenceType : "Não"}
-                            </td> */}
                             <td>
-                              <button
-                                className={styles.btnEdit}
-                                onClick={() => {
-                                  setIsOpenEdit(exp.id);
-                                  setIsOpenEdit(exp.id);
-                                  setNewExpense(exp.label);
-                                  setNewExpenseValue(Number(exp.value));
-                                  setNewDueDate(exp.newDueDate.split("T")[0]);
-                                  setRecurrenceType(
-                                    exp.recurrenceType ?? "NONE"
-                                  );
-                                }}
-                              >
-                                <RiPencilFill />
-                              </button>
-                            </td>
-                            <td>
-                              <button
-                                className={styles.btnDel}
-                                onClick={() => handleDeleteExpense(exp)}
-                              >
-                                <RiEraserFill />
-                              </button>
+                              <div className={styles.edit}>
+                                <button
+                                  className={styles.btnEdit}
+                                  onClick={() => {
+                                    setIsOpenEdit(exp.id);
+                                    setIsOpenEdit(exp.id);
+                                    setNewExpense(exp.label);
+                                    setNewExpenseValue(Number(exp.value));
+                                    setNewDueDate(new Date(exp.newDueDate));
+                                    setRecurrenceType(
+                                      exp.recurrenceType ?? "NONE",
+                                    );
+                                  }}
+                                >
+                                  <RiPencilFill />
+                                </button>
+                                <button
+                                  className={styles.btnDel}
+                                  onClick={() => handleDeleteExpense(exp)}
+                                >
+                                  <RiEraserFill />
+                                </button>
+                              </div>
                             </td>
                           </>
                         )}

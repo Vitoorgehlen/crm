@@ -60,7 +60,7 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
           const state: PermissionState = {};
           Object.values(PermissionEnum).forEach((perm) => {
             const rolePerm = usersRoles.find(
-              (r: any) => r.permission === perm && r.role === role
+              (r: any) => r.permission === perm && r.role === role,
             );
             state[perm] = rolePerm ? rolePerm.allowed : false;
           });
@@ -118,7 +118,7 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
               Authorization: `Bearer ${token}`,
             },
             body: JSON.stringify({ role, updates }),
-          })
+          }),
         );
       }
 
@@ -153,7 +153,7 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
         const state: PermissionState = {};
         Object.values(PermissionEnum).forEach((p) => {
           const item = newData.find(
-            (x: any) => x.role === r && x.permission === p
+            (x: any) => x.role === r && x.permission === p,
           );
           state[p] = item ? !!item.allowed : false;
         });
@@ -192,7 +192,7 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
         const state: PermissionState = {};
         Object.values(PermissionEnum).forEach((p) => {
           const item = newData.find(
-            (x: any) => x.role === r && x.permission === p
+            (x: any) => x.role === r && x.permission === p,
           );
           state[p] = item ? !!item.allowed : false;
         });
@@ -207,72 +207,74 @@ export default function Permissions({ userRole }: ConfigPermissionsProps) {
   };
 
   return (
-    <div className={styles.allTable}>
-      <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Permissão</th>
-            {Object.keys(RolePermissions)
-              .filter((role) => role !== "ADMIN")
-              .map((role) => (
-                <th key={role}>{RoleLabels[role]}</th>
-              ))}
-          </tr>
-        </thead>
-        <tbody>
-          {Object.values(PermissionEnum).map((perm) => (
-            <tr key={perm}>
-              <td>{PermissionLabels[perm]}</td>
-
-              {Object.keys(RoleLabels)
+    <div className={styles.main}>
+      <div className={styles.allTable}>
+        <table className={`glass ${styles.table}`}>
+          <thead>
+            <tr>
+              <th>Permissão</th>
+              {Object.keys(RolePermissions)
                 .filter((role) => role !== "ADMIN")
                 .map((role) => (
-                  <td key={role}>
-                    <input
-                      type="checkbox"
-                      checked={permissionsByRole[role]?.[perm] || false}
-                      onChange={() => togglePermissionForRole(role, perm)}
-                    />
-                    {permissionsByRole[role]?.[perm] === true ? (
-                      <MdRadioButtonChecked
-                        onClick={() => togglePermissionForRole(role, perm)}
-                        className={styles.check}
-                      />
-                    ) : (
-                      <MdRadioButtonUnchecked
-                        onClick={() => togglePermissionForRole(role, perm)}
-                        className={styles.noCheck}
-                      />
-                    )}
-                  </td>
+                  <th key={role}>{RoleLabels[role]}</th>
                 ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
-      <div className={styles.btnsEnd}>
-        <button
-          className={styles.btnReset}
-          onClick={handleResetPermissions}
-          type="button"
-        >
-          {loading === "reset" ? (
-            <h3>Resetando...</h3>
-          ) : (
-            <h3>Resetar as permissões</h3>
-          )}
-        </button>
-        <button
-          className={styles.btnSave}
-          onClick={handleSavePermissions}
-          type="button"
-        >
-          {loading === "save" ? (
-            <h3>Salvando...</h3>
-          ) : (
-            <h3>Salvar as permissões</h3>
-          )}
-        </button>
+          </thead>
+          <tbody>
+            {Object.values(PermissionEnum).map((perm) => (
+              <tr key={perm}>
+                <td>{PermissionLabels[perm]}</td>
+
+                {Object.keys(RoleLabels)
+                  .filter((role) => role !== "ADMIN")
+                  .map((role) => (
+                    <td key={role}>
+                      <input
+                        type="checkbox"
+                        checked={permissionsByRole[role]?.[perm] || false}
+                        onChange={() => togglePermissionForRole(role, perm)}
+                      />
+                      {permissionsByRole[role]?.[perm] === true ? (
+                        <MdRadioButtonChecked
+                          onClick={() => togglePermissionForRole(role, perm)}
+                          className={styles.check}
+                        />
+                      ) : (
+                        <MdRadioButtonUnchecked
+                          onClick={() => togglePermissionForRole(role, perm)}
+                          className={styles.noCheck}
+                        />
+                      )}
+                    </td>
+                  ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className={styles.btnsEnd}>
+          <button
+            className={`btn-action glass ${styles.btnSave} ${styles.btnReset}`}
+            onClick={handleResetPermissions}
+            type="button"
+          >
+            {loading === "reset" ? (
+              <h5>Resetando...</h5>
+            ) : (
+              <h5>Resetar as permissões</h5>
+            )}
+          </button>
+          <button
+            className={`btn-action glass ${styles.btnSave}`}
+            onClick={handleSavePermissions}
+            type="button"
+          >
+            {loading === "save" ? (
+              <h5>Salvando...</h5>
+            ) : (
+              <h5>Salvar as permissões</h5>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

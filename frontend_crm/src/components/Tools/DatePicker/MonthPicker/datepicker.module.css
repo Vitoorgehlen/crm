@@ -1,0 +1,49 @@
+.input {
+  color: var(--primaryText) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+.input:hover {
+  border: 1px solid var(--primaryColor) !important;
+}
+
+.calendar {
+  background-color: var(--sidebarBackground) !important;
+  border: 1px solid var(--mainBackground) !important;
+  border: none !important;
+  color: var(--primaryText);
+}
+
+/* container geral */
+:global(.react-datepicker) {
+  background-color: var(--textBase);
+  border: 1px solid var(--mainBackground);
+}
+
+:global(.react-datepicker__month-text) {
+  color: var(--primaryText);
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid var(--sidebarBackground);
+}
+
+/* hover */
+:global(.react-datepicker__month-text:hover) {
+  border: 1px solid var(--primaryColor);
+  background-color: var(--sidebarBackground) !important;
+  color: var(--primaryColor) !important;
+}
+
+/* navegação (setinhas) */
+:global(.react-datepicker__navigation-icon::before) {
+  border-color: var(--textBase);
+}
+
+/* Mês selecionado */
+:global(.react-datepicker__month-text--selected) {
+  background-color: var(--primaryColor) !important;
+  color: var(--mainBackground) !important;
+  font-weight: bold !important;
+}
