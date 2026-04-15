@@ -565,6 +565,122 @@ export default function CloseDealForm({
           </div>
         </div>
 
+        <div className={styles.paymentTitle}>
+          <div className={styles.payment}>
+            <p>Entrada</p>
+            <input
+              type="text"
+              className={`form-base ${styles.form}`}
+              placeholder="Entrada"
+              value={downPaymentValue.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+              onChange={(e) => {
+                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
+                setDownPaymentValue(numeric);
+              }}
+            />
+          </div>
+
+          <div className={styles.payment}>
+            <p>FGTS</p>
+            <input
+              type="text"
+              className={`form-base ${styles.form}`}
+              placeholder="FGTS"
+              value={fgtsValue.toLocaleString("pt-BR", {
+                style: "currency",
+                currency: "BRL",
+              })}
+              onChange={(e) => {
+                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
+                setFgtsValue(numeric);
+              }}
+            />
+          </div>
+
+          {paymentMethod === "CASH" && (
+            <div className={styles.payment}>
+              <p>À vista</p>
+              <input
+                type="text"
+                className={`form-base ${styles.form}`}
+                placeholder="FGTS"
+                value={cashValue.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setFgtsValue(numeric);
+                }}
+              />
+            </div>
+          )}
+
+          {paymentMethod === "FINANCING" && (
+            <div className={styles.payment}>
+              <p>Financiado</p>
+              <input
+                className={`form-base ${styles.form}`}
+                type="text"
+                placeholder="Valor de Financiamento"
+                value={financingValue.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setFinancingValue(numeric);
+                }}
+              />
+            </div>
+          )}
+
+          {paymentMethod === "FINANCING" && (
+            <div className={styles.payment}>
+              <p>Subsídio</p>
+              <input
+                className={`form-base ${styles.form}`}
+                type="text"
+                placeholder="Valor de subsídio"
+                value={subsidyValue.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setSubsidyValue(numeric);
+                }}
+              />
+            </div>
+          )}
+
+          {paymentMethod === "CREDIT_LETTER" && (
+            <div className={styles.payment}>
+              <p>Carta de crédito</p>
+              <input
+                type="text"
+                className={`form-base ${styles.form}`}
+                placeholder="Valor da carta de crédito"
+                value={creditLetterValue.toLocaleString("pt-BR", {
+                  style: "currency",
+                  currency: "BRL",
+                })}
+                onChange={(e) => {
+                  const numeric =
+                    Number(e.target.value.replace(/\D/g, "")) / 100;
+                  setCreditLetterValue(numeric);
+                }}
+              />
+            </div>
+          )}
+        </div>
+
         <div className={styles.nameBtnInstallment}>
           <button
             className={`${styles.btnInstallment} 

@@ -676,103 +676,62 @@ export default function DealForm({
                 </div>
               </div>
 
-              {paymentMethod === "CASH" && (
-                <div>
-                  <div className={styles.box}>
-                    <p>Valor à vista</p>
-                    <p>FGTS</p>
-                  </div>
-                  <div className={styles.payment}>
-                    <input
-                      type="text"
-                      className={`form-base ${styles.payment}`}
-                      placeholder="Valor à vista"
-                      value={downPaymentValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
-                      }}
-                    />
-                    <input
-                      type="text"
-                      className={`form-base ${styles.payment}`}
-                      placeholder="FGTS"
-                      value={fgtsValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {paymentMethod === "FINANCING" && (
-                <div>
-                  <div className={styles.box}>
-                    <p>Entrada </p>
-                    <p>Subsídio</p>
-                    <p>FGTS</p>
+              <div className={styles.box}>
+                <p>Valor à vista</p>
+                <p>FGTS</p>
+                {paymentMethod === "FINANCING" && (
+                  <>
                     <p>Financiamento</p>
-                  </div>
-                  <div className={styles.payment}>
-                    <input
-                      className={`form-base ${styles.payment}`}
-                      type="text"
-                      placeholder="Valor de entrada"
-                      value={downPaymentValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
-                      }}
-                    />
-                    <input
-                      className={`form-base ${styles.payment}`}
-                      type="text"
-                      placeholder="Valor de subsídio"
-                      value={subsidyValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setSubsidyValue(numeric);
-                      }}
-                    />
-                    <input
-                      className={`form-base ${styles.payment}`}
-                      type="text"
-                      placeholder="FGTS"
-                      value={fgtsValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
-                      }}
-                    />
+                    <p>Subsídio</p>
+                  </>
+                )}
+                {paymentMethod === "CREDIT_LETTER" && (
+                  <>
+                    <p>Carta de crédito</p>
+                  </>
+                )}
+              </div>
+
+              <div className={styles.payment}>
+                <input
+                  type="text"
+                  className={`form-base ${styles.payment}`}
+                  placeholder="Entrada"
+                  value={downPaymentValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setDownPaymentValue(numeric);
+                  }}
+                />
+
+                <input
+                  type="text"
+                  className={`form-base ${styles.payment}`}
+                  placeholder="FGTS"
+                  value={fgtsValue.toLocaleString("pt-BR", {
+                    style: "currency",
+                    currency: "BRL",
+                  })}
+                  onChange={(e) => {
+                    const numeric =
+                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                    setFgtsValue(numeric);
+                  }}
+                />
+
+                {paymentMethod === "FINANCING" && (
+                  <>
                     <input
                       className={`form-base ${styles.payment}`}
                       type="text"
                       placeholder="Valor de Financiamento"
                       value={financingValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        style: "currency",
+                        currency: "BRL",
                       })}
                       onChange={(e) => {
                         const numeric =
@@ -780,63 +739,41 @@ export default function DealForm({
                         setFinancingValue(numeric);
                       }}
                     />
-                  </div>
-                </div>
-              )}
 
-              {paymentMethod === "CREDIT_LETTER" && (
-                <div>
-                  <div className={styles.box}>
-                    <p>Valor de entrada</p>
-                    <p>FGTS</p>
-                    <p>Valor da carta de crédito</p>
-                  </div>
-                  <div className={styles.payment}>
                     <input
                       className={`form-base ${styles.payment}`}
                       type="text"
-                      placeholder="Valor de entrada"
-                      value={downPaymentValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                      placeholder="Valor de subsídio"
+                      value={subsidyValue.toLocaleString("pt-BR", {
+                        style: "currency",
+                        currency: "BRL",
                       })}
                       onChange={(e) => {
                         const numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDownPaymentValue(numeric);
+                        setSubsidyValue(numeric);
                       }}
                     />
-                    <input
-                      type="text"
-                      className={`form-base ${styles.payment}`}
-                      placeholder="FGTS"
-                      value={fgtsValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFgtsValue(numeric);
-                      }}
-                    />
-                    <input
-                      type="text"
-                      className={`form-base ${styles.payment}`}
-                      placeholder="Valor da carta de crédito"
-                      value={creditLetterValue.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setCreditLetterValue(numeric);
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
+                  </>
+                )}
+
+                {paymentMethod === "CREDIT_LETTER" && (
+                  <input
+                    type="text"
+                    className={`form-base ${styles.payment}`}
+                    placeholder="Valor da carta de crédito"
+                    value={creditLetterValue.toLocaleString("pt-BR", {
+                      style: "currency",
+                      currency: "BRL",
+                    })}
+                    onChange={(e) => {
+                      const numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+                      setCreditLetterValue(numeric);
+                    }}
+                  />
+                )}
+              </div>
 
               <h3>
                 {getTotal(
@@ -1030,8 +967,8 @@ export default function DealForm({
                     <span>
                       R$
                       {doc.value.toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        style: "currency",
+                        currency: "BRL",
                       })}
                     </span>
                   </div>
@@ -1077,8 +1014,8 @@ export default function DealForm({
                         return acc + item.value;
                       }, 0)
                       .toLocaleString("pt-BR", {
-                        minimumFractionDigits: 2,
-                        maximumFractionDigits: 2,
+                        style: "currency",
+                        currency: "BRL",
                       })}
                   </p>
                 </div>
@@ -1122,8 +1059,8 @@ export default function DealForm({
                       return acc + item.value;
                     }, 0)
                     .toLocaleString("pt-BR", {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
+                      style: "currency",
+                      currency: "BRL",
                     })}
                 </p>
               </div>

@@ -277,6 +277,8 @@ input:hover {
   height: auto;
   z-index: 1;
   color: rgba(255, 255, 255, 0.01);
+
+  pointer-events: none;
 }
 
 .main-base {
@@ -309,6 +311,7 @@ input:hover {
   font-size: 14px;
   font-weight: 200;
   outline: none;
+  color: var(--primaryText);
 }
 
 .form-base:focus,

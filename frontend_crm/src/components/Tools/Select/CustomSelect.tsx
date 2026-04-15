@@ -12,18 +12,21 @@ interface CustomSelectProps<T> {
   options: Option<T>[];
   value: Option<T> | null;
   onChange: (value: Option<T> | null) => void;
+  isDisabled?: boolean;
 }
 
 export default function CustomSelect<T>({
   options,
   value,
   onChange,
+  isDisabled,
 }: CustomSelectProps<T>) {
   return (
     <Select<Option<T>, false>
       options={options}
       value={value}
       onChange={(option) => onChange(option as Option<T> | null)}
+      isDisabled={isDisabled}
       className={styles.container}
       classNames={{
         control: () => styles.control,

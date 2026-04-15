@@ -193,6 +193,8 @@
 }
 
 .border {
+  display: flex;
+  flex-direction: column;
   border-bottom: solid 1px var(--textBase);
   margin: 10px 0;
 }
@@ -204,13 +206,94 @@
   gap: 5px;
   justify-content: space-between;
   padding-bottom: 2px;
+  align-items: center;
 }
 
-.boxSplitCommission span {
+.inputPercentage {
+  display: flex;
+}
+
+.inputWrapper {
+  position: relative;
+  width: 60px;
+}
+
+.suffix {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  font-size: 12px;
+  color: var(--primaryText);
+  color: var(--textBase);
+}
+
+.totalPercentage {
   color: var(--textBase);
   display: flex;
-  align-items: end;
+  align-items: center;
   font-size: 10px;
+  margin-left: 3px;
+}
+
+.paidValue {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.paidValue p {
+  text-align: center;
+  width: 80px;
+  color: var(--textBase);
+}
+
+.btnPaid,
+.btnPaidActive {
+  border-radius: 6px;
+  width: 70px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--textBase);
+}
+
+.btnPaid {
+  background: var(--mainBackground);
+  color: var(--textBase);
+}
+
+.btnPaid:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+}
+
+.btnPaidActive {
+  background: var(--primaryColor);
+  color: var(--mainBackground);
+  border: 1px solid var(--primaryColor);
+}
+
+.btnPaidActive:hover {
+  color: var(--primaryColor);
+  background: var(--mainBackground);
+}
+
+.addSplit {
+  background: transparent;
+  border: none;
+  font-size: 1.3rem;
+  color: var(--textBase);
+  cursor: pointer;
+  border: none;
+}
+
+.addSplit:hover {
+  color: var(--primaryColor);
+}
+
+.removeSplit:hover {
+  color: var(--errorColor);
 }
 
 .btnCancelAndConfirm {

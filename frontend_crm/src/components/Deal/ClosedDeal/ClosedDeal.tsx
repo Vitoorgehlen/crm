@@ -145,10 +145,10 @@ export default function ClosedDeal({
   );
 
   const userOptions = [
-    { value: 0, label: "Empresa" },
+    { label: "Empresa", value: 0 },
     ...companyUsers.map((u) => ({
-      value: u.id,
       label: u.name ?? `Usuário ${u.id}`,
+      value: u.id,
     })),
   ];
 
@@ -196,16 +196,16 @@ export default function ClosedDeal({
     );
   }
 
-  function computedAmountFor(index: number) {
+  function computedAmountFor(index: number): number {
     const s = splits[index];
     if (!s) return 0;
+
     if (splitMethod === "percentage") {
       const pct = s.percentage ?? 0;
-      const valueNumber = (commissionAmount * pct) / 100;
-      const valueString = real(valueNumber);
-      return valueString;
+      return (commissionAmount * pct) / 100;
     }
-    return +(s.amount ?? 0);
+
+    return s.amount ?? 0;
   }
 
   function real(v: number | undefined | null): string {
@@ -283,29 +283,6 @@ export default function ClosedDeal({
       setLoading(false);
     }
   }, [token]);
-
-  function getTotal() {
-    if (paymentMethod === "CASH") {
-      return (cashValue || 0) + (fgtsValue || 0) + (downPaymentValue || 0);
-    }
-
-    if (paymentMethod === "FINANCING") {
-      return (
-        (downPaymentValue || 0) +
-        (subsidyValue || 0) +
-        (fgtsValue || 0) +
-        (financingValue || 0)
-      );
-    }
-
-    if (paymentMethod === "CREDIT_LETTER") {
-      return (
-        (downPaymentValue || 0) + (fgtsValue || 0) + (creditLetterValue || 0)
-      );
-    }
-
-    return 0;
-  }
 
   function buildPayload(): CloseDealPayload {
     const normalizedSplits = splits.map((s) => {
@@ -1087,24 +1064,27 @@ export default function ClosedDeal({
             <div className={styles.boxCommissionShare}>
               <div className={styles.splitCommissionTitle}>
                 <p>Divisão da comissão</p>
+
                 <button
-                  className={`btn-action
-                            ${styles.btnCommission} 
-                            ${splitMethod === "percentage" && styles.btnActive}`}
+                  className={`btn-action ${styles.btnCommission} ${
+                    splitMethod === "percentage" && styles.btnActive
+                  }`}
                   type="button"
                   onClick={() => setSplitMethod("percentage")}
                 >
                   %
                 </button>
+
                 <button
-                  className={`btn-action
-                            ${styles.btnCommission} 
-                            ${splitMethod === "amount" && styles.btnActive}`}
+                  className={`btn-action ${styles.btnCommission} ${
+                    splitMethod === "amount" && styles.btnActive
+                  }`}
                   type="button"
                   onClick={() => setSplitMethod("amount")}
                 >
                   R$
                 </button>
+
                 <button
                   className={styles.addSplit}
                   type="button"
@@ -1125,10 +1105,11 @@ export default function ClosedDeal({
                       <CustomSelect
                         options={userOptions}
                         value={selectedOption}
+                        isDisabled={s.isPaid}
                         onChange={(option) => {
                           if (!option) return;
 
-                          const isCompany = option.value === null;
+                          const isCompany = option.value === 0;
 
                           updateSplit(i, {
                             isCompany,
@@ -1136,52 +1117,6 @@ export default function ClosedDeal({
                           });
                         }}
                       />
-
-                      {splitMethod === "percentage" ? (
-                        <>
-                          <input
-                            type="type"
-                            className={`form-base ${styles.form}`}
-                            style={{ width: 90 }}
-                            value={s.percentage === 0 ? "" : s.percentage}
-                            onChange={(e) => {
-                              let value = e.target.value;
-                              value = value.replace(",", ".");
-
-                              if (value === "") {
-                                updateSplit(i, { percentage: 0 });
-                                return;
-                              }
-
-                              const parsed = parseFloat(value);
-
-                              if (!isNaN(parsed)) {
-                                updateSplit(i, {
-                                  percentage: Math.min(parseFloat(value), 100),
-                                });
-                              }
-                            }}
-                          />
-                          <span> ≈ R$ {computedAmountFor(i)}</span>
-                        </>
-                      ) : (
-                        <>
-                          <input
-                            type="text"
-                            className={`form-base ${styles.form}`}
-                            style={{ width: 120 }}
-                            value={real(Number(s.amount ?? 0))}
-                            onChange={(e) => {
-                              const numeric =
-                                Number(e.target.value.replace(/\D/g, "")) / 100;
-                              updateSplit(i, {
-                                amount: numeric,
-                              });
-                            }}
-                            placeholder="Valor"
-                          />
-                        </>
-                      )}
 
                       <input
                         type="text"
@@ -1194,15 +1129,142 @@ export default function ClosedDeal({
                           })
                         }
                       />
+                      {s.isPaid && (
+                        <>
+                          <button
+                            className={`btn-action glass ${
+                              s.isPaid ? styles.btnPaidActive : styles.btnPaid
+                            }`}
+                            type="button"
+                            onClick={() =>
+                              updateSplit(i, { isPaid: !s.isPaid })
+                            }
+                          >
+                            {s.isPaid ? (
+                              <>
+                                <GiCheckMark /> Recebido
+                              </>
+                            ) : (
+                              "Receber"
+                            )}
+                          </button>
 
-                      <button
-                        className={`${styles.addSplit} ${styles.removeSplit}`}
-                        type="button"
-                        onClick={() => removeSplit(i)}
-                      >
-                        <IoRemoveCircle />
-                      </button>
+                          <button
+                            className={`${styles.addSplit} ${styles.removeSplit}`}
+                            type="button"
+                            onClick={() => removeSplit(i)}
+                          >
+                            <IoRemoveCircle />
+                          </button>
+                        </>
+                      )}
                     </div>
+
+                    {!s.isPaid && (
+                      <div className={styles.boxSplitCommission}>
+                        {splitMethod === "percentage" ? (
+                          <div className={styles.inputPercentage}>
+                            <div className={styles.inputWrapper}>
+                              <input
+                                type="text"
+                                className={`form-base ${styles.form}`}
+                                style={{ width: 60 }}
+                                disabled={s.isPaid}
+                                value={s.percentage === 0 ? "" : s.percentage}
+                                onChange={(e) => {
+                                  let value = e.target.value.replace(",", ".");
+
+                                  if (value === "") {
+                                    updateSplit(i, { percentage: 0 });
+                                    return;
+                                  }
+
+                                  const parsed = parseFloat(value);
+
+                                  if (!isNaN(parsed)) {
+                                    updateSplit(i, {
+                                      percentage: Math.min(parsed, 100),
+                                    });
+                                  }
+                                }}
+                              />
+                              <span className={styles.suffix}>%</span>
+                            </div>
+                            <span className={styles.totalPercentage}>
+                              {" "}
+                              ≈ <br />
+                              R$ <br />
+                              {computedAmountFor(i)}
+                            </span>
+                          </div>
+                        ) : (
+                          <input
+                            type="text"
+                            className={`form-base ${styles.form}`}
+                            style={{ width: 110 }}
+                            disabled={s.isPaid}
+                            value={real(Number(s.amount ?? 0))}
+                            onChange={(e) => {
+                              const numeric =
+                                Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                              updateSplit(i, {
+                                amount: numeric,
+                              });
+                            }}
+                            placeholder="Valor"
+                          />
+                        )}
+
+                        <div className={styles.paidValue}>
+                          <p>Valor recebido:</p>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.form}`}
+                            style={{ width: 110 }}
+                            value={real(Number(s.received ?? 0))}
+                            onChange={(e) => {
+                              const numeric =
+                                Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                              const maxAllowed =
+                                splitMethod === "percentage"
+                                  ? computedAmountFor(i)
+                                  : (s.amount ?? 0);
+
+                              updateSplit(i, {
+                                received: Math.min(numeric, maxAllowed),
+                              });
+                            }}
+                            placeholder="Pago"
+                          />
+                        </div>
+
+                        <button
+                          className={`btn-action glass ${
+                            s.isPaid ? styles.btnPaidActive : styles.btnPaid
+                          }`}
+                          type="button"
+                          onClick={() => updateSplit(i, { isPaid: !s.isPaid })}
+                        >
+                          {s.isPaid ? (
+                            <>
+                              <GiCheckMark /> Recebido
+                            </>
+                          ) : (
+                            "Receber"
+                          )}
+                        </button>
+
+                        <button
+                          className={`${styles.addSplit} ${styles.removeSplit}`}
+                          type="button"
+                          onClick={() => removeSplit(i)}
+                        >
+                          <IoRemoveCircle />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}
