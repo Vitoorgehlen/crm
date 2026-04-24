@@ -352,7 +352,7 @@ model Schedule {
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
 
-  deal    Deal?   @relation(fields: [dealId], references: [id])
+  deal    Deal?   @relation(fields: [dealId], references: [id], onDelete: Cascade)
   creator User    @relation("UserSchedule", fields: [createdBy], references: [id])
   updater User    @relation("UserScheduleUpdates", fields: [updatedBy], references: [id])
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)

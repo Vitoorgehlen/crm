@@ -4,11 +4,18 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
-import { Expense, ExpensePayload, ExpenseProps } from "@/types/index";
+import {
+  DeleteContext,
+  Expense,
+  ExpensePayload,
+  ExpenseProps,
+} from "@/types/index";
 import { RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
 import CustomSelect, { Option } from "@/components/Tools/Select/CustomSelect";
 import CustomDatePicker from "@/components/Tools/DatePicker/DayPicker/DayPicker";
+import WarningDeal from "@/components/Warning/DefaultWarning";
+import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -22,6 +29,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   const [selectYear, setSelectYear] = useState(
     new Date().getFullYear().toString(),
   );
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [filteredExpenses, setFilteredExpenses] = useState<Expense[]>([]);
 
@@ -140,11 +148,6 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   }
 
   async function handleDeleteExpense(expense: Expense) {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir a despesa ${expense.label}?`,
-    );
-    if (!confirmDelete) return;
-
     try {
       const res = await fetch(`${API}/expense/${expense.id}`, {
         method: "DELETE",
@@ -316,16 +319,11 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                   value={newExpense}
                   onChange={(e) => setNewExpense(e.target.value)}
                 />
-                <input
-                  type="text"
-                  className="form-base"
+                <CurrencyInput
+                  className={`form-base ${styles.payment}`}
                   placeholder="Valor"
-                  value={real(newExpenseValue)}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setNewExpenseValue(numeric);
-                  }}
+                  value={newExpenseValue || 0}
+                  onChange={setNewExpenseValue}
                 />
               </div>
               <div className={styles.cardAddExpense}>
@@ -381,17 +379,11 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                               />
                             </td>
                             <td>
-                              <input
-                                type="text"
-                                className="form-base"
+                              <CurrencyInput
+                                className={`form-base ${styles.payment}`}
                                 placeholder="Valor"
-                                value={real(newExpenseValue)}
-                                onChange={(e) => {
-                                  const numeric =
-                                    Number(e.target.value.replace(/\D/g, "")) /
-                                    100;
-                                  setNewExpenseValue(numeric);
-                                }}
+                                value={newExpenseValue || 0}
+                                onChange={setNewExpenseValue}
                               />
                             </td>
                             <td>
@@ -472,7 +464,16 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                                 </button>
                                 <button
                                   className={styles.btnDel}
-                                  onClick={() => handleDeleteExpense(exp)}
+                                  onClick={async () => {
+                                    if (!exp) return;
+
+                                    setDeleteContext({
+                                      message:
+                                        "Tem certeza que deseja excluir a despesa",
+                                      name: exp.label ?? "",
+                                      onConfirm: () => handleDeleteExpense(exp),
+                                    });
+                                  }}
                                 >
                                   <RiEraserFill />
                                 </button>
@@ -488,6 +489,18 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
           </div>
         </div>
       </main>
+
+      {deleteContext && (
+        <WarningDeal
+          message={deleteContext.message}
+          name={deleteContext.name}
+          onClose={() => setDeleteContext(null)}
+          onConfirm={async () => {
+            await deleteContext.onConfirm();
+            setDeleteContext(null);
+          }}
+        />
+      )}
     </div>
   );
 }

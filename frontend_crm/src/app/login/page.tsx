@@ -49,7 +49,9 @@ export default function LoginPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(
+          err instanceof Error ? err.message : "Erro inesperado ao fazer login",
+        );
       }
     } finally {
       setLoading(false);
@@ -79,7 +81,11 @@ export default function LoginPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro inesperado ao resetar a senha",
+        );
       }
     } finally {
       setLoading(false);
@@ -175,7 +181,7 @@ export default function LoginPage() {
                     type="submit"
                     disabled={loading}
                   >
-                    {loading ? "Entrando..." : "Entrar"}
+                    {loading ? <p>Entrando...</p> : "Entrar"}
                   </button>
                 </div>
               </form>
@@ -217,7 +223,7 @@ export default function LoginPage() {
                     type="submit"
                     disabled={loading}
                   >
-                    {loading ? "Entrando..." : "Entrar"}
+                    {loading ? <p>Enviando...</p> : "Enviar"}
                   </button>
                 </div>
               </form>

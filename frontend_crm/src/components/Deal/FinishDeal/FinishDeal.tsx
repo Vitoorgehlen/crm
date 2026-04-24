@@ -16,10 +16,12 @@ import {
   DocumentationCost,
   Note,
   DEAL_STEP_TYPE_LABEL,
+  DeleteContext,
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
 import { useRouter } from "next/navigation";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 
 export default function FinishDeal({
   isOpen,
@@ -36,6 +38,8 @@ export default function FinishDeal({
   );
 
   const [showClientPopup, setShowClientPopup] = useState(false);
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
+
   const [docCostLabel, setDocCostLabel] = useState("");
   const [docCostValue, setDocCostValue] = useState<number>(0);
   const [docCostNote, setDocCostNote] = useState("");
@@ -189,10 +193,6 @@ export default function FinishDeal({
 
   async function handleDeleteDocCost(docId?: number) {
     if (typeof docId !== "number") return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa documentação?`,
-    );
-    if (!confirmDelete) return;
 
     try {
       const res = await fetch(`${API}/documentationcost/${docId}`, {
@@ -257,10 +257,6 @@ export default function FinishDeal({
 
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`,
-    );
-    if (!confirmDelete) return;
 
     try {
       const res = await fetch(`${API}/note/${noteId}`, {
@@ -656,8 +652,10 @@ export default function FinishDeal({
                       placeholder="Documentação"
                       value={real(docCostValue)}
                       onChange={(e) => {
-                        const numeric =
+                        let numeric =
                           Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                        if (numeric >= 99999999.99) numeric = 99999999.99;
                         setDocCostValue(numeric);
                       }}
                     />
@@ -700,8 +698,10 @@ export default function FinishDeal({
                           placeholder="Documentação"
                           value={real(docCostValue)}
                           onChange={(e) => {
-                            const numeric =
+                            let numeric =
                               Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                            if (numeric >= 99999999.99) numeric = 99999999.99;
                             setDocCostValue(numeric);
                           }}
                         />
@@ -757,7 +757,13 @@ export default function FinishDeal({
                             <button
                               className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
                               type="button"
-                              onClick={() => handleDeleteDocCost(doc.id)}
+                              onClick={() =>
+                                setDeleteContext({
+                                  message: "Deseja cancelar essa documentação",
+                                  name: doc.label ?? "",
+                                  onConfirm: () => handleDeleteDocCost(doc.id),
+                                })
+                              }
                             >
                               <RiEraserFill />
                             </button>
@@ -856,7 +862,13 @@ export default function FinishDeal({
                           <button
                             className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
                             type="button"
-                            onClick={() => handleDeleteNote(note.id)}
+                            onClick={() =>
+                              setDeleteContext({
+                                message: "Deseja cancelar essa nota",
+                                name: note.content ?? "",
+                                onConfirm: () => handleDeleteNote(note.id),
+                              })
+                            }
                           >
                             <RiEraserFill />
                           </button>
@@ -887,6 +899,18 @@ export default function FinishDeal({
           <h5>{deal?.client?.name ?? ""}</h5>
           <span>{deal?.client?.phone ?? ""}</span>
         </div>
+      )}
+
+      {deleteContext && (
+        <WarningDeal
+          message={deleteContext.message}
+          name={deleteContext.name}
+          onClose={() => setDeleteContext(null)}
+          onConfirm={async () => {
+            await deleteContext.onConfirm();
+            setDeleteContext(null);
+          }}
+        />
       )}
     </div>
   );

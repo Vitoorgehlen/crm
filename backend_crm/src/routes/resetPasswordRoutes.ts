@@ -9,7 +9,7 @@ router.post('/password-reset', async (req, res) => {
   if (!email) return res.status(401).json({ error: 'Email inválido' });
 
   try {
-    const { resetLink } = await resetPassword(email);
+    const resetLink = await resetPassword(email);
 
     await sendEmail (
       email,

@@ -2,35 +2,66 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  min-height: 100vh;
+  margin-left: -60px;
+  overflow: hidden;
 
   display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.boxTotal {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+}
+
+.boxLogoName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logoName {
+  width: 70px;
+  transform: rotate(90deg);
+  color: var(--primaryColor);
+}
+
+.nameLogo {
+  color: var(--textBase);
+  margin-top: -60px;
+  margin-bottom: 30px;
+  font-size: 55px;
+  font-weight: 600;
 }
 
 .box {
   display: flex;
   justify-content: center;
+  align-items: center;
   flex-direction: column;
   width: 560px;
   height: 300px;
   border-radius: 20px;
   border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background-color: rgba(255, 255, 255, 0.1);
+  z-index: 2;
 }
 
-.box h1 {
-  color: var(--primaryColor);
-  margin: 0 0 20px 40px;
+.box h3 {
+  color: var(--primaryText);
+}
+
+.box span {
+  color: var(--primaryText);
+  margin: 30px 0 50px 40px;
 }
 
 .erro {
-  color: var(--errorColor2);
+  color: var(--errorColor);
 }
 
 .form {
@@ -41,21 +72,59 @@
   width: 80%;
 }
 
-.box input,
-.box input:focus,
-.box input:hover,
-.box input:active {
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  outline: none;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
+.upLine {
+  width: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px;
 }
 
-.form h4 {
+.line {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--textBase);
+  margin-bottom: 5px;
+}
+
+.line:hover {
+  border-bottom: 1px solid var(--primaryColor);
+}
+
+.icon {
   color: var(--primaryText);
+  font-size: 1.5rem;
+  margin: 0 10px;
+}
+
+.inputForm {
+  background: none;
+  border: none;
+  color: var(--primaryText);
+  padding: 9px 15px;
+  font-size: 14px;
+  font-weight: 200;
+  outline: none;
+  width: 100%;
+}
+
+.eyeButton {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--primaryText);
+  font-size: 1.1rem;
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--textBase);
+}
+
+.eyeButton:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--textBase);
+  background-color: var(--mainBackground);
 }
 
 .resetPassword {
@@ -65,39 +134,55 @@
   background-color: none;
   cursor: pointer;
 
-  color: var(--primaryText);
+  color: var(--textBase);
   text-align: start;
   text-decoration: none;
 }
 
 .resetPassword:hover {
-  color: var(--secondaryText);
+  color: var(--primaryText);
+}
+
+.lineBtn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
 }
 
 .send {
-  padding: 8px;
-  margin: 0 auto;
-  margin-top: 15px;
-  width: 50%;
+  padding: 5px;
   color: var(--primaryText);
-  border: 1px solid var(--shadowColor);
-  border-radius: 5px;
-  background-color: var(--cardBackground);
+  border-radius: 6px;
+  width: 30%;
   cursor: pointer;
+  background-color: transparent;
 
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--textBase);
 }
 
 .send:hover {
+  background: var(--mainBackground);
   border: 1px solid var(--primaryColor);
-  color: var(--primaryColor);
-  background: var(--cardBackgroundHover);
 }
 
 @media (max-width: 768px) {
   .main {
-    padding: 10px;
+    margin: 0;
+  }
+
+  .logoName {
+    width: 60px;
+  }
+
+  .nameLogo {
+    margin-top: -50px;
+    font-size: 45px;
+    font-weight: 500;
+  }
+
+  .box {
+    width: 90%;
   }
 }

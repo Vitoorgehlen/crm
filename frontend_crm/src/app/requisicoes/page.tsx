@@ -6,8 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 import { FaUserEdit, FaUsersCog } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import { ClientDeletedRequest, Deal } from "@/types";
+import { ClientDeletedRequest, Deal, DeleteContext } from "@/types";
 import { formatDateForCards } from "@/utils/dateUtils";
+import WarningDeal from "@/components/Warning/DefaultWarning";
+import WarningClient from "@/components/Warning/ClientWarning";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -17,6 +19,13 @@ export default function DeleteRequest() {
   const [isRequestClient, setIsRequestClient] = useState(true);
   const [isRequestDeal, setIsRequestDeal] = useState(false);
 
+  const [deleteContextDeal, setDeleteContextDeal] =
+    useState<DeleteContext>(null);
+  const [deleteContextClient, setDeleteContextClient] =
+    useState<DeleteContext>(null);
+  const [dealsToDelete, setDealsToDelete] = useState<any[] | null>(null);
+  const [showDeleteModalClient, setShowDeleteModalClient] = useState(false);
+
   const [clientRequest, setClientRequest] = useState<ClientDeletedRequest[]>(
     [],
   );
@@ -24,18 +33,6 @@ export default function DeleteRequest() {
   const [loading, setLoading] = useState<"read" | "canc" | "del" | null>(null);
 
   const approvedRequestClient = async (client: ClientDeletedRequest) => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${client.name}?`,
-    );
-    if (!confirmDelete) return;
-
-    if (client.deals?.length) {
-      const confirmDelete = window.confirm(
-        `${client.name} possui ${client.deals?.length} negociações em aberto`,
-      );
-      if (!confirmDelete) return;
-    }
-
     if (loading !== null) return;
     setLoading("del");
     try {
@@ -58,11 +55,6 @@ export default function DeleteRequest() {
   };
 
   const rejectedRequestClient = async (client: ClientDeletedRequest) => {
-    const confirmDelete = window.confirm(
-      `Cancelar solicitação para excluir ${client.name}?`,
-    );
-    if (!confirmDelete) return;
-
     if (loading !== null) return;
     setLoading("canc");
     try {
@@ -90,11 +82,6 @@ export default function DeleteRequest() {
   };
 
   const approvedRequestDeal = async (deal: Deal) => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${deal.client?.name}?`,
-    );
-    if (!confirmDelete) return;
-
     if (loading !== null) return;
     setLoading("del");
     try {
@@ -117,11 +104,6 @@ export default function DeleteRequest() {
   };
 
   const rejectedRequestDeal = async (client: Deal) => {
-    const confirmDelete = window.confirm(
-      `Cancelar solicitação para excluir ${client.client?.name}?`,
-    );
-    if (!confirmDelete) return;
-
     setLoading("canc");
     try {
       const res = await fetch(`${API}/deals/${client.id}`, {
@@ -164,6 +146,27 @@ export default function DeleteRequest() {
       setLoading(null);
     }
   }, [token]);
+
+  async function fetchDealByClient(client: ClientDeletedRequest) {
+    setLoading("read");
+    try {
+      const res = await fetch(`${API}/deals-by-client/${client.id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar clientes");
+      return data;
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(null);
+    }
+  }
 
   const fetchDealRequest = useCallback(async () => {
     setLoading("read");
@@ -281,12 +284,25 @@ export default function DeleteRequest() {
                             <button
                               className={styles.btnDel}
                               type="button"
-                              onClick={(e) => {
+                              onClick={async (e) => {
+                                if (!c) return;
+
                                 e.stopPropagation();
-                                approvedRequestClient(c);
+                                const deals = await fetchDealByClient(c);
+
+                                setDealsToDelete(deals);
+
+                                setDeleteContextClient({
+                                  message:
+                                    "Tem certeza que deseja excluir o cliente",
+                                  name: c.name ?? "",
+                                  onConfirm: () => approvedRequestClient(c),
+                                });
+
+                                setShowDeleteModalClient(true);
                               }}
                             >
-                              {loading === "del" ? "Apagando..." : "Apagar"}
+                              Apagar
                             </button>
                             <button
                               className={`${styles.btnDel} ${styles.btnCancel}`}
@@ -296,9 +312,7 @@ export default function DeleteRequest() {
                                 rejectedRequestClient(c);
                               }}
                             >
-                              {loading === "canc"
-                                ? "Cancelando..."
-                                : "Cancelar"}
+                              Cancelar
                             </button>
                           </div>
                         </div>
@@ -352,12 +366,19 @@ export default function DeleteRequest() {
                             <button
                               className={styles.btnDel}
                               type="button"
-                              onClick={(e) => {
+                              onClick={async (e) => {
+                                if (!d) return;
+
                                 e.stopPropagation();
-                                approvedRequestDeal(d);
+                                setDeleteContextDeal({
+                                  message:
+                                    "Tem certeza que deseja excluir a negociação com",
+                                  name: d.client?.name ?? "",
+                                  onConfirm: () => approvedRequestDeal(d),
+                                });
                               }}
                             >
-                              {loading === "del" ? "Apagando..." : "Apagar"}
+                              Apagar
                             </button>
                             <button
                               className={`${styles.btnDel} ${styles.btnCancel}`}
@@ -367,9 +388,7 @@ export default function DeleteRequest() {
                                 rejectedRequestDeal(d);
                               }}
                             >
-                              {loading === "canc"
-                                ? "Cancelando..."
-                                : "Cancelar"}
+                              Cancelar
                             </button>
                           </div>
                         </div>
@@ -379,6 +398,51 @@ export default function DeleteRequest() {
               )}
             </div>
           </main>
+
+          {deleteContextDeal && (
+            <WarningDeal
+              message={deleteContextDeal.message}
+              name={deleteContextDeal.name}
+              onClose={() => setDeleteContextDeal(null)}
+              onConfirm={async () => {
+                await deleteContextDeal.onConfirm();
+                setDeleteContextDeal(null);
+              }}
+            />
+          )}
+
+          {showDeleteModalClient && (
+            <WarningClient
+              message="Tem certeza que deseja excluir o cliente"
+              name={deleteContextClient?.name || ""}
+              deals={dealsToDelete?.length || 0}
+              onClose={() => {
+                setShowDeleteModalClient(false);
+                setDealsToDelete(null);
+                setDeleteContextClient(null);
+              }}
+              onConfirm={async () => {
+                if (deleteContextClient?.onConfirm) {
+                  await deleteContextClient.onConfirm();
+                }
+                setShowDeleteModalClient(false);
+                setDealsToDelete(null);
+                setDeleteContextClient(null);
+              }}
+            />
+          )}
+
+          {deleteContextDeal && (
+            <WarningDeal
+              message={deleteContextDeal.message}
+              name={deleteContextDeal.name}
+              onClose={() => setDeleteContextDeal(null)}
+              onConfirm={async () => {
+                await deleteContextDeal.onConfirm();
+                setDeleteContextDeal(null);
+              }}
+            />
+          )}
         </>
       )}
     </div>

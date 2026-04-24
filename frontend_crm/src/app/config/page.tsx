@@ -3,11 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import {
-  MdOutlinePowerOff,
-  MdOutlineEdit,
-  MdDeleteForever,
-} from "react-icons/md";
+import { MdOutlinePowerOff, MdOutlineEdit } from "react-icons/md";
 import { GrConfigure } from "react-icons/gr";
 
 import {
@@ -18,7 +14,7 @@ import {
 } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import { User, RoleLabels } from "@/types";
+import { User, RoleLabels, DeleteContext } from "@/types";
 import ConfigUsers from "@/components/config/users/page";
 import Permissions from "@/components/config/permissions/page";
 import EditMe from "@/components/config/editMe/page";
@@ -81,33 +77,6 @@ export default function Config() {
       setLoading(false);
     }
   }, [token]);
-
-  const deleteUser = async (UserDelete: User) => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${UserDelete.name}?`,
-    );
-    if (!confirmDelete) return;
-
-    if (loading) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`${API}/users/${UserDelete.id}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!res.ok) return;
-
-      handleUpdate();
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   async function handleLogout() {
     if (loading) return;
@@ -270,17 +239,6 @@ export default function Config() {
                                 >
                                   <MdOutlineEdit />
                                 </button>
-                                {user?.role === "ADMIN" && (
-                                  <button
-                                    type="button"
-                                    className={`btn-action glass ${styles.btnEditUser} ${styles.btnDeleteUser}`}
-                                    onClick={() => {
-                                      deleteUser(u);
-                                    }}
-                                  >
-                                    <MdDeleteForever />
-                                  </button>
-                                )}
                               </div>
                             </>
                           )}

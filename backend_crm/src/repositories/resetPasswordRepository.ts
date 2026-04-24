@@ -8,7 +8,7 @@ export async function resetPassword(email: string) {
     where: { email },
   });
 
-  if (!user) throw new Error('Usuário inválido');
+  if (!user) return;
 
   if (!process.env.TOKEN_SECRET) {
     throw new Error('TOKEN_SECRET não está definido nas variáveis de ambiente');
@@ -20,7 +20,7 @@ export async function resetPassword(email: string) {
 
   const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${token}`
 
-  return { token, resetLink };
+  return resetLink;
 }
 
 export async function confirmReset(token: string, newPassword: string) {

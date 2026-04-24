@@ -483,8 +483,10 @@ export default function CommissionCard({ deals }: any) {
                   className="glass"
                   value={real(Number(annualGoalValue))}
                   onChange={(e) => {
-                    const numeric =
+                    let numeric =
                       Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                    if (numeric >= 99999999.99) numeric = 99999999.99;
                     setAnnualGoalValue(numeric);
                   }}
                 />

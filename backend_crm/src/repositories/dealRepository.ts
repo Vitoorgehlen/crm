@@ -3,7 +3,6 @@ import { Prisma, User } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
 
-// Criar um Deal
 export async function addDeal(
   data: Omit<Prisma.DealCreateInput, 'creator' | 'client' | 'company'> & {
     creatorId: number;
@@ -509,7 +508,6 @@ export async function getDealDeletedRequest(userId: number) {
   });
 }
 
-// Atualizar deal
 export async function updateDeal(
   id: number,
   newData: Partial<Prisma.DealUncheckedUpdateInput>,
@@ -592,8 +590,17 @@ export async function deleteDeal(
       }
     }
 
-    await tx.note.deleteMany({ where: { dealId: id } })
+    const deleteDeal = await tx.deal.delete({ where: { id } });
 
-    return tx.deal.delete({ where: { id } });
+    const remainingDeals = await tx.deal.count({
+      where: { clientId: targetDeal.client.id },
+      });
+
+    if (remainingDeals === 0) {
+      const deleteClient = await  tx.client.delete({ where: { id: targetDeal.client.id } })
+      return { deleteDeal, deleteClient }
+    };
+
+    return deleteDeal
   })
 }

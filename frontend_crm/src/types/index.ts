@@ -39,6 +39,12 @@ export type ClientDeletedRequest = {
     };
 };
 
+export type DeleteContext = {
+  message: string;
+  name: string;
+  onConfirm: () => Promise<void> | void;
+} | null;
+
 export type ClientPayload = {
     name: string;
     phone?: string;
@@ -214,6 +220,7 @@ export type DealPayload = {
 };
 
 export interface CommissionSplit {
+  id?: number;
   userId?: number | null;
   isCompany?: boolean;
   amount?: number;
@@ -254,6 +261,7 @@ export interface CloseDealFormProps {
     deal: Deal;
     onClose: () => void;
     onSubmit: (payload: CloseDealPayload) => Promise<void>;
+    onUpdateDealShare?: (updatedDeal: Deal) => void;
     newStep: (step: string) => Promise<void>;
 
     initialPaymentMethod?: PaymentMethod;

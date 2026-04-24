@@ -52,7 +52,11 @@ export default function Documentation() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro inesperado ao salvar a documentação",
+        );
       }
     } finally {
       setLoading(null);
@@ -83,7 +87,11 @@ export default function Documentation() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro inesperado resetar a documentação",
+        );
       }
     } finally {
       setLoading(null);

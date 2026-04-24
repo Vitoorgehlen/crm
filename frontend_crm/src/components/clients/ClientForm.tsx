@@ -6,12 +6,12 @@ import { Client, ClientFormProps } from "@/types/index";
 import { formatDateForCards } from "@/utils/dateUtils";
 import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
-import { MdRadioButtonChecked, MdRadioButtonUnchecked } from "react-icons/md";
 
 import styles from "./ClientForm.module.css";
 import DayPicker from "../Tools/DatePicker/DayPicker/DayPicker";
 import { parseISO } from "date-fns";
 import { format } from "date-fns";
+import WarningClient from "../Warning/ClientWarning";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -30,7 +30,9 @@ export default function ClientsForm({
   const [isInvestor, setIsInvestor] = useState(false);
   const [isPriority, setIsPriority] = useState(false);
 
+  const [dealsToDelete, setDealsToDelete] = useState<any[] | null>(null);
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [loading, setLoading] = useState<"read" | "save" | "delete" | null>(
     null,
   );
@@ -98,6 +100,12 @@ export default function ClientsForm({
     setLoading("save");
     setError("");
 
+    if (name.length <= 2) {
+      setError("O nome do cliente precisa ter mais de 3 letras.");
+      setLoading(null);
+      return;
+    }
+
     try {
       const payload: Partial<Client> = {
         name,
@@ -116,7 +124,7 @@ export default function ClientsForm({
       onClose();
     } catch (err) {
       console.log(err);
-      setError("Erro ao enviar formuário");
+      setError(err instanceof Error ? err.message : "Erro ao enviar formuário");
     } finally {
       setLoading(null);
     }
@@ -124,17 +132,6 @@ export default function ClientsForm({
 
   const deleteClient = async () => {
     if (!client) return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${client.name}?`,
-    );
-    if (!confirmDelete) return;
-    const deals = await fetchDealByClient(client);
-    if (deals.length > 0) {
-      const confirm2Delete = window.confirm(
-        `O ${client.name} possui ${deals.length} negociação que vai ser apagado juntos com ele.`,
-      );
-      if (!confirm2Delete) return;
-    }
 
     if (loading) return;
     setLoading("delete");
@@ -159,7 +156,11 @@ export default function ClientsForm({
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar o usuário");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao apagar cliente",
+      );
     } finally {
       setLoading(null);
     }
@@ -292,7 +293,7 @@ export default function ClientsForm({
                 type="button"
                 onClick={(e) => handleSubmit(e, onSubmit)}
               >
-                {loading === "save" ? "Enviando..." : "Enviar"}
+                {loading === "save" ? <span>Enviando...</span> : "Enviar"}
               </button>
             </div>
           ) : (
@@ -307,9 +308,16 @@ export default function ClientsForm({
                 <button
                   className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
                   type="button"
-                  onClick={() => deleteClient()}
+                  onClick={async () => {
+                    if (!client) return;
+
+                    const deals = await fetchDealByClient(client);
+
+                    setDealsToDelete(deals);
+                    setShowDeleteModal(true);
+                  }}
                 >
-                  {loading === "delete" ? "Apagando..." : "Apagar"}
+                  {loading === "delete" ? <span>Apagando...</span> : "Apagar"}
                 </button>
               )}
               <button
@@ -317,7 +325,7 @@ export default function ClientsForm({
                 type="button"
                 onClick={(e) => handleSubmit(e, onSubmit)}
               >
-                {loading === "save" ? "Atualizando..." : "Atualizar"}
+                {loading === "save" ? <span>Atualizando...</span> : "Atualizar"}
               </button>
             </div>
           )}
@@ -336,6 +344,23 @@ export default function ClientsForm({
           </div>
         )}
       </div>
+
+      {showDeleteModal && (
+        <WarningClient
+          message={`Tem certeza que deseja excluir`}
+          name={`${client?.name}`}
+          deals={!dealsToDelete ? 0 : dealsToDelete.length}
+          onClose={() => {
+            setShowDeleteModal(false);
+            setDealsToDelete(null);
+          }}
+          onConfirm={async () => {
+            await deleteClient();
+            setShowDeleteModal(false);
+            setDealsToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 }

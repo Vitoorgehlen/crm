@@ -34,6 +34,7 @@ export default function Clients() {
   const [total, setTotal] = useState(0);
   const [limit] = useState(20);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [teamClients, setTeamClients] = useQueryState("team", {
     defaultValue: false,
@@ -83,6 +84,7 @@ export default function Clients() {
         console.error(err);
       } finally {
         setLoading(false);
+        setInitialLoading(false);
       }
     },
     [token, teamClients, search, selectedUser, limit, clientId],
@@ -223,9 +225,14 @@ export default function Clients() {
               </button>
             </div>
           )}
-          {clients.length === 0 ? (
+
+          {clients.length === 0 && !initialLoading ? (
             <div className={styles.noItens}>
-              <p>Nenhuma cliente encontrado.</p>
+              <h3>😭 Desculpe não encotramos nenhum cliente...</h3>
+              <p>
+                Se o problema persistir entre em contato para corrigirmos este
+                erro.
+              </p>
             </div>
           ) : (
             <div className={styles.clientList}>
@@ -265,7 +272,8 @@ export default function Clients() {
                   </button>
                 );
               })}
-              {!clientId && (
+
+              {total > 1 && (
                 <div className={styles.pagination}>
                   <button
                     className={`

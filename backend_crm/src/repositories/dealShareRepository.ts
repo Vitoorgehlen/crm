@@ -411,6 +411,7 @@ export async function updateDealShare(
 
   if (newData.isPaid === false && dealShare.isPaid === true) {
     updateDate.paidAt = null;
+    updateDate.received = 0;
   }
 
   if (newData.isPaid === true && dealShare.isPaid === false) {

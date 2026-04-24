@@ -1,0 +1,147 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal {
+  background: var(--mainBackground);
+  padding: 20px;
+  gap: 4px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modalConfirm {
+  border: 1px solid var(--errorColor);
+}
+
+.innerModal {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.titleForm {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.boxLogoName {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logoName {
+  width: 40px;
+  transform: rotate(90deg);
+  color: var(--primaryColor);
+}
+
+.nameLogo {
+  color: var(--textBase);
+  margin-top: -30px;
+  font-size: 30px;
+  font-weight: 400;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primaryText);
+  cursor: pointer;
+}
+
+.closeBtnInvisible {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.line {
+  text-align: center;
+  margin-top: 20px;
+  color: var(--textBase);
+}
+
+.line p {
+  color: var(--textBase);
+}
+
+.line .name {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--primaryColor);
+}
+
+.line .text {
+  color: var(--errorColor);
+}
+
+.footerCard {
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+  width: 100%;
+  margin-top: 30px;
+}
+
+.btnDeal {
+  padding: 5px;
+  color: var(--primaryColor);
+  border-radius: 6px;
+  width: 120px;
+  cursor: pointer;
+
+  border: 1px solid var(--textBase);
+}
+
+.btnDeal:hover {
+  color: var(--primaryText);
+  border: 1px solid var(--primaryColor);
+}
+
+.btnDelete {
+  color: var(--primaryText);
+  border: 1px solid var(--textBase);
+}
+
+.btnDelete:hover {
+  background: var(--errorColor);
+  border: 1px solid var(--errorColor);
+}
+
+.btnUpdate {
+  color: var(--primaryText);
+  border: 1px solid var(--textBase);
+}
+
+.btnUpdate:hover {
+  background: var(--mainBackground);
+  border: 1px solid var(--primaryColor);
+}
+
+@media (max-width: 768px) {
+  .modal {
+    padding: 20px;
+    margin: 0 20px;
+  }
+}

@@ -55,6 +55,10 @@
   justify-content: center;
 }
 
+.list p {
+  color: var(--primaryText);
+}
+
 .deleteItem {
   display: flex;
   justify-content: space-between;

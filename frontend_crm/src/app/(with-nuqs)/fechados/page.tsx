@@ -41,6 +41,7 @@ const LIMIT = 5;
 export default function Deals() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+  const [initialIsLoadind, setInitialIsLoadind] = useState(true);
 
   const [users, setUsers] = useState<User[]>([]);
 
@@ -85,6 +86,30 @@ export default function Deals() {
   >({} as Record<PaymentMethod, number>);
 
   const [loading, setLoading] = useState(false);
+
+  const handleUpdateDealShare = useCallback((updatedDeal: Deal) => {
+    setSelectedDeal((prev) => {
+      if (prev?.id === updatedDeal.id) {
+        return updatedDeal;
+      }
+      return prev;
+    });
+
+    setDealsByMethod((prev) => {
+      const newState = { ...prev };
+      const targetMethod = updatedDeal.paymentMethod as PaymentMethod;
+
+      const index = newState[targetMethod]?.findIndex(
+        (d) => d.id === updatedDeal.id,
+      );
+
+      if (index !== undefined && index !== -1) {
+        newState[targetMethod][index] = updatedDeal;
+      }
+
+      return newState;
+    });
+  }, []);
 
   const findDealById = (dealId: number): Deal | undefined => {
     for (const method of Object.keys(dealsByMethod) as PaymentMethod[]) {
@@ -171,7 +196,6 @@ export default function Deals() {
     if (data.paymentMethod) {
       await fetchDealsByMethod(data.paymentMethod as PaymentMethod, 1);
     }
-    // await fetchDealsData();
   };
 
   const closeDealShares = async (payload: CloseDealPayload) => {
@@ -193,18 +217,38 @@ export default function Deals() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erro ao fechar negociação");
 
+    const updatedDeal = data;
+    const originalMethod = selectedDeal.paymentMethod;
+
     setDealsByMethod((prev) => {
       const newState = { ...prev };
-      for (const method of Object.keys(newState) as PaymentMethod[]) {
-        newState[method] = newState[method].filter((d) => d.id !== data.id);
+
+      if (originalMethod !== updatedDeal.paymentMethod) {
+        newState[originalMethod] = newState[originalMethod].filter(
+          (d) => d.id !== updatedDeal.id,
+        );
       }
+
+      const targetMethod = updatedDeal.paymentMethod as PaymentMethod;
+      const index = newState[targetMethod].findIndex(
+        (d) => d.id === updatedDeal.id,
+      );
+
+      if (index !== -1) {
+        newState[targetMethod][index] = updatedDeal;
+      } else {
+        newState[targetMethod] = [updatedDeal, ...newState[targetMethod]];
+      }
+
       return newState;
     });
-    // await fetchDealsData();
+
     setIsCloseOpen(false);
     setSelectedDeal(null);
-    router.push("/fechados");
-    return;
+
+    if (updatedDeal.paymentMethod) {
+      await fetchDealsByMethod(updatedDeal.paymentMethod as PaymentMethod, 1);
+    }
   };
 
   const handleChangeStep = async (step: string) => {
@@ -237,7 +281,7 @@ export default function Deals() {
         currentPage,
       );
     }
-    // await fetchDealsData();
+    await fetchAllMethodData();
     setIsCloseOpen(false);
     setSelectedDeal(null);
     router.push("/fechados");
@@ -264,14 +308,11 @@ export default function Deals() {
 
     setDealsByMethod((prev) => {
       const newState = { ...prev };
+
       for (const method of Object.keys(newState) as PaymentMethod[]) {
-        const index = newState[method].findIndex((d) => d.id === data.id);
-        if (index !== -1) {
-          newState[method] = [...newState[method]];
-          newState[method][index] = data;
-          break;
-        }
+        newState[method] = newState[method].filter((d) => d.id !== dealId);
       }
+
       return newState;
     });
     if (data.paymentMethod) {
@@ -282,7 +323,7 @@ export default function Deals() {
         currentPage,
       );
     }
-    // await fetchDealsData();
+    await fetchAllMethodData();
   };
 
   const fetchDealsByMethod = useCallback(
@@ -321,6 +362,7 @@ export default function Deals() {
         console.error(err);
       } finally {
         setLoading(false);
+        setInitialIsLoadind(false);
       }
     },
     [token, search, teamDeals, userId, limit],
@@ -373,6 +415,7 @@ export default function Deals() {
       console.error("Erro ao buscar deals:", err);
     } finally {
       setLoading(false);
+      setInitialIsLoadind(false);
     }
   }, [token, search, teamDeals, userId, limit]);
 
@@ -567,9 +610,14 @@ export default function Deals() {
             {Object.values(dealsByMethod).every(
               (deals) => deals.length === 0,
             ) &&
-              !loading && (
-                <div className={styles.divError}>
-                  <p>Nenhuma negociação encontrada</p>
+              !loading &&
+              !initialIsLoadind && (
+                <div className={styles.noItens}>
+                  <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
+                  <p>
+                    Se o problema persistir entre em contato para corrigirmos
+                    este erro.
+                  </p>
                 </div>
               )}
 
@@ -583,6 +631,7 @@ export default function Deals() {
                 }}
                 onSubmit={closeDealShares}
                 newStep={handleChangeStep}
+                onUpdateDealShare={handleUpdateDealShare}
               />
             )}
           </div>

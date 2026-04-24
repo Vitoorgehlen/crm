@@ -172,7 +172,7 @@
 .btnDelAndUp {
   display: flex;
   flex-direction: row;
-  justify-content: space-around;
+  justify-content: space-evenly;
   width: 100%;
   gap: 15px;
   margin-top: 20px;

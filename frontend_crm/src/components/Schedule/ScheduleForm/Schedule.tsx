@@ -5,6 +5,7 @@ import {
   CreateSchedulePayload,
   Deal,
   DealStatus,
+  DeleteContext,
   Schedule,
   ScheduleFormProps,
 } from "@/types";
@@ -13,6 +14,7 @@ import styles from "./Schedule.module.css";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -37,6 +39,8 @@ export default function ScheduleForm({
   const [newDate, setNewDate] = useState<Date | undefined>(
     schedule?.reminderAt ? new Date(schedule.reminderAt) : undefined,
   );
+
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [error, setError] = useState("");
@@ -91,11 +95,7 @@ export default function ScheduleForm({
       }
       onClose();
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Erro inesperado");
-      }
+      setError(err instanceof Error ? err.message : "Erro inesperado");
     }
   }
 
@@ -116,11 +116,11 @@ export default function ScheduleForm({
 
       if (onCreate) onCreate(data);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Erro inesperado ao criar o compromisso");
-      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao criar compromisso",
+      );
     }
   }
 
@@ -142,20 +142,15 @@ export default function ScheduleForm({
 
       if (onUpdate) onUpdate(data);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Erro inesperado ao editar o compromisso");
-      }
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao editar compromisso",
+      );
     }
   }
 
   const handleDelete = async (schedule: Schedule) => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir o compromisso?`,
-    );
-    if (!confirmDelete) return;
-
     try {
       const res = await fetch(`${API}/schedule/${schedule.id}`, {
         method: "DELETE",
@@ -181,7 +176,11 @@ export default function ScheduleForm({
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar o compromisso");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao apagar compromisso",
+      );
     }
   };
 
@@ -204,7 +203,11 @@ export default function ScheduleForm({
         setDeals(data);
       } catch (err) {
         console.log(err);
-        setError("Erro ao carregar lista de clientes");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro inesperado ao carregar lista de clientes",
+        );
       }
     }
 
@@ -261,7 +264,13 @@ export default function ScheduleForm({
                 <button
                   className={styles.closeBtn}
                   type="button"
-                  onClick={() => handleDelete(schedule)}
+                  onClick={() =>
+                    setDeleteContext({
+                      message: "Deseja cancelar esse compromisso",
+                      name: schedule.label ?? "",
+                      onConfirm: () => handleDelete(schedule),
+                    })
+                  }
                 >
                   <IoTrashOutline />
                 </button>
@@ -331,6 +340,18 @@ export default function ScheduleForm({
           </div>
         </div>
       </div>
+
+      {deleteContext && (
+        <WarningDeal
+          message={deleteContext.message}
+          name={deleteContext.name}
+          onClose={() => setDeleteContext(null)}
+          onConfirm={async () => {
+            await deleteContext.onConfirm();
+            setDeleteContext(null);
+          }}
+        />
+      )}
     </form>
   );
 }

@@ -7,6 +7,7 @@ import {
   Deal,
   DealFormProps,
   DealStatus,
+  DeleteContext,
   Documentation,
   Note,
   PaymentMethod,
@@ -26,6 +27,8 @@ import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { getTotal, sumDocs } from "@/utils/sumPreviusDocs";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
+import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -64,6 +67,8 @@ export default function DealForm({
   const [fgtsValue, setFgtsValue] = useState<number>(0);
   const [financingValue, setFinancingValue] = useState<number>(0);
   const [creditLetterValue, setCreditLetterValue] = useState<number>(0);
+
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [docValues, setDocValues] = useState<Record<string, number>>({});
   const [docsCalculated, setDocsCalculated] = useState<
@@ -150,6 +155,12 @@ export default function DealForm({
     setLoading("save");
     setError("");
 
+    if (!clientId) {
+      setError("Selecionar um cliente para a negociação.");
+      setLoading(null);
+      return;
+    }
+
     try {
       const payload: Partial<Deal> = {
         clientId,
@@ -167,11 +178,9 @@ export default function DealForm({
 
       if (isClosingDeal) payload.status = status;
 
-      const maybePromise = submitFunction(payload);
-      await Promise.resolve(maybePromise);
-
       if (typeof clientId === "number") {
         const currentPriority = deal?.client?.isPriority ?? false;
+
         if (isPriority !== currentPriority) {
           const res = await fetch(`${API}/clients/${clientId}`, {
             method: "PUT",
@@ -185,15 +194,18 @@ export default function DealForm({
           if (!res.ok) throw new Error("Falha ao atualizar a prioridade");
 
           const updatedClient: Client = await res.json();
+
           if (onClientUpdated) onClientUpdated(updatedClient);
         }
       }
 
+      const maybePromise = submitFunction(payload);
+      await Promise.resolve(maybePromise);
+
       if (mode === "create") clearForm();
       onClose();
     } catch (err) {
-      console.log(err);
-      setError("Erro ao enviar formuário");
+      setError(err instanceof Error ? err.message : "Erro desconhecido");
     } finally {
       setLoading(null);
     }
@@ -247,10 +259,6 @@ export default function DealForm({
 
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`,
-    );
-    if (!confirmDelete) return;
 
     try {
       const res = await fetch(`${API}/note/${noteId}`, {
@@ -269,11 +277,6 @@ export default function DealForm({
   }
 
   const deleteDeal = async () => {
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir ${deal?.client?.name}?`,
-    );
-    if (!confirmDelete) return;
-
     if (loading !== null) return;
     setLoading("del");
     try {
@@ -301,7 +304,9 @@ export default function DealForm({
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao apagar o usuário");
+      setError(
+        err instanceof Error ? err.message : "Erro desconhecido o cliente",
+      );
     } finally {
       setLoading(null);
     }
@@ -409,7 +414,11 @@ export default function DealForm({
         setClients(data.data);
       } catch (err) {
         console.log(err);
-        setError("Erro ao carregar lista de clientes");
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Erro desconhecido ao carregar os clientes",
+        );
       } finally {
         setLoading(null);
       }
@@ -629,150 +638,122 @@ export default function DealForm({
                   </button>
                 </div>
               )}
-              <div className={styles.box}>
-                <p>Status do cliente:</p>
-                <CustomSelect
-                  options={statusOptions}
-                  value={selectedStatusOption || null}
-                  onChange={(option) => {
-                    if (option) {
-                      setStatusClient(option.value);
-                    }
-                  }}
-                />
-              </div>
 
-              <div className={styles.box}>
-                <p>Imóvel desejado:</p>
-                <textarea
-                  className={`form-base ${styles.formSearch}`}
-                  placeholder="O que o cliente busca em um imóvel?"
-                  onChange={(e) => setSearchProfile(e.target.value)}
-                  value={searchProfile}
-                />
-              </div>
+              <div className={styles.titleAndInputs}>
+                <div className={styles.box}>
+                  <p>Status do cliente</p>
+                  <p>Método de pagamento</p>
+                </div>
 
-              <div className={styles.box}>
-                <p>Método de pagamento:</p>
-                <div className={styles.paymentMethod}>
-                  {paymentMethod === "FINANCING" && (
-                    <input
-                      type="text"
-                      className={`form-base ${styles.inputBank}`}
-                      placeholder="Banco"
-                      onChange={(e) => setFinancialInstitution(e.target.value)}
-                      value={financialInstitution}
-                    />
-                  )}
+                <div className={styles.box}>
                   <CustomSelect
-                    options={paymentMethodOptions}
-                    value={selectedPaymentMethodOption || null}
+                    options={statusOptions}
+                    value={selectedStatusOption || null}
                     onChange={(option) => {
                       if (option) {
-                        setPaymentMethod(option.value);
+                        setStatusClient(option.value);
                       }
                     }}
                   />
+
+                  <div className={styles.paymentMethod}>
+                    {paymentMethod === "FINANCING" && (
+                      <input
+                        type="text"
+                        className={`form-base ${styles.inputBank}`}
+                        placeholder="Banco"
+                        onChange={(e) =>
+                          setFinancialInstitution(e.target.value)
+                        }
+                        value={financialInstitution}
+                      />
+                    )}
+                    <CustomSelect
+                      options={paymentMethodOptions}
+                      value={selectedPaymentMethodOption || null}
+                      onChange={(option) => {
+                        if (option) {
+                          setPaymentMethod(option.value);
+                        }
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className={styles.box}>
-                <p>Valor à vista</p>
-                <p>FGTS</p>
-                {paymentMethod === "FINANCING" && (
-                  <>
-                    <p>Financiamento</p>
-                    <p>Subsídio</p>
-                  </>
-                )}
-                {paymentMethod === "CREDIT_LETTER" && (
-                  <>
-                    <p>Carta de crédito</p>
-                  </>
-                )}
+              <div className={styles.titleAndInputs}>
+                <div className={styles.box}>
+                  <p>Valor à vista</p>
+                  <p>FGTS</p>
+                  {paymentMethod === "FINANCING" && (
+                    <>
+                      <p>Financiamento</p>
+                      <p>Subsídio</p>
+                    </>
+                  )}
+                  {paymentMethod === "CREDIT_LETTER" && (
+                    <>
+                      <p>Carta de crédito</p>
+                    </>
+                  )}
+                </div>
+
+                <div className={styles.payment}>
+                  <CurrencyInput
+                    className={`form-base ${styles.payment}`}
+                    placeholder="Entrada"
+                    value={downPaymentValue}
+                    onChange={setDownPaymentValue}
+                  />
+
+                  <CurrencyInput
+                    className={`form-base ${styles.payment}`}
+                    placeholder="FGTS"
+                    value={fgtsValue}
+                    onChange={setFgtsValue}
+                  />
+
+                  {paymentMethod === "FINANCING" && (
+                    <>
+                      <CurrencyInput
+                        className={`form-base ${styles.payment}`}
+                        placeholder="Valor de Financiamento"
+                        value={financingValue}
+                        onChange={setFinancingValue}
+                      />
+
+                      <CurrencyInput
+                        className={`form-base ${styles.payment}`}
+                        placeholder="Valor de subsídio"
+                        value={subsidyValue}
+                        onChange={setSubsidyValue}
+                      />
+                    </>
+                  )}
+
+                  {paymentMethod === "CREDIT_LETTER" && (
+                    <CurrencyInput
+                      className={`form-base ${styles.payment}`}
+                      placeholder="Valor da carta de crédito"
+                      value={creditLetterValue}
+                      onChange={setCreditLetterValue}
+                    />
+                  )}
+                </div>
               </div>
 
-              <div className={styles.payment}>
-                <input
-                  type="text"
-                  className={`form-base ${styles.payment}`}
-                  placeholder="Entrada"
-                  value={downPaymentValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setDownPaymentValue(numeric);
-                  }}
-                />
-
-                <input
-                  type="text"
-                  className={`form-base ${styles.payment}`}
-                  placeholder="FGTS"
-                  value={fgtsValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setFgtsValue(numeric);
-                  }}
-                />
-
-                {paymentMethod === "FINANCING" && (
-                  <>
-                    <input
-                      className={`form-base ${styles.payment}`}
-                      type="text"
-                      placeholder="Valor de Financiamento"
-                      value={financingValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFinancingValue(numeric);
-                      }}
-                    />
-
-                    <input
-                      className={`form-base ${styles.payment}`}
-                      type="text"
-                      placeholder="Valor de subsídio"
-                      value={subsidyValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setSubsidyValue(numeric);
-                      }}
-                    />
-                  </>
-                )}
-
-                {paymentMethod === "CREDIT_LETTER" && (
-                  <input
-                    type="text"
-                    className={`form-base ${styles.payment}`}
-                    placeholder="Valor da carta de crédito"
-                    value={creditLetterValue.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCreditLetterValue(numeric);
-                    }}
+              <div className={styles.titleAndInputs}>
+                <div className={styles.box}>
+                  <p>Imóvel desejado</p>
+                </div>
+                <div className={styles.boxFormSearch}>
+                  <textarea
+                    className={`form-base ${styles.formSearch}`}
+                    placeholder="O que o cliente busca em um imóvel?"
+                    onChange={(e) => setSearchProfile(e.target.value)}
+                    value={searchProfile}
                   />
-                )}
+                </div>
               </div>
 
               <h3>
@@ -811,9 +792,18 @@ export default function DealForm({
                     <button
                       className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
                       type="button"
-                      onClick={() => deleteDeal()}
+                      onClick={async () => {
+                        if (!deal) return;
+
+                        setDeleteContext({
+                          message:
+                            "Tem certeza que deseja excluir a negociação com",
+                          name: deal.client?.name ?? "",
+                          onConfirm: deleteDeal,
+                        });
+                      }}
                     >
-                      {loading === "del" ? "Apagando" : "Apagar"}
+                      {loading === "del" ? <span>Apagando...</span> : "Apagar"}
                     </button>
                   )}
 
@@ -822,7 +812,11 @@ export default function DealForm({
                     type="button"
                     onClick={(e) => handleSubmit(e, onSubmit, false)}
                   >
-                    {loading === "save" ? "Atualizando" : "Atualizar"}
+                    {loading === "save" ? (
+                      <span>Atualizando...</span>
+                    ) : (
+                      "Atualizar"
+                    )}
                   </button>
                   <button
                     className={`btn-action glass ${styles.btnDeal} ${styles.btnSell}`}
@@ -923,7 +917,15 @@ export default function DealForm({
                               <button
                                 className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
                                 type="button"
-                                onClick={() => handleDeleteNote(note.id)}
+                                onClick={async () => {
+                                  if (!deal) return;
+                                  setDeleteContext({
+                                    message:
+                                      "Tem certeza que deseja excluir a nota",
+                                    name: note.content,
+                                    onConfirm: () => handleDeleteNote(note.id),
+                                  });
+                                }}
                               >
                                 <RiEraserFill />
                               </button>
@@ -1066,6 +1068,18 @@ export default function DealForm({
               </div>
             )}
           </div>
+        )}
+
+        {deleteContext && (
+          <WarningDeal
+            message={deleteContext.message}
+            name={deleteContext.name}
+            onClose={() => setDeleteContext(null)}
+            onConfirm={async () => {
+              await deleteContext.onConfirm();
+              setDeleteContext(null);
+            }}
+          />
         )}
 
         {isCloseOpen && deal && (

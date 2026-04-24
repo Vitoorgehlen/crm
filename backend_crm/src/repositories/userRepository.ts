@@ -136,6 +136,8 @@ export async function deleteTeamMember(
   const isSameCompany = sameCompany({requesterId, targetId });
   if (!isSameCompany) throw new Error('Usuários não são da mesma empresa.' );
 
+  console.log(requesterRole)
+
   if (requesterRole !== 'ADMIN') {
     throw new Error('Apenas administradores podem remover usuários');
   }

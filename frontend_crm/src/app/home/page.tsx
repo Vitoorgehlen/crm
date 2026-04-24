@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import styles from "./page.module.css";
 import {
+  DeleteContext,
   priorityOrder,
   TaskPriority,
   Tasks,
@@ -17,6 +18,7 @@ import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
 import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
 import ChartLayout from "@/components/chart/Chart";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
@@ -26,13 +28,15 @@ export default function Home() {
   const [tasks, setTasks] = useState<Tasks[]>();
 
   const [isOpenEditTask, setIsOpenEditTask] = useState<number | undefined>(
-    undefined
+    undefined,
   );
   const [taskContent, setTaskContent] = useState("");
   const [taskPriority, setTaskPriority] = useState<TaskPriority>(
-    TasksPriority.NORMAL
+    TasksPriority.NORMAL,
   );
   const [taskFinish, setTaskFinish] = useState(false);
+
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [user, setUser] = useState<User | null>(null);
 
@@ -50,14 +54,17 @@ export default function Home() {
     }
   }, [token]);
 
-  const groupedTasks = tasks?.reduce((acc, task) => {
-    const priority = task.priority;
-    if (!acc[priority]) {
-      acc[priority] = [];
-    }
-    acc[priority].push(task);
-    return acc;
-  }, {} as Record<TasksPriority, Tasks[]>);
+  const groupedTasks = tasks?.reduce(
+    (acc, task) => {
+      const priority = task.priority;
+      if (!acc[priority]) {
+        acc[priority] = [];
+      }
+      acc[priority].push(task);
+      return acc;
+    },
+    {} as Record<TasksPriority, Tasks[]>,
+  );
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -139,13 +146,6 @@ export default function Home() {
   }
 
   async function handleDeleteTask(task: Tasks) {
-    if (!task.isFinish) {
-      const confirmDelete = window.confirm(
-        `Tem certeza que deseja excluir essa tarefa?`
-      );
-      if (!confirmDelete) return;
-    }
-
     if (!task) return;
 
     try {
@@ -257,7 +257,7 @@ export default function Home() {
                   .sort(
                     ([priorityA], [priorityB]) =>
                       priorityOrder[priorityA as TasksPriority] -
-                      priorityOrder[priorityB as TasksPriority]
+                      priorityOrder[priorityB as TasksPriority],
                   )
                   .map(([priority, tasksInGroup]) => (
                     <div key={priority} className={styles.taskItens}>
@@ -277,7 +277,7 @@ export default function Home() {
                                 value={taskPriority}
                                 onChange={(e) =>
                                   setTaskPriority(
-                                    e.target.value as TasksPriority
+                                    e.target.value as TasksPriority,
                                   )
                                 }
                                 required
@@ -287,7 +287,7 @@ export default function Home() {
                                     <option key={key} value={value.dbValue}>
                                       {value.label}
                                     </option>
-                                  )
+                                  ),
                                 )}
                               </select>
 
@@ -343,7 +343,13 @@ export default function Home() {
                                 <button
                                   className={styles.btnDelTask}
                                   type="button"
-                                  onClick={() => handleDeleteTask(task)}
+                                  onClick={() =>
+                                    setDeleteContext({
+                                      message: "Deseja cancelar essa tarefa",
+                                      name: task.content ?? "",
+                                      onConfirm: () => handleDeleteTask(task),
+                                    })
+                                  }
                                 >
                                   <RiEraserFill />
                                 </button>
@@ -366,6 +372,17 @@ export default function Home() {
           <ScheduleLayout />
         </div>
       </div>
+      {deleteContext && (
+        <WarningDeal
+          message={deleteContext.message}
+          name={deleteContext.name}
+          onClose={() => setDeleteContext(null)}
+          onConfirm={async () => {
+            await deleteContext.onConfirm();
+            setDeleteContext(null);
+          }}
+        />
+      )}
     </main>
   );
 }

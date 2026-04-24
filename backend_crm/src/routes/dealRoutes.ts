@@ -25,7 +25,7 @@ router.post('/deals', loginRequired, async(req, res) => {
 
   const { clientId, ...dealData } = req.body;
 
-  if (!clientId) return res.status(400).json({ error: 'clientId é obrigatório.' });
+  if (!clientId) return res.status(400).json({ error: 'Selecionar um cliente para a negociação.' });
 
   try {
     const newDeal = await addDeal({

@@ -86,7 +86,11 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao salvar");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao salvar seus dados",
+      );
     } finally {
       setLoading(false);
     }
@@ -145,7 +149,11 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       return payload;
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao verificar os dados");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao verfificar os dados",
+      );
       return null;
     }
   };

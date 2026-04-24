@@ -29,6 +29,7 @@ export default function DealList({
 }: DealListProps) {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+  const [initialLoading, setInitialLoading] = useState(true);
 
   const [dealId, setDealId] = useQueryState("dealId");
   const [users, setUsers] = useState<User[]>([]);
@@ -314,6 +315,7 @@ export default function DealList({
       console.error("Erro ao buscar deals:", err);
     } finally {
       setLoading(false);
+      setInitialLoading(false);
     }
   }, [token, search, teamDeals, userId, limit, selectedStatusDeal, statusList]);
 
@@ -404,22 +406,6 @@ export default function DealList({
           showClearButton={!!dealId}
         />
 
-        <div className={styles.box}>
-          {isCreateOpen && (
-            <DealForm
-              mode="create"
-              isOpen={isCreateOpen}
-              deal={undefined}
-              onClose={() => {
-                setIsCreateOpen(false);
-                setSelectedDeal(null);
-                setDealId(null);
-              }}
-              onSubmit={handleCreate}
-            />
-          )}
-        </div>
-
         {dealId && (
           <div className={styles.btnUncheck}>
             <button
@@ -435,12 +421,13 @@ export default function DealList({
         )}
 
         {Object.values(dealsByStatus).every((deals) => deals.length === 0) &&
-        !loading ? (
+        !loading &&
+        !initialLoading ? (
           <div className={styles.noItens}>
             <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
             <p>
-              Verifique se você tem alguma negociação criada ou entre em contato
-              para corrigirmos esse erro.
+              Se o problema persistir entre em contato para corrigirmos este
+              erro.
             </p>
           </div>
         ) : (
@@ -565,6 +552,7 @@ export default function DealList({
           </div>
         )}
       </main>
+
       {selectedDeal && (
         <DealForm
           mode="edit"
@@ -577,6 +565,20 @@ export default function DealList({
           onSubmit={handleEdit}
           onCloseDeal={closeDealShares}
           onDelete={handleDeleteDeal}
+        />
+      )}
+
+      {isCreateOpen && (
+        <DealForm
+          mode="create"
+          isOpen={isCreateOpen}
+          deal={undefined}
+          onClose={() => {
+            setIsCreateOpen(false);
+            setSelectedDeal(null);
+            setDealId(null);
+          }}
+          onSubmit={handleCreate}
         />
       )}
     </div>

@@ -36,7 +36,7 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
         finalEmail,
         finalEmail2,
         finalPassword,
-        finalPassword2
+        finalPassword2,
       );
 
       if (!payload) {
@@ -73,7 +73,9 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao salvar");
+      setError(
+        err instanceof Error ? err.message : "Erro inesperado ao salvar",
+      );
     } finally {
       setLoading(false);
     }
@@ -84,7 +86,7 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
     email: string,
     email2: string,
     password: string,
-    password2: string
+    password2: string,
   ) => {
     try {
       if (name.length < 4 || name.length > 25) {
@@ -121,7 +123,7 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
         const passReq = /(?=.*[a-z])(?=.*[A-Z])/;
         if (!passReq.test(password)) {
           setError(
-            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula"
+            "Senha precisa conter ao menos uma letra maiúscula e uma minúscula",
           );
           return;
         }
@@ -133,7 +135,11 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
       return payload;
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao verificar os dados");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao verfificar os dados",
+      );
       return null;
     }
   };

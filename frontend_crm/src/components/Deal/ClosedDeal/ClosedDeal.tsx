@@ -16,7 +16,7 @@ import {
   DEAL_STEP_TYPE_LABEL,
   WORKFLOW_BY_METHOD,
   Documentation,
-  docsNames,
+  DeleteContext,
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
@@ -32,6 +32,8 @@ import { BsCashCoin } from "react-icons/bs";
 import { sumDocs } from "@/utils/sumPreviusDocs";
 import { useRouter } from "next/navigation";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
+import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 
 export default function ClosedDeal({
   isOpen,
@@ -39,6 +41,7 @@ export default function ClosedDeal({
   onClose,
   onSubmit,
   newStep,
+  onUpdateDealShare,
 }: CloseDealFormProps) {
   const { token, isLoading } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
@@ -105,6 +108,7 @@ export default function ClosedDeal({
   const [docCostTotal, setDocCostTotal] = useState<number>(0);
 
   const [showClientPopup, setShowClientPopup] = useState(false);
+  const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [showPopup, setShowPopup] = useState(false);
   const [docValues, setDocValues] = useState<Record<string, number>>({});
@@ -196,6 +200,55 @@ export default function ClosedDeal({
     );
   }
 
+  async function updateDealShare(split: CommissionSplit) {
+    if (!split.id) return;
+
+    try {
+      const res = await fetch(`${API}/deals-share/${split.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          received: split.received,
+          isPaid: split.isPaid,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        console.error(data);
+        throw new Error(data.error || "Erro ao atualizar comissão");
+      }
+
+      if (onUpdateDealShare) {
+        const updatedDealShare = deal.DealShare?.map((existingShare) => {
+          if (existingShare.id === split.id) {
+            return {
+              ...existingShare,
+              received: split.received,
+              isPaid: split.isPaid,
+              userId: split.userId ?? undefined,
+            };
+          }
+          return existingShare;
+        });
+
+        const updatedDeal = {
+          ...deal,
+          DealShare: updatedDealShare,
+        };
+
+        onUpdateDealShare(updatedDeal);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao atualizar comissão");
+    }
+  }
+
   function computedAmountFor(index: number): number {
     const s = splits[index];
     if (!s) return 0;
@@ -206,6 +259,15 @@ export default function ClosedDeal({
     }
 
     return s.amount ?? 0;
+  }
+
+  function hasPendingCommissions() {
+    return splits.some((s, i) => {
+      const total =
+        splitMethod === "percentage" ? computedAmountFor(i) : (s.amount ?? 0);
+
+      return !s.isPaid || (s.received ?? 0) < total;
+    });
   }
 
   function real(v: number | undefined | null): string {
@@ -338,6 +400,7 @@ export default function ClosedDeal({
   async function handleSubmit(e?: React.FormEvent) {
     if (e) e.preventDefault();
     setError(null);
+
     const err = validate();
     if (err) {
       setError(err);
@@ -346,10 +409,10 @@ export default function ClosedDeal({
 
     if (loading) return;
     setLoading(true);
+
     try {
       const payload = buildPayload();
       await onSubmit(payload);
-      onClose();
     } catch (err: any) {
       console.error(err);
       setError(err?.message ?? "Erro ao atualizar negociação.");
@@ -361,18 +424,15 @@ export default function ClosedDeal({
   async function handleChangeStep(e: React.FormEvent, step: string) {
     if (e) e.preventDefault();
     setError(null);
-    await handleSubmit();
 
-    if (step === "next" && isLastStep) {
-      const hasUnpaidCommission = splits.some((s) => !s.isPaid);
-      if (hasUnpaidCommission) {
-        setError(
-          "Não é possível finalizar a negociação com comissões pendentes.",
-        );
-        return;
-      }
+    if (step === "next" && isLastStep && hasPendingCommissions()) {
+      setError(
+        "Não é possível finalizar a negociação com comissões pendentes.",
+      );
+      return;
     }
 
+    await handleSubmit();
     if (loading) return;
     setLoading(true);
     try {
@@ -448,10 +508,6 @@ export default function ClosedDeal({
 
   async function handleDeleteDocCost(docId?: number) {
     if (typeof docId !== "number") return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa documentação?`,
-    );
-    if (!confirmDelete) return;
 
     try {
       const res = await fetch(`${API}/documentationcost/${docId}`, {
@@ -516,10 +572,6 @@ export default function ClosedDeal({
 
   async function handleDeleteNote(noteId?: number) {
     if (typeof noteId !== "number") return;
-    const confirmDelete = window.confirm(
-      `Tem certeza que deseja excluir essa nota?`,
-    );
-    if (!confirmDelete) return;
 
     try {
       const res = await fetch(`${API}/note/${noteId}`, {
@@ -576,6 +628,7 @@ export default function ClosedDeal({
 
     if (deal.DealShare && deal.DealShare.length > 0) {
       const shares = deal.DealShare.map((ds) => ({
+        id: ds.id,
         userId: ds.userId ?? null,
         isCompany: !!ds.isCompany,
         amount: Number(ds.amount ?? 0),
@@ -798,36 +851,20 @@ export default function ClosedDeal({
             <div className={styles.paymentTitle}>
               <div className={styles.payment}>
                 <p>Valor do imóvel</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
-                  value={propertyValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setPropertyValue(numeric);
-                  }}
                   placeholder="Valor do imóvel"
+                  value={propertyValue}
+                  onChange={setPropertyValue}
                 />
               </div>
               <div className={styles.payment}>
                 <p>Valor total da comissão</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
-                  value={commissionAmount.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setCommissionAmount(numeric);
-                  }}
                   placeholder="Valor da comissão"
+                  value={commissionAmount}
+                  onChange={setCommissionAmount}
                 />
               </div>
 
@@ -862,56 +899,32 @@ export default function ClosedDeal({
             <div className={styles.paymentTitle}>
               <div className={styles.payment}>
                 <p>Entrada</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
                   placeholder="Valor de entrada"
-                  value={downPaymentValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setDownPaymentValue(numeric);
-                  }}
+                  value={downPaymentValue}
+                  onChange={setDownPaymentValue}
                 />
               </div>
 
               <div className={styles.payment}>
                 <p>FGTS</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
                   placeholder="FGTS"
-                  value={fgtsValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setFgtsValue(numeric);
-                  }}
+                  value={fgtsValue}
+                  onChange={setFgtsValue}
                 />
               </div>
 
               {paymentMethod === "CASH" && (
                 <div className={styles.payment}>
                   <p>Valor à vista</p>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     className={`form-base ${styles.form}`}
-                    placeholder="Valor a vista"
-                    value={cashValue.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCashValue(numeric);
-                    }}
+                    placeholder="Valor à vista"
+                    value={cashValue}
+                    onChange={setCashValue}
                   />
                 </div>
               )}
@@ -920,37 +933,21 @@ export default function ClosedDeal({
                 <>
                   <div className={styles.payment}>
                     <p>Financiamento</p>
-                    <input
-                      type="text"
+                    <CurrencyInput
                       className={`form-base ${styles.form}`}
-                      placeholder="Valor de Financiamento"
-                      value={financingValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setFinancingValue(numeric);
-                      }}
+                      placeholder="Valor de financiamento"
+                      value={financingValue}
+                      onChange={setFinancingValue}
                     />
                   </div>
 
                   <div className={styles.payment}>
                     <p>Subsídio</p>
-                    <input
-                      type="text"
+                    <CurrencyInput
                       className={`form-base ${styles.form}`}
                       placeholder="Valor de subsídio"
-                      value={subsidyValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setSubsidyValue(numeric);
-                      }}
+                      value={subsidyValue}
+                      onChange={setSubsidyValue}
                     />
                   </div>
                 </>
@@ -958,19 +955,11 @@ export default function ClosedDeal({
               {paymentMethod === "CREDIT_LETTER" && (
                 <div className={styles.payment}>
                   <p>Carta crédito</p>
-                  <input
-                    type="text"
+                  <CurrencyInput
                     className={`form-base ${styles.form}`}
                     placeholder="Valor da carta de crédito"
-                    value={creditLetterValue.toLocaleString("pt-BR", {
-                      style: "currency",
-                      currency: "BRL",
-                    })}
-                    onChange={(e) => {
-                      const numeric =
-                        Number(e.target.value.replace(/\D/g, "")) / 100;
-                      setCreditLetterValue(numeric);
-                    }}
+                    value={creditLetterValue}
+                    onChange={setCreditLetterValue}
                   />
                 </div>
               )}
@@ -1001,19 +990,11 @@ export default function ClosedDeal({
                 >
                   <div className={styles.payment}>
                     <p>Valor da parcela</p>
-                    <input
-                      type="text"
+                    <CurrencyInput
                       className={`form-base ${styles.form}`}
                       placeholder="Parcelamento"
-                      value={installmentValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setInstallmentValue(numeric);
-                      }}
+                      value={installmentValue}
+                      onChange={setInstallmentValue}
                     />
                   </div>
                   <div className={styles.payment}>
@@ -1030,19 +1011,11 @@ export default function ClosedDeal({
                   </div>
                   <div className={styles.payment}>
                     <p>Valor do reforço</p>
-                    <input
-                      type="text"
+                    <CurrencyInput
                       className={`form-base ${styles.form}`}
                       placeholder="Reforço"
-                      value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                        style: "currency",
-                        currency: "BRL",
-                      })}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setBonusInstallmentValue(numeric);
-                      }}
+                      value={bonusInstallmentValue}
+                      onChange={setBonusInstallmentValue}
                     />
                   </div>
                   <div className={styles.payment}>
@@ -1132,21 +1105,25 @@ export default function ClosedDeal({
                       {s.isPaid && (
                         <>
                           <button
-                            className={`btn-action glass ${
-                              s.isPaid ? styles.btnPaidActive : styles.btnPaid
-                            }`}
+                            className={`btn-action glass ${styles.btnPaidActive}`}
                             type="button"
-                            onClick={() =>
-                              updateSplit(i, { isPaid: !s.isPaid })
-                            }
+                            onClick={() => {
+                              const total =
+                                splitMethod === "percentage"
+                                  ? computedAmountFor(i)
+                                  : (splits[i].amount ?? 0);
+
+                              const updated = {
+                                ...splits[i],
+                                received: 0,
+                                isPaid: false,
+                              };
+
+                              updateSplit(i, updated);
+                              updateDealShare(updated);
+                            }}
                           >
-                            {s.isPaid ? (
-                              <>
-                                <GiCheckMark /> Recebido
-                              </>
-                            ) : (
-                              "Receber"
-                            )}
+                            <GiCheckMark /> Recebido
                           </button>
 
                           <button
@@ -1205,8 +1182,10 @@ export default function ClosedDeal({
                             disabled={s.isPaid}
                             value={real(Number(s.amount ?? 0))}
                             onChange={(e) => {
-                              const numeric =
+                              let numeric =
                                 Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                              if (numeric >= 99999999.99) numeric = 99999999.99;
 
                               updateSplit(i, {
                                 amount: numeric,
@@ -1218,15 +1197,11 @@ export default function ClosedDeal({
 
                         <div className={styles.paidValue}>
                           <p>Valor recebido:</p>
-                          <input
-                            type="text"
+                          <CurrencyInput
                             className={`form-base ${styles.form}`}
-                            style={{ width: 110 }}
-                            value={real(Number(s.received ?? 0))}
-                            onChange={(e) => {
-                              const numeric =
-                                Number(e.target.value.replace(/\D/g, "")) / 100;
-
+                            placeholder="Pago"
+                            value={Number(s.received ?? 0)}
+                            onChange={(numeric) => {
                               const maxAllowed =
                                 splitMethod === "percentage"
                                   ? computedAmountFor(i)
@@ -1236,24 +1211,29 @@ export default function ClosedDeal({
                                 received: Math.min(numeric, maxAllowed),
                               });
                             }}
-                            placeholder="Pago"
                           />
                         </div>
 
                         <button
-                          className={`btn-action glass ${
-                            s.isPaid ? styles.btnPaidActive : styles.btnPaid
-                          }`}
+                          className={`btn-action glass ${styles.btnPaid}`}
                           type="button"
-                          onClick={() => updateSplit(i, { isPaid: !s.isPaid })}
+                          onClick={() => {
+                            const total =
+                              splitMethod === "percentage"
+                                ? computedAmountFor(i)
+                                : (splits[i].amount ?? 0);
+
+                            const updated = {
+                              ...splits[i],
+                              received: total,
+                              isPaid: true,
+                            };
+
+                            updateSplit(i, updated);
+                            updateDealShare(updated);
+                          }}
                         >
-                          {s.isPaid ? (
-                            <>
-                              <GiCheckMark /> Recebido
-                            </>
-                          ) : (
-                            "Receber"
-                          )}
+                          Receber
                         </button>
 
                         <button
@@ -1286,7 +1266,13 @@ export default function ClosedDeal({
                 className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
                 type="button"
                 onClick={(e) => {
-                  handleChangeStep(e, "back");
+                  if (isFirstStep) {
+                    setDeleteContext({
+                      message: "Deseja cancelar a negociação com",
+                      name: deal.client?.name ?? "",
+                      onConfirm: () => handleChangeStep(e, "back"),
+                    });
+                  } else handleChangeStep(e, "back");
                 }}
               >
                 <span>
@@ -1355,16 +1341,11 @@ export default function ClosedDeal({
                       value={docCostLabel}
                       onChange={(e) => setDocCostLabel(e.target.value)}
                     />
-                    <input
-                      type="text"
+                    <CurrencyInput
                       className={`form-base ${styles.addNoteForm}`}
                       placeholder="Documentação"
-                      value={real(docCostValue)}
-                      onChange={(e) => {
-                        const numeric =
-                          Number(e.target.value.replace(/\D/g, "")) / 100;
-                        setDocCostValue(numeric);
-                      }}
+                      value={docCostValue}
+                      onChange={setDocCostValue}
                     />
                     <input
                       type="text"
@@ -1374,6 +1355,7 @@ export default function ClosedDeal({
                       onChange={(e) => setDocCostNote(e.target.value)}
                     />
                     <button
+                      type="button"
                       className={styles.btnSave}
                       onClick={handleAddDocCost}
                       disabled={!docCostLabel.trim()}
@@ -1399,17 +1381,13 @@ export default function ClosedDeal({
                           value={docCostLabel}
                           onChange={(e) => setDocCostLabel(e.target.value)}
                         />
-                        <input
-                          type="text"
+                        <CurrencyInput
                           className={`form-base ${styles.addNoteForm}`}
                           placeholder="Documentação"
-                          value={real(docCostValue)}
-                          onChange={(e) => {
-                            const numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-                            setDocCostValue(numeric);
-                          }}
+                          value={docCostValue}
+                          onChange={setDocCostValue}
                         />
+
                         <input
                           type="text"
                           className={`form-base ${styles.addNoteForm}`}
@@ -1462,7 +1440,13 @@ export default function ClosedDeal({
                             <button
                               className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
                               type="button"
-                              onClick={() => handleDeleteDocCost(doc.id)}
+                              onClick={() =>
+                                setDeleteContext({
+                                  message: "Deseja cancelar essa documentação",
+                                  name: doc.label ?? "",
+                                  onConfirm: () => handleDeleteDocCost(doc.id),
+                                })
+                              }
                             >
                               <RiEraserFill />
                             </button>
@@ -1561,7 +1545,13 @@ export default function ClosedDeal({
                           <button
                             className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
                             type="button"
-                            onClick={() => handleDeleteNote(note.id)}
+                            onClick={() =>
+                              setDeleteContext({
+                                message: "Deseja cancelar essa nota",
+                                name: note.content ?? "",
+                                onConfirm: () => handleDeleteNote(note.id),
+                              })
+                            }
                           >
                             <RiEraserFill />
                           </button>
@@ -1702,6 +1692,18 @@ export default function ClosedDeal({
               </div>
             )}
           </div>
+        )}
+
+        {deleteContext && (
+          <WarningDeal
+            message={deleteContext.message}
+            name={deleteContext.name}
+            onClose={() => setDeleteContext(null)}
+            onConfirm={async () => {
+              await deleteContext.onConfirm();
+              setDeleteContext(null);
+            }}
+          />
         )}
       </div>
     </form>

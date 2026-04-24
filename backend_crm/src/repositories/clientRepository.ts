@@ -15,6 +15,7 @@ export async function addClient(
   const canCreateClient = await checkUserPermission(creatorId, 'DEAL_CREATE');
   if (!canCreateClient) throw new Error('Você não tem permissão para criar clientes');
 
+  if (!data.name || data.name.length <= 2) throw new Error('Nome curto demais');
   const { dateOfBirth, ...rest } = data;
 
   return prisma.$transaction(async (tx) => {

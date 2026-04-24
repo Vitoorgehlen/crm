@@ -11,15 +11,25 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicPaths = useMemo(() => ["/login", "/reset-password"], []);
+  const publicPaths = useMemo(() => ["/"], []);
+  const authPages = useMemo(() => ["/login", "/reset-password"], []);
   const SUPaths = useMemo(() => ["/super-user-dashboard"], []);
 
   useEffect(() => {
     if (isLoading) return;
 
     if (!token) {
-      if (!publicPaths.includes(pathname)) {
+      if (!publicPaths.includes(pathname) && !authPages.includes(pathname)) {
         router.push("/login");
+      }
+      return;
+    }
+
+    if (token && authPages.includes(pathname)) {
+      if (userType === "superuser") {
+        router.push("/super-user-dashboard");
+      } else {
+        router.push("/home");
       }
       return;
     }
@@ -41,7 +51,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
       router.push("/super-user-dashboard");
       return;
     }
-  }, [SUPaths, publicPaths, token, userType, isLoading, pathname, router]);
+  }, [SUPaths, authPages, token, userType, isLoading, pathname, router]);
 
   if (isLoading) {
     return (
@@ -51,7 +61,9 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!token && publicPaths.includes(pathname)) return <>{children}</>;
+  if (pathname === "/") return <>{children}</>;
+
+  if (!token && authPages.includes(pathname)) return <>{children}</>;
   if (token && userType === "superuser" && pathname.startsWith("/super-user"))
     return <>{children}</>;
   if (token && userType === "user") return <>{children}</>;

@@ -18,6 +18,7 @@ import {
   MdCheckBox,
 } from "react-icons/md";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
+import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 
 export default function CloseDealForm({
   isOpen,
@@ -507,34 +508,20 @@ export default function CloseDealForm({
         <div className={styles.paymentTitle}>
           <div className={styles.payment}>
             <p>Valor do imóvel</p>
-            <input
-              type="text"
+            <CurrencyInput
               className={`form-base ${styles.form}`}
-              value={propertyValue.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-              onChange={(e) => {
-                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-                setPropertyValue(numeric);
-              }}
               placeholder="Valor do imóvel"
+              value={propertyValue}
+              onChange={setPropertyValue}
             />
           </div>
           <div className={styles.payment}>
             <p>Valor total da comissão</p>
-            <input
-              type="text"
+            <CurrencyInput
               className={`form-base ${styles.form}`}
-              value={commissionAmount.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-              onChange={(e) => {
-                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-                setCommissionAmount(numeric);
-              }}
-              placeholder="Valor da comissão"
+              placeholder="Valor de comissão"
+              value={commissionAmount}
+              onChange={setCommissionAmount}
             />
           </div>
           {paymentMethod === "FINANCING" && (
@@ -568,54 +555,32 @@ export default function CloseDealForm({
         <div className={styles.paymentTitle}>
           <div className={styles.payment}>
             <p>Entrada</p>
-            <input
-              type="text"
+            <CurrencyInput
               className={`form-base ${styles.form}`}
               placeholder="Entrada"
-              value={downPaymentValue.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-              onChange={(e) => {
-                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-                setDownPaymentValue(numeric);
-              }}
+              value={downPaymentValue}
+              onChange={setDownPaymentValue}
             />
           </div>
 
           <div className={styles.payment}>
             <p>FGTS</p>
-            <input
-              type="text"
+            <CurrencyInput
               className={`form-base ${styles.form}`}
               placeholder="FGTS"
-              value={fgtsValue.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              })}
-              onChange={(e) => {
-                const numeric = Number(e.target.value.replace(/\D/g, "")) / 100;
-                setFgtsValue(numeric);
-              }}
+              value={fgtsValue}
+              onChange={setFgtsValue}
             />
           </div>
 
           {paymentMethod === "CASH" && (
             <div className={styles.payment}>
               <p>À vista</p>
-              <input
-                type="text"
+              <CurrencyInput
                 className={`form-base ${styles.form}`}
-                placeholder="FGTS"
-                value={cashValue.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFgtsValue(numeric);
-                }}
+                placeholder="Valor à vista"
+                value={cashValue}
+                onChange={setCashValue}
               />
             </div>
           )}
@@ -623,19 +588,11 @@ export default function CloseDealForm({
           {paymentMethod === "FINANCING" && (
             <div className={styles.payment}>
               <p>Financiado</p>
-              <input
+              <CurrencyInput
                 className={`form-base ${styles.form}`}
-                type="text"
-                placeholder="Valor de Financiamento"
-                value={financingValue.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setFinancingValue(numeric);
-                }}
+                placeholder="Valor de financiamento"
+                value={financingValue}
+                onChange={setFinancingValue}
               />
             </div>
           )}
@@ -643,19 +600,11 @@ export default function CloseDealForm({
           {paymentMethod === "FINANCING" && (
             <div className={styles.payment}>
               <p>Subsídio</p>
-              <input
+              <CurrencyInput
                 className={`form-base ${styles.form}`}
-                type="text"
-                placeholder="Valor de subsídio"
-                value={subsidyValue.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setSubsidyValue(numeric);
-                }}
+                placeholder="Valor de financiamento"
+                value={subsidyValue}
+                onChange={setSubsidyValue}
               />
             </div>
           )}
@@ -663,19 +612,11 @@ export default function CloseDealForm({
           {paymentMethod === "CREDIT_LETTER" && (
             <div className={styles.payment}>
               <p>Carta de crédito</p>
-              <input
-                type="text"
+              <CurrencyInput
                 className={`form-base ${styles.form}`}
                 placeholder="Valor da carta de crédito"
-                value={creditLetterValue.toLocaleString("pt-BR", {
-                  style: "currency",
-                  currency: "BRL",
-                })}
-                onChange={(e) => {
-                  const numeric =
-                    Number(e.target.value.replace(/\D/g, "")) / 100;
-                  setCreditLetterValue(numeric);
-                }}
+                value={creditLetterValue}
+                onChange={setCreditLetterValue}
               />
             </div>
           )}
@@ -706,19 +647,11 @@ export default function CloseDealForm({
             >
               <div className={styles.payment}>
                 <p>Valor da parcela</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
                   placeholder="Parcelamento"
-                  value={installmentValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setInstallmentValue(numeric);
-                  }}
+                  value={installmentValue}
+                  onChange={setInstallmentValue}
                 />
               </div>
               <div className={styles.payment}>
@@ -733,19 +666,11 @@ export default function CloseDealForm({
               </div>
               <div className={styles.payment}>
                 <p>Valor do reforço</p>
-                <input
-                  type="text"
+                <CurrencyInput
                   className={`form-base ${styles.form}`}
                   placeholder="Reforço"
-                  value={bonusInstallmentValue.toLocaleString("pt-BR", {
-                    style: "currency",
-                    currency: "BRL",
-                  })}
-                  onChange={(e) => {
-                    const numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
-                    setBonusInstallmentValue(numeric);
-                  }}
+                  value={bonusInstallmentValue}
+                  onChange={setBonusInstallmentValue}
                 />
               </div>
               <div className={styles.payment}>
@@ -852,8 +777,10 @@ export default function CloseDealForm({
                         style={{ width: 120 }}
                         value={real(Number(s.amount ?? 0))}
                         onChange={(e) => {
-                          const numeric =
+                          let numeric =
                             Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                          if (numeric >= 99999999.99) numeric = 99999999.99;
                           updateSplit(i, {
                             amount: numeric,
                           });
@@ -914,7 +841,7 @@ export default function CloseDealForm({
             onClick={() => handleSubmit()}
             disabled={loading}
           >
-            {loading ? "Confirmando..." : "Confirmar"}
+            {loading ? <span>Confirmando...</span> : "Confirmar"}
           </button>
         </div>
 

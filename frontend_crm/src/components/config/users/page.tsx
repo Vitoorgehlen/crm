@@ -171,7 +171,9 @@ export default function ConfigUsers({
       if (onUpdate) onUpdate();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao salvar");
+      setError(
+        err instanceof Error ? err.message : "Erro inesperado ao criar usuário",
+      );
     } finally {
       setLoading(false);
     }
@@ -234,7 +236,11 @@ export default function ConfigUsers({
       onClose();
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao salvar");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao editar usuário",
+      );
     } finally {
       setLoading(false);
     }
@@ -306,7 +312,11 @@ export default function ConfigUsers({
       return payload;
     } catch (err) {
       console.error(err);
-      setError("Erro inesperado ao verificar os dados");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao verfificar os dados",
+      );
       return null;
     }
   };

@@ -87,7 +87,7 @@ export default function SuperUserPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(err instanceof Error ? err.message : "Erro inesperado");
       }
     } finally {
       setLoading(false);
@@ -127,7 +127,7 @@ export default function SuperUserPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(err instanceof Error ? err.message : "Erro inesperado");
       }
     } finally {
       setLoading(false);
@@ -198,7 +198,7 @@ export default function SuperUserPage() {
       if (err instanceof Error) {
         setError(err.message);
       } else {
-        setError("Erro inesperado");
+        setError(err instanceof Error ? err.message : "Erro inesperado");
       }
     } finally {
       setLoading(false);
@@ -282,27 +282,29 @@ export default function SuperUserPage() {
           <div className={styles.createCompany}>
             <div className={styles.createCompanyBox}>
               <input
-                className={styles.labelCreateCompany}
+                className="form-base"
                 type="text"
                 placeholder="Nome"
                 onChange={(e) => setCompanyName(e.target.value)}
               />
               <input
-                className={styles.labelCreateCompany}
+                className="form-base"
                 type="number"
                 placeholder="MaxUsers"
                 onChange={(e) => setCompanyUsers(Number(e.target.value))}
               />
 
               <button
-                className={styles.btnSave}
+                className={`btn-action glass ${styles.btnSave}`}
+                style={{ width: 80 }}
                 onClick={(e) => handleSubmit(e)}
               >
-                <h4>Criar compania</h4>
+                <h4>Criar</h4>
               </button>
             </div>
             {error && <p className={styles.error}>{error}</p>}
           </div>
+
           <div className={styles.companies}>
             {companies.length === 0 ? (
               <p>Nenhuma empresa cadastrada</p>
@@ -315,14 +317,14 @@ export default function SuperUserPage() {
                     <div key={company.id} className={styles.companyContent}>
                       <div className={styles.companyInfos}>
                         <input
-                          className={styles.labelCreateCompany}
+                          className="form-base"
                           type="text"
                           placeholder="Nome"
                           value={companyName}
                           onChange={(e) => setCompanyName(e.target.value)}
                         />
                         <input
-                          className={styles.labelCreateCompany}
+                          className="form-base"
                           type="number"
                           placeholder="MaxUsers"
                           value={companyUsers}
@@ -354,7 +356,7 @@ export default function SuperUserPage() {
                     <div className={styles.companyContent}>
                       <div className={styles.companyInfos}>
                         {Array.isArray(users) && users.length > 0 ? (
-                          users.map((u) => <h3 key={u.id}>{u.name}</h3>)
+                          users.map((u) => <h5 key={u.id}>{u.name}</h5>)
                         ) : (
                           <p>Nenhum usuário</p>
                         )}
@@ -365,8 +367,8 @@ export default function SuperUserPage() {
                   <div key={company.id} className={styles.company}>
                     <div key={company.id} className={styles.companyContent}>
                       <div className={styles.companyInfos}>
-                        <h3>{company.name}</h3>
-                        <h3>{company.maxUsers}</h3>
+                        <h4>{company.name}</h4>
+                        <h5>{company.maxUsers}</h5>
                       </div>
                       <button
                         className={styles.btnOpenCompany}
@@ -391,32 +393,67 @@ export default function SuperUserPage() {
             )}
           </div>
 
-          {docsNames.map((doc) => (
-            <div key={doc.key}>
-              <h3>{doc.label}</h3>
-              <input
-                type="number"
-                value={docValues[doc.key] ?? ""}
-                onChange={(e) =>
-                  setDocValues((prev) => ({
-                    ...prev,
-                    [doc.key]: Number(e.target.value),
-                  }))
-                }
-              />
-            </div>
-          ))}
+          <div className={styles.docs}>
+            {docsNames.map((doc) => (
+              <div key={doc.key} className={styles.doc}>
+                <p>{doc.label}</p>
+                <div className={styles.inputAndPercent}>
+                  <div className={styles.inputWrapper}>
+                    <input
+                      type="text"
+                      className={`form-base ${
+                        doc.type === "percent"
+                          ? styles.inputPercent
+                          : styles.inputValue
+                      }`}
+                      value={
+                        docValues[doc.key] !== undefined
+                          ? doc.type === "percent"
+                            ? docValues[doc.key].toLocaleString("pt-BR", {
+                                minimumFractionDigits: 2,
+                                maximumFractionDigits: 2,
+                              })
+                            : docValues[doc.key].toLocaleString("pt-BR", {
+                                style: "currency",
+                                currency: "BRL",
+                              })
+                          : ""
+                      }
+                      onChange={(e) => {
+                        const raw = e.target.value.replace(/\D/g, "");
+                        const numeric = Number(raw) / 100;
 
-          <button onClick={handleSaveDocs}>Salvar documentações</button>
+                        if (doc.type === "percent" && numeric > 100) return;
+
+                        setDocValues((prev) => ({
+                          ...prev,
+                          [doc.key]: numeric,
+                        }));
+                      }}
+                    />
+                    {doc.type === "percent" && (
+                      <span className={styles.suffix}>%</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
 
           <button
-            className={styles.btnLogout}
+            className={`btn-action glass ${`btn-action glass ${styles.btnSave}`}`}
+          >
+            <p>Salvar documentações</p>
+          </button>
+
+          <button
+            className={`btn-action glass ${`btn-action glass ${styles.btnSave}`} ${styles.btnLogout}`}
             onClick={handleLogout}
             type="button"
           >
-            <h3>
+            <p>
               <MdOutlinePowerOff /> Desconectar
-            </h3>
+            </p>
           </button>
 
           {isOpenCreateUsers && (

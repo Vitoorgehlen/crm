@@ -8,8 +8,7 @@
   flex-direction: column;
   background-color: var(--mainBackground);
   overflow-y: auto;
-
-  /* scrollbar-color: var(--cor--secundaria-claro) var(--cor--principal); */
+  padding: 20px;
 }
 
 .header {
@@ -43,56 +42,41 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 3px;
+  background: var(--sidebarBackground);
+  border-radius: 8px;
 }
 
 .createCompanyBox {
   display: flex;
+  justify-content: space-between;
   width: 100%;
   gap: 5px;
 }
 
-.labelCreateCompany {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 500px;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground2);
-  transition: 200ms;
-  width: 100%;
-}
-
-.labelCreateCompany::placeholder {
-  outline: none;
-  color: var(--textBase);
-}
-
 .btnSave {
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  width: 200px;
-  font-size: 0.9rem;
+  padding: 5px;
+  color: var(--primaryColor);
   border: none;
-  border-radius: 5px;
+  border-radius: 6px;
+  max-width: 500px;
+  width: 35%;
   cursor: pointer;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--textBase);
 }
 
 .btnSave:hover {
-  color: var(--primaryColor);
-  background: var(--cardBackgroundHover);
+  color: var(--primaryText);
   border: 1px solid var(--primaryColor);
+}
+
+.btnLogout {
+  margin-top: 20px;
+  color: var(--errorColor);
+}
+
+.btnLogout:hover {
+  background-color: var(--errorColor);
+  border: 1px solid var(--textBase);
 }
 
 .companies {
@@ -161,29 +145,59 @@
   background: var(--cardBackgroundHover);
 }
 
-.btnLogout {
-  margin-top: 20px;
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  font-size: 0.9rem;
-  border: none;
-  border-radius: 5px;
-  max-width: 500px;
-  width: 80%;
-  cursor: pointer;
+.docs {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: 200ms;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  flex-direction: column;
+  width: 100%;
+  max-width: 400px;
+  background-color: var(--sidebarBackground);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: var(--primaryText);
 }
 
-.btnLogout:hover {
-  color: var(--errorColor2);
-  background: var(--cardBackgroundHover);
-  border: 1px solid var(--errorColor2);
+.doc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 5px;
+  width: 100%;
+  max-width: 800px;
+}
+
+.inputAndPercent {
+  display: flex;
+}
+
+.inputWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.inputValue {
+  display: flex;
+  align-items: center;
+  padding: 5px;
+  max-width: 100px;
+  color: var(--primaryText);
+}
+
+.inputPercent {
+  padding-right: 20px;
+  align-items: center;
+  padding: 5px 23px 5px 5px;
+  max-width: 100px;
+  color: var(--primaryText);
+  text-align: right;
+  gap: 5px;
+}
+
+.suffix {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--primaryText);
 }
