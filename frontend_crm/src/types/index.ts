@@ -567,8 +567,10 @@ export type Schedule = {
     creator?: {
         name: string;
     };
-    client?: {
-        name: string;
+    deal?: {
+        client: {
+          name: string;
+      };
     };
 };
 

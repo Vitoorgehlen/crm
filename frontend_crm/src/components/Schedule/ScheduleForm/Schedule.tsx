@@ -9,12 +9,13 @@ import {
   Schedule,
   ScheduleFormProps,
 } from "@/types";
-import { IoTrashOutline } from "react-icons/io5";
+import { MdClose } from "react-icons/md";
 import styles from "./Schedule.module.css";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
 import WarningDeal from "@/components/Warning/DefaultWarning";
+import DayAndHourPicker from "@/components/Tools/DatePicker/DayPicker/DayAndHourPicker";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -36,8 +37,8 @@ export default function ScheduleForm({
   const [dealId, setDealId] = useState<number | undefined>(undefined);
   const [newLabel, setNewLabel] = useState("");
   const [newFinish, setNewFinish] = useState(false);
-  const [newDate, setNewDate] = useState<Date | undefined>(
-    schedule?.reminderAt ? new Date(schedule.reminderAt) : undefined,
+  const [newDate, setNewDate] = useState<Date | null>(
+    schedule?.reminderAt ? new Date(schedule.reminderAt) : null,
   );
 
   const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
@@ -55,8 +56,10 @@ export default function ScheduleForm({
 
   const handleMouseUp = (e: React.MouseEvent) => {
     if (!isMouseDownInside && e.target === e.currentTarget) {
-      const formEvent = e as unknown as React.FormEvent;
-      handleSubmit(formEvent);
+      if (schedule) {
+        const formEvent = e as unknown as React.FormEvent;
+        handleSubmit(formEvent);
+      } else onClose();
     }
     setIsMouseDownInside(false);
   };
@@ -200,7 +203,7 @@ export default function ScheduleForm({
         if (!res.ok) throw new Error("Erro ao buscar clientes");
         const data = await res.json();
         if (!mounted) return;
-        setDeals(data);
+        setDeals(data.data);
       } catch (err) {
         console.log(err);
         setError(
@@ -223,18 +226,25 @@ export default function ScheduleForm({
         setDealId(schedule.dealId || undefined);
         setNewLabel(schedule.label || "");
         setNewFinish(schedule.finish || false);
-        setNewDate(
-          schedule.reminderAt ? new Date(schedule.reminderAt) : undefined,
-        );
+        setNewDate(schedule.reminderAt ? new Date(schedule.reminderAt) : null);
       } else {
         setDealId(undefined);
         setNewLabel("");
         setNewFinish(false);
-        setNewDate(day ? new Date(day) : undefined);
+        setNewDate(day ? new Date(day) : null);
       }
       setError("");
     }
   }, [schedule, day, isOpen]);
+
+  useEffect(() => {
+    if (dealId) {
+      const selected = deals.find((d) => d.id === dealId);
+      if (selected && selected.client?.name !== searchClient) {
+        setSearchClient(selected.client?.name || "");
+      }
+    }
+  }, [dealId, deals, searchClient]);
 
   if (!isOpen) return null;
 
@@ -247,97 +257,121 @@ export default function ScheduleForm({
       onDragStart={handleDragStart}
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div className={styles.innerModal}>
-          <div className={styles.modalLeft}>
-            <div className={styles.titleCard}>
-              <div>
-                {!schedule ? (
-                  <h2>Adicionar compromisso</h2>
-                ) : (
-                  <>
-                    <h4>Editar compromisso</h4>
-                    <h2>com: {schedule.client?.name ?? ""}</h2>
-                  </>
-                )}
-              </div>
-              {schedule && (
-                <button
-                  className={styles.closeBtn}
-                  type="button"
-                  onClick={() =>
-                    setDeleteContext({
-                      message: "Deseja cancelar esse compromisso",
-                      name: schedule.label ?? "",
-                      onConfirm: () => handleDelete(schedule),
-                    })
-                  }
-                >
-                  <IoTrashOutline />
-                </button>
-              )}
+        <div className={styles.titleCard}>
+          {!schedule && (
+            <button className={styles.closeBtnInvisible} type="button">
+              <MdClose />
+            </button>
+          )}
+          {!schedule ? (
+            <h5>Adicionar compromisso</h5>
+          ) : (
+            <div>
+              <p>Editar compromisso</p>
+              <h5>com: {schedule.deal?.client.name ?? ""}</h5>
             </div>
+          )}
+          <button
+            className={styles.closeBtn}
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+          >
+            <MdClose />
+          </button>
+        </div>
 
-            {error && <p className={styles.error}>{error}</p>}
-            <input
-              list="deals"
-              placeholder="Buscar cliente..."
-              value={searchClient}
-              onChange={(e) => {
-                const value = e.target.value;
-                setSearchClient(value);
+        {error && <p className={styles.error}>{error}</p>}
+        <div className={styles.line}>
+          <input
+            list="deals"
+            className={`form-base ${styles.changeClient}`}
+            placeholder="Buscar cliente"
+            value={searchClient}
+            onChange={(e) => {
+              const value = e.target.value;
+              setSearchClient(value);
 
-                const foundDeal = deals.find(
-                  (deal) => deal.client?.name === value,
-                );
-                if (foundDeal) setDealId(foundDeal.id);
-              }}
-            />
+              const foundClient = deals.find(
+                (deal) =>
+                  deal.client?.name.toLowerCase().trim() ===
+                  value.toLowerCase().trim(),
+              );
 
-            <datalist id="deals">
-              {deals
-                .slice()
-                .reverse()
-                .map((deal) => (
-                  <option
-                    key={deal.id}
-                    value={deal.client?.name || "Cliente não encontrado"}
-                  >
-                    {DealStatus[deal.status].label || ""}
-                  </option>
-                ))}
-            </datalist>
+              setDealId(foundClient ? foundClient.id : undefined);
+            }}
+          />
 
-            <input
-              type="datetime-local"
-              onChange={(e) => setNewDate(new Date(e.target.value))}
-              value={formatDateForInput(newDate)}
-            />
-
-            <h3>Compromisso</h3>
-            <input
-              type="text"
-              placeholder="O que o cliente busca em um imóvel?"
-              onChange={(e) => setNewLabel(e.target.value)}
-              value={newLabel}
-            />
-            <div className={styles.btns}>
-              {schedule && (
-                <button
-                  type="button"
-                  className={`${styles.btnFilter} ${
-                    newFinish ? styles.btnFilterActive : ""
-                  }`}
-                  onClick={() => setNewFinish((prev) => !prev)}
+          <datalist id="deals">
+            {deals
+              .slice()
+              .reverse()
+              .map((deal) => (
+                <option
+                  key={deal.id}
+                  value={deal.client?.name || "Cliente não encontrado"}
                 >
-                  {newFinish ? <MdCheckBox /> : <MdCheckBoxOutlineBlank />}
-                  {newFinish ? "Reativar" : "Finalizar"}
-                </button>
+                  {DealStatus[deal.status].label || ""}
+                </option>
+              ))}
+          </datalist>
+
+          <DayAndHourPicker
+            value={newDate}
+            onChange={(date) => setNewDate(date)}
+          />
+        </div>
+
+        <p>Compromisso</p>
+        <textarea
+          className={`form-base ${styles.inputSchedule}`}
+          placeholder="Qual compromisso vamos agendar?"
+          onChange={(e) => setNewLabel(e.target.value)}
+          value={newLabel}
+        />
+
+        <div className={styles.btns}>
+          {schedule ? (
+            <button
+              type="button"
+              className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
+              onClick={() =>
+                setDeleteContext({
+                  message: "Deseja cancelar esse compromisso",
+                  name: schedule.label ?? "",
+                  onConfirm: () => handleDelete(schedule),
+                })
+              }
+            >
+              Apagar
+            </button>
+          ) : (
+            <div></div>
+          )}
+          <button
+            type="submit"
+            className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
+          >
+            {schedule ? "Salvar" : "Criar"}
+          </button>
+          {schedule ? (
+            <button
+              type="button"
+              className={`btn-action glass ${styles.btnDeal} ${styles.btnFinish} ${styles.btnFinish} ${newFinish && styles.finish}`}
+              onClick={() => setNewFinish((prev) => !prev)}
+            >
+              {newFinish ? (
+                <MdCheckBox className={styles.active} />
+              ) : (
+                <MdCheckBoxOutlineBlank />
               )}
-              <button type="submit" className={styles.btnSave}>
-                {schedule ? "Salvar" : "Criar"}
-              </button>
-            </div>
-          </div>
+              {newFinish ? "Reativar" : "Finalizar"}
+            </button>
+          ) : (
+            <div></div>
+          )}
         </div>
       </div>
 

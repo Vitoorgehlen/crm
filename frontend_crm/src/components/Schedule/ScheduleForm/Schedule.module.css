@@ -11,77 +11,18 @@
   z-index: 999;
 }
 
-.overlay h2,
-.overlayEdit h2 {
-  color: var(--primaryText);
-}
-
-.overlay h3,
-.overlayEdit h3 {
-  color: var(--primaryText);
-  align-items: start;
-  width: 100%;
-}
-
-.overlay input,
-.overlay select,
-.overlayEdit input,
-.overlayEdit select {
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.modalLeft input:focus,
-.modalLeft input:active,
-.modalLeft input:hover,
-.overlayEdit input:focus,
-.overlayEdit input:active,
-.overlayEdit input:hover {
-  background: var(--cardBackgroundHover);
-}
-.modalLeft select::placeholder,
-.modalLeft input::placeholder {
-  color: var(--textBase);
-}
-
 .modal {
   background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
-  max-width: 500px;
+  max-width: 450px;
   width: 100%;
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.innerModal {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-  justify-content: space-between;
-}
-
-.modalLeft {
-  padding: 0 1rem 1rem 1.8rem;
-  gap: 4px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 100%;
-  height: 100%;
-  justify-content: space-between;
+  color: var(--textBase);
 }
 
 .titleCard {
@@ -100,21 +41,29 @@
   cursor: pointer;
 }
 
-.paymentTitle {
+.closeBtnInvisible {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.line {
+  width: 100%;
   display: flex;
-  flex-direction: row;
   justify-content: space-between;
-  width: 100%;
+  gap: 2px;
+  margin: 10px 0;
 }
 
-.payment {
-  display: flex;
-  flex-direction: row;
+.input {
   width: 100%;
+  max-width: 173px;
+  height: 33px;
 }
 
-.modalLeft h4 {
-  color: var(--tercearyText);
+.inputSchedule {
+  width: 100%;
+  min-height: 80px;
+  resize: none;
 }
 
 .btns {
@@ -122,7 +71,49 @@
   display: flex;
   gap: 5px;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.btnDeal {
+  padding: 5px;
+  color: var(--primaryText);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 120px;
+  cursor: pointer;
+
+  border: 1px solid var(--textBase);
+}
+
+.btnDelete:hover {
+  background: var(--errorColor);
+  border: 1px solid var(--errorColor);
+}
+
+.btnUpdate:hover {
+  background: var(--mainBackground);
+  border: 1px solid var(--primaryColor);
+}
+
+.btnFinish:hover {
+  background: var(--primaryColor);
+  border: 1px solid var(--mainBackground);
+  color: var(--mainBackground);
+}
+
+.finish {
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid var(--textBase);
+  color: var(--textBase);
+}
+
+.active {
+  color: var(--primaryColor);
+}
+
+.btnFinish:hover .active {
+  color: var(--mainBackground);
 }
 
 .btnSave {
@@ -188,4 +179,18 @@
 .btnFilterActive:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
+}
+
+@media (max-width: 768px) {
+  .btnDeal {
+    max-width: 100px;
+  }
+
+  .btnDelete {
+    border: 1px solid var(--errorColor);
+  }
+
+  .btnFinish {
+    border: 1px solid var(--primaryColor);
+  }
 }

@@ -23,6 +23,34 @@
   border: 1px solid var(--mainBackground) !important;
 }
 
+/* HORAS */
+:global(.react-datepicker-time__header) {
+  color: var(--primaryText) !important;
+  font-weight: 600;
+}
+
+:global(.react-datepicker__time-container) {
+  color: var(--primaryText) !important;
+}
+
+:global(.react-datepicker__time) {
+  background-color: var(--mainBackground) !important;
+}
+
+:global(.react-datepicker__time-box) {
+  background-color: var(--mainBackground) !important;
+}
+
+:global(.react-datepicker__time-list-item:hover) {
+  background-color: var(--mainBackground) !important;
+  color: var(--primaryColor) !important;
+}
+
+:global(.react-datepicker__time-list-item--selected) {
+  background-color: var(--primaryColor) !important;
+  color: var(--mainBackground) !important;
+}
+
 :global(.react-datepicker__header) {
   background-color: var(--textBase) !important;
   border-bottom: 1px solid var(--primaryColor) !important;

@@ -194,7 +194,7 @@ export default function ScheduleLayout() {
             className={styles.icon}
             onClick={() => navigateDate("prev")}
           />
-          <h6>Agenda</h6>
+          <span>Agenda</span>
           <MdKeyboardArrowRight
             className={styles.icon}
             onClick={() => navigateDate("next")}
@@ -202,14 +202,14 @@ export default function ScheduleLayout() {
         </div>
 
         <div className={styles.title}>
-          <h2>
+          <p>
             {isWeekOrMonth ? titleSchedule("week") : titleSchedule("month")}
-          </h2>
+          </p>
         </div>
 
         <div className={styles.actions}>
           <button
-            className={styles.toggleButton}
+            className={`btn-action glass ${styles.btnDeal} ${styles.toggleButton}`}
             onClick={() => {
               setIsWeekOrMonth((prev) => {
                 const next = !prev;
@@ -225,160 +225,153 @@ export default function ScheduleLayout() {
               });
             }}
           >
-            <h4>{isWeekOrMonth ? "Semana" : "Mês"}</h4>
+            <span>{isWeekOrMonth ? "Semana" : "Mês"}</span>
           </button>
           <button
             type="button"
-            className={styles.addButton}
+            className={`btn-action glass ${styles.btnDeal} ${styles.addButton}`}
             onClick={() => {
               setIsOpenCard((prev) => !prev);
             }}
           >
             <AiOutlinePlus className={styles.icon} />
-            <h4>Adicionar</h4>
+            <span>Adicionar</span>
           </button>
         </div>
       </div>
 
-      <div
-        className={`${styles.grid} ${
-          isWeekOrMonth ? styles.weekView : styles.monthView
-        }`}
-      >
+      <div className={`${styles.grid} ${isWeekOrMonth && styles.gridWeek}`}>
         {isWeekOrMonth ? (
-          <div className={styles.gridHeader}>
+          <>
             {days.map((day, index) => (
-              <div key={index} className={styles.dayHeader}>
+              <div key={`header-${index}`} className={styles.dayHeader}>
                 <span>
                   {formatTextWeek(
                     day.toLocaleDateString("pt-BR", { weekday: "short" }),
                   )}
                 </span>
-                {isWeekOrMonth && (
-                  <span className={styles.dayNumber}>
-                    {days[index]?.getDate()}
-                  </span>
-                )}
+                <h5>{days[index]?.getDate()}</h5>
               </div>
             ))}
-          </div>
+          </>
         ) : (
-          <div className={styles.gridHeaderMonth}>
+          <>
             {["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"].map(
               (day, index) => (
-                <div key={index} className={styles.gridHeaderMonthTxt}>
+                <div
+                  key={`header-${index}`}
+                  className={styles.gridHeaderMonthTxt}
+                >
                   <span>{day}</span>
                 </div>
               ),
             )}
-          </div>
+          </>
         )}
 
-        <div className={styles.gridBody}>
-          {isWeekOrMonth
-            ? // Visualização semanal
-              Array.from({ length: 7 }).map((_, index) => {
-                const day = days[index];
-                const isPast = isPastDay(day);
-                const isTodayDate = isToday(day);
-                const isFutureOrToday = !isPast;
+        {isWeekOrMonth
+          ? Array.from({ length: 7 }).map((_, index) => {
+              const day = days[index];
+              const isPast = isPastDay(day);
+              const isTodayDate = isToday(day);
+              const isFutureOrToday = !isPast;
 
-                return isFutureOrToday ? (
-                  <div
-                    key={index}
-                    onClick={() => {
-                      setSelectedDay(day);
-                      setIsOpenCard((prev) => !prev);
-                    }}
-                    className={`${styles.dayColumn} 
-                  ${isTodayDate ? styles.today : styles.future}
+              return isFutureOrToday ? (
+                <div
+                  key={index}
+                  onClick={() => {
+                    setSelectedDay(day);
+                    setIsOpenCard((prev) => !prev);
+                  }}
+                  className={`${styles.dayColumn} 
+                  ${isTodayDate && styles.today}
                   ${
                     day.getDay() === 0 || day.getDay() === 6
                       ? styles.weekend
                       : ""
                   }
                   `}
-                  >
-                    <div className={styles.events}>
-                      {getScheduleForDay(day)
-                        .slice()
-                        .sort(
-                          (a, b) =>
-                            new Date(a.reminderAt ?? 0).getTime() -
-                            new Date(b.reminderAt ?? 0).getTime(),
-                        )
-                        .map((schedule) => (
-                          <button
-                            key={schedule.id}
-                            className={
-                              schedule.finish
-                                ? styles.scheduleItemFinish
-                                : styles.scheduleItem
-                            }
-                            onClick={() => {
-                              setSelectedDay(day);
-                              setSelectedSchedule(schedule);
-                              setIsOpenCard((prev) => !prev);
-                            }}
-                          >
-                            <h4>{schedule.client?.name}</h4>
-                            <h5>
-                              {formatDateForSchedules(schedule.reminderAt)}
-                            </h5>
-                            <p>{schedule.label}</p>
-                          </button>
-                        ))}
-                    </div>
+                >
+                  <div className={styles.events}>
+                    {getScheduleForDay(day)
+                      .slice()
+                      .sort(
+                        (a, b) =>
+                          new Date(a.reminderAt ?? 0).getTime() -
+                          new Date(b.reminderAt ?? 0).getTime(),
+                      )
+                      .map((schedule) => (
+                        <button
+                          key={schedule.id}
+                          className={`glass ${
+                            schedule.finish
+                              ? styles.scheduleItemFinish
+                              : styles.scheduleItem
+                          }`}
+                          onClick={() => {
+                            setSelectedDay(day);
+                            setSelectedSchedule(schedule);
+                            setIsOpenCard((prev) => !prev);
+                          }}
+                        >
+                          <p>{schedule.deal?.client.name ?? ""}</p>
+                          <span>
+                            {formatDateForSchedules(schedule.reminderAt)}
+                          </span>
+                          <p>{schedule.label}</p>
+                        </button>
+                      ))}
                   </div>
-                ) : (
-                  <div
-                    key={index}
-                    className={`${styles.dayColumn} 
+                </div>
+              ) : (
+                <div
+                  key={index}
+                  className={`${styles.dayColumn} 
                   ${isPast ? styles.pastDay : ""}`}
-                  ></div>
-                );
-              })
-            : // Visualização mensal
-              days.map((day, index) => {
-                const isCurrentMonth =
-                  day.getMonth() === currentDate.getMonth();
-                const isPast = isPastDay(day);
-                const isTodayDate = isToday(day);
-                const isFutureOrToday = !isPast;
+                ></div>
+              );
+            })
+          : days.map((day, index) => {
+              const isCurrentMonth = day.getMonth() === currentDate.getMonth();
+              const isPast = isPastDay(day);
+              const isTodayDate = isToday(day);
+              const isFutureOrToday = !isPast;
 
-                return isFutureOrToday ? (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedDay(day)}
-                    onMouseEnter={() => setHoveredDay(day)}
-                    onMouseLeave={() => setHoveredDay(null)}
-                    className={`${styles.monthDay} ${
-                      isCurrentMonth ? styles.currentMonth : styles.otherMonth
-                    } ${isTodayDate ? styles.today : ""}`}
-                  >
-                    {day.getDate()}
-                    {getScheduleForDay(day).length > 0 && (
-                      <div className={styles.eventsMonth}>
-                        {getScheduleForDay(day).length === 1 &&
-                          `${getScheduleForDay(day).length} evento`}
-                        {getScheduleForDay(day).length >= 2 &&
-                          `${getScheduleForDay(day).length} eventos`}
-                      </div>
-                    )}
-                  </button>
-                ) : (
-                  <div
-                    key={index}
-                    className={`${styles.monthDay} ${
-                      isCurrentMonth ? styles.currentMonth : styles.otherMonth
-                    } ${isPast ? styles.pastDay : ""}`}
-                  >
-                    {day.getDate()}
-                  </div>
-                );
-              })}
-        </div>
+              return isFutureOrToday ? (
+                <button
+                  key={index}
+                  onClick={() => setSelectedDay(day)}
+                  onMouseEnter={() => setHoveredDay(day)}
+                  onMouseLeave={() => setHoveredDay(null)}
+                  className={`${styles.monthDay} ${
+                    isCurrentMonth ? styles.currentMonth : styles.otherMonth
+                  } ${isTodayDate && styles.today}`}
+                >
+                  {day.getDate()}
+                  {getScheduleForDay(day).length > 0 && (
+                    <div className={styles.eventsMonth}>
+                      <p>{getScheduleForDay(day).length}</p>
+                      {getScheduleForDay(day).length === 1 ? (
+                        <span>evento</span>
+                      ) : (
+                        <span>eventos</span>
+                      )}
+                    </div>
+                  )}
+                </button>
+              ) : (
+                <div
+                  key={index}
+                  className={`${styles.monthDay} ${
+                    isCurrentMonth ? styles.currentMonth : styles.otherMonth
+                  } ${isPast && styles.pastDay}`}
+                >
+                  {day.getDate()}
+                </div>
+              );
+            })}
       </div>
+
       {isOpenCard && (
         <ScheduleForm
           isOpen={isOpenCard}
@@ -399,26 +392,30 @@ export default function ScheduleLayout() {
           }}
         />
       )}
+
       {hoveredDay && (
         <div className={styles.tooltip}>
           <div className={styles.tooltipTitle}>
-            <h3>
+            <h5>
               {hoveredDay.toLocaleDateString("pt-BR", {
                 day: "2-digit",
                 month: "long",
               })}
-            </h3>
+            </h5>
           </div>
           {getScheduleForDay(hoveredDay).length > 0 ? (
             getScheduleForDay(hoveredDay).map((schedule) => (
-              <div key={schedule.id} className={styles.tooltipItem}>
-                <h4>{schedule.client?.name}</h4>
+              <div
+                key={schedule.id}
+                className={`${styles.tooltipItem} ${!schedule.finish && styles.tooltipItemPending}`}
+              >
+                <span>{formatDateForSchedules(schedule.reminderAt)}</span>
                 <p>{schedule.label}</p>
-                <small>{formatDateForSchedules(schedule.reminderAt)}</small>
+                <h5>{schedule.deal?.client.name ?? ""}</h5>
               </div>
             ))
           ) : (
-            <p>Sem compromisso</p>
+            <span>Sem compromisso</span>
           )}
         </div>
       )}

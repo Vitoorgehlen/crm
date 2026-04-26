@@ -28,6 +28,14 @@ export default function CustomSelect<T>({
       onChange={(option) => onChange(option as Option<T> | null)}
       isDisabled={isDisabled}
       className={styles.container}
+      menuPortalTarget={typeof window !== "undefined" ? document.body : null}
+      menuPosition="fixed"
+      styles={{
+        menuPortal: (base) => ({
+          ...base,
+          zIndex: 9999,
+        }),
+      }}
       classNames={{
         control: () => styles.control,
         menu: () => styles.menu,

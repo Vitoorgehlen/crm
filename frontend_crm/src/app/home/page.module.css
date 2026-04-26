@@ -1,8 +1,9 @@
 .main {
-  min-height: 100vh;
+  min-height: 98vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: start;
+
   align-items: center;
   padding-bottom: 20px;
 }
@@ -12,89 +13,109 @@
   display: flex;
   justify-content: flex-end;
   padding-right: 50px;
+  color: var(--textBase);
+}
+
+.title span {
+  font-size: 30px;
+  font-weight: 600;
   color: var(--primaryColor);
 }
 
 .contentSection {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   margin-top: 10px;
   width: 90%;
+  gap: 5px;
 }
 
 .chartAndTask {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  width: 80%;
+  justify-content: space-between;
+  width: 100%;
   gap: 10px;
 }
 
-.chart {
-  width: 100%;
-  max-width: 550px;
-  color: var(--primaryColor);
-}
-
 .taskSection {
-  display: flex;
   padding: 10px 0;
   align-items: center;
-  flex-direction: column;
   width: 100%;
   max-width: 550px;
   max-height: 350px;
   margin: 10px 0 5px 0;
-  border: 1px solid var(--borderColor);
   border-radius: 10px;
-  background: var(--cardBackground);
-  box-shadow: -3px 3px 10px var(--shadowColor);
-
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-
   overflow-y: auto;
 }
 
-.taskSection input,
-.taskSection select {
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
+.contentSection h5 {
+  color: var(--primaryText);
+}
+
+.taskSection span {
+  color: var(--textBase);
+}
+
+.titleCard {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 15px;
   width: 100%;
+}
+
+.btnInvisible {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.btnOpen {
+  color: var(--textBase);
+  font-size: 1rem;
   border: none;
-  outline: none;
-  color: var(--primaryText);
-  background-color: var(--inputColor);
+  cursor: pointer;
 }
 
-.taskSection input:focus,
-.taskSection input:active,
-.taskSection input:hover {
-  border: none !important;
-  box-shadow: none !important;
+.btnOpen:hover {
+  color: var(--primaryText);
 }
 
-.taskSection h2 {
-  color: var(--primaryText);
+.taskClose {
+  opacity: 0;
+  visibility: hidden;
+  display: none;
+}
+
+.taskOpen {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .addTask {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: 5px;
   width: 95%;
+  gap: 5px;
+}
+
+.inputForm {
+  width: 100%;
 }
 
 .btnSave {
-  color: var(--primaryText);
+  color: var(--textBase);
   font-size: 1.5rem;
   border: none;
   cursor: pointer;
 }
 
 .btnSave:hover {
-  color: var(--primaryColor);
+  color: var(--primaryText);
 }
 
 .tasksList {
@@ -104,6 +125,11 @@
   align-items: center;
   width: 100%;
   gap: 5px;
+}
+
+.tasksList p {
+  margin: 5px 0;
+  color: var(--textBase);
 }
 
 .taskItens {
@@ -118,10 +144,24 @@
   justify-content: space-between;
   align-items: center;
   width: 95%;
+  gap: 5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.textTask {
+.btnDelTask,
+.btnEditTask {
+  border: none;
+  color: var(--textBase);
+  font-size: 0.9rem;
   cursor: pointer;
+}
+
+.btnDelTask:hover {
+  color: var(--errorColor);
+}
+
+.btnEditTask:hover {
+  color: var(--primaryColor);
 }
 
 .divTask {
@@ -129,16 +169,11 @@
   gap: 5px;
 }
 
-.divButton {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  width: 100%;
-  padding: 2px 5px;
-  border: none;
-  cursor: pointer;
+.divTask span {
+  color: var(--primaryText);
 }
 
+.divButton,
 .divButtonFinish {
   display: flex;
   align-items: center;
@@ -146,50 +181,71 @@
   width: 100%;
   padding: 2px 5px;
   border: none;
-  color: var(--tercearyText);
+  cursor: pointer;
+}
+
+.divButtonFinish span {
+  color: rgba(255, 255, 255, 0.1);
   text-decoration: line-through;
-  text-decoration-color: var(--primaryColor);
-  cursor: pointer;
+  text-decoration-color: var(--textBase);
 }
 
-.btnEditTask {
-  border: none;
-  color: var(--secondaryText);
-  font-size: 0.9rem;
-  cursor: pointer;
+.chart {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0 5px 0;
+  max-width: 550px;
+  border-radius: 10px;
 }
 
-.btnDelTask {
-  border: none;
-  margin-left: 5px;
-  color: var(--errorColor2);
-  font-size: 0.9rem;
-  cursor: pointer;
+.chart .titleCard {
+  padding: 0 5px;
 }
 
-.btnDelTask:hover,
-.btnEditTask:hover {
-  color: var(--primaryText);
+.schedule {
+  padding: 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 500px;
+
+  align-self: center;
+  width: fit-content;
 }
 
 @media (max-width: 768px) {
   .title {
-    width: 100%;
-    padding-right: 10px;
     margin-top: 10px;
+    padding-right: 30px;
   }
 
   .contentSection {
-    flex-direction: column;
     align-items: center;
     width: 100%;
-    gap: 40px;
+    gap: 10px;
   }
 
-  .calendar {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
+  .chartAndTask {
+    flex-direction: column;
+    width: 95%;
+    gap: 10px;
+  }
+
+  .taskSection {
+    margin: 0;
+  }
+
+  .chart {
+    margin: 0;
+  }
+
+  .schedule {
+    width: 95%;
+  }
+
+  .scheduleOpen {
+    width: 100%;
+    border-radius: 0;
   }
 }
