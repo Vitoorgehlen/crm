@@ -31,6 +31,7 @@ import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { sumDocs } from "@/utils/sumPreviusDocs";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
@@ -803,18 +804,16 @@ export default function ClosedDeal({
                   }}
                   className={styles.popupClient}
                 >
-                  <button
-                    className={styles.clientBtn}
-                    onClick={() => {
-                      if (!deal?.client?.name) return;
-
-                      router.push(
-                        `/clientes?clientId=${deal.client.id}&team=true`,
-                      );
-                    }}
-                  >
+                  {deal?.client?.id ? (
+                    <Link
+                      className={styles.clientBtn}
+                      href={`/clientes?clientId=${deal.client.id}`}
+                    >
+                      <h4>{deal?.client?.name ?? ""}</h4>
+                    </Link>
+                  ) : (
                     <h4>{deal?.client?.name ?? ""}</h4>
-                  </button>
+                  )}
                 </div>
                 <span>
                   {`Fechada:
@@ -870,8 +869,7 @@ export default function ClosedDeal({
 
               {paymentMethod === "FINANCING" && (
                 <div className={styles.payment}>
-                  <p>Instituição</p>
-                  <p>financeira</p>
+                  <p>Instituição financeira</p>
                   <input
                     type="text"
                     className={`form-base ${styles.inputBank}`}
@@ -1333,36 +1331,40 @@ export default function ClosedDeal({
                     <span>Editando</span>
                   </>
                 ) : (
-                  <>
-                    <input
-                      type="text"
-                      className={`form-base ${styles.addNoteForm}`}
-                      placeholder="Documentação"
-                      value={docCostLabel}
-                      onChange={(e) => setDocCostLabel(e.target.value)}
-                    />
-                    <CurrencyInput
-                      className={`form-base ${styles.addNoteForm}`}
-                      placeholder="Documentação"
-                      value={docCostValue}
-                      onChange={setDocCostValue}
-                    />
-                    <input
-                      type="text"
-                      className={`form-base ${styles.addNoteForm}`}
-                      placeholder="Obs"
-                      value={docCostNote}
-                      onChange={(e) => setDocCostNote(e.target.value)}
-                    />
-                    <button
-                      type="button"
-                      className={styles.btnSave}
-                      onClick={handleAddDocCost}
-                      disabled={!docCostLabel.trim()}
-                    >
-                      <RiSave3Fill />
-                    </button>
-                  </>
+                  <div>
+                    <div className={styles.divAddDoc}>
+                      <input
+                        type="text"
+                        className={`form-base ${styles.addNoteForm}`}
+                        placeholder="Documentação"
+                        value={docCostLabel}
+                        onChange={(e) => setDocCostLabel(e.target.value)}
+                      />
+                      <CurrencyInput
+                        className={`form-base ${styles.addNoteForm}`}
+                        placeholder="Documentação"
+                        value={docCostValue}
+                        onChange={setDocCostValue}
+                      />
+                    </div>
+                    <div className={styles.divAddDoc}>
+                      <input
+                        type="text"
+                        className={`form-base ${styles.addNoteForm}`}
+                        placeholder="Obs"
+                        value={docCostNote}
+                        onChange={(e) => setDocCostNote(e.target.value)}
+                      />
+                      <button
+                        type="button"
+                        className={styles.btnSave}
+                        onClick={handleAddDocCost}
+                        disabled={!docCostLabel.trim()}
+                      >
+                        <RiSave3Fill />
+                      </button>
+                    </div>
+                  </div>
                 )}
               </div>
 

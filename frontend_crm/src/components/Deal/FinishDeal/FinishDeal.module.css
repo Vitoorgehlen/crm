@@ -19,7 +19,7 @@
   max-width: 1000px;
   margin: 0 25px 10px 0;
   width: 90%;
-  height: 600px;
+  height: 90vh;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -75,6 +75,7 @@
 .clientBtn {
   border: none;
   width: 100%;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -173,7 +174,7 @@
   margin: 0 auto;
   flex-direction: row;
   align-items: center;
-  margin-top: 15px;
+  margin: 15px 0;
   width: 100%;
 }
 
@@ -276,6 +277,12 @@
 .addNoteForm {
   color: var(--primaryText);
   border: 1px solid var(--textBase) !important;
+}
+
+.divAddDoc {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
 }
 
 .addDoc {
@@ -446,6 +453,7 @@
 
   .btnCancelAndConfirm {
     gap: 15px;
+    margin-bottom: 0;
   }
 
   .btnCancel,

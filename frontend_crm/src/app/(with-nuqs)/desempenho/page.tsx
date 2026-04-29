@@ -12,6 +12,7 @@ import { formatDateForFinish } from "@/utils/dateUtils";
 import { useQueryState } from "nuqs";
 import UserSelect from "@/components/Tools/Select/UserSelect";
 import MonthPicker from "@/components/Tools/DatePicker/MonthPicker/MonthPicker";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -108,52 +109,57 @@ export default function Config() {
   }, [startMonth]);
 
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <div className={styles.headerContent}>
-          <div className={styles.title}>
-            <h3>Desempenho da Equipe</h3>
-          </div>
-          <div className={styles.headerIcons}>
-            <UserSelect
-              users={users}
-              value={selectedUserObject}
-              onChange={(user) => {
-                setSelectedUser(user?.id?.toString() || "ALL");
-              }}
-            />
-            <MonthPicker
-              value={startMonthDate}
-              onChange={(date) => {
-                if (!date) {
-                  setStartMonth("");
-                  return;
-                }
+    <main className={styles.main}>
+      <div className={styles.headerContent}>
+        <div className={styles.title}>
+          <h3>Desempenho</h3>
+          <h5>da Equipe</h5>
+        </div>
+        <div className={styles.headerIcons}>
+          {!hasSearched && (
+            <>
+              <UserSelect
+                users={users}
+                value={selectedUserObject}
+                onChange={(user) => {
+                  setSelectedUser(user?.id?.toString() || "ALL");
+                }}
+              />
+              <MonthPicker
+                value={startMonthDate}
+                onChange={(date) => {
+                  if (!date) {
+                    setStartMonth("");
+                    return;
+                  }
 
-                const formatted = `${date.getFullYear()}-${String(
-                  date.getMonth() + 1,
-                ).padStart(2, "0")}`;
+                  const formatted = `${date.getFullYear()}-${String(
+                    date.getMonth() + 1,
+                  ).padStart(2, "0")}`;
 
-                setStartMonth(formatted);
+                  setStartMonth(formatted);
 
-                const firstDay = new Date(
-                  date.getFullYear(),
-                  date.getMonth(),
-                  1,
-                );
-                const lastDay = new Date(
-                  date.getFullYear(),
-                  date.getMonth() + 1,
-                  0,
-                );
+                  const firstDay = new Date(
+                    date.getFullYear(),
+                    date.getMonth(),
+                    1,
+                  );
+                  const lastDay = new Date(
+                    date.getFullYear(),
+                    date.getMonth() + 1,
+                    0,
+                  );
 
-                setStartDate(firstDay.toISOString());
-                setEndDate(lastDay.toISOString());
-              }}
-            />
+                  setStartDate(firstDay.toISOString());
+                  setEndDate(lastDay.toISOString());
+                }}
+              />
+            </>
+          )}
 
-            {!hasSearched ? (
-              startMonth && (
+          {!hasSearched ? (
+            startMonth && (
+              <Tooltip label={"Pesquisar"}>
                 <button
                   className={`glass btn-action ${styles.search}`}
                   onClick={() => {
@@ -163,8 +169,10 @@ export default function Config() {
                 >
                   <FaSearch />
                 </button>
-              )
-            ) : (
+              </Tooltip>
+            )
+          ) : (
+            <Tooltip label={"Limpar"}>
               <button
                 className={`glass btn-action ${styles.search}`}
                 onClick={() => {
@@ -176,108 +184,107 @@ export default function Config() {
               >
                 <FaTimes />
               </button>
-            )}
-          </div>
+            </Tooltip>
+          )}
         </div>
-        <div
-          className={`glass ${deals.length === 0 ? styles.listEmpty : styles.list}`}
-        >
-          {deals.length === 0 ? (
-            <p>Selecione um mês e pesquise o desempenho da equipe.</p>
-          ) : (
+      </div>
+      <div className={deals.length === 0 ? styles.listEmpty : styles.list}>
+        {deals.length === 0 ? (
+          <p>Selecione um mês e pesquise o desempenho da equipe.</p>
+        ) : (
+          <table className={`glass ${styles.dealsTable}`}>
+            <thead>
+              <tr>
+                <th>Cliente</th>
+                <th>Valor total</th>
+                <th>Status</th>
+                <th>Criado em</th>
+                <th>Criado por</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deals
+                .slice()
+                .reverse()
+                .map((d) => {
+                  const totalValue =
+                    d.paymentMethod === "CASH"
+                      ? Number(d.cashValue ?? 0) +
+                        Number(d.fgtsValue ?? 0) +
+                        Number(d.downPaymentValue ?? 0)
+                      : d.paymentMethod === "FINANCING"
+                        ? Number(d.financingValue ?? 0) +
+                          Number(d.subsidyValue ?? 0) +
+                          Number(d.fgtsValue ?? 0) +
+                          Number(d.downPaymentValue ?? 0)
+                        : d.paymentMethod === "CREDIT_LETTER"
+                          ? Number(d.creditLetterValue ?? 0) +
+                            Number(d.subsidyValue ?? 0) +
+                            Number(d.fgtsValue ?? 0) +
+                            Number(d.downPaymentValue ?? 0)
+                          : 0;
+
+                  return (
+                    <tr key={d.id}>
+                      <td>{d.client?.name || "Não encontrado"}</td>
+                      <td>
+                        {totalValue.toLocaleString("pt-BR", {
+                          style: "currency",
+                          currency: "BRL",
+                        })}
+                      </td>
+                      <td>
+                        {DealStatus[d.status as keyof typeof DealStatus]
+                          ?.label || "Não encontrado"}
+                      </td>
+                      <td>
+                        {d.createdAt
+                          ? formatDateForFinish(d.createdAt)
+                          : "Não encontrado"}
+                      </td>
+                      <td>{d.creator?.name || "Não encontrado"}</td>
+                    </tr>
+                  );
+                })}
+            </tbody>
+          </table>
+        )}
+      </div>
+
+      <div className={styles.list}>
+        {clients.length > 0 && (
+          <>
+            <h4>Clientes criados sem negociação</h4>
             <table className={`glass ${styles.dealsTable}`}>
               <thead>
                 <tr>
                   <th>Cliente</th>
-                  <th>Valor total</th>
-                  <th>Status</th>
+                  <th>Investidor</th>
                   <th>Criado em</th>
                   <th>Criado por</th>
                 </tr>
               </thead>
               <tbody>
-                {deals
+                {clients
                   .slice()
                   .reverse()
-                  .map((d) => {
-                    const totalValue =
-                      d.paymentMethod === "CASH"
-                        ? Number(d.cashValue ?? 0) +
-                          Number(d.fgtsValue ?? 0) +
-                          Number(d.downPaymentValue ?? 0)
-                        : d.paymentMethod === "FINANCING"
-                          ? Number(d.financingValue ?? 0) +
-                            Number(d.subsidyValue ?? 0) +
-                            Number(d.fgtsValue ?? 0) +
-                            Number(d.downPaymentValue ?? 0)
-                          : d.paymentMethod === "CREDIT_LETTER"
-                            ? Number(d.creditLetterValue ?? 0) +
-                              Number(d.subsidyValue ?? 0) +
-                              Number(d.fgtsValue ?? 0) +
-                              Number(d.downPaymentValue ?? 0)
-                            : 0;
-
-                    return (
-                      <tr key={d.id}>
-                        <td>{d.client?.name || "Não encontrado"}</td>
-                        <td>
-                          {totalValue.toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })}
-                        </td>
-                        <td>
-                          {DealStatus[d.status as keyof typeof DealStatus]
-                            ?.label || "Não encontrado"}
-                        </td>
-                        <td>
-                          {d.createdAt
-                            ? formatDateForFinish(d.createdAt)
-                            : "Não encontrado"}
-                        </td>
-                        <td>{d.creator?.name || "Não encontrado"}</td>
-                      </tr>
-                    );
-                  })}
+                  .map((c) => (
+                    <tr key={c.id}>
+                      <td>{c.name || "Não encontrado"}</td>
+                      <td>{c.isInvestor ? "Sim" : "Não"}</td>
+                      <td>
+                        {c.createdAt
+                          ? formatDateForFinish(c.createdAt)
+                          : "Não encontrado"}
+                      </td>
+                      <td>{c.creator?.name || "Não encontrado"}</td>
+                    </tr>
+                  ))}
               </tbody>
             </table>
-          )}
-        </div>
-        <div className={styles.list}>
-          {clients.length > 0 && (
-            <>
-              <h2>Clientes criados sem negociação</h2>
-              <table className={styles.dealsTable}>
-                <thead>
-                  <tr>
-                    <th>Cliente</th>
-                    <th>Investidor</th>
-                    <th>Criado em</th>
-                    <th>Criado por</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {clients
-                    .slice()
-                    .reverse()
-                    .map((c) => (
-                      <tr key={c.id}>
-                        <td>{c.name || "Não encontrado"}</td>
-                        <td>{c.isInvestor ? "Sim" : "Não"}</td>
-                        <td>
-                          {c.createdAt
-                            ? formatDateForFinish(c.createdAt)
-                            : "Não encontrado"}
-                        </td>
-                        <td>{c.creator?.name || "Não encontrado"}</td>
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </>
-          )}
-        </div>
-      </main>
-    </div>
+          </>
+        )}
+      </div>
+    </main>
   );
 }

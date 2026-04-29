@@ -11,40 +11,6 @@
   z-index: 999;
 }
 
-.overlay h2 {
-  color: var(--primaryText);
-}
-
-.overlay input,
-.overlay select {
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: none;
-  outline: none;
-  background: var(--cardBackground);
-}
-
-.overlay input:focus,
-.overlay input:active,
-.overlay input:hover {
-  border: none !important;
-  box-shadow: none !important;
-}
-
-.overlay label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px;
-  margin: 3px;
-  border-radius: 5px;
-  width: 100%;
-  border: 1px solid var(--shadowColor);
-  background: var(--cardBackground);
-}
-
 .modal {
   background: var(--mainBackground);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
@@ -60,76 +26,9 @@
 
 .innerModal {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   width: 100%;
   justify-content: space-between;
-}
-
-.closeBtn {
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--primaryText);
-  cursor: pointer;
-}
-
-.error {
-  color: var(--errorColor2);
-}
-
-.btnUpdate {
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  border: none;
-  border-radius: 20px;
-  width: 200px;
-  cursor: pointer;
-}
-
-.btnEditUser {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--cardBackground);
-  border-radius: 5px;
-  width: 40px;
-  height: 40px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  border: 1px solid var(--shadowColor);
-}
-
-.btnEditUserActive {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--errorColor2);
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  color: var(--primaryText);
-  font-size: 1.3rem;
-  border: 1px solid var(--shadowColor);
-}
-
-.createUserLabels {
-  width: 100%;
-}
-
-.labelSettingUser {
-  display: flex;
-  align-items: center;
-  padding: 8px;
-  border-radius: 5px;
-  width: 80%;
-  max-width: 500px;
-  border: 1px solid var(--shadowColor);
-  background: var(--primaryText);
-  transition: 200ms;
-  width: 100%;
 }
 
 .box {
@@ -140,9 +39,30 @@
   justify-content: center;
 }
 
-.boxClose {
-  display: flex;
+.closeBtn {
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  color: var(--primaryText);
+  cursor: pointer;
+}
+
+.input {
   width: 100%;
-  justify-content: space-between;
-  margin-bottom: 3px;
+}
+
+.btnSave {
+  padding: 5px;
+  border: none;
+  border-radius: 6px;
+  max-width: 500px;
+  width: 35%;
+  cursor: pointer;
+  border: 1px solid var(--textBase);
+  color: var(--primaryText);
+}
+
+.btnSave:hover {
+  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
 }

@@ -26,6 +26,7 @@ import { AiOutlineUserAdd } from "react-icons/ai";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { getTotal, sumDocs } from "@/utils/sumPreviusDocs";
+import Link from "next/link";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
@@ -537,18 +538,16 @@ export default function DealForm({
                         }}
                         className={styles.popupClient}
                       >
-                        <button
-                          className={styles.clientBtn}
-                          onClick={() => {
-                            if (!deal?.client?.name) return;
-
-                            router.push(
-                              `/clientes?clientId=${deal.client.id}&team=true`,
-                            );
-                          }}
-                        >
+                        {deal?.client?.id ? (
+                          <Link
+                            className={styles.clientBtn}
+                            href={`/clientes?clientId=${deal.client.id}`}
+                          >
+                            <h4>{deal?.client?.name ?? ""}</h4>
+                          </Link>
+                        ) : (
                           <h4>{deal?.client?.name ?? ""}</h4>
-                        </button>
+                        )}
                       </div>
                       <span>
                         {`Último contato:

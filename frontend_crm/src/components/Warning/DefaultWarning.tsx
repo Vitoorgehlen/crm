@@ -77,7 +77,7 @@ export default function WarningDeal({
             </button>
           </div>
 
-          {error && <p className={styles.erro}>{error}</p>}
+          {error && <p className="erro">{error}</p>}
           <div className={styles.line}>
             <p>
               {message} <span className={styles.name}>{name}</span>?

@@ -549,6 +549,12 @@ export type Note = {
         name: string;
     };
 };
+export type NotePad = {
+    id: number;
+    content: string;
+    slot: number;
+    userId?: number;
+};
 
 export type Schedule = {
     id: number;

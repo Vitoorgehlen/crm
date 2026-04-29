@@ -5,235 +5,62 @@
   --sidebarBackground: #1a1b1e;
   --textBase: #6b6c70;
   --primaryText: #f2f6d2;
-  --secondaryText: #e4f07d;
-  --tercearyText: #a7b054;
-  --inputColor: #4a4b3d;
   --primaryColor: #dbf017;
-  --accentColor: #a7b054;
+  --logoColor: rgba(255, 255, 255, 0.01);
   --shadowColor: rgba(47, 47, 18, 0.3);
   --cardBackground: linear-gradient(
     135deg,
     rgba(242, 246, 210, 0.28),
     rgba(242, 246, 210, 0.08)
   );
-  --cardBackgroundHover: linear-gradient(
-    135deg,
-    rgba(242, 246, 210, 0.08),
-    rgba(242, 246, 210, 0.28)
-  );
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(228, 240, 125, 0.3),
-    rgba(167, 176, 84, 0.3)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(167, 176, 84, 0.5),
-    rgba(228, 240, 125, 0.5)
-  );
-  --errorColorD: linear-gradient(
-    135deg,
-    rgba(238, 49, 49, 0.5),
-    rgba(201, 74, 74, 0.5)
-  );
-  --errorColorDHover: linear-gradient(
-    135deg,
-    rgba(201, 74, 74, 0.5),
-    rgba(238, 49, 49, 0.5)
-  );
-  --warningColorD: linear-gradient(
-    135deg,
-    rgba(228, 240, 125, 0.2),
-    rgba(243, 234, 65, 0.2)
-  );
-  --warningColorDHover: linear-gradient(
-    135deg,
-    rgba(243, 234, 65, 0.2),
-    rgba(228, 240, 125, 0.2)
-  );
 
   --successColor: #b8d957;
-  --successColor2: #caf841;
-  --errorColor: #c94a4a;
-  --errorColor2: #ee3131;
-  --warningColor: #e4f07d;
-  --warningColor2: #f3ea41;
+  --errorColor: #ee3131;
 
   --font:
     system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-
-  --textColor: #f2f6d2;
-  --colorPrimary: #dbf017;
-  --colorSecondary: #e4f07d;
-  --colorTerceary: #a7b054;
-  --colorShadow: rgba(40, 41, 28, 0.92);
-  --backgroundColorPrimary: #28291c;
-  --backgroundColorSecondary: #82826c;
-  --backgroundColorTerceary: #4a4b3d;
-  --backgroundGradient: linear-gradient(
-    135deg,
-    rgba(242, 246, 210, 0.28),
-    rgba(242, 246, 210, 0.08)
-  );
 }
 
 [data-theme="default-light"] {
-  --mainBackground: #f2f6d2;
-  --textBase: #a3ac50;
-  --primaryText: #323325;
-  --secondaryText: #5a5a4a;
-  --tercearyText: #6f7063;
-  --inputColor: #d9dda5;
-  --primaryColor: #a7b054;
-  --accentColor: #dbf017;
-  --shadowColor: rgba(90, 90, 74, 0.2);
-
-  --cardBackground: linear-gradient(
-    135deg,
-    rgba(90, 90, 74, 0.35),
-    rgba(90, 90, 74, 0.15)
-  );
-  --cardBackgroundHover: linear-gradient(
-    135deg,
-    rgba(90, 90, 74, 0.15),
-    rgba(90, 90, 74, 0.35)
-  );
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(167, 176, 84, 0.5),
-    rgba(228, 240, 125, 0.5)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(228, 240, 125, 0.5),
-    rgba(167, 176, 84, 0.5)
-  );
-
-  --errorColorD: linear-gradient(
-    135deg,
-    rgba(238, 49, 49, 0.4),
-    rgba(201, 74, 74, 0.4)
-  );
-  --errorColorDHover: linear-gradient(
-    135deg,
-    rgba(201, 74, 74, 0.4),
-    rgba(238, 49, 49, 0.4)
-  );
-
-  --warningColorD: linear-gradient(
-    135deg,
-    rgba(228, 240, 125, 0.25),
-    rgba(243, 234, 65, 0.25)
-  );
-  --warningColorDHover: linear-gradient(
-    135deg,
-    rgba(243, 234, 65, 0.25),
-    rgba(228, 240, 125, 0.25)
-  );
+  --mainBackground: #eef0e5;
+  --sidebarBackground: #e3e6c9;
+  --textBase: #6b6c70;
+  --primaryText: #141519;
+  --primaryColor: #bdd00d;
+  --logoColor: rgba(20, 21, 25, 0.03);
 }
 
 [data-theme="blue-dark"] {
   --mainBackground: #344850;
-  --textBase: #1f2c32;
-  --primaryText: #d2eaf3;
-  --secondaryText: #5496b0;
-  --tercearyText: #7dcff0;
-  --inputColor: #138ab8;
+  --sidebarBackground: #1f2c32;
   --primaryColor: #18b2ef;
-  --accentColor: #7dcff0;
-  --shadowColor: rgba(47, 47, 18, 0.3);
-
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(84, 150, 176, 0.5),
-    rgba(46, 80, 97, 0.3)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(46, 80, 97, 0.3),
-    rgba(84, 150, 176, 0.5)
-  );
+  --logoColor: rgba(24, 178, 239, 0.02);
 }
 
 [data-theme="blue-light"] {
-  --mainBackground: #e5f2f7;
-  --textBase: #37a0ca;
-  --primaryText: #131c21;
-  --secondaryText: #344850;
-  --tercearyText: #467dad;
-  --inputColor: #a4b6ef;
-  --primaryColor: #1887ef;
-  --accentColor: #0a719a;
-  --shadowColor: rgba(31, 44, 50, 0.2);
-
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(19, 138, 184, 0.2),
-    rgba(19, 138, 184, 0.5)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(19, 138, 184, 0.5),
-    rgba(19, 138, 184, 0.2)
-  );
+  --mainBackground: #e5e6f0;
+  --sidebarBackground: #e5f2f7;
+  --textBase: #6b6c70;
+  --primaryText: #141519;
+  --primaryColor: #123c63;
+  --logoColor: rgba(18, 60, 99, 0.03);
 }
 
 [data-theme="pink-dark"] {
   --mainBackground: #402b38;
-  --textBase: #2b1824;
-  --primaryText: #f4dce8;
-  --secondaryText: #ff66b3;
-  --tercearyText: #f79ac0;
-  --inputColor: #593247;
+  --sidebarBackground: #2b1824;
   --primaryColor: #f61c65;
-  --accentColor: #ff8fc0;
-  --shadowColor: rgba(30, 15, 20, 0.3);
-
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(242, 82, 135, 0.3),
-    rgba(247, 154, 192, 0.3)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(247, 154, 192, 0.3),
-    rgba(242, 82, 135, 0.3)
-  );
+  --logoColor: rgba(246, 28, 101, 0.02);
 }
 
 [data-theme="pink-light"] {
-  --mainBackground: #fce8f1;
-  --textBase: #cfa7b8;
-  --primaryText: #261420;
-  --secondaryText: #5e2d47;
-  --tercearyText: #f25287;
-  --inputColor: #f3bcd0;
+  --mainBackground: #d8c5cd;
+  --sidebarBackground: #eddce2;
+  --textBase: #6b6c70;
+  --primaryText: #141519;
   --primaryColor: #ff66b3;
-  --accentColor: #ee6fa4;
-  --shadowColor: rgba(90, 45, 60, 0.15);
-
-  --cardBackground: linear-gradient(
-    135deg,
-    rgba(255, 140, 180, 0.4),
-    rgba(252, 232, 241, 0.3)
-  );
-  --cardBackgroundHover: linear-gradient(
-    135deg,
-    rgba(252, 232, 241, 0.3),
-    rgba(255, 140, 180, 0.4)
-  );
-
-  --cardBackground2: linear-gradient(
-    135deg,
-    rgba(255, 140, 180, 0.25),
-    rgba(247, 154, 192, 0.25)
-  );
-  --cardBackground2Hover: linear-gradient(
-    135deg,
-    rgba(247, 154, 192, 0.25),
-    rgba(255, 140, 180, 0.25)
-  );
+  --logoColor: rgba(255, 102, 179, 0.05);
 }
 
 * {
@@ -265,7 +92,11 @@ input:hover {
 
 .app-bg {
   min-height: 98vh;
-  background-image: radial-gradient(circle, #141519 0%, #000000 100%);
+  background-image: radial-gradient(
+    circle,
+    var(--mainBackground) 0%,
+    var(--sidebarBackground) 100%
+  );
 }
 
 .logoMain {
@@ -276,7 +107,7 @@ input:hover {
   width: 200px;
   height: auto;
   z-index: 1;
-  color: rgba(255, 255, 255, 0.01);
+  color: var(--logoColor);
 
   pointer-events: none;
 }
@@ -286,7 +117,7 @@ input:hover {
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--logoColor);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
@@ -338,6 +169,12 @@ input:hover {
 
 .btn-action-inactive {
   color: var(--primaryText);
+}
+
+.error {
+  width: 100%;
+  color: var(--errorColor);
+  text-align: center;
 }
 
 .arrow-pagination {

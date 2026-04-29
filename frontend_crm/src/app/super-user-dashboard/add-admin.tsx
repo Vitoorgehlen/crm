@@ -153,60 +153,58 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
     >
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
-          <div className={styles.createUserLabels}>
-            <div className={styles.box}>
-              <input
-                className={styles.labelSettingUser}
-                type="text"
-                placeholder="Nome"
-                onChange={(e) => setNewName(e.target.value)}
-              />
-              <button
-                className={styles.closeBtn}
-                type="button"
-                onClick={() => onClose()}
-              >
-                <MdClose />
-              </button>
-            </div>
-            {error && <p className={styles.error}>{error}</p>}
-            <div className={styles.box}>
-              <input
-                className={styles.labelSettingUser}
-                type="email"
-                placeholder="Novo e-mail"
-                onChange={(e) => setNewEmail(e.target.value)}
-              />
-              <input
-                className={styles.labelSettingUser}
-                type="email"
-                placeholder="Confirme e-mail"
-                onChange={(e) => setNewEmail2(e.target.value)}
-              />
-            </div>
-            <div className={styles.box}>
-              <input
-                className={styles.labelSettingUser}
-                type="password"
-                placeholder="Nova senha"
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <input
-                className={styles.labelSettingUser}
-                type="password"
-                placeholder="Confirme a senha"
-                onChange={(e) => setNewPassword2(e.target.value)}
-              />
-            </div>
-            <div className={styles.box}>
-              <button
-                className={styles.btnUpdate}
-                type="button"
-                onClick={() => handleCreateUser()}
-              >
-                {loading ? <h3>Criando...</h3> : <h3>Criar usuário</h3>}
-              </button>
-            </div>
+          <div className={styles.box}>
+            <input
+              className={`form-base ${styles.input}`}
+              type="text"
+              placeholder="Nome"
+              onChange={(e) => setNewName(e.target.value)}
+            />
+            <button
+              className={styles.closeBtn}
+              type="button"
+              onClick={() => onClose()}
+            >
+              <MdClose />
+            </button>
+          </div>
+          {error && <p className={styles.error}>{error}</p>}
+          <div className={styles.box}>
+            <input
+              className={`form-base ${styles.input}`}
+              type="email"
+              placeholder="Novo e-mail"
+              onChange={(e) => setNewEmail(e.target.value)}
+            />
+            <input
+              className={`form-base ${styles.input}`}
+              type="email"
+              placeholder="Confirme e-mail"
+              onChange={(e) => setNewEmail2(e.target.value)}
+            />
+          </div>
+          <div className={styles.box}>
+            <input
+              className={`form-base ${styles.input}`}
+              type="password"
+              placeholder="Nova senha"
+              onChange={(e) => setNewPassword(e.target.value)}
+            />
+            <input
+              className={`form-base ${styles.input}`}
+              type="password"
+              placeholder="Confirme a senha"
+              onChange={(e) => setNewPassword2(e.target.value)}
+            />
+          </div>
+          <div className={styles.box}>
+            <button
+              className={`btn-action glass ${styles.btnSave}`}
+              type="button"
+              onClick={() => handleCreateUser()}
+            >
+              {loading ? <h4>Criando...</h4> : <h4>Criar usuário</h4>}
+            </button>
           </div>
         </div>
       </div>

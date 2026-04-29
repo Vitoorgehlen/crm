@@ -10,6 +10,7 @@ import { ClientDeletedRequest, Deal, DeleteContext } from "@/types";
 import { formatDateForCards } from "@/utils/dateUtils";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import WarningClient from "@/components/Warning/ClientWarning";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -212,21 +213,23 @@ export default function DeleteRequest() {
                 <h5>{isRequestClient ? " Clientes" : " Negociações"}</h5>
               </div>
               <div className={styles.headerIcons}>
-                <button
-                  className={`${
-                    isRequestClient
-                      ? "btn-action-active"
-                      : "btn-action-inactive"
-                  } btn-action glass`}
-                  onClick={() => {
-                    setIsRequestClient(true);
-                    setIsRequestDeal(false);
-                  }}
-                >
-                  <FaUserEdit />
-                </button>
+                <Tooltip label={"Apagar cliente"}>
+                  <button
+                    className={`${
+                      isRequestClient
+                        ? "btn-action-active"
+                        : "btn-action-inactive"
+                    } btn-action glass`}
+                    onClick={() => {
+                      setIsRequestClient(true);
+                      setIsRequestDeal(false);
+                    }}
+                  >
+                    <FaUserEdit />
+                  </button>
+                </Tooltip>
 
-                {permissions.includes("USER_UPDATE") && (
+                <Tooltip label={"Apagar negociação"}>
                   <button
                     className={`${
                       isRequestDeal
@@ -240,7 +243,7 @@ export default function DeleteRequest() {
                   >
                     <FaUsersCog />
                   </button>
-                )}
+                </Tooltip>
               </div>
             </div>
 

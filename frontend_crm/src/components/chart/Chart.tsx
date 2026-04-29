@@ -11,7 +11,6 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
-import styles from "./Chart.module.css";
 import { useAuth } from "@/contexts/AuthContext";
 import { DealShare } from "@/types";
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -96,23 +95,28 @@ export default function ChartLayout() {
   }, [isLoading, token, router]);
 
   return (
-    <div className={styles.main}>
+    <div>
       <ResponsiveContainer width="100%" height={220}>
         <BarChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis />
-          <Tooltip
-            formatter={(value) => {
-              if (typeof value !== "number") return value ?? "R$ 0,00";
+          <CartesianGrid stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
+          <XAxis dataKey="name" stroke="var(--textBase)" />
 
-              return value.toLocaleString("pt-BR", {
-                style: "currency",
-                currency: "BRL",
-              });
+          <YAxis stroke="var(--textBase)" />
+          <Tooltip
+            cursor={{ fill: "var(--sidebarBackground)" }}
+            contentStyle={{
+              backgroundColor: "var(--sidebarBackground)",
+              border: "1px solid var(--primaryColor)",
+              borderRadius: "8px",
             }}
+            labelStyle={{ color: "var(--primaryText)" }}
+            itemStyle={{ color: "var(--primaryColor)" }}
           />
-          <Bar dataKey="value" fill="var(--accentColor)" />
+          <Bar
+            dataKey="value"
+            fill="var(--textBase)"
+            activeBar={{ fill: "var(--primaryColor)" }}
+          />
         </BarChart>
       </ResponsiveContainer>
     </div>

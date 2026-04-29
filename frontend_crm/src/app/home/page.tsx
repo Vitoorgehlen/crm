@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./page.module.css";
 import {
   DeleteContext,
+  NotePad,
   priorityOrder,
   TaskPriority,
   Tasks,
@@ -16,11 +17,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import ScheduleLayout from "@/components/Schedule/ScheduleLayout/ScheduleLayout";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
-import { MdOpenInNew, MdOpenInNewOff } from "react-icons/md";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
 import ChartLayout from "@/components/chart/Chart";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
@@ -28,6 +30,10 @@ export default function Home() {
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Tasks[]>();
+  const [notes, setNotes] = useState<NotePad[]>([]);
+  const [originalNote, setOriginalNote] = useState("");
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const currentNote = notes[currentIndex];
 
   const [isOpenEditTask, setIsOpenEditTask] = useState<number | undefined>(
     undefined,
@@ -44,7 +50,9 @@ export default function Home() {
 
   const [isOpenTask, setIsOpenTask] = useState(true);
   const [isOpenChart, setIsOpenChart] = useState(true);
+  const [isOpenNote, setIsOpenNote] = useState(true);
   const [isOpenSchedule, setIsOpenSchedule] = useState(true);
+  const [error, setError] = useState("");
 
   const fetchMe = useCallback(async () => {
     try {
@@ -80,6 +88,16 @@ export default function Home() {
   const selectedPriority =
     priorityOptions.find((opt) => opt.value === taskPriority) || null;
 
+  function handleNote(next: boolean) {
+    setCurrentIndex((prev) => {
+      if (next) {
+        return (prev + 1) % notes.length;
+      } else {
+        return (prev - 1 + notes.length) % notes.length;
+      }
+    });
+  }
+
   const fetchTasks = useCallback(async () => {
     try {
       const res = await fetch(`${API}/tasks`, {
@@ -107,6 +125,14 @@ export default function Home() {
       setIsOpenChart((prev) => {
         const updated = !prev;
         localStorage.setItem("isOpenChart", JSON.stringify(updated));
+        return updated;
+      });
+    }
+
+    if (card === "note-pad") {
+      setIsOpenNote((prev) => {
+        const updated = !prev;
+        localStorage.setItem("isOpenNote", JSON.stringify(updated));
         return updated;
       });
     }
@@ -228,6 +254,61 @@ export default function Home() {
     }
   }
 
+  async function handleAutoSave() {
+    if (isLoading) return;
+    setError("");
+
+    if (!currentNote) return;
+    if (currentNote.content === originalNote) return;
+
+    try {
+      const response = await fetch(`${API}/notepad`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ content: currentNote?.content }),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao salvar nota");
+
+      setNotes((prev) => [...prev, data]);
+      setOriginalNote(data.content);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro inesperado");
+      }
+    }
+  }
+
+  const fetchNotes = useCallback(async () => {
+    if (isLoading) return;
+
+    try {
+      const res = await fetch(`${API}/notepad/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar a notas");
+
+      setNotes(data);
+      setOriginalNote(data[0].content);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  }, [token, isLoading]);
+
+  useEffect(() => {
+    if (notes.length > 0) {
+      setCurrentIndex(0);
+    }
+  }, [notes]);
+
   useEffect(() => {
     if (isLoading) return;
     if (!token) {
@@ -237,7 +318,8 @@ export default function Home() {
 
     fetchMe();
     fetchTasks();
-  }, [isLoading, token, router, fetchMe, fetchTasks]);
+    fetchNotes();
+  }, [isLoading, token]);
 
   useEffect(() => {
     const savedTask = localStorage.getItem("isOpenTask");
@@ -250,6 +332,11 @@ export default function Home() {
       setIsOpenChart(JSON.parse(savedChart));
     }
 
+    const savedNote = localStorage.getItem("isOpenNote");
+    if (savedNote !== null) {
+      setIsOpenNote(JSON.parse(savedNote));
+    }
+
     const savedSchedule = localStorage.getItem("isOpenSchedule");
     if (savedSchedule !== null) {
       setIsOpenSchedule(JSON.parse(savedSchedule));
@@ -258,30 +345,169 @@ export default function Home() {
 
   return (
     <main className={styles.main}>
-      <div className={styles.title}>
-        <h4>
-          Bem vindo(a) <span>{user?.name}</span>
-        </h4>
-      </div>
-      <div className={styles.contentSection}>
-        <div className={styles.chartAndTask}>
-          <div className={`glass ${styles.taskSection}`}>
-            <div className={styles.titleCard}>
-              <button className={styles.btnInvisible}>
-                {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-              </button>
-              <h5>Tarefas</h5>
-              <button
-                className={styles.btnOpen}
-                onClick={() => handleToggleOpenCard("task")}
+      <div className={styles.header}>
+        <div className={styles.btnsWindows}>
+          <Tooltip label={"Notas"}>
+            <button
+              className={styles.btnWindows}
+              onClick={() => handleToggleOpenCard("note-pad")}
+            >
+              <div
+                className={`glass ${styles.btnSlide} ${isOpenNote && styles.btnSlideActive}`}
               >
-                {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-              </button>
+                <div className={styles.slide}></div>
+              </div>
+              <span>Notas</span>
+            </button>
+          </Tooltip>
+
+          <Tooltip label={"Faturamento"}>
+            <button
+              className={styles.btnWindows}
+              onClick={() => handleToggleOpenCard("chart")}
+            >
+              <div
+                className={`glass ${styles.btnSlide} ${isOpenChart && styles.btnSlideActive}`}
+              >
+                <div className={styles.slide}></div>
+              </div>
+              <span>Faturamento</span>
+            </button>
+          </Tooltip>
+
+          <Tooltip label={"Tarefas"}>
+            <button
+              className={styles.btnWindows}
+              onClick={() => handleToggleOpenCard("task")}
+            >
+              <div
+                className={`glass ${styles.btnSlide} ${isOpenTask && styles.btnSlideActive}`}
+              >
+                <div className={styles.slide}></div>
+              </div>
+              <span>Tarefas</span>
+            </button>
+          </Tooltip>
+
+          <Tooltip label={"Agenda"}>
+            <button
+              className={styles.btnWindows}
+              onClick={() => handleToggleOpenCard("schedule")}
+            >
+              <div
+                className={`glass ${styles.btnSlide} ${isOpenSchedule && styles.btnSlideActive}`}
+              >
+                <div className={styles.slide}></div>
+              </div>
+              <span>Agenda</span>
+            </button>
+          </Tooltip>
+        </div>
+
+        <div className={styles.title}>
+          <h4>
+            Bem vindo(a) <span>{user?.name}</span>
+          </h4>
+        </div>
+      </div>
+
+      <div className={styles.contentSection}>
+        {isOpenNote && (
+          <div className={`glass ${styles.noteSection}`}>
+            <div className={styles.titleCard}>
+              <h5 className={styles.titleCenter}>Notas</h5>
+
+              <Tooltip label={"Fechar"}>
+                <button
+                  className={styles.btnOpen}
+                  onClick={() => handleToggleOpenCard("note-pad")}
+                >
+                  <div className={styles.slide}></div>
+                </button>
+              </Tooltip>
             </div>
 
-            <div
-              className={`${isOpenTask ? styles.taskOpen : styles.taskClose}`}
-            >
+            <div className={styles.card}>
+              {error && <p className="error">{error}</p>}
+
+              {notes.length >= 2 && (
+                <div className={styles.btnsNote}>
+                  <button
+                    className={styles.btnNote}
+                    onClick={() => handleNote(false)}
+                  >
+                    <IoIosArrowBack />
+                  </button>
+
+                  <button
+                    className={styles.btnNote}
+                    onClick={() => handleNote(true)}
+                  >
+                    <IoIosArrowForward />
+                  </button>
+                </div>
+              )}
+
+              <div className={styles.noteInput}>
+                {currentNote?.id === notes[0]?.id ? (
+                  <textarea
+                    className={`form-base ${styles.formNote}`}
+                    placeholder="Nota"
+                    value={currentNote?.content || ""}
+                    onChange={(e) => {
+                      const updated = [...notes];
+                      updated[currentIndex] = {
+                        ...updated[currentIndex],
+                        content: e.target.value,
+                      };
+                      setNotes(updated);
+                    }}
+                    onBlur={handleAutoSave}
+                  />
+                ) : (
+                  <span className={styles.formNote}>
+                    {currentNote?.content || ""}
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {isOpenChart && (
+          <div className={`glass ${styles.chartSection}`}>
+            <div className={styles.titleCard}>
+              <h5 className={styles.titleCenter}>Faturamento</h5>
+
+              <Tooltip label={"Fechar"}>
+                <button
+                  className={styles.btnOpen}
+                  onClick={() => handleToggleOpenCard("chart")}
+                >
+                  <div className={styles.slide}></div>
+                </button>
+              </Tooltip>
+            </div>
+            {isOpenChart && <ChartLayout />}
+          </div>
+        )}
+
+        {isOpenTask && (
+          <div className={`glass ${styles.taskSection}`}>
+            <div className={styles.titleCard}>
+              <h5 className={styles.titleCenter}>Tarefas</h5>
+
+              <Tooltip label={"Fechar"}>
+                <button
+                  className={styles.btnOpen}
+                  onClick={() => handleToggleOpenCard("task")}
+                >
+                  <div className={styles.slide}></div>
+                </button>
+              </Tooltip>
+            </div>
+
+            <div className={styles.card}>
               <div className={styles.addTask}>
                 {isOpenEditTask ? (
                   <>
@@ -425,42 +651,25 @@ export default function Home() {
               </div>
             </div>
           </div>
+        )}
 
-          <div className={`glass ${styles.chart}`}>
+        {isOpenSchedule && (
+          <div className={`glass ${styles.scheduleSection}`}>
             <div className={styles.titleCard}>
-              <button className={styles.btnInvisible}>
-                {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-              </button>
-              <h5>Faturamento</h5>
-              <button
-                className={styles.btnOpen}
-                onClick={() => handleToggleOpenCard("chart")}
-              >
-                {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-              </button>
+              <Tooltip label={"Fechar"}>
+                <button
+                  className={styles.btnOpen}
+                  onClick={() => handleToggleOpenCard("schedule")}
+                >
+                  <div className={styles.slide}></div>
+                </button>
+              </Tooltip>
             </div>
-            {isOpenChart && <ChartLayout />}
+            {isOpenSchedule && <ScheduleLayout />}
           </div>
-        </div>
-
-        <div
-          className={`glass ${styles.schedule} ${isOpenSchedule && styles.scheduleOpen}`}
-        >
-          <div className={styles.titleCard}>
-            <button className={styles.btnInvisible}>
-              {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-            </button>
-            {!isOpenSchedule && <h5>Agenda</h5>}
-            <button
-              className={styles.btnOpen}
-              onClick={() => handleToggleOpenCard("schedule")}
-            >
-              {isOpenTask ? <MdOpenInNewOff /> : <MdOpenInNew />}
-            </button>
-          </div>
-          {isOpenSchedule && <ScheduleLayout />}
-        </div>
+        )}
       </div>
+
       {deleteContext && (
         <WarningDeal
           message={deleteContext.message}

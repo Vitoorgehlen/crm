@@ -28,8 +28,8 @@ import {
 } from "@dnd-kit/modifiers";
 import { PaymentMethod } from "@/types/index";
 import HeaderPage from "@/components/searchbar/page";
-import DraggableCard from "@/components/draggableAndDroppable/draggableCard";
-import DroppableColumn from "@/components/draggableAndDroppable/droppable";
+import DraggableCard from "@/components/Tools/draggableAndDroppable/draggableCard";
+import DroppableColumn from "@/components/Tools/draggableAndDroppable/droppable";
 import { useQueryState } from "nuqs";
 import { fetchDealsList, fetchMultipleDeals } from "@/utils/fetchDeals";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";

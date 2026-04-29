@@ -44,6 +44,7 @@ export default function ScheduleForm({
   const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
 
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -67,13 +68,6 @@ export default function ScheduleForm({
   const handleDragStart = (e: React.DragEvent) => {
     e.preventDefault();
   };
-
-  function formatDateForInput(date: Date | undefined): string {
-    if (!date) return "";
-    const offset = date.getTimezoneOffset();
-    const local = new Date(date.getTime() - offset * 60000);
-    return local.toISOString().slice(0, 16);
-  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -103,6 +97,9 @@ export default function ScheduleForm({
   }
 
   async function handleCreate(payload: CreateSchedulePayload) {
+    if (loading) return;
+    setLoading(true);
+
     try {
       const response = await fetch(`${API}/schedule`, {
         method: "POST",
@@ -124,6 +121,8 @@ export default function ScheduleForm({
           ? err.message
           : "Erro inesperado ao criar compromisso",
       );
+    } finally {
+      setLoading(false);
     }
   }
 

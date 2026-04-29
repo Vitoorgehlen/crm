@@ -24,48 +24,48 @@ export default function ThemeSwitcher() {
         <h5>Personalize o tema do seu CRM!</h5>
         <div className={styles.btns}>
           <button
-            className={styles.btnDefaultDark}
+            className={`glass ${styles.btn} ${styles.btnDefaultDark}`}
             onClick={() => setTheme("default-dark")}
           >
             Padrão
-            <p>Escuro</p>
+            <span>Escuro</span>
           </button>
           <button
-            className={styles.btnBlueDark}
+            className={`glass ${styles.btn} ${styles.btnBlueDark}`}
             onClick={() => setTheme("blue-dark")}
           >
             Azul
-            <p>Escuro</p>
+            <span>Escuro</span>
           </button>
           <button
-            className={styles.btnPinkDark}
+            className={`glass ${styles.btn} ${styles.btnPinkDark}`}
             onClick={() => setTheme("pink-dark")}
           >
             Rosa
-            <p>Escuro</p>
+            <span>Escuro</span>
           </button>
         </div>
         <div className={styles.btns}>
           <button
-            className={styles.btnDefault}
+            className={`glass ${styles.btn} ${styles.btnDefault}`}
             onClick={() => setTheme("default-light")}
           >
             Padrão
-            <p>Claro</p>
+            <span>Claro</span>
           </button>
           <button
-            className={styles.btnBlue}
+            className={`glass ${styles.btn} ${styles.btnBlue}`}
             onClick={() => setTheme("blue-light")}
           >
             Azul
-            <p>Claro</p>
+            <span>Claro</span>
           </button>
           <button
-            className={styles.btnPink}
+            className={`glass ${styles.btn} ${styles.btnPink}`}
             onClick={() => setTheme("pink-light")}
           >
             Rosa
-            <p>Claro</p>
+            <span>Claro</span>
           </button>
         </div>
       </div>

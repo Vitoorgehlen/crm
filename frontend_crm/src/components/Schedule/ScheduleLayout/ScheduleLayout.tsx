@@ -143,6 +143,20 @@ export default function ScheduleLayout() {
     });
   }
 
+  function hasPendingSchedules(day: Date) {
+    return schedules.some((schedule) => {
+      if (!schedule.reminderAt || schedule.finish) return false;
+
+      const scheduleDate = new Date(schedule.reminderAt);
+
+      return (
+        scheduleDate.getDate() === day.getDate() &&
+        scheduleDate.getMonth() === day.getMonth() &&
+        scheduleDate.getFullYear() === day.getFullYear()
+      );
+    });
+  }
+
   function formatTextWeek(text: string) {
     return text.charAt(0).toUpperCase() + text.slice(1, -1);
   }
@@ -202,6 +216,7 @@ export default function ScheduleLayout() {
         </div>
 
         <div className={styles.title}>
+          <h5 className={styles.titleCrazy}>Agenda</h5>
           <p>
             {isWeekOrMonth ? titleSchedule("week") : titleSchedule("month")}
           </p>
@@ -274,16 +289,18 @@ export default function ScheduleLayout() {
               const day = days[index];
               const isPast = isPastDay(day);
               const isTodayDate = isToday(day);
-              const isFutureOrToday = !isPast;
+              const hasPending = hasPendingSchedules(day);
 
-              return isFutureOrToday ? (
+              const shouldShow = !isPast || hasPending;
+
+              return shouldShow ? (
                 <div
                   key={index}
                   onClick={() => {
                     setSelectedDay(day);
                     setIsOpenCard((prev) => !prev);
                   }}
-                  className={`${styles.dayColumn} 
+                  className={`${isPast ? styles.pastDay : styles.dayColumn}
                   ${isTodayDate && styles.today}
                   ${
                     day.getDay() === 0 || day.getDay() === 6
@@ -335,9 +352,11 @@ export default function ScheduleLayout() {
               const isCurrentMonth = day.getMonth() === currentDate.getMonth();
               const isPast = isPastDay(day);
               const isTodayDate = isToday(day);
-              const isFutureOrToday = !isPast;
+              const hasPending = hasPendingSchedules(day);
 
-              return isFutureOrToday ? (
+              const shouldShow = !isPast || hasPending;
+
+              return shouldShow ? (
                 <button
                   key={index}
                   onClick={() => setSelectedDay(day)}
@@ -345,7 +364,7 @@ export default function ScheduleLayout() {
                   onMouseLeave={() => setHoveredDay(null)}
                   className={`${styles.monthDay} ${
                     isCurrentMonth ? styles.currentMonth : styles.otherMonth
-                  } ${isTodayDate && styles.today}`}
+                  } ${isTodayDate && styles.today} ${isPast && styles.pastDay}`}
                 >
                   {day.getDate()}
                   {getScheduleForDay(day).length > 0 && (

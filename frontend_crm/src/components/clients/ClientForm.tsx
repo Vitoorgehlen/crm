@@ -106,6 +106,12 @@ export default function ClientsForm({
       return;
     }
 
+    if (name.length >= 60) {
+      setError("O nome do cliente é muito longo.");
+      setLoading(null);
+      return;
+    }
+
     try {
       const payload: Partial<Client> = {
         name,
@@ -210,7 +216,7 @@ export default function ClientsForm({
             </button>
           </div>
 
-          {error && <p className={styles.erro}>{error}</p>}
+          {error && <p className="erro">{error}</p>}
           <div className={styles.line}>
             <input
               type="text"

@@ -19,7 +19,7 @@
   max-width: 900px;
   margin: 0 25px 10px 0;
   width: 90%;
-  height: 600px;
+  height: 90vh;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -73,6 +73,7 @@
 .clientBtn {
   border: none;
   width: 100%;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -422,6 +423,12 @@
   align-items: center;
 }
 
+.divAddDoc {
+  display: flex;
+  gap: 3px;
+  margin-top: 3px;
+}
+
 .addNoteForm {
   color: var(--primaryText);
   border: 1px solid var(--textBase) !important;
@@ -616,9 +623,29 @@
     flex-direction: column;
   }
 
+  .paymentTitle {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+    justify-content: flex-start;
+  }
+
   .paymentTitleMobile {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+
+  .payment:last-child {
+    grid-column: span 1;
+  }
+
+  .payment p {
+    width: 100%;
+    margin-bottom: 3px;
+  }
+
+  .inputBank {
+    max-width: 100%;
   }
 
   .btnCancelAndConfirm {

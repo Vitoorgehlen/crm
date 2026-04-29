@@ -236,7 +236,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
         </div>
       )}
 
-      {error && <p className={styles.erro}>{error}</p>}
+      {error && <p className="erro">{error}</p>}
       <button
         className={`btn-action glass ${styles.btnSave}`}
         onClick={handleEditMe}

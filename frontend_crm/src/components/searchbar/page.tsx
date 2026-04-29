@@ -6,6 +6,7 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { AiOutlineUserAdd } from "react-icons/ai";
 import UserSelect from "../Tools/Select/UserSelect";
 import styles from "./page.module.css";
+import Tooltip from "../Tools/Tooltip/Tooltip";
 
 interface HeaderProps {
   title: string;
@@ -70,29 +71,37 @@ export default function HeaderPage({
             )}
 
             {permissions.includes("ALL_DEAL_READ") && (
-              <button
-                className={`${
-                  teamDeals ? "btn-action-active" : "btn-action-inactive"
-                } btn-action glass`}
-                onClick={handleToggleTeamDeals}
-                type="button"
-              >
-                <HiUserGroup />
-              </button>
+              <Tooltip label={"Modo equipe"}>
+                <button
+                  className={`${
+                    teamDeals ? "btn-action-active" : "btn-action-inactive"
+                  } btn-action glass`}
+                  onClick={handleToggleTeamDeals}
+                  type="button"
+                >
+                  <HiUserGroup />
+                </button>
+              </Tooltip>
             )}
 
             {permissions.includes("DEAL_CREATE") && add && (
-              <button
-                className={`${styles.addDeal} btn-action glass`}
-                onClick={onCreate}
-                type="button"
+              <Tooltip
+                label={`Adicionar ${
+                  title === "Clientes" ? "cliente" : "negociação"
+                }`}
               >
-                {title === "Clientes" ? (
-                  <AiOutlineUserAdd />
-                ) : (
-                  <BsFileEarmarkPlus />
-                )}
-              </button>
+                <button
+                  className={`${styles.addDeal} btn-action glass`}
+                  onClick={onCreate}
+                  type="button"
+                >
+                  {title === "Clientes" ? (
+                    <AiOutlineUserAdd />
+                  ) : (
+                    <BsFileEarmarkPlus />
+                  )}
+                </button>
+              </Tooltip>
             )}
           </>
         )}

@@ -1,12 +1,10 @@
 .main {
   box-sizing: border-box;
-  padding: 0;
   margin: 0;
   min-height: 100vh;
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
   overflow-y: auto;
   padding: 20px;
 }
@@ -20,10 +18,15 @@
   color: var(--primaryText);
   margin: 0 auto;
   width: 100%;
-  max-width: 1200px;
 }
 
 .content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.contentBox {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -31,31 +34,41 @@
   margin: 0 auto;
   padding: 0 20px;
   width: 100%;
-  max-width: 1200px;
+  gap: 20px;
+}
+
+.companyBox {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border-radius: 5px;
 }
 
 .createCompany {
   width: 100%;
-  gap: 5px;
-  margin: 5px 0;
-  padding: 10px;
   justify-content: center;
   align-items: center;
   text-align: center;
-  background: var(--sidebarBackground);
-  border-radius: 8px;
+  border-bottom: 1px solid var(--textBase);
+}
+
+.title {
+  color: var(--textBase);
 }
 
 .createCompanyBox {
   display: flex;
   justify-content: space-between;
   width: 100%;
+  margin: 5px 0;
   gap: 5px;
 }
 
 .btnSave {
   padding: 5px;
-  color: var(--primaryColor);
   border: none;
   border-radius: 6px;
   max-width: 500px;
@@ -64,96 +77,127 @@
   border: 1px solid var(--textBase);
 }
 
+.btnSave h4 {
+  color: var(--primaryColor);
+}
+
 .btnSave:hover {
-  color: var(--primaryText);
   border: 1px solid var(--primaryColor);
 }
 
-.btnLogout {
-  margin-top: 20px;
-  color: var(--errorColor);
-}
-
-.btnLogout:hover {
-  background-color: var(--errorColor);
-  border: 1px solid var(--textBase);
+.btnSave:hover h4 {
+  color: var(--primaryText);
 }
 
 .companies {
   width: 100%;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  margin: 10px;
-  gap: 10px;
 }
 
 .company {
   width: 100%;
-  max-width: 800px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  background: var(--cardBackground);
-  border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 
 .companyContent {
-  width: 80%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  border-radius: 5px;
+  gap: 5px;
+  padding: 10px 10px 0 10px;
 }
 
 .companyInfos {
   width: 100%;
-  max-width: 800px;
   display: flex;
   color: var(--primaryText);
   justify-content: space-between;
-  border-radius: 5px;
-  gap: 15px;
+  gap: 5px;
 }
 
-.btnOpenCompany {
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  width: 40px;
-  height: 40px;
-  margin-left: 10px;
-  font-size: 1.2rem;
-  border-radius: 5px;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+.inputComp {
+  width: 100%;
+}
+
+.inputMaxUser {
+  width: 70px;
+}
+
+.companyInfosUsers {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  color: var(--textBase);
+}
+
+.btnCompany {
+  padding: 5px;
+  border: none;
+  border-radius: 6px;
+  max-width: 500px;
+  width: 35px;
   cursor: pointer;
+  border: 1px solid var(--textBase);
 }
 
-.btnOpenCompany:hover {
+.btnCompEnv:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--cardBackgroundHover);
+}
+
+.btnCompDel:hover {
+  color: var(--errorColor);
+  border: 1px solid var(--errorColor);
+}
+
+.createNote {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+}
+
+.createNote span {
+  color: var(--textBase);
+}
+
+.formNote {
+  width: 100%;
+  min-height: 70px;
+  color: var(--primaryText);
+  resize: none;
+  padding: 8px 12px;
+  line-height: 1.4;
+}
+
+.noteBtns {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.btnLogout {
+  margin-top: 10px;
+  color: var(--errorColor);
+}
+
+.btnLogout:hover {
+  background-color: var(--errorColor);
+  color: var(--primaryText);
+  border: 1px solid var(--primaryText);
 }
 
 .docs {
+  width: 100%;
   display: flex;
   flex-direction: column;
-  width: 100%;
-  max-width: 400px;
-  background-color: var(--sidebarBackground);
-  padding: 8px;
-  border-radius: 6px;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 5px;
+
   color: var(--primaryText);
 }
 
@@ -200,4 +244,39 @@
   transform: translateY(-50%);
   pointer-events: none;
   color: var(--primaryText);
+}
+
+.docs .btnSave {
+  color: var(--primaryText);
+}
+
+@media (max-width: 768px) {
+  .main {
+    padding: 20px 0;
+  }
+
+  .header {
+    padding-left: 20px;
+  }
+
+  .content {
+    flex-direction: column;
+  }
+
+  .contentBox {
+    padding: 0 10px;
+    margin-bottom: 20px;
+  }
+
+  .companyBox {
+    padding: 10px;
+  }
+
+  .btnSave {
+    width: 200px;
+  }
+
+  .btnLogout {
+    width: 200px;
+  }
 }

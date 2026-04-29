@@ -11,6 +11,7 @@ import dealRoutes from './routes/dealRoutes';
 import documentationCostRoutes from './routes/documentationCostRoutes';
 import previousDocumentationRoutes from './routes/previousDocumentationRoutes';
 import noteRoutes from './routes/noteRoutes';
+import notePadRoutes from './routes/notePadRoutes';
 import dealShareRoutes from './routes/dealShareRoutes';
 import goalsRoutes from './routes/goalsRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
@@ -49,6 +50,7 @@ class App {
     this.app.use('/', documentationCostRoutes);
     this.app.use('/', previousDocumentationRoutes);
     this.app.use('/', noteRoutes);
+    this.app.use('/', notePadRoutes);
     this.app.use('/', dealShareRoutes);
     this.app.use('/', goalsRoutes);
     this.app.use('/', scheduleRoutes);

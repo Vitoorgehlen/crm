@@ -39,7 +39,8 @@
   max-width: 800px;
   margin: 0 25px 10px 0;
   width: 90%;
-  height: 600px;
+  min-height: 100px;
+  height: 90vh;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -101,6 +102,7 @@
 .clientBtn {
   border: none;
   width: 100%;
+  text-decoration: none;
   cursor: pointer;
 }
 
@@ -242,7 +244,6 @@
   border-radius: 10px;
   gap: 4px;
   width: 35%;
-  height: 560px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -464,6 +465,11 @@
 }
 
 @media (max-width: 768px) {
+  .overlay {
+    align-items: stretch;
+    justify-content: stretch;
+  }
+
   .modal {
     padding: 20px 10px;
     border-radius: 0;
@@ -477,7 +483,8 @@
     max-width: 800px;
     margin: 0;
     width: 100%;
-    height: 100%;
+    height: 100vh;
+    max-height: 100vh;
   }
 
   .innerModal {
@@ -487,6 +494,7 @@
 
   .modalLeft {
     padding: 0;
+    max-width: 100%;
     gap: 10px;
   }
 

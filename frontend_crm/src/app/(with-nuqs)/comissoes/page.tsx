@@ -8,11 +8,12 @@ import DealForm from "@/components/Deal/DealForm/DealForm";
 import { Deal } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FaCashRegister } from "react-icons/fa";
-import { BsCashCoin } from "react-icons/bs";
+import { BsCashCoin, BsCashStack } from "react-icons/bs";
 
 import ExpenseCard from "@/components/commissions/Despesas/page";
 import CommissionCard from "@/components/commissions/Comissoes/page";
 import { useQueryState } from "nuqs";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -318,36 +319,46 @@ export default function Commissions() {
             <h3>{isOpenCommission ? "Comissões" : "Despesas"}</h3>
           </div>
           <div className={styles.headerIcons}>
-            <button
-              className={`btn-action glass ${styles.btn}
+            <Tooltip label={"Suas comissões"}>
+              <button
+                className={`btn-action glass ${styles.btn}
                 ${isOpenCommission && styles.btnActive}
               }`}
-              onClick={() => {
-                setTab("commission");
-              }}
-              type="button"
-            >
-              <BsCashCoin />
-            </button>
-            <button
-              className={`btn-action glass ${styles.btn}
-                ${isOpenExpense && styles.btnActive}
-              }`}
-              onClick={() => {
-                setTab("expense");
-              }}
-              type="button"
-            >
-              <FaCashRegister />
-            </button>
-            {permissions.includes("DEAL_CREATE") && (
-              <button
-                className={`${styles.addDeal} btn-action glass`}
-                onClick={openCreate}
+                onClick={() => {
+                  setTab("commission");
+                }}
                 type="button"
               >
-                <BsFileEarmarkPlus />
+                <BsCashCoin />
               </button>
+            </Tooltip>
+
+            {permissions.includes("EXPENSE_READ") && (
+              <Tooltip label={"Despesas"}>
+                <button
+                  className={`btn-action glass ${styles.btn}
+                ${isOpenExpense && styles.btnActive}
+              }`}
+                  onClick={() => {
+                    setTab("expense");
+                  }}
+                  type="button"
+                >
+                  <FaCashRegister />
+                </button>
+              </Tooltip>
+            )}
+
+            {permissions.includes("DEAL_CREATE") && (
+              <Tooltip label={"Adicionar negociação"}>
+                <button
+                  className={`${styles.addDeal} btn-action glass`}
+                  onClick={openCreate}
+                  type="button"
+                >
+                  <BsFileEarmarkPlus />
+                </button>
+              </Tooltip>
             )}
           </div>
         </div>

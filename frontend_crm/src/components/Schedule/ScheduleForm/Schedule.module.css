@@ -103,7 +103,7 @@
 }
 
 .finish {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(255, 255, 255, 0.1);
   border: 1px solid var(--textBase);
   color: var(--textBase);
 }
@@ -114,27 +114,6 @@
 
 .btnFinish:hover .active {
   color: var(--mainBackground);
-}
-
-.btnSave {
-  padding: 5px;
-  color: var(--primaryText);
-  background: var(--cardBackground);
-  font-size: 1.5rem;
-  border: none;
-  border-radius: 20px;
-  width: 250px;
-  cursor: pointer;
-  box-shadow: -3px 3px 10px var(--shadowColor);
-  border: 1px solid var(--shadowColor);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-}
-
-.btnSave:hover {
-  border: 1px solid var(--primaryColor);
-  color: var(--primaryColor);
-  background: var(--cardBackgroundHover);
 }
 
 .btnFilter {

@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 import { MdEdit, MdOutlinePowerOff } from "react-icons/md";
 import { FaRegTrashCan } from "react-icons/fa6";
 import { IoMdCheckmark, IoMdClose } from "react-icons/io";
-import { docsNames, Documentation, User } from "@/types";
+import { docsNames, Documentation, NotePad, User } from "@/types";
 import { IoMdPersonAdd } from "react-icons/io";
 import { AddAdmin } from "./add-admin";
 
@@ -30,6 +30,11 @@ export default function SuperUserPage() {
   const [companyUsers, setCompanyUsers] = useState<number | undefined>(
     undefined,
   );
+
+  const [newNote, setNewNote] = useState<string>("");
+  const [notes, setNotes] = useState<NotePad[]>([]);
+  const [selectedNote, setSelectedNote] = useState<NotePad | null>(null);
+
   const [docValues, setDocValues] = useState<Record<string, number>>({});
 
   const [users, setUsers] = useState<User[]>([]);
@@ -74,11 +79,13 @@ export default function SuperUserPage() {
       if (!response.ok)
         throw new Error(data.error || "Erro ao salvar o empresa");
 
+      console.log("NEW COMPANY:", data);
+
       if (selectedCompany) {
         setCompanies((prev) => prev.map((c) => (c.id === data.id ? data : c)));
         setSelectedCompany(null);
       } else {
-        setCompanies((prev) => [...prev, data]);
+        setCompanies((prev) => [...prev, data.newCompany]);
       }
 
       setCompanyName("");
@@ -165,6 +172,105 @@ export default function SuperUserPage() {
       logout();
 
       router.push("/login");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleSaveNote(note?: NotePad) {
+    if (loading) return;
+
+    setLoading(true);
+    setError("");
+
+    let content;
+    if (note) {
+      content = { ...note, content: newNote };
+    } else content = { content: newNote };
+
+    try {
+      const response = await fetch(`${API}/notepad-global`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(content),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao salvar nota");
+
+      if (note) {
+        setNotes((prev) =>
+          prev.map((n) => (n.id === note.id ? { ...n, content: newNote } : n)),
+        );
+        setSelectedNote(null);
+      } else {
+        setNotes((prev) => [...prev, data]);
+      }
+
+      setNewNote("");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro inesperado");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const fetchNotes = useCallback(async () => {
+    setLoading(true);
+
+    try {
+      const res = await fetch(`${API}/notepad-global/`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar a notas");
+
+      setNotes(data);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  async function handleDeleteNote(slot: number) {
+    if (loading) return;
+
+    const confirmDelete = window.confirm(
+      `Tem certeza que deseja excluir a nota?`,
+    );
+    if (!confirmDelete) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${API}/notepad-global/${slot}`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Erro ao apagar nota");
+
+      setNotes((prev) => prev.filter((n) => n.slot !== slot));
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Erro inesperado");
+      }
     } finally {
       setLoading(false);
     }
@@ -269,7 +375,8 @@ export default function SuperUserPage() {
 
   useEffect(() => {
     fetchDocs();
-  }, [fetchDocs]);
+    fetchNotes();
+  }, [fetchDocs, fetchNotes]);
 
   return (
     <div className={styles.page}>
@@ -279,189 +386,314 @@ export default function SuperUserPage() {
         </div>
 
         <div className={styles.content}>
-          <div className={styles.createCompany}>
-            <div className={styles.createCompanyBox}>
-              <input
-                className="form-base"
-                type="text"
-                placeholder="Nome"
-                onChange={(e) => setCompanyName(e.target.value)}
-              />
-              <input
-                className="form-base"
-                type="number"
-                placeholder="MaxUsers"
-                onChange={(e) => setCompanyUsers(Number(e.target.value))}
-              />
+          <div className={styles.contentBox}>
+            <div className={`glass ${styles.companyBox}`}>
+              <div className={styles.createCompany}>
+                <h4 className={styles.title}>Empresas</h4>
+                <div className={styles.createCompanyBox}>
+                  <input
+                    className={`form-base ${styles.inputComp}`}
+                    type="text"
+                    placeholder="Nome"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                  />
+                  <input
+                    className={`form-base ${styles.inputMaxUser}`}
+                    type="number"
+                    placeholder="MaxUsers"
+                    value={companyUsers ?? ""}
+                    onChange={(e) => setCompanyUsers(Number(e.target.value))}
+                  />
 
-              <button
-                className={`btn-action glass ${styles.btnSave}`}
-                style={{ width: 80 }}
-                onClick={(e) => handleSubmit(e)}
-              >
-                <h4>Criar</h4>
-              </button>
-            </div>
-            {error && <p className={styles.error}>{error}</p>}
-          </div>
+                  <button
+                    className={`btn-action glass ${styles.btnSave}`}
+                    style={{ width: 80 }}
+                    onClick={(e) => handleSubmit(e)}
+                  >
+                    <h4>Criar</h4>
+                  </button>
+                </div>
+                {error && <p className={styles.error}>{error}</p>}
+              </div>
 
-          <div className={styles.companies}>
-            {companies.length === 0 ? (
-              <p>Nenhuma empresa cadastrada</p>
-            ) : (
-              companies.map((company) => {
-                const isSelected = selectedCompany?.id === company.id;
+              <div className={styles.companies}>
+                {companies.length === 0 ? (
+                  <p>Nenhuma empresa cadastrada</p>
+                ) : (
+                  companies.map((company) => {
+                    const isSelected = selectedCompany?.id === company.id;
 
-                return isSelected ? (
-                  <div key={company.id} className={styles.company}>
-                    <div key={company.id} className={styles.companyContent}>
-                      <div className={styles.companyInfos}>
-                        <input
-                          className="form-base"
-                          type="text"
-                          placeholder="Nome"
-                          value={companyName}
-                          onChange={(e) => setCompanyName(e.target.value)}
-                        />
-                        <input
-                          className="form-base"
-                          type="number"
-                          placeholder="MaxUsers"
-                          value={companyUsers}
-                          onChange={(e) =>
-                            setCompanyUsers(Number(e.target.value))
-                          }
-                        />
-                      </div>
-                      <button
-                        className={styles.btnOpenCompany}
-                        onClick={(e) => handleSubmit(e)}
-                      >
-                        <IoMdCheckmark />
-                      </button>
-                      <button
-                        className={styles.btnOpenCompany}
-                        onClick={() => setSelectedCompany(null)}
-                      >
-                        <IoMdClose />
-                      </button>
-                      <button
-                        className={styles.btnOpenCompany}
-                        type="button"
-                        onClick={() => setIsOpenCreateUsers(true)}
-                      >
-                        <IoMdPersonAdd />
-                      </button>
-                    </div>
-                    <div className={styles.companyContent}>
-                      <div className={styles.companyInfos}>
-                        {Array.isArray(users) && users.length > 0 ? (
-                          users.map((u) => <h5 key={u.id}>{u.name}</h5>)
+                    return (
+                      <div key={company.id} className={styles.company}>
+                        {isSelected ? (
+                          <>
+                            <div className={styles.companyContent}>
+                              <div className={styles.companyInfos}>
+                                <input
+                                  className={`form-base ${styles.inputComp}`}
+                                  type="text"
+                                  value={companyName}
+                                  onChange={(e) =>
+                                    setCompanyName(e.target.value)
+                                  }
+                                />
+
+                                <input
+                                  className={`form-base ${styles.inputMaxUser}`}
+                                  type="number"
+                                  value={companyUsers}
+                                  onChange={(e) =>
+                                    setCompanyUsers(Number(e.target.value))
+                                  }
+                                />
+                              </div>
+
+                              <button
+                                onClick={handleSubmit}
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                              >
+                                <IoMdCheckmark />
+                              </button>
+
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                                onClick={() => setSelectedCompany(null)}
+                              >
+                                <IoMdClose />
+                              </button>
+
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                onClick={() => setIsOpenCreateUsers(true)}
+                              >
+                                <IoMdPersonAdd />
+                              </button>
+                            </div>
+
+                            <div className={styles.companyContent}>
+                              <div className={styles.companyInfosUsers}>
+                                {users.length > 0 ? (
+                                  users.map((u) => (
+                                    <span key={u.id}>{u.name}</span>
+                                  ))
+                                ) : (
+                                  <span>Nenhum usuário</span>
+                                )}
+                              </div>
+                            </div>
+                          </>
                         ) : (
-                          <p>Nenhum usuário</p>
+                          <div className={styles.companyContent}>
+                            <div className={styles.companyInfos}>
+                              <h4>{company.name}</h4>
+                              <h5>{company.maxUsers}</h5>
+                            </div>
+
+                            <button
+                              className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                              onClick={() => {
+                                setSelectedCompany(company);
+                                setCompanyName(company.name);
+                                setCompanyUsers(company.maxUsers);
+                              }}
+                            >
+                              <MdEdit />
+                            </button>
+
+                            <button
+                              className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                              onClick={() => handleDelete(company)}
+                            >
+                              <FaRegTrashCan />
+                            </button>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div key={company.id} className={styles.company}>
-                    <div key={company.id} className={styles.companyContent}>
-                      <div className={styles.companyInfos}>
-                        <h4>{company.name}</h4>
-                        <h5>{company.maxUsers}</h5>
-                      </div>
-                      <button
-                        className={styles.btnOpenCompany}
-                        onClick={() => {
-                          setSelectedCompany(company);
-                          setCompanyName(company.name);
-                          setCompanyUsers(company.maxUsers);
-                        }}
-                      >
-                        <MdEdit />
-                      </button>
-                      <button
-                        className={styles.btnOpenCompany}
-                        onClick={() => handleDelete(company)}
-                      >
-                        <FaRegTrashCan />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
 
-          <div className={styles.docs}>
-            {docsNames.map((doc) => (
-              <div key={doc.key} className={styles.doc}>
-                <p>{doc.label}</p>
-                <div className={styles.inputAndPercent}>
-                  <div className={styles.inputWrapper}>
-                    <input
-                      type="text"
-                      className={`form-base ${
-                        doc.type === "percent"
-                          ? styles.inputPercent
-                          : styles.inputValue
-                      }`}
-                      value={
-                        docValues[doc.key] !== undefined
-                          ? doc.type === "percent"
-                            ? docValues[doc.key].toLocaleString("pt-BR", {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2,
-                              })
-                            : docValues[doc.key].toLocaleString("pt-BR", {
-                                style: "currency",
-                                currency: "BRL",
-                              })
-                          : ""
-                      }
-                      onChange={(e) => {
-                        const raw = e.target.value.replace(/\D/g, "");
-                        const numeric = Number(raw) / 100;
+            <div className={`glass ${styles.companyBox}`}>
+              <h4 className={styles.title}>Notas</h4>
 
-                        if (doc.type === "percent" && numeric > 100) return;
-
-                        setDocValues((prev) => ({
-                          ...prev,
-                          [doc.key]: numeric,
-                        }));
-                      }}
-                    />
-                    {doc.type === "percent" && (
-                      <span className={styles.suffix}>%</span>
-                    )}
+              {selectedNote ? (
+                <div className={styles.createNote}>
+                  <span>Editando...</span>
+                </div>
+              ) : (
+                <div className={styles.createNote}>
+                  <textarea
+                    className={`form-base ${styles.formNote}`}
+                    placeholder="Nota"
+                    onChange={(e) => setNewNote(e.target.value)}
+                    value={newNote}
+                  />
+                  <div className={styles.noteBtns}>
+                    <button
+                      className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                      onClick={() => handleSaveNote()}
+                    >
+                      <IoMdCheckmark />
+                    </button>
                   </div>
                 </div>
+              )}
+
+              <div className={styles.companies}>
+                {notes.length === 0 ? (
+                  <p>Nenhuma nota cadastrada</p>
+                ) : (
+                  notes.map((note: NotePad) => {
+                    const isSelected = selectedNote?.id === note.id;
+
+                    return (
+                      <div key={note.id} className={styles.company}>
+                        {isSelected ? (
+                          <>
+                            <div className={styles.companyContent}>
+                              <textarea
+                                className={`form-base ${styles.formNote}`}
+                                placeholder="Nota"
+                                onChange={(e) => setNewNote(e.target.value)}
+                                value={newNote}
+                              />
+
+                              <div className={styles.noteBtns}>
+                                <button
+                                  className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                  onClick={() => handleSaveNote(note)}
+                                >
+                                  <IoMdCheckmark />
+                                </button>
+                                <button
+                                  className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                                  onClick={() => {
+                                    setSelectedNote(null);
+                                    setNewNote("");
+                                  }}
+                                >
+                                  <IoMdClose />
+                                </button>
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className={styles.companyContent}>
+                            <div className={styles.companyInfos}>
+                              <p>{note.content}</p>
+                            </div>
+
+                            <div className={styles.noteBtns}>
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                onClick={() => {
+                                  setNewNote(note.content);
+                                  setSelectedNote(note);
+                                }}
+                              >
+                                <MdEdit />
+                              </button>
+
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                                onClick={() => handleDeleteNote(note.slot)}
+                              >
+                                <FaRegTrashCan />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                )}
               </div>
-            ))}
+            </div>
           </div>
 
-          <button
-            className={`btn-action glass ${`btn-action glass ${styles.btnSave}`}`}
-          >
-            <p>Salvar documentações</p>
-          </button>
+          <div className={`glass ${styles.docs}`}>
+            <h4 className={styles.title}>Documentos</h4>
 
-          <button
-            className={`btn-action glass ${`btn-action glass ${styles.btnSave}`} ${styles.btnLogout}`}
-            onClick={handleLogout}
-            type="button"
-          >
-            <p>
-              <MdOutlinePowerOff /> Desconectar
-            </p>
-          </button>
+            <div className={styles.docs}>
+              {docsNames.map((doc) => (
+                <div key={doc.key} className={styles.doc}>
+                  <p>{doc.label}</p>
+                  <div className={styles.inputAndPercent}>
+                    <div className={styles.inputWrapper}>
+                      <input
+                        type="text"
+                        className={`form-base ${
+                          doc.type === "percent"
+                            ? styles.inputPercent
+                            : styles.inputValue
+                        }`}
+                        value={
+                          docValues[doc.key] !== undefined
+                            ? doc.type === "percent"
+                              ? docValues[doc.key].toLocaleString("pt-BR", {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2,
+                                })
+                              : docValues[doc.key].toLocaleString("pt-BR", {
+                                  style: "currency",
+                                  currency: "BRL",
+                                })
+                            : ""
+                        }
+                        onChange={(e) => {
+                          const raw = e.target.value.replace(/\D/g, "");
+                          const numeric = Number(raw) / 100;
 
-          {isOpenCreateUsers && (
-            <AddAdmin
-              company={selectedCompany}
-              onClose={() => setIsOpenCreateUsers(false)}
-            />
-          )}
+                          if (doc.type === "percent" && numeric > 100) return;
+
+                          setDocValues((prev) => ({
+                            ...prev,
+                            [doc.key]: numeric,
+                          }));
+                        }}
+                      />
+                      {doc.type === "percent" && (
+                        <span className={styles.suffix}>%</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <button
+              className={`btn-action glass ${styles.btnSave}`}
+              onClick={handleSaveDocs}
+            >
+              <p>Salvar</p>
+            </button>
+
+            {isOpenCreateUsers && (
+              <AddAdmin
+                company={selectedCompany}
+                onClose={() => setIsOpenCreateUsers(false)}
+              />
+            )}
+          </div>
+        </div>
+
+        <div className={styles.content}>
+          <div className={styles.contentBox}>
+            <button
+              className={`btn-action glass ${`btn-action glass ${styles.btnSave}`} ${styles.btnLogout}`}
+              onClick={handleLogout}
+              type="button"
+            >
+              <p>
+                <MdOutlinePowerOff /> Desconectar
+              </p>
+            </button>
+          </div>
+
+          <div className={styles.docs}></div>
         </div>
       </main>
     </div>

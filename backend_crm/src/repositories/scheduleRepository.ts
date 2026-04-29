@@ -64,8 +64,16 @@ export async function addSchedule(
 
 // Pega o compromissos
 export function getSchedules(userId: number) {
+  const oneMonthAgo = new Date();
+  oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+
   return prisma.schedule.findMany({
-    where: { createdBy: userId },
+    where: {
+      createdBy: userId,
+      reminderAt: {
+        gte: oneMonthAgo,
+      },
+    },
     include: {
       deal : {
         include: {

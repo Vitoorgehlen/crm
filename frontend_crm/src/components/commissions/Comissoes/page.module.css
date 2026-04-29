@@ -60,7 +60,7 @@
 }
 
 .btnDelGoal:hover {
-  color: var(--errorColor2);
+  color: var(--errorColor);
 }
 
 .cardGoal input {

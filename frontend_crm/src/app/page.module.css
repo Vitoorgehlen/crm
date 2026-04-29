@@ -18,7 +18,6 @@
   height: 300px;
   border-radius: 20px;
   border: 1px solid var(--shadowColor);
-  background-color: var(--cardBackground2);
 }
 
 .box h1 {

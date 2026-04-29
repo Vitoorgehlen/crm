@@ -19,6 +19,7 @@ import ConfigUsers from "@/components/config/users/page";
 import Permissions from "@/components/config/permissions/page";
 import EditMe from "@/components/config/editMe/page";
 import Documentation from "@/components/config/documentation/page";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -114,65 +115,75 @@ export default function Config() {
             </h5>
           </div>
           <div className={styles.headerIcons}>
-            <button
-              className={`${
-                isConfigUser ? "btn-action-active" : "btn-action-inactive"
-              } btn-action glass`}
-              onClick={() => {
-                setIsConfigUser(true);
-                setIsConfigTeam(false);
-                setIsOpenPermissions(false);
-                setIsConfigCompany(false);
-              }}
-            >
-              <FaUserEdit />
-            </button>
+            <Tooltip label={"Suas configurações"}>
+              <button
+                className={`${
+                  isConfigUser ? "btn-action-active" : "btn-action-inactive"
+                } btn-action glass`}
+                onClick={() => {
+                  setIsConfigUser(true);
+                  setIsConfigTeam(false);
+                  setIsOpenPermissions(false);
+                  setIsConfigCompany(false);
+                }}
+              >
+                <FaUserEdit />
+              </button>
+            </Tooltip>
             {permissions.includes("USER_UPDATE") && (
-              <button
-                className={`${
-                  isConfigTeam ? "btn-action-active" : "btn-action-inactive"
-                } btn-action glass`}
-                onClick={() => {
-                  setIsConfigUser(false);
-                  setIsConfigTeam(true);
-                  setIsOpenPermissions(false);
-                  setIsConfigCompany(false);
-                }}
-              >
-                <FaUsersCog />
-              </button>
+              <Tooltip label={"Configurações da equipe"}>
+                <button
+                  className={`${
+                    isConfigTeam ? "btn-action-active" : "btn-action-inactive"
+                  } btn-action glass`}
+                  onClick={() => {
+                    setIsConfigUser(false);
+                    setIsConfigTeam(true);
+                    setIsOpenPermissions(false);
+                    setIsConfigCompany(false);
+                  }}
+                >
+                  <FaUsersCog />
+                </button>
+              </Tooltip>
             )}
             {user?.role === "ADMIN" && (
-              <button
-                className={`${
-                  isOpenPermissions
-                    ? "btn-action-active"
-                    : "btn-action-inactive"
-                } btn-action glass`}
-                onClick={() => {
-                  setIsConfigUser(false);
-                  setIsConfigTeam(false);
-                  setIsOpenPermissions(true);
-                  setIsConfigCompany(false);
-                }}
-              >
-                <FaUnlockAlt />
-              </button>
+              <Tooltip label={"Permissões"}>
+                <button
+                  className={`${
+                    isOpenPermissions
+                      ? "btn-action-active"
+                      : "btn-action-inactive"
+                  } btn-action glass`}
+                  onClick={() => {
+                    setIsConfigUser(false);
+                    setIsConfigTeam(false);
+                    setIsOpenPermissions(true);
+                    setIsConfigCompany(false);
+                  }}
+                >
+                  <FaUnlockAlt />
+                </button>
+              </Tooltip>
             )}
             {user?.role === "ADMIN" && (
-              <button
-                className={`${
-                  isConfigCompany ? "btn-action-active" : "btn-action-inactive"
-                } btn-action glass`}
-                onClick={() => {
-                  setIsConfigUser(false);
-                  setIsConfigTeam(false);
-                  setIsOpenPermissions(false);
-                  setIsConfigCompany(true);
-                }}
-              >
-                <GrConfigure />
-              </button>
+              <Tooltip label={"Documentos"}>
+                <button
+                  className={`${
+                    isConfigCompany
+                      ? "btn-action-active"
+                      : "btn-action-inactive"
+                  } btn-action glass`}
+                  onClick={() => {
+                    setIsConfigUser(false);
+                    setIsConfigTeam(false);
+                    setIsOpenPermissions(false);
+                    setIsConfigCompany(true);
+                  }}
+                >
+                  <GrConfigure />
+                </button>
+              </Tooltip>
             )}
           </div>
         </div>

@@ -1,0 +1,38 @@
+.wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: -35px;
+
+  background: #111;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: 0.2s ease;
+}
+
+.wrapper:hover .tooltip {
+  opacity: 1;
+}
+
+/* alinhamentos */
+.center {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.left {
+  left: 0;
+}
+
+.right {
+  right: 0;
+}

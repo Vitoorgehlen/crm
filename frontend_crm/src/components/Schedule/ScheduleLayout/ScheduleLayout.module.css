@@ -33,6 +33,11 @@
   min-width: 80px;
 }
 
+.titleCrazy {
+  margin-top: -23px;
+  margin-bottom: 5px;
+}
+
 .actions {
   display: flex;
   gap: 5px;
@@ -78,13 +83,16 @@
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   flex-direction: column;
-  height: 500px;
+  height: 60vh;
   border-top: 1px solid var(--primaryColor);
   color: var(--textBase);
 }
 
 .gridWeek {
-  grid-template-rows: 50px 1fr;
+  display: grid;
+  grid-template-rows: auto 1fr; /* header auto, conteúdo flexível */
+  height: 60vh;
+  overflow: hidden;
 }
 
 .dayHeader {
@@ -130,16 +138,17 @@
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-
   padding: 10px;
   min-height: 100%;
   border: none;
   border-right: 1px solid var(--textBase);
   cursor: pointer;
+  overflow-y: auto;
+  max-height: calc(60vh - 80px);
 }
 
 .dayColumn:hover {
-  background: var(--cardBackgroundHover);
+  background: var(--cardBackground);
 }
 
 .dayColumn:last-child {
@@ -169,13 +178,13 @@
 }
 
 .events {
-  height: 100%;
   width: 100%;
   max-width: 80px;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 5px;
+  flex: 1;
 }
 
 .scheduleItem,
@@ -247,7 +256,7 @@
 }
 
 .monthDay:hover {
-  background: var(--cardBackgroundHover);
+  background: var(--cardBackground);
 }
 
 .monthDay:nth-child(7n) {
@@ -380,7 +389,6 @@
   .gridWeek {
     grid-template-rows: 50px 1fr;
     height: 100vw;
-    overflow: scroll;
   }
 
   .events {

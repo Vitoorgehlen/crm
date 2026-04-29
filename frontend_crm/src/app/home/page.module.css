@@ -2,16 +2,17 @@
   min-height: 98vh;
   display: flex;
   flex-direction: column;
-  justify-content: start;
-
+  width: 100%;
   align-items: center;
+
   padding-bottom: 20px;
 }
 
-.title {
+.header {
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: end;
   padding-right: 50px;
   color: var(--textBase);
 }
@@ -22,89 +23,160 @@
   color: var(--primaryColor);
 }
 
-.contentSection {
+.btnsWindows {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  margin-top: 10px;
-  width: 90%;
-  gap: 5px;
-}
-
-.chartAndTask {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  margin: 10px 0 0 10px;
   gap: 10px;
 }
 
-.taskSection {
-  padding: 10px 0;
+.btnWindows {
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
-  max-width: 550px;
-  max-height: 350px;
-  margin: 10px 0 5px 0;
-  border-radius: 10px;
-  overflow-y: auto;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--textBase);
+  transition: opacity 0.2s ease;
+}
+
+.btnSlide {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  width: 36px;
+  height: 20px;
+  border-radius: 999px;
+  border: 1px solid var(--textBase);
+  transition: all 0.25s ease;
+}
+
+.slide {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--textBase);
+  transition: all 0.25s ease;
+}
+
+.btnSlideActive {
+  justify-content: flex-end;
+}
+
+.btnSlideActive .slide {
+  background-color: var(--primaryColor);
+}
+
+.btnWindows:hover .btnSlide {
+  border-color: var(--primaryColor);
+}
+
+.contentSection {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+
+  width: 90%;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .contentSection h5 {
   color: var(--primaryText);
 }
 
-.taskSection span {
-  color: var(--textBase);
+.taskSection,
+.chartSection,
+.noteSection {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  width: 100%;
+  max-height: 350px;
+  border-radius: 10px;
+  overflow-y: auto;
+  grid-column: span 1;
 }
 
 .titleCard {
+  position: relative;
   display: flex;
-  justify-content: space-between;
-  padding: 0 15px;
-  width: 100%;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 0 25px;
 }
 
-.btnInvisible {
-  opacity: 0;
-  visibility: hidden;
+.titleCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
 }
 
 .btnOpen {
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+}
+
+.btnOpen .slide {
+  background-color: var(--errorColor);
+  opacity: 0.5;
+}
+
+.btnOpen .slide:hover {
+  opacity: 1;
+}
+
+.card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+.card:hover {
+  color: var(--primaryText);
+}
+
+.btnsNote {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0 10px;
+}
+
+.btnNote {
   color: var(--textBase);
   font-size: 1rem;
   border: none;
   cursor: pointer;
 }
 
-.btnOpen:hover {
+.btnNote:hover {
+  color: var(--primaryColor);
+}
+
+.noteInput {
+  width: 100%;
+  flex: 1;
+  display: flex;
+  padding: 0 12px;
+  min-height: 0;
+}
+
+.formNote {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
   color: var(--primaryText);
-}
-
-.taskClose {
-  opacity: 0;
-  visibility: hidden;
-  display: none;
-}
-
-.taskOpen {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.addTask {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 5px;
-  width: 95%;
-  gap: 5px;
-}
-
-.inputForm {
-  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: pre-wrap;
+  resize: none;
+  line-height: 1.4;
 }
 
 .btnSave {
@@ -118,6 +190,32 @@
   color: var(--primaryText);
 }
 
+.chartSection {
+  overflow: hidden;
+  padding: 0 5px;
+  justify-content: space-between;
+}
+.chartSection .titleCard {
+  margin: 10px 0;
+}
+
+.taskSection {
+  overflow: hidden;
+}
+
+.addTask {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 5px 0;
+  width: 95%;
+  gap: 5px;
+}
+
+.inputForm {
+  width: 100%;
+}
+
 .tasksList {
   display: flex;
   flex-direction: column;
@@ -125,6 +223,7 @@
   align-items: center;
   width: 100%;
   gap: 5px;
+  overflow-y: auto;
 }
 
 .tasksList p {
@@ -190,62 +289,28 @@
   text-decoration-color: var(--textBase);
 }
 
-.chart {
+.scheduleSection {
+  padding: 10px 3px;
+  border-radius: 10px;
+  max-width: 100%;
   width: 100%;
-  padding: 10px;
-  margin: 10px 0 5px 0;
-  max-width: 550px;
-  border-radius: 10px;
-}
-
-.chart .titleCard {
-  padding: 0 5px;
-}
-
-.schedule {
-  padding: 10px;
-  border-radius: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 500px;
-
-  align-self: center;
-  width: fit-content;
 }
 
 @media (max-width: 768px) {
-  .title {
+  .header {
+    flex-direction: column-reverse;
+    justify-content: center;
+    align-items: center;
+    padding-right: 0;
     margin-top: 10px;
-    padding-right: 30px;
+  }
+
+  .btnsWindows {
+    margin: 10px 0 0 0;
   }
 
   .contentSection {
-    align-items: center;
-    width: 100%;
-    gap: 10px;
-  }
-
-  .chartAndTask {
-    flex-direction: column;
-    width: 95%;
-    gap: 10px;
-  }
-
-  .taskSection {
-    margin: 0;
-  }
-
-  .chart {
-    margin: 0;
-  }
-
-  .schedule {
-    width: 95%;
-  }
-
-  .scheduleOpen {
-    width: 100%;
-    border-radius: 0;
+    display: grid;
+    grid-template-columns: 1fr;
   }
 }

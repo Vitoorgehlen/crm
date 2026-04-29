@@ -83,7 +83,7 @@ export default function WarningClient({
             </button>
           </div>
 
-          {error && <p className={styles.erro}>{error}</p>}
+          {error && <p className="erro">{error}</p>}
           <div className={styles.line}>
             {confirmStep ? (
               <p className={styles.text}>
