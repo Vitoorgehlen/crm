@@ -16,6 +16,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 export default function FinishDeals() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
+  const [initialIsLoadind, setInitialIsLoadind] = useState(true);
 
   const [users, setUsers] = useState<User[]>([]);
   const [years, setYears] = useState<
@@ -371,6 +372,8 @@ export default function FinishDeals() {
       setDeals(data);
     } catch (err: unknown) {
       console.error(err);
+    } finally {
+      setInitialIsLoadind(false);
     }
   }, [token, search, teamDeals, selectedYear, userId, progressDeals]);
 
@@ -489,9 +492,17 @@ export default function FinishDeals() {
         <div className={styles.boxSteps}>
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
-              {yearsSortedDesc.length === 0 && (
-                <p>Nenhuma negociação finalizada.</p>
-              )}
+              {!loading &&
+                !initialIsLoadind &&
+                yearsSortedDesc.length === 0 && (
+                  <div className={styles.noItens}>
+                    <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
+                    <p>
+                      Se o problema persistir entre em contato para corrigirmos
+                      este erro.
+                    </p>
+                  </div>
+                )}
               {yearsSortedDesc.map((y) => {
                 const year = y.year;
                 const total = y.total;

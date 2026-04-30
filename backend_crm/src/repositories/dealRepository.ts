@@ -174,6 +174,35 @@ export async function getDeals(
   })
 }
 
+export async function getDealsOfCurrentMonth(
+  userId: number,
+) {
+  const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
+  if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+    23, 59, 59, 999
+  );
+
+  return await prisma.deal.count({
+    where: {
+      createdBy: userId,
+      status: {
+        in: ['CLOSED', 'FINISHED'],
+      },
+      closedAt: {
+        gte: startOfMonth,
+        lte: endOfMonth,
+      }
+    }
+  });
+}
+
 export async function getFinishedDealsYears(
   userId: number,
   filter: { search?: string; progressDeals: boolean; teamDeals? : boolean; targetId?: number | null; year: number},

@@ -33,6 +33,7 @@ import DroppableColumn from "@/components/Tools/draggableAndDroppable/droppable"
 import { useQueryState } from "nuqs";
 import { fetchDealsList, fetchMultipleDeals } from "@/utils/fetchDeals";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
+import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 import ClosedDeal from "@/components/Deal/ClosedDeal/ClosedDeal";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -522,6 +523,37 @@ export default function Deals() {
                       </span>
                     </header>
 
+                    {totalPages > 1 && (
+                      <div className={styles.pagination}>
+                        <button
+                          disabled={currentPage <= 1 || loading}
+                          className={styles.btnNote}
+                          onClick={() =>
+                            handlePageChange(method, currentPage - 1)
+                          }
+                        >
+                          <IoIosArrowBack />
+                        </button>
+
+                        <p>
+                          <span className={styles.currentPage}>
+                            {currentPage}
+                          </span>
+                          <span>/ {totalPages}</span>
+                        </p>
+
+                        <button
+                          disabled={currentPage >= totalPages || loading}
+                          className={styles.btnNote}
+                          onClick={() =>
+                            handlePageChange(method, currentPage + 1)
+                          }
+                        >
+                          <IoIosArrowForward />
+                        </button>
+                      </div>
+                    )}
+
                     <div className={styles.methodWorkflow}>
                       {steps.map((step) => {
                         const columnDeals = currentDeals.filter(
@@ -532,11 +564,11 @@ export default function Deals() {
                             key={`${method}-${step}`}
                             id={`${method}-${step}`}
                           >
-                            <div className={`glass ${styles.column}`}>
+                            <div className={styles.column}>
                               <p className={styles.stepName}>
                                 {DEAL_STEP_TYPE_LABEL[step]}
                               </p>
-                              <div className={styles.dealList}>
+                              <div className={`glass ${styles.dealList}`}>
                                 {columnDeals.map((dealItem) => (
                                   <DraggableCard
                                     key={String(dealItem.id)}
@@ -577,31 +609,6 @@ export default function Deals() {
                         );
                       })}
                     </div>
-                    {totalPages > 1 && (
-                      <div className={styles.pagination}>
-                        <button
-                          disabled={currentPage <= 1 || loading}
-                          onClick={() =>
-                            handlePageChange(method, currentPage - 1)
-                          }
-                        >
-                          Anterior
-                        </button>
-
-                        <span>
-                          {currentPage} / {totalPages}
-                        </span>
-
-                        <button
-                          disabled={currentPage >= totalPages || loading}
-                          onClick={() =>
-                            handlePageChange(method, currentPage + 1)
-                          }
-                        >
-                          Próxima
-                        </button>
-                      </div>
-                    )}
                   </section>
                 );
               },

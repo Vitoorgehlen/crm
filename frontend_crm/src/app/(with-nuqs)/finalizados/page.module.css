@@ -24,6 +24,7 @@
 .yearButtons {
   display: flex;
   justify-content: space-around;
+  color: var(--textBase);
 }
 
 .yearBtn {
@@ -145,6 +146,17 @@
 
 .pendingSection p:last-child {
   border: none;
+}
+
+.noItens {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-top: 90px;
+  color: var(--textBase);
 }
 
 @media (max-width: 768px) {

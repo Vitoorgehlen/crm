@@ -14,6 +14,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import HeaderPage from "@/components/searchbar/page";
 import DealForm from "@/components/Deal/DealForm/DealForm";
 import styles from "./page.module.css";
+import Confetti from "@/components/Confetti/CloseConfetti";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 interface DealListProps {
@@ -33,6 +34,8 @@ export default function DealList({
 
   const [dealId, setDealId] = useQueryState("dealId");
   const [users, setUsers] = useState<User[]>([]);
+
+  const [showConfetti, setShowConfetti] = useState(false);
 
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -191,8 +194,17 @@ export default function DealList({
     if (!res.ok) throw new Error(data.error || "Erro ao fechar negociação");
 
     await fetchAllStatusesData();
-    setSelectedDeal(null);
-    router.push("/fechados");
+
+    setShowConfetti(true);
+
+    setTimeout(() => {
+      setShowConfetti(false);
+      setTimeout(() => {
+        setSelectedDeal(null);
+        router.push("/fechados");
+      }, 300);
+    }, 4500);
+
     return;
   };
 
@@ -390,6 +402,8 @@ export default function DealList({
 
   return (
     <div className={styles.page}>
+      {showConfetti && <Confetti />}
+
       <main className={styles.main}>
         <HeaderPage
           title={title}
