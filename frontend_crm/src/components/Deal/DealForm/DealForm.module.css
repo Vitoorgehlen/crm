@@ -220,7 +220,7 @@
   font-size: 1.5rem;
   color: var(--primaryText);
   background: var(--textBase);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--logoColor);
   border-radius: 0 5px 5px 0;
   cursor: pointer;
 }

@@ -57,7 +57,7 @@ span .currentPage {
   width: 100%;
   margin-top: 20px;
 
-  color: rgba(255, 255, 255, 0.1);
+  color: var(--logoColor);
   font-size: 1.3rem;
 }
 
@@ -67,7 +67,7 @@ span .currentPage {
 
 /* 
 .status_approved {
-  background: rgba(255, 255, 255, 0.1); 
+  background: var(--logoColor); 
   backdrop-filter: blur(10px); 
   -webkit-backdrop-filter: blur(10px); 
 
@@ -254,7 +254,7 @@ span .currentPage {
     width: 100%;
     margin-top: 20px;
 
-    color: rgba(255, 255, 255, 0.1);
+    color: var(--logoColor);
     font-size: 1.3rem;
   }
 

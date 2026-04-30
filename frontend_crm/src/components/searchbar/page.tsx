@@ -74,7 +74,7 @@ export default function HeaderPage({
               <Tooltip label={"Modo equipe"}>
                 <button
                   className={`${
-                    teamDeals ? "btn-action-active" : "btn-action-inactive"
+                    teamDeals && "btn-action-active"
                   } btn-action glass`}
                   onClick={handleToggleTeamDeals}
                   type="button"

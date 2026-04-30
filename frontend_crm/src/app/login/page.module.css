@@ -47,7 +47,7 @@
   height: 300px;
   border-radius: 20px;
   border: 1px solid var(--shadowColor);
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: var(--logoColor);
   z-index: 2;
 }
 

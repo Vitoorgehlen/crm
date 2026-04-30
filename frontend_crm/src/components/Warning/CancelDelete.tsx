@@ -8,15 +8,13 @@ import styles from "./WarningCard.module.css";
 type WarningCardProps = {
   message: string;
   name: string;
-  cancelDelete?: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void> | void;
 };
 
-export default function WarningDeal({
+export default function CancelDelete({
   message,
   name,
-  cancelDelete = false,
   onClose,
   onConfirm,
 }: WarningCardProps) {
@@ -39,7 +37,7 @@ export default function WarningDeal({
 
   return (
     <div className={styles.overlay}>
-      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
+      <div className={`${styles.modal}`} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
           <div className={styles.titleForm}>
             <button
@@ -89,7 +87,7 @@ export default function WarningDeal({
           <div className={styles.footerCard}>
             <button
               type="button"
-              className={`btn-action glass ${styles.btnDeal} ${cancelDelete ? styles.btnDelete : styles.btnUpdate}`}
+              className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
               onClick={onClose}
             >
               Não
@@ -97,8 +95,10 @@ export default function WarningDeal({
 
             <button
               type="button"
-              className={`btn-action glass ${styles.btnDeal} ${cancelDelete ? styles.btnUpdate : styles.btnDelete}`}
-              onClick={() => handleConfirm()}
+              className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
+              onClick={() => {
+                handleConfirm();
+              }}
             >
               Sim
             </button>

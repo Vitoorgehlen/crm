@@ -14,7 +14,7 @@
     rgba(242, 246, 210, 0.08)
   );
 
-  --successColor: #b8d957;
+  --successColor: #4ade80;
   --errorColor: #ee3131;
 
   --font:
@@ -23,11 +23,11 @@
 }
 
 [data-theme="default-light"] {
-  --mainBackground: #eef0e5;
-  --sidebarBackground: #e3e6c9;
+  --mainBackground: #c5c8ba;
+  --sidebarBackground: #f2f5e9;
   --textBase: #6b6c70;
   --primaryText: #141519;
-  --primaryColor: #bdd00d;
+  --primaryColor: #869503;
   --logoColor: rgba(20, 21, 25, 0.03);
 }
 
@@ -39,12 +39,28 @@
 }
 
 [data-theme="blue-light"] {
-  --mainBackground: #e5e6f0;
-  --sidebarBackground: #e5f2f7;
+  --mainBackground: #c4ced2;
+  --sidebarBackground: #e5e6f0;
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #123c63;
   --logoColor: rgba(18, 60, 99, 0.03);
+}
+
+[data-theme="red-dark"] {
+  --primaryColor: #ff4d4d;
+
+  --errorColor: #ff1a1a;
+}
+
+[data-theme="red-light"] {
+  --mainBackground: #c5c8ba;
+  --sidebarBackground: #f2f5e9;
+  --textBase: #6b6c70;
+  --primaryText: #141519;
+  --primaryColor: #ff3b3b;
+  --logoColor: rgba(20, 21, 25, 0.03);
+  --errorColor: #ff1a1a;
 }
 
 [data-theme="pink-dark"] {
@@ -120,6 +136,8 @@ input:hover {
   background: var(--logoColor);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  border: 1px solid var(--shadowColor);
+  border-radius: 8px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
@@ -136,7 +154,7 @@ input:hover {
 .form-base {
   background: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--shadowColor);
   border-radius: 8px;
   padding: 9px 15px;
   font-size: 14px;
@@ -161,14 +179,12 @@ input:hover {
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--shadowColor);
+  color: var(--primaryText);
 }
 
 .btn-action-active {
   color: var(--primaryColor);
-}
-
-.btn-action-inactive {
-  color: var(--primaryText);
 }
 
 .error {
@@ -223,6 +239,17 @@ input[type="number"]::-webkit-outer-spin-button,
 input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px none inset !important;
+  box-shadow: 0 0 0 1000px none inset !important;
+
+  -webkit-text-fill-color: var(--primaryText) !important;
+  transition: background-color 5000s ease-in-out 0s;
 }
 
 [data-draggable="true"] {

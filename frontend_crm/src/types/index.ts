@@ -42,6 +42,7 @@ export type ClientDeletedRequest = {
 export type DeleteContext = {
   message: string;
   name: string;
+  cancelDelete?: boolean;
   onConfirm: () => Promise<void> | void;
 } | null;
 

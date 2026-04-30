@@ -124,7 +124,7 @@ export default function LoginPage() {
             <>
               <h2 className={styles.title}>Login</h2>
               <form className={styles.form} onSubmit={handleLogin}>
-                {error && <p className="erro">{error}</p>}
+                {error && <p className="error">{error}</p>}
                 <div className={styles.line}>
                   <MdOutlineMail className={styles.icon} />
 
@@ -199,7 +199,7 @@ export default function LoginPage() {
               </button>
               <span className={styles.title}>Recuperar senha</span>
               <form className={styles.form} onSubmit={resetPassword}>
-                {error && <p className="erro">{error}</p>}
+                {error && <p className="error">{error}</p>}
 
                 <div className={styles.line}>
                   <MdOutlineMail className={styles.icon} />

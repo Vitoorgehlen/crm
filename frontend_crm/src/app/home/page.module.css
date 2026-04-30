@@ -244,7 +244,7 @@
   align-items: center;
   width: 95%;
   gap: 5px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid var(--shadowColor);
 }
 
 .btnDelTask,
@@ -284,7 +284,7 @@
 }
 
 .divButtonFinish span {
-  color: rgba(255, 255, 255, 0.1);
+  color: var(--textBase);
   text-decoration: line-through;
   text-decoration-color: var(--textBase);
 }

@@ -103,7 +103,7 @@
 }
 
 .finish {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--logoColor);
   border: 1px solid var(--textBase);
   color: var(--textBase);
 }

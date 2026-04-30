@@ -160,4 +160,10 @@
     border-radius: 8px;
     max-height: 70px;
   }
+
+  .noDeals {
+    display: flex;
+    align-items: center;
+    height: 50px;
+  }
 }

@@ -11,6 +11,7 @@ import {
 interface AuthContextType {
   token: string | null;
   userType: "user" | "superuser" | null;
+  userId: number | null;
   login: (token: string, userType: "user" | "superuser") => void;
   permissions: string[];
   logout: () => void;
@@ -23,8 +24,20 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [userType, setUserType] = useState<"user" | "superuser" | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  function getUserIdFromToken(token: string | null): number | null {
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.id || payload.userId || payload.sub;
+    } catch {
+      return null;
+    }
+  }
 
   async function fetchPermissions(token: string) {
     setIsLoading(true);
@@ -40,14 +53,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const perms: string[] = Array.isArray(data)
         ? data
         : Array.isArray(data?.permissions)
-        ? data.permissions
-        : [];
+          ? data.permissions
+          : [];
 
       setPermissions(perms);
     } catch (err) {
       console.error(err);
       setToken(null);
       setUserType(null);
+      setUserId(null);
       setPermissions([]);
       localStorage.removeItem("token");
       localStorage.removeItem("userType");
@@ -59,6 +73,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = (newToken: string, newUserType: "user" | "superuser") => {
     setToken(newToken);
     setUserType(newUserType);
+    setUserId(getUserIdFromToken(newToken));
     localStorage.setItem("token", newToken);
     localStorage.setItem("userType", newUserType);
     if (newUserType === "user") fetchPermissions(newToken);
@@ -67,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setToken(null);
     setUserType(null);
+    setUserId(null);
     setPermissions([]);
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
@@ -82,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedToken && savedUserType) {
       setToken(savedToken);
       setUserType(savedUserType);
+      setUserId(getUserIdFromToken(savedToken));
       if (savedUserType === "user") fetchPermissions(savedToken);
     }
     setIsLoading(false);
@@ -89,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ token, userType, login, permissions, logout, isLoading }}
+      value={{ token, userType, userId, login, permissions, logout, isLoading }}
     >
       {children}
     </AuthContext.Provider>

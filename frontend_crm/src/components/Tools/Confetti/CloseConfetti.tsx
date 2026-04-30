@@ -73,7 +73,7 @@ export default function Confetti() {
             </div>
           </div>
 
-          {error && <p className="erro">{error}</p>}
+          {error && <p className="error">{error}</p>}
           {totalDeals === 1 && (
             <div className={styles.line}>
               <svg

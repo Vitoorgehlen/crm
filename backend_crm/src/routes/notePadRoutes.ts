@@ -35,7 +35,7 @@ router.put('/notepad', loginRequired, async(req, res) => {
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
   const { content } = req.body;
-  if (!content || typeof content !== 'string') {
+  if ((!content || typeof content !== 'string') && content !== '') {
     return res.status(400).json({ error: 'O campo "content" é obrigatório.' });
   }
 

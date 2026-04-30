@@ -83,7 +83,6 @@ export async function getClientDeletedRequest(userId: number) {
   });
 }
 
-// Pega todos os clientes feitos pelo User
 export async function getMyClients(
   userId: number,
   search: string,
@@ -144,7 +143,6 @@ export async function getMyClients(
   });
 }
 
-// Pega todos os clientes feitos pela equipe
 export async function getTeamClients(
   userId: number,
   search: string,
@@ -223,7 +221,6 @@ export async function getTeamClients(
   })
 }
 
-// Atualizar cliente
 export async function updateClient(
   id: number,
   newData: Partial<Prisma.ClientUncheckedUpdateInput>,

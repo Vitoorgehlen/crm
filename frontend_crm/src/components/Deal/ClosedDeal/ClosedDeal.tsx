@@ -30,7 +30,6 @@ import { GiCheckMark } from "react-icons/gi";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
 import { sumDocs } from "@/utils/sumPreviusDocs";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
@@ -44,9 +43,8 @@ export default function ClosedDeal({
   newStep,
   onUpdateDealShare,
 }: CloseDealFormProps) {
-  const { token, isLoading } = useAuth();
+  const { token, permissions, isLoading, userId } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
-  const router = useRouter();
 
   const [companyUsers, setCompanyUsers] = useState<
     Array<{ id: number; name?: string }>
@@ -1260,23 +1258,28 @@ export default function ClosedDeal({
             </div>
 
             <div className={styles.btnCancelAndConfirm}>
-              <button
-                className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
-                type="button"
-                onClick={(e) => {
-                  if (isFirstStep) {
-                    setDeleteContext({
-                      message: "Deseja cancelar a negociação com",
-                      name: deal.client?.name ?? "",
-                      onConfirm: () => handleChangeStep(e, "back"),
-                    });
-                  } else handleChangeStep(e, "back");
-                }}
-              >
-                <span>
-                  {isFirstStep ? "Cancelar negociação" : "Voltar etapa"}
-                </span>
-              </button>
+              {isFirstStep &&
+                (deal.createdBy === userId
+                  ? permissions.includes("DEAL_CLOSE_DELETE")
+                  : permissions.includes("ALL_DEAL_CLOSE_DELETE")) && (
+                  <button
+                    className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
+                    type="button"
+                    onClick={(e) => {
+                      if (isFirstStep) {
+                        setDeleteContext({
+                          message: "Deseja cancelar a negociação com",
+                          name: deal.client?.name ?? "",
+                          onConfirm: () => handleChangeStep(e, "back"),
+                        });
+                      } else handleChangeStep(e, "back");
+                    }}
+                  >
+                    <span>
+                      {isFirstStep ? "Cancelar negociação" : "Voltar etapa"}
+                    </span>
+                  </button>
+                )}
 
               <button
                 className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}

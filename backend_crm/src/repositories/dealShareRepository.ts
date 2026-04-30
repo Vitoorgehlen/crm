@@ -28,7 +28,6 @@ const WORKFLOW: Record<PaymentMethod, DealStepType[]> = {
   ]
 };
 
-// Fechar negociação
 export async function closeDeal(
   id: number,
   newData: Partial<Prisma.DealUncheckedUpdateInput> & {
@@ -148,7 +147,7 @@ export async function closeDeal(
   }
 
   const result = await prisma.$transaction(async (tx) => {
-    const updatedDeal = await tx.deal.update({
+    await tx.deal.update({
         where: { id },
         data: {
           downPaymentValue: newData.downPaymentValue,
@@ -248,7 +247,6 @@ export async function closeDeal(
   return result;
 }
 
-// update Step
 export async function updateStep(
   id: number,
   changeStep: string,
@@ -299,6 +297,15 @@ export async function updateStep(
     newCurrentStep = currentStepIndex -1;
 
     if (targetDeal.status === 'FINISHED') {
+
+    if (userId !== targetDeal.createdBy) {
+      const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE_DELETE');
+      if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    } else {
+      const canUpdateDeal = await checkUserPermission(userId, 'DEAL_CLOSE_DELETE');
+      if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    }
+
       return await prisma.deal.update({
         where: { id },
         data: {
@@ -309,6 +316,14 @@ export async function updateStep(
     };
 
     if (newCurrentStep < 0) {
+      if (userId !== targetDeal.createdBy) {
+        const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE_DELETE');
+        if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+      } else {
+        const canUpdateDeal = await checkUserPermission(userId, 'DEAL_CLOSE_DELETE');
+        if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+      }
+
       return await prisma.$transaction([
         prisma.dealShare.deleteMany({where: { dealId: id}}),
         prisma.deal.update({
@@ -335,7 +350,6 @@ export async function updateStep(
   });
 }
 
-// update Step
 export async function updateStepDnd(
   id: number,
   changeStep: string,
@@ -379,7 +393,6 @@ export async function updateStepDnd(
   });
 }
 
-// Atualizar DealShare
 export async function updateDealShare(
   id: number,
   newData: Partial<Prisma.DealShareUncheckedUpdateInput>,
@@ -424,7 +437,6 @@ export async function updateDealShare(
   });
 }
 
-// apagar um DealShare
 export async function deleteAllDealShare(
   dealId: number,
   userId: number

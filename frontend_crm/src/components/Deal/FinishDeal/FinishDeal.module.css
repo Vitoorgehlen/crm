@@ -139,7 +139,7 @@
 }
 
 .firstLine {
-  border-bottom: solid 1px rgba(255, 255, 255, 0.1);
+  border-bottom: solid 1px var(--logoColor);
 }
 
 .boxInfos .text {
@@ -444,6 +444,7 @@
   .modalLeft {
     padding: 0;
     flex-direction: column;
+    max-width: 100%;
   }
 
   .paymentTitleMobile {

@@ -45,7 +45,7 @@ export default function DealForm({
   onDelete,
 }: DealFormProps) {
   const router = useRouter();
-  const { token, isLoading } = useAuth();
+  const { token, permissions, isLoading } = useAuth();
 
   const [clients, setClients] = useState<Client[]>(clientsProp ?? []);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -70,7 +70,7 @@ export default function DealForm({
   const [creditLetterValue, setCreditLetterValue] = useState<number>(0);
 
   const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
-
+  const [hovering, setHovering] = useState(false);
   const [docValues, setDocValues] = useState<Record<string, number>>({});
   const [docsCalculated, setDocsCalculated] = useState<
     { label: string; value: number; description: string }[]
@@ -301,6 +301,51 @@ export default function DealForm({
         onDelete(deal.id);
       } else {
         onClose();
+      }
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error ? err.message : "Erro desconhecido o cliente",
+      );
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const rejectedRequest = async (mode: "deals" | "clients") => {
+    if (loading !== null) return;
+    setLoading("del");
+
+    let id = undefined;
+
+    if (mode === "deals") id = deal?.id;
+    if (mode === "clients") id = deal?.client?.id;
+
+    try {
+      const res = await fetch(`${API}/${mode}/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          deleteRequest: false,
+          deleteRequestBy: null,
+          deleteRequestAt: null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const msg = data?.error || "Erro ao cancelar exclusão";
+        setError(msg);
+        return;
+      }
+
+      setError("");
+      if (onDelete && deal?.id) {
+        onDelete(deal.id);
       }
       onClose();
     } catch (err) {
@@ -780,14 +825,39 @@ export default function DealForm({
                 </button>
               ) : (
                 <div className={styles.footerCard}>
-                  {deal?.deleteRequest ? (
+                  {(deal?.client?.deleteRequest || deal?.deleteRequest) && (
                     <button
                       className={`btn-action glass ${styles.btnDeal} ${styles.deleteRequest}`}
-                      onClick={() => router.push("/requisicoes")}
+                      type="button"
+                      onMouseEnter={() => setHovering(true)}
+                      onMouseLeave={() => setHovering(false)}
+                      onClick={async () => {
+                        if (!deal) return;
+
+                        const delDeal = deal?.deleteRequest;
+                        const whoDel = delDeal ? "deals" : "clients";
+
+                        setDeleteContext({
+                          message: `Cancelar a exclusão ${
+                            delDeal ? "da negociação" : "do cliente"
+                          }`,
+                          name: deal.client?.name ?? "",
+                          cancelDelete: true,
+                          onConfirm: () => rejectedRequest(whoDel),
+                        });
+                      }}
                     >
-                      Solicitado
+                      {loading === "del" ? (
+                        <span>Cancelando...</span>
+                      ) : hovering ? (
+                        <span>Cancelar solicitação</span>
+                      ) : (
+                        <span>Solicitação enviada</span>
+                      )}
                     </button>
-                  ) : (
+                  )}
+
+                  {!deal?.deleteRequest && !deal?.client?.deleteRequest && (
                     <button
                       className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
                       type="button"
@@ -817,17 +887,19 @@ export default function DealForm({
                       "Atualizar"
                     )}
                   </button>
-                  <button
-                    className={`btn-action glass ${styles.btnDeal} ${styles.btnSell}`}
-                    type="button"
-                    onClick={() => {
-                      if (!onCloseDeal)
-                        return setError("Função não disponível");
-                      setIsCloseOpen(true);
-                    }}
-                  >
-                    Vender
-                  </button>
+                  {permissions.includes("DEAL_CLOSE") && (
+                    <button
+                      className={`btn-action glass ${styles.btnDeal} ${styles.btnSell}`}
+                      type="button"
+                      onClick={() => {
+                        if (!onCloseDeal)
+                          return setError("Função não disponível");
+                        setIsCloseOpen(true);
+                      }}
+                    >
+                      Vender
+                    </button>
+                  )}
                 </div>
               )}
             </div>
@@ -1073,6 +1145,7 @@ export default function DealForm({
           <WarningDeal
             message={deleteContext.message}
             name={deleteContext.name}
+            cancelDelete={deleteContext.cancelDelete}
             onClose={() => setDeleteContext(null)}
             onConfirm={async () => {
               await deleteContext.onConfirm();

@@ -174,7 +174,7 @@
 }
 
 .weekend {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--logoColor);
 }
 
 .events {
@@ -212,7 +212,7 @@
 
 .scheduleItemFinish {
   color: var(--textBase);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--logoColor);
 }
 
 .scheduleItem:hover,
@@ -228,7 +228,7 @@
 
 .today .scheduleItemFinish {
   background-color: none;
-  color: rgba(255, 255, 255, 0.1);
+  color: var(--logoColor);
 }
 
 .gridBody {

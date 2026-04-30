@@ -7,7 +7,7 @@
 .control {
   background: none !important;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid var(--logoColor) !important;
   border-radius: 8px;
   cursor: pointer !important;
   width: 100%;
@@ -19,7 +19,7 @@
 
 /* menu dropdown */
 .menu {
-  background: rgba(255, 255, 255, 0.1) !important;
+  background: var(--logoColor) !important;
   backdrop-filter: blur(10px);
   border-radius: 8px;
   overflow: hidden;
@@ -35,7 +35,7 @@
 
 /* hover */
 .optionFocused {
-  background-color: rgba(255, 255, 255, 0.1) !important;
+  background-color: var(--logoColor) !important;
   color: var(--primaryColor) !important;
 }
 

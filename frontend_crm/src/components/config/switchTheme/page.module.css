@@ -38,13 +38,13 @@
   width: 70px;
   height: 70px;
   border-radius: 100px;
+  border: 1px solid var(--shadowColor);
   cursor: pointer;
 }
 
 .btnDefaultDark {
   color: #dbf017;
-  background: linear-gradient(135deg, #141519, #1a1b1e);
-  border: 1px solid #dbf017;
+  background: #141519;
 }
 
 .btnDefaultDark:hover {
@@ -54,52 +54,72 @@
 
 .btnBlueDark {
   color: #18b2ef;
-  background: linear-gradient(135deg, #7dcff0, #1f2c32);
-  border: 1px solid #18b2ef;
+  background: #1f2c32;
 }
 
 .btnBlueDark:hover {
-  background: linear-gradient(135deg, #1f2c32, #7dcff0);
+  color: #1f2c32;
+  background: #18b2ef;
+}
+
+.btnRedDark {
+  color: #ff3b3b;
+  background: #141519;
+}
+
+.btnRedDark:hover {
+  color: #141519;
+  background: #ff3b3b;
 }
 
 .btnPinkDark {
   color: #ff66b3;
-  background: linear-gradient(135deg, #f79ac0, #2b1824);
-  border: 1px solid #ff66b3;
+  background: #2b1824;
 }
 
 .btnPinkDark:hover {
-  background: linear-gradient(135deg, #2b1824, #f79ac0);
+  color: #2b1824;
+  background: #ff66b3;
 }
 
 .btnDefault {
-  color: #4a4b3d;
-  background: linear-gradient(135deg, #dbf017, #d9dda5);
-  border: 1px solid #4a4b3d;
+  color: #869503;
+  background: #c5c8ba;
 }
 
 .btnDefault:hover {
-  background: linear-gradient(135deg, #d9dda5, #dbf017);
+  color: #c5c8ba;
+  background: #869503;
 }
 
 .btnBlue {
-  color: #131c21;
-  background: linear-gradient(135deg, #7dcff0, #e5f2f7);
-  border: 1px solid #131c21;
+  color: #123c63;
+  background: #c4ced2;
 }
 
 .btnBlue:hover {
-  background: linear-gradient(135deg, #e5f2f7, #7dcff0);
+  color: #c4ced2;
+  background: #123c63;
+}
+
+.btnRed {
+  color: #ff3b3b;
+  background: #c5c8ba;
+}
+
+.btnRed:hover {
+  color: #c5c8ba;
+  background: #ff3b3b;
 }
 
 .btnPink {
-  color: #261420;
-  background: linear-gradient(135deg, #f79ac0, #fce8f1);
-  border: 1px solid #261420;
+  color: #ff66b3;
+  background: #d8c5cd;
 }
 
 .btnPink:hover {
-  background: linear-gradient(135deg, #fce8f1, #f79ac0);
+  color: #d8c5cd;
+  background: #ff66b3;
 }
 
 @media (max-width: 768px) {

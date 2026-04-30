@@ -24,7 +24,7 @@ export default function CommissionCard({ deals }: any) {
     goals.find((goal) => goal.year === new Date().getFullYear()),
   );
   const [annualGoalValue, setAnnualGoalValue] = useState(0);
-
+  const [initialLoading, setInitialLoading] = useState(true);
   const lastDay = new Date();
   lastDay.setMonth(lastDay.getMonth() + 1);
   lastDay.setDate(0);
@@ -381,6 +381,7 @@ export default function CommissionCard({ deals }: any) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Erro ao buscar metas");
       setGoals(data);
+      setInitialLoading(false);
     } catch (err: unknown) {
       console.error(err);
     }
@@ -554,9 +555,19 @@ export default function CommissionCard({ deals }: any) {
           </div>
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
-              {yearsSortedDesc.length === 0 && (
-                <p>Nenhuma comissão encontrada.</p>
+              {yearsSortedDesc.length === 0 && !initialLoading && (
+                <div className={styles.noItens}>
+                  <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
+                  <p>
+                    Se o problema persistir entre em contato para corrigirmos
+                    este erro.
+                  </p>
+                </div>
+
+                //  (
+                //   <p>Nenhuma comissão encontrada.</p>
               )}
+
               {yearsSortedDesc.map((year) => {
                 const monthsObj = groupedByYearMonth[year] || {};
                 const total = Object.values(monthsObj).reduce(
@@ -665,11 +676,9 @@ export default function CommissionCard({ deals }: any) {
             )}
           </div>
 
-          <div className={`glass ${styles.pendingSection}`}>
-            <h4>A receber</h4>
-            {pendingDeals.length === 0 ? (
-              <span>Sem comissões a receber.</span>
-            ) : (
+          {!initialLoading && pendingDeals.length > 1 && (
+            <div className={`glass ${styles.pendingSection}`}>
+              <h4>A receber</h4>
               <div className={styles.pendingList}>
                 {pendingDeals
                   .sort(
@@ -707,8 +716,8 @@ export default function CommissionCard({ deals }: any) {
                     </div>
                   ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </main>
     </div>

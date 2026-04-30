@@ -216,9 +216,7 @@ export default function DeleteRequest() {
                 <Tooltip label={"Apagar cliente"}>
                   <button
                     className={`${
-                      isRequestClient
-                        ? "btn-action-active"
-                        : "btn-action-inactive"
+                      isRequestClient && "btn-action-active"
                     } btn-action glass`}
                     onClick={() => {
                       setIsRequestClient(true);
@@ -232,9 +230,7 @@ export default function DeleteRequest() {
                 <Tooltip label={"Apagar negociação"}>
                   <button
                     className={`${
-                      isRequestDeal
-                        ? "btn-action-active"
-                        : "btn-action-inactive"
+                      isRequestDeal && "btn-action-active"
                     } btn-action glass`}
                     onClick={() => {
                       setIsRequestClient(false);

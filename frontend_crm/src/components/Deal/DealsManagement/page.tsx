@@ -14,7 +14,7 @@ import { AiOutlineLoading3Quarters } from "react-icons/ai";
 import HeaderPage from "@/components/searchbar/page";
 import DealForm from "@/components/Deal/DealForm/DealForm";
 import styles from "./page.module.css";
-import Confetti from "@/components/Confetti/CloseConfetti";
+import Confetti from "@/components/Tools/Confetti/CloseConfetti";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 interface DealListProps {

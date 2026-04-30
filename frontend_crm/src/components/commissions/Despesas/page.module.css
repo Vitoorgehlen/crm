@@ -130,7 +130,7 @@
 }
 
 .dealsTable tbody tr:nth-child(even) {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--logoColor);
 }
 
 .main input {
@@ -139,7 +139,7 @@
   width: 100%;
   max-width: 90px;
   color: var(--primaryText);
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--logoColor);
 }
 
 .infoCard {

@@ -44,6 +44,13 @@ export default function ThemeSwitcher() {
             Rosa
             <span>Escuro</span>
           </button>
+          <button
+            className={`glass ${styles.btn} ${styles.btnRedDark}`}
+            onClick={() => setTheme("red-dark")}
+          >
+            Vermelho
+            <span>Escuro</span>
+          </button>
         </div>
         <div className={styles.btns}>
           <button
@@ -65,6 +72,13 @@ export default function ThemeSwitcher() {
             onClick={() => setTheme("pink-light")}
           >
             Rosa
+            <span>Claro</span>
+          </button>
+          <button
+            className={`glass ${styles.btn} ${styles.btnRed}`}
+            onClick={() => setTheme("red-light")}
+          >
+            Vermelho
             <span>Claro</span>
           </button>
         </div>

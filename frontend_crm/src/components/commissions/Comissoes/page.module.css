@@ -249,6 +249,16 @@
   border: 1px solid var(--primaryColor);
 }
 
+.noItens {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  color: var(--textBase);
+}
+
 @media (max-width: 768px) {
   .boxSteps {
     flex-direction: column;

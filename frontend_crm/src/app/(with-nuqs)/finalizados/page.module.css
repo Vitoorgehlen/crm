@@ -136,12 +136,12 @@
   padding: 15px;
   background: none;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--shadowColor);
   border-radius: 8px;
 }
 
 .pendingSection p {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--shadowColor);
 }
 
 .pendingSection p:last-child {

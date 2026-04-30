@@ -355,7 +355,7 @@ export default function Home() {
               <div
                 className={`glass ${styles.btnSlide} ${isOpenNote && styles.btnSlideActive}`}
               >
-                <div className={styles.slide}></div>
+                <div className={styles.slide} />
               </div>
               <span>Notas</span>
             </button>
@@ -369,7 +369,7 @@ export default function Home() {
               <div
                 className={`glass ${styles.btnSlide} ${isOpenChart && styles.btnSlideActive}`}
               >
-                <div className={styles.slide}></div>
+                <div className={styles.slide} />
               </div>
               <span>Faturamento</span>
             </button>
@@ -383,7 +383,7 @@ export default function Home() {
               <div
                 className={`glass ${styles.btnSlide} ${isOpenTask && styles.btnSlideActive}`}
               >
-                <div className={styles.slide}></div>
+                <div className={styles.slide} />
               </div>
               <span>Tarefas</span>
             </button>
@@ -397,7 +397,7 @@ export default function Home() {
               <div
                 className={`glass ${styles.btnSlide} ${isOpenSchedule && styles.btnSlideActive}`}
               >
-                <div className={styles.slide}></div>
+                <div className={styles.slide} />
               </div>
               <span>Agenda</span>
             </button>
@@ -422,7 +422,7 @@ export default function Home() {
                   className={styles.btnOpen}
                   onClick={() => handleToggleOpenCard("note-pad")}
                 >
-                  <div className={styles.slide}></div>
+                  <div className={styles.slide} />
                 </button>
               </Tooltip>
             </div>
@@ -484,7 +484,7 @@ export default function Home() {
                   className={styles.btnOpen}
                   onClick={() => handleToggleOpenCard("chart")}
                 >
-                  <div className={styles.slide}></div>
+                  <div className={styles.slide} />
                 </button>
               </Tooltip>
             </div>
@@ -502,7 +502,7 @@ export default function Home() {
                   className={styles.btnOpen}
                   onClick={() => handleToggleOpenCard("task")}
                 >
-                  <div className={styles.slide}></div>
+                  <div className={styles.slide} />
                 </button>
               </Tooltip>
             </div>
@@ -631,13 +631,17 @@ export default function Home() {
                                   <button
                                     className={styles.btnDelTask}
                                     type="button"
-                                    onClick={() =>
-                                      setDeleteContext({
-                                        message: "Deseja cancelar essa tarefa",
-                                        name: task.content ?? "",
-                                        onConfirm: () => handleDeleteTask(task),
-                                      })
-                                    }
+                                    onClick={() => {
+                                      if (task.isFinish) handleDeleteTask(task);
+                                      else
+                                        setDeleteContext({
+                                          message:
+                                            "Deseja cancelar essa tarefa",
+                                          name: task.content ?? "",
+                                          onConfirm: () =>
+                                            handleDeleteTask(task),
+                                        });
+                                    }}
                                   >
                                     <RiEraserFill />
                                   </button>
@@ -661,7 +665,7 @@ export default function Home() {
                   className={styles.btnOpen}
                   onClick={() => handleToggleOpenCard("schedule")}
                 >
-                  <div className={styles.slide}></div>
+                  <div className={styles.slide} />
                 </button>
               </Tooltip>
             </div>

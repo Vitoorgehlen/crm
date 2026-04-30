@@ -12,6 +12,7 @@ import DayPicker from "../Tools/DatePicker/DayPicker/DayPicker";
 import { parseISO } from "date-fns";
 import { format } from "date-fns";
 import WarningClient from "../Warning/ClientWarning";
+import CancelDelete from "../Warning/CancelDelete";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,9 +34,11 @@ export default function ClientsForm({
   const [dealsToDelete, setDealsToDelete] = useState<any[] | null>(null);
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showCancelDeleteModal, setShowCancelDeleteModal] = useState(false);
   const [loading, setLoading] = useState<"read" | "save" | "delete" | null>(
     null,
   );
+  const [hovering, setHovering] = useState(false);
   const [error, setError] = useState("");
 
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -172,6 +175,47 @@ export default function ClientsForm({
     }
   };
 
+  const rejectedRequest = async () => {
+    if (!client) return;
+
+    if (loading) return;
+    setLoading("delete");
+    try {
+      const res = await fetch(`${API}/clients/${client.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          deleteRequest: false,
+          deleteRequestBy: null,
+          deleteRequestAt: null,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        const msg = data?.error || "Erro ao cancelar exclusão";
+        setError(msg);
+        return;
+      }
+
+      setError("");
+      onDelete?.(client?.id || 0);
+      onClose();
+    } catch (err) {
+      console.error(err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Erro inesperado ao apagar cliente",
+      );
+    } finally {
+      setLoading(null);
+    }
+  };
+
   useEffect(() => {
     if (client) {
       setName(client.name || "");
@@ -216,7 +260,7 @@ export default function ClientsForm({
             </button>
           </div>
 
-          {error && <p className="erro">{error}</p>}
+          {error && <p className="error">{error}</p>}
           <div className={styles.line}>
             <input
               type="text"
@@ -305,11 +349,28 @@ export default function ClientsForm({
           ) : (
             <div className={styles.btnDelAndUp}>
               {client && client.deleteRequest ? (
-                <div
+                <button
                   className={`btn-action glass ${styles.btnDeal} ${styles.deleteRequest}`}
+                  type="button"
+                  onMouseEnter={() => setHovering(true)}
+                  onMouseLeave={() => setHovering(false)}
+                  onClick={async () => {
+                    if (!client) return;
+
+                    const deals = await fetchDealByClient(client);
+
+                    setDealsToDelete(deals);
+                    setShowCancelDeleteModal(true);
+                  }}
                 >
-                  <span>Solicitação enviada</span>
-                </div>
+                  {loading === "delete" ? (
+                    <span>Cancelando...</span>
+                  ) : hovering ? (
+                    <span>Cancelar solicitação</span>
+                  ) : (
+                    <span>Solicitação enviada</span>
+                  )}
+                </button>
               ) : (
                 <button
                   className={`btn-action glass ${styles.btnDeal} ${styles.btnDelete}`}
@@ -355,7 +416,7 @@ export default function ClientsForm({
         <WarningClient
           message={`Tem certeza que deseja excluir`}
           name={`${client?.name}`}
-          deals={!dealsToDelete ? 0 : dealsToDelete.length}
+          deals={!dealsToDelete ? [] : dealsToDelete}
           onClose={() => {
             setShowDeleteModal(false);
             setDealsToDelete(null);
@@ -363,6 +424,22 @@ export default function ClientsForm({
           onConfirm={async () => {
             await deleteClient();
             setShowDeleteModal(false);
+            setDealsToDelete(null);
+          }}
+        />
+      )}
+
+      {showCancelDeleteModal && (
+        <CancelDelete
+          message={`Cancelar exclusão de`}
+          name={`${client?.name}`}
+          onClose={() => {
+            setShowCancelDeleteModal(false);
+            setDealsToDelete(null);
+          }}
+          onConfirm={async () => {
+            await rejectedRequest();
+            setShowCancelDeleteModal(false);
             setDealsToDelete(null);
           }}
         />
