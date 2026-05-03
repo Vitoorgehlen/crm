@@ -37,6 +37,8 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
   const [newExpenseValue, setNewExpenseValue] = useState<number | null>(null);
   const [newDueDate, setNewDueDate] = useState<Date | null>(null);
   const [recurrenceType, setRecurrenceType] = useState("MONTHLY");
+  const [error, setError] = useState<string | null>(null);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return `${now.getFullYear()} - ${now.getMonth()}`;
@@ -344,148 +346,164 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
             </div>
           </div>
           <div>
-            <div className={`glass ${styles.cashStatsCardExpense}`}>
-              <table className={`glass ${styles.dealsTable}`}>
-                <thead>
-                  <tr>
-                    <th>Conta</th>
-                    <th>Dia Venc.</th>
-                    <th>Valor</th>
-                    <th>Pago</th>
-                    <th></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredExpenses
-                    .slice()
-                    .reverse()
-                    .map((exp) => (
-                      <tr key={exp.id}>
-                        {isOpenEdit === exp.id ? (
-                          <>
-                            <td>
-                              <input
-                                type="text"
-                                className="form-base"
-                                placeholder="Despesa"
-                                value={newExpense}
-                                onChange={(e) => setNewExpense(e.target.value)}
-                              />
-                            </td>
-                            <td>
-                              <CustomDatePicker
-                                value={newDueDate}
-                                onChange={setNewDueDate}
-                              />
-                            </td>
-                            <td>
-                              <CurrencyInput
-                                className={`form-base ${styles.payment}`}
-                                placeholder="Valor"
-                                value={newExpenseValue || 0}
-                                onChange={setNewExpenseValue}
-                              />
-                            </td>
-                            <td>
-                              <button
-                                className={`glass ${styles.btnIsPaid} 
+            {error ? (
+              <div className={styles.noItens}>
+                <h3>⚠️ Erro ao carregar despesas</h3>
+                <p>Tente novamente ou entre em contato se persistir.</p>
+              </div>
+            ) : (
+              <div className={styles.noItens}>
+                <h3>😭 Nenhuma despesa encontrada...</h3>
+                <p>Tente ajustar os filtros ou criar uma nova despesa.</p>
+              </div>
+            )}
+            {(!error || filteredExpenses.length > 0) && !initialLoading && (
+              <div className={`glass ${styles.cashStatsCardExpense}`}>
+                <table className={`glass ${styles.dealsTable}`}>
+                  <thead>
+                    <tr>
+                      <th>Conta</th>
+                      <th>Dia Venc.</th>
+                      <th>Valor</th>
+                      <th>Pago</th>
+                      <th></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredExpenses
+                      .slice()
+                      .reverse()
+                      .map((exp) => (
+                        <tr key={exp.id}>
+                          {isOpenEdit === exp.id ? (
+                            <>
+                              <td>
+                                <input
+                                  type="text"
+                                  className="form-base"
+                                  placeholder="Despesa"
+                                  value={newExpense}
+                                  onChange={(e) =>
+                                    setNewExpense(e.target.value)
+                                  }
+                                />
+                              </td>
+                              <td>
+                                <CustomDatePicker
+                                  value={newDueDate}
+                                  onChange={setNewDueDate}
+                                />
+                              </td>
+                              <td>
+                                <CurrencyInput
+                                  className={`form-base ${styles.payment}`}
+                                  placeholder="Valor"
+                                  value={newExpenseValue || 0}
+                                  onChange={setNewExpenseValue}
+                                />
+                              </td>
+                              <td>
+                                <button
+                                  className={`glass ${styles.btnIsPaid} 
                                 ${exp.isPaid && styles.btnIsPaidActive}`}
-                                onClick={() => {
-                                  handleEditExpense({
-                                    ...exp,
-                                    isPaid: !exp.isPaid,
-                                  });
-                                }}
-                              >
-                                {exp.isPaid ? "Pago" : "Pagar"}
-                              </button>
-                            </td>
-                            <td>
-                              <div className={styles.edit}>
-                                <button
-                                  className={styles.btnEdit}
-                                  onClick={() => handleEditExpense(exp)}
-                                >
-                                  <FaCheck />
-                                </button>
-                                <button
-                                  className={styles.btnDel}
                                   onClick={() => {
-                                    setIsOpenEdit(null);
-                                    resetExpense();
-                                  }}
-                                >
-                                  <FaTimes />
-                                </button>
-                              </div>
-                            </td>
-                          </>
-                        ) : (
-                          <>
-                            <td>{exp.label || "Não encontrada"}</td>
-                            <td>
-                              {new Date(exp.newDueDate).getDate() ||
-                                "Não encontrado"}
-                            </td>
-                            <td>
-                              {real(Number(exp.value)) ||
-                                "Valor não encontrado"}
-                            </td>
-                            <td>
-                              <button
-                                className={`glass ${styles.btnIsPaid} 
-                                ${exp.isPaid && styles.btnIsPaidActive}`}
-                                onClick={() => {
-                                  handleEditExpense({
-                                    ...exp,
-                                    isPaid: !exp.isPaid,
-                                  });
-                                }}
-                              >
-                                {exp.isPaid ? "Pago" : "Pagar"}
-                              </button>
-                            </td>
-                            <td>
-                              <div className={styles.edit}>
-                                <button
-                                  className={styles.btnEdit}
-                                  onClick={() => {
-                                    setIsOpenEdit(exp.id);
-                                    setIsOpenEdit(exp.id);
-                                    setNewExpense(exp.label);
-                                    setNewExpenseValue(Number(exp.value));
-                                    setNewDueDate(new Date(exp.newDueDate));
-                                    setRecurrenceType(
-                                      exp.recurrenceType ?? "NONE",
-                                    );
-                                  }}
-                                >
-                                  <RiPencilFill />
-                                </button>
-                                <button
-                                  className={styles.btnDel}
-                                  onClick={async () => {
-                                    if (!exp) return;
-
-                                    setDeleteContext({
-                                      message:
-                                        "Tem certeza que deseja excluir a despesa",
-                                      name: exp.label ?? "",
-                                      onConfirm: () => handleDeleteExpense(exp),
+                                    handleEditExpense({
+                                      ...exp,
+                                      isPaid: !exp.isPaid,
                                     });
                                   }}
                                 >
-                                  <RiEraserFill />
+                                  {exp.isPaid ? "Pago" : "Pagar"}
                                 </button>
-                              </div>
-                            </td>
-                          </>
-                        )}
-                      </tr>
-                    ))}
-                </tbody>
-              </table>
-            </div>
+                              </td>
+                              <td>
+                                <div className={styles.edit}>
+                                  <button
+                                    className={styles.btnEdit}
+                                    onClick={() => handleEditExpense(exp)}
+                                  >
+                                    <FaCheck />
+                                  </button>
+                                  <button
+                                    className={styles.btnDel}
+                                    onClick={() => {
+                                      setIsOpenEdit(null);
+                                      resetExpense();
+                                    }}
+                                  >
+                                    <FaTimes />
+                                  </button>
+                                </div>
+                              </td>
+                            </>
+                          ) : (
+                            <>
+                              <td>{exp.label || "Não encontrada"}</td>
+                              <td>
+                                {new Date(exp.newDueDate).getDate() ||
+                                  "Não encontrado"}
+                              </td>
+                              <td>
+                                {real(Number(exp.value)) ||
+                                  "Valor não encontrado"}
+                              </td>
+                              <td>
+                                <button
+                                  className={`glass ${styles.btnIsPaid} 
+                                ${exp.isPaid && styles.btnIsPaidActive}`}
+                                  onClick={() => {
+                                    handleEditExpense({
+                                      ...exp,
+                                      isPaid: !exp.isPaid,
+                                    });
+                                  }}
+                                >
+                                  {exp.isPaid ? "Pago" : "Pagar"}
+                                </button>
+                              </td>
+                              <td>
+                                <div className={styles.edit}>
+                                  <button
+                                    className={styles.btnEdit}
+                                    onClick={() => {
+                                      setIsOpenEdit(exp.id);
+                                      setIsOpenEdit(exp.id);
+                                      setNewExpense(exp.label);
+                                      setNewExpenseValue(Number(exp.value));
+                                      setNewDueDate(new Date(exp.newDueDate));
+                                      setRecurrenceType(
+                                        exp.recurrenceType ?? "NONE",
+                                      );
+                                    }}
+                                  >
+                                    <RiPencilFill />
+                                  </button>
+                                  <button
+                                    className={styles.btnDel}
+                                    onClick={async () => {
+                                      if (!exp) return;
+
+                                      setDeleteContext({
+                                        message:
+                                          "Tem certeza que deseja excluir a despesa",
+                                        name: exp.label ?? "",
+                                        onConfirm: () =>
+                                          handleDeleteExpense(exp),
+                                      });
+                                    }}
+                                  >
+                                    <RiEraserFill />
+                                  </button>
+                                </div>
+                              </td>
+                            </>
+                          )}
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       </main>

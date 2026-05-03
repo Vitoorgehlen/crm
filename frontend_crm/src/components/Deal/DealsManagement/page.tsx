@@ -40,8 +40,8 @@ export default function DealList({
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [limit] = useState(initialLimit);
-
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
   });
@@ -257,6 +257,7 @@ export default function DealList({
 
   const fetchDealById = useCallback(async () => {
     if (!token || !dealId) return;
+    setError(null);
     setLoading(true);
 
     const params = new URLSearchParams();
@@ -279,6 +280,7 @@ export default function DealList({
       }
     } catch (err) {
       console.error(err);
+      setError("Erro ao buscar negociações.");
     } finally {
       setLoading(false);
     }
@@ -286,6 +288,7 @@ export default function DealList({
 
   const fetchAllStatusesData = useCallback(async () => {
     if (!token) return;
+    setError(null);
     setLoading(true);
 
     if (dealId) {
@@ -325,6 +328,7 @@ export default function DealList({
       setCurrentPageByStatus(newCurrentPageByStatus);
     } catch (err: unknown) {
       console.error("Erro ao buscar deals:", err);
+      setError("Erro ao buscar negociações.");
     } finally {
       setLoading(false);
       setInitialLoading(false);
@@ -434,15 +438,17 @@ export default function DealList({
           </div>
         )}
 
-        {Object.values(dealsByStatus).every((deals) => deals.length === 0) &&
-        !loading &&
-        !initialLoading ? (
+        {error ? (
           <div className={styles.noItens}>
-            <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
-            <p>
-              Se o problema persistir entre em contato para corrigirmos este
-              erro.
-            </p>
+            <h3>⚠️ Erro ao carregar negociações</h3>
+            <p>Tente novamente ou entre em contato se persistir.</p>
+          </div>
+        ) : Object.values(dealsByStatus).every((deals) => deals.length === 0) &&
+          !loading &&
+          !initialLoading ? (
+          <div className={styles.noItens}>
+            <h3>😭 Nenhuma negociação encontrada...</h3>
+            <p>Tente ajustar os filtros ou criar uma nova negociação.</p>
           </div>
         ) : (
           <div className={styles.cardsDeals}>

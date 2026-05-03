@@ -168,7 +168,7 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
               <MdClose />
             </button>
           </div>
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className="error">{error}</p>}
           <div className={styles.box}>
             <input
               className={`form-base ${styles.input}`}
@@ -186,13 +186,13 @@ export function AddAdmin({ company, onClose }: CreateAdmin) {
           <div className={styles.box}>
             <input
               className={`form-base ${styles.input}`}
-              type="password"
+              type="text"
               placeholder="Nova senha"
               onChange={(e) => setNewPassword(e.target.value)}
             />
             <input
               className={`form-base ${styles.input}`}
-              type="password"
+              type="text"
               placeholder="Confirme a senha"
               onChange={(e) => setNewPassword2(e.target.value)}
             />

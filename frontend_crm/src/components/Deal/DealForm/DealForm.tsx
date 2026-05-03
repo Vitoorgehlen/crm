@@ -144,6 +144,9 @@ export default function DealForm({
     if (!res.ok) throw new Error(data.error || "Erro");
 
     setClients((prev) => [...prev, data]);
+
+    setClientId(data.id);
+    setSearchClient(data.name);
   };
 
   const handleSubmit = async (
@@ -641,7 +644,7 @@ export default function DealForm({
                 </div>
               </div>
 
-              {error && <p className={styles.error}>{error}</p>}
+              {error && <p className="error">{error}</p>}
               {mode === "create" && (
                 <div className={styles.boxTitle}>
                   <input
@@ -1038,7 +1041,6 @@ export default function DealForm({
                   <div className={styles.nameValue}>
                     <p>{doc.label}:</p>
                     <span>
-                      R$
                       {doc.value.toLocaleString("pt-BR", {
                         style: "currency",
                         currency: "BRL",
@@ -1064,15 +1066,14 @@ export default function DealForm({
                   <div className={styles.boxDocTotal}>
                     <h5>Total MCMV:</h5>
                     <p>
-                      R$
                       {docsCalculated
                         .reduce((acc, item) => {
                           if (item.label === "Financiar SBPE") return acc;
                           return acc + item.value;
                         }, 0)
                         .toLocaleString("pt-BR", {
-                          minimumFractionDigits: 2,
-                          maximumFractionDigits: 2,
+                          style: "currency",
+                          currency: "BRL",
                         })}
                     </p>
                   </div>
@@ -1080,7 +1081,6 @@ export default function DealForm({
                 <div className={styles.boxDocTotal}>
                   <h5>Total SBPE:</h5>
                   <p>
-                    R$
                     {docsCalculated
                       .reduce((acc, item) => {
                         if (item.label === "Financiar MCMV") return acc;

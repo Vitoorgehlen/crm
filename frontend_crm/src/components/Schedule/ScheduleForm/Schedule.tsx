@@ -282,7 +282,7 @@ export default function ScheduleForm({
           </button>
         </div>
 
-        {error && <p className={styles.error}>{error}</p>}
+        {error && <p className="error">{error}</p>}
         <div className={styles.line}>
           <input
             list="deals"

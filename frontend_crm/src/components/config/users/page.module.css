@@ -40,7 +40,7 @@
   width: 100%;
   border: none;
   outline: none;
-  background: var(--mainBackground);
+  background: var(--mainBg);
   box-shadow: -3px 3px 10px var(--shadowColor);
 
   backdrop-filter: blur(20px);
@@ -48,7 +48,7 @@
 } */
 
 .modal {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   padding: 15px;
   gap: 4px;
   border-radius: 10px;
@@ -121,7 +121,7 @@
 .btnUpdate:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--mainBackground);
+  background: var(--mainBg);
 }
 
 .btnEditUser {
@@ -138,7 +138,7 @@
 .btnEditUser:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--mainBackground);
+  background: var(--mainBg);
 }
 
 .close:hover {

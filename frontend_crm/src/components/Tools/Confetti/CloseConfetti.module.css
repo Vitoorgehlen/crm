@@ -48,7 +48,7 @@
 }
 
 .modal {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border-radius: 10px;
   max-width: 500px;
   width: 100%;

@@ -30,21 +30,21 @@
 .yearBtn {
   text-align: center;
   padding: 8px 12px;
-  color: var(--mainBackground);
-  border: 1px solid var(--mainBackground);
+  color: var(--mainBg);
+  border: 1px solid var(--mainBg);
   font-size: 1rem;
   border-radius: 20px;
   cursor: pointer;
 }
 
 .yearBtn:hover {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
 }
 
 .yearBtnActive {
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
   color: var(--textBase);
   border: 1px solid var(--primaryColor);
 }
@@ -62,8 +62,8 @@
 .monthToggle,
 .monthToggleActive {
   color: var(--textBase);
-  background: var(--sidebarBackground);
-  border: 1px solid var(--mainBackground);
+  background: var(--secondaryBg);
+  border: 1px solid var(--mainBg);
   border-radius: 20px;
   padding: 5px 10px 6px 10px;
   display: flex;
@@ -77,7 +77,7 @@
 
 .monthToggle:hover,
 .monthToggleActive:hover {
-  color: var(--mainBackground);
+  color: var(--mainBg);
   background: var(--primaryColor);
 }
 

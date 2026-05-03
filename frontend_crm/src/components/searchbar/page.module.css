@@ -37,7 +37,13 @@
 }
 
 .addDeal {
+  background-color: var(--primaryColor);
   color: var(--primaryText);
+}
+
+.addDeal:hover {
+  background-color: var(--mainBg);
+  color: var(--primaryColor);
 }
 
 .headerIcons button:hover {

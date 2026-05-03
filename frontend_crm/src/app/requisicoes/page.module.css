@@ -112,7 +112,7 @@
   font-size: 1rem;
   border-radius: 20px;
   cursor: pointer;
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
 }
 
 .btnDel:hover {
@@ -123,8 +123,8 @@
 
 .btnCancel:hover {
   background-color: var(--primaryColor);
-  color: var(--mainBackground);
-  border: 1px solid var(--mainBackground);
+  color: var(--mainBg);
+  border: 1px solid var(--mainBg);
 }
 
 @media (max-width: 768px) {

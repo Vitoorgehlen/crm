@@ -60,7 +60,7 @@
 }
 
 .toggleButton:hover {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border: 1px solid var(--primaryColor);
 }
 
@@ -71,12 +71,12 @@
 
 .addButton:hover {
   background: var(--primaryColor);
-  border: 1px solid var(--mainBackground);
-  color: var(--mainBackground);
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
 }
 
 .addButton:hover .icon {
-  color: var(--mainBackground);
+  color: var(--mainBg);
 }
 
 .grid {
@@ -206,7 +206,7 @@
 }
 
 .scheduleItem {
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
   border: 1px solid var(--textBase);
 }
 
@@ -264,26 +264,26 @@
 }
 
 .monthDay.today.currentMonth {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
 }
 
 .monthDay.pastDay.currentMonth {
   background: var(--textBase);
-  border-right: 1px solid var(--mainBackground);
-  border-bottom: 1px solid var(--mainBackground);
-  color: var(--mainBackground);
+  border-right: 1px solid var(--mainBg);
+  border-bottom: 1px solid var(--mainBg);
+  color: var(--mainBg);
   cursor: default;
 }
 
 .otherMonth {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   color: var(--textBase);
 }
 
 .monthDay.pastDay.otherMonth {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   color: var(--textBase);
   cursor: default;
 }
@@ -295,7 +295,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: var(--sidebarBackground);
+  background: var(--secondaryBg);
   text-align: center;
   border-radius: 3px;
   cursor: pointer;
@@ -316,7 +316,7 @@
   align-items: center;
   justify-content: center;
   transform: translateX(-50%);
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border-radius: 8px;
   padding: 12px;
   z-index: 1000;

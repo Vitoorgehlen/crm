@@ -38,7 +38,12 @@ export default function Config() {
   const selectedUserObject =
     users.find((u) => String(u.id) === selectedUser) || null;
 
-  const startMonthDate = startMonth ? new Date(startMonth + "-01") : null;
+  const startMonthValue = startMonth
+    ? {
+        year: Number(startMonth.split("-")[0]),
+        month: Number(startMonth.split("-")[1]) - 1,
+      }
+    : null;
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -97,17 +102,6 @@ export default function Config() {
     fetchUsers();
   }, [isLoading, token, router, fetchUsers, permissions]);
 
-  useEffect(() => {
-    if (!startMonth) return;
-
-    const [year, month] = startMonth.split("-");
-    const firstDay = new Date(Number(year), Number(month) - 1, 1);
-    const lastDay = new Date(Number(year), Number(month), 0);
-
-    setStartDate(firstDay.toISOString());
-    setEndDate(lastDay.toISOString());
-  }, [startMonth]);
-
   return (
     <main className={styles.main}>
       <div className={styles.headerContent}>
@@ -126,29 +120,21 @@ export default function Config() {
                 }}
               />
               <MonthPicker
-                value={startMonthDate}
-                onChange={(date) => {
-                  if (!date) {
+                value={startMonthValue}
+                onChange={(value) => {
+                  if (!value) {
                     setStartMonth("");
                     return;
                   }
 
-                  const formatted = `${date.getFullYear()}-${String(
-                    date.getMonth() + 1,
+                  const formatted = `${value.year}-${String(
+                    value.month + 1,
                   ).padStart(2, "0")}`;
 
                   setStartMonth(formatted);
 
-                  const firstDay = new Date(
-                    date.getFullYear(),
-                    date.getMonth(),
-                    1,
-                  );
-                  const lastDay = new Date(
-                    date.getFullYear(),
-                    date.getMonth() + 1,
-                    0,
-                  );
+                  const firstDay = new Date(value.year, value.month, 1);
+                  const lastDay = new Date(value.year, value.month + 1, 0);
 
                   setStartDate(firstDay.toISOString());
                   setEndDate(lastDay.toISOString());

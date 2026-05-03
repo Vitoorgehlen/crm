@@ -22,7 +22,7 @@
 }
 
 .table thead {
-  background: var(--mainBackground);
+  background: var(--mainBg);
 }
 
 .table thead th {

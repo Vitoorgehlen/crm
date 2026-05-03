@@ -1,8 +1,9 @@
 @import url("https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap");
 
 :root {
-  --mainBackground: #141519;
-  --sidebarBackground: #1a1b1e;
+  --mainBg: #141519;
+  --secondaryBg: #1a1b1e;
+  --sidebarBg: rgba(26, 27, 30, 0.9);
   --textBase: #6b6c70;
   --primaryText: #f2f6d2;
   --primaryColor: #dbf017;
@@ -23,8 +24,9 @@
 }
 
 [data-theme="default-light"] {
-  --mainBackground: #c5c8ba;
-  --sidebarBackground: #f2f5e9;
+  --mainBg: #c5c8ba;
+  --secondaryBg: #f2f5e9;
+  --sidebarBg: rgba(242, 245, 233, 0.9);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #869503;
@@ -32,15 +34,17 @@
 }
 
 [data-theme="blue-dark"] {
-  --mainBackground: #344850;
-  --sidebarBackground: #1f2c32;
+  --mainBg: #344850;
+  --secondaryBg: #1f2c32;
+  --sidebarBg: rgba(31, 44, 50, 0.9);
   --primaryColor: #18b2ef;
   --logoColor: rgba(24, 178, 239, 0.02);
 }
 
 [data-theme="blue-light"] {
-  --mainBackground: #c4ced2;
-  --sidebarBackground: #e5e6f0;
+  --mainBg: #c4ced2;
+  --secondaryBg: #e5e6f0;
+  --sidebarBg: rgba(229, 230, 240, 0.9);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #123c63;
@@ -54,8 +58,9 @@
 }
 
 [data-theme="red-light"] {
-  --mainBackground: #c5c8ba;
-  --sidebarBackground: #f2f5e9;
+  --mainBg: #c5c8ba;
+  --secondaryBg: #f2f5e9;
+  --sidebarBg: rgba(242, 245, 233, 0.9);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #ff3b3b;
@@ -64,15 +69,16 @@
 }
 
 [data-theme="pink-dark"] {
-  --mainBackground: #402b38;
-  --sidebarBackground: #2b1824;
+  --mainBg: #402b38;
+  --secondaryBg: #2b1824;
   --primaryColor: #f61c65;
   --logoColor: rgba(246, 28, 101, 0.02);
 }
 
 [data-theme="pink-light"] {
-  --mainBackground: #d8c5cd;
-  --sidebarBackground: #eddce2;
+  --mainBg: #d8c5cd;
+  --secondaryBg: #eddce2;
+  --sidebarBg: rgba(237, 220, 226, 0.9);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #ff66b3;
@@ -96,7 +102,7 @@ body {
 
   display: flex;
   flex-direction: column;
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
 }
 
 input:focus,
@@ -110,8 +116,8 @@ input:hover {
   min-height: 98vh;
   background-image: radial-gradient(
     circle,
-    var(--mainBackground) 0%,
-    var(--sidebarBackground) 100%
+    var(--mainBg) 0%,
+    var(--secondaryBg) 100%
   );
 }
 
@@ -184,6 +190,7 @@ input:hover {
 }
 
 .btn-action-active {
+  border: 1px solid var(--primaryColor);
   color: var(--primaryColor);
 }
 

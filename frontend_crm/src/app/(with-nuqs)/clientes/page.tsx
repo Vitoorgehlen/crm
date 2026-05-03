@@ -35,6 +35,7 @@ export default function Clients() {
   const [limit] = useState(20);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [teamClients, setTeamClients] = useQueryState("team", {
     defaultValue: false,
@@ -54,6 +55,8 @@ export default function Clients() {
       }
 
       setLoading(true);
+      setError(null);
+
       try {
         const params = new URLSearchParams();
 
@@ -82,6 +85,7 @@ export default function Clients() {
         setTotal(Math.ceil(data.total / limit));
       } catch (err: unknown) {
         console.error(err);
+        setError("Erro ao buscar clientes.");
       } finally {
         setLoading(false);
         setInitialLoading(false);
@@ -92,6 +96,8 @@ export default function Clients() {
 
   const fetchUsers = useCallback(async () => {
     setLoading(true);
+    setError(null);
+
     try {
       const res = await fetch(`${API}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -102,6 +108,7 @@ export default function Clients() {
       setUsers(data);
     } catch (err: unknown) {
       console.error(err);
+      setError("Erro ao buscar usuários");
     } finally {
       setLoading(false);
     }
@@ -226,13 +233,24 @@ export default function Clients() {
             </div>
           )}
 
-          {clients.length === 0 && !initialLoading ? (
+          {/* {clients.length === 0 && !initialLoading ? (
             <div className={styles.noItens}>
               <h3>😭 Desculpe não encotramos nenhum cliente...</h3>
               <p>
                 Se o problema persistir entre em contato para corrigirmos este
                 erro.
               </p>
+            </div>
+          ) : ( */}
+          {error ? (
+            <div className={styles.noItens}>
+              <h3>⚠️ Erro ao carregar clientes</h3>
+              <p>Tente novamente ou entre em contato se persistir.</p>
+            </div>
+          ) : clients.length === 0 && !loading && !initialLoading ? (
+            <div className={styles.noItens}>
+              <h3>😭 Nenhum cliente encontrada...</h3>
+              <p>Tente ajustar os filtros ou criar um cliente novo.</p>
             </div>
           ) : (
             <div className={styles.clientList}>

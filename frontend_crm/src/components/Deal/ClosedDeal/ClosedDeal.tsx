@@ -819,31 +819,10 @@ export default function ClosedDeal({
                 </span>
               </div>
 
-              <div className={styles.btnPriorityAndDoc}>
-                <div
-                  onMouseEnter={() => {
-                    setShowPopup(true);
-                    sumDocs(
-                      docValues,
-                      paymentMethod,
-                      downPaymentValue,
-                      subsidyValue,
-                      cashValue,
-                      fgtsValue,
-                      financingValue,
-                      creditLetterValue,
-                    );
-                  }}
-                  onMouseLeave={() => {
-                    setShowPopup(false);
-                  }}
-                >
-                  <BsCashCoin className={styles.btnDocValue} />
-                </div>
-              </div>
+              <div className={styles.btnPriorityAndDoc} />
             </div>
 
-            {error && <p className={styles.error}>{error}</p>}
+            {error && <p className="error">{error}</p>}
 
             <div className={styles.paymentTitle}>
               <div className={styles.payment}>

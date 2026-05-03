@@ -135,7 +135,7 @@
 .btnEditUser:hover {
   color: var(--primaryColor);
   border: 1px solid var(--primaryColor);
-  background: var(--mainBackground);
+  background: var(--mainBg);
 }
 
 .btnDeleteUser:hover {

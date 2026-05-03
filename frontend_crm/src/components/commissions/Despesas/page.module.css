@@ -33,7 +33,7 @@
   border-radius: 8px;
   padding: 10px;
   text-align: center;
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
   border: 1px solid var(--textBase);
 }
 
@@ -63,7 +63,7 @@
 
 .btnSave {
   color: var(--primaryColor);
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border-radius: 5px;
   max-width: 50px;
   width: 80%;
@@ -89,7 +89,7 @@
 }
 
 .dealsTable thead {
-  background: var(--mainBackground);
+  background: var(--mainBg);
 }
 
 .dealsTable thead th {
@@ -154,7 +154,7 @@
 
 .btnIsPaid {
   color: var(--primaryText);
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border-radius: 5px;
   max-width: 90px;
   width: 100%;
@@ -172,8 +172,8 @@
 
 .btnIsPaidActive {
   background-color: var(--textBase);
-  border: 1px solid var(--mainBackground);
-  color: var(--mainBackground);
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
 }
 
 .edit {
@@ -184,7 +184,7 @@
 
 .btnEdit {
   border: none;
-  color: var(--mainBackground);
+  color: var(--mainBg);
   font-size: 0.9rem;
   cursor: pointer;
 }
@@ -196,13 +196,23 @@
 .btnDel {
   border: none;
   margin-left: 5px;
-  color: var(--mainBackground);
+  color: var(--mainBg);
   font-size: 0.9rem;
   cursor: pointer;
 }
 
 .btnDel:hover {
   color: var(--errorColor);
+}
+
+.noItens {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  color: var(--textBase);
 }
 
 @media (max-width: 768px) {

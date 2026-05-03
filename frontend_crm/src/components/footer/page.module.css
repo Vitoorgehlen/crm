@@ -12,6 +12,6 @@
   align-items: center;
   padding: 10px 20px 10px 20px;
   color: var(--textBase);
-  background-color: var(--sidebarBackground);
+  background-color: var(--secondaryBg);
   z-index: 500;
 }

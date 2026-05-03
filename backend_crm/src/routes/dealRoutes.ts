@@ -64,7 +64,7 @@ router.get('/deals', loginRequired, async (req, res) => {
   const { id: userId } = user;
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
-  const search = String(req.query.name || '').trim();
+  const search = String(req.query.search || '').trim();
   const dealId = req.query.dealId ? Number(req.query.dealId) : undefined;
 
   const statusQ = typeof req.query.status === 'string' ? req.query.status : undefined;

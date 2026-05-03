@@ -42,7 +42,7 @@
 /* selecionado */
 .optionSelected {
   background-color: var(--primaryColor) !important;
-  color: var(--mainBackground) !important;
+  color: var(--mainBg) !important;
 }
 
 .singleValue {

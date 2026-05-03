@@ -12,7 +12,7 @@
 }
 
 .modal {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   padding: 1.8rem 1.8rem 1rem 1.8rem;
   gap: 4px;
   border-radius: 10px;
@@ -92,14 +92,14 @@
 }
 
 .btnUpdate:hover {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border: 1px solid var(--primaryColor);
 }
 
 .btnFinish:hover {
   background: var(--primaryColor);
-  border: 1px solid var(--mainBackground);
-  color: var(--mainBackground);
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
 }
 
 .finish {
@@ -113,7 +113,7 @@
 }
 
 .btnFinish:hover .active {
-  color: var(--mainBackground);
+  color: var(--mainBg);
 }
 
 .btnFilter {

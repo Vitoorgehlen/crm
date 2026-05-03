@@ -12,7 +12,7 @@
 }
 
 .modal {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   padding: 20px;
   gap: 4px;
   border-radius: 10px;
@@ -135,7 +135,7 @@
 }
 
 .btnUpdate:hover {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border: 1px solid var(--primaryColor);
 }
 

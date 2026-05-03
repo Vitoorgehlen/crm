@@ -24,6 +24,7 @@ export default function CommissionCard({ deals }: any) {
     goals.find((goal) => goal.year === new Date().getFullYear()),
   );
   const [annualGoalValue, setAnnualGoalValue] = useState(0);
+  const [error, setError] = useState<string | null>(null);
   const [initialLoading, setInitialLoading] = useState(true);
   const lastDay = new Date();
   lastDay.setMonth(lastDay.getMonth() + 1);
@@ -373,6 +374,8 @@ export default function CommissionCard({ deals }: any) {
   }
 
   const fetchGoals = useCallback(async () => {
+    setError(null);
+
     try {
       const res = await fetch(`${API}/goals`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -384,6 +387,7 @@ export default function CommissionCard({ deals }: any) {
       setInitialLoading(false);
     } catch (err: unknown) {
       console.error(err);
+      setError("Erro ao buscar comissões.");
     }
   }, [token]);
 
@@ -555,19 +559,23 @@ export default function CommissionCard({ deals }: any) {
           </div>
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
-              {yearsSortedDesc.length === 0 && !initialLoading && (
+              {error ? (
                 <div className={styles.noItens}>
-                  <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
-                  <p>
-                    Se o problema persistir entre em contato para corrigirmos
-                    este erro.
-                  </p>
+                  <h3>⚠️ Erro ao carregar negociações</h3>
+                  <p>Tente novamente ou entre em contato se persistir.</p>
                 </div>
-
-                //  (
-                //   <p>Nenhuma comissão encontrada.</p>
+              ) : (
+                yearsSortedDesc.length === 0 &&
+                !initialLoading && (
+                  <div className={styles.noItens}>
+                    <h3>😭 Nenhuma negociação encontrada...</h3>
+                    <p>
+                      Tente ajustar os filtros ou criar uma nova negociação.
+                    </p>
+                  </div>
+                )
               )}
-
+              ;
               {yearsSortedDesc.map((year) => {
                 const monthsObj = groupedByYearMonth[year] || {};
                 const total = Object.values(monthsObj).reduce(

@@ -104,7 +104,7 @@ export default function WarningClient({
                 <p className={styles.text}>
                   <span className={styles.name}>{name}</span> possui{" "}
                   <span className={styles.name}>{deals.length}</span>{" "}
-                  {deals.length > 1 ? "negociações" : "negociação"}?
+                  {deals.length > 1 ? "negociações" : "negociação"}!
                 </p>
                 <p className={styles.text}>
                   Ao excluir o cliente, todas as negociações dele serão

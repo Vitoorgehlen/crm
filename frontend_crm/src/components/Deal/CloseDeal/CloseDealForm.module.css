@@ -13,7 +13,7 @@
 }
 
 .modal {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   padding: 20px;
   border-radius: 10px;
   max-width: 550px;
@@ -147,7 +147,7 @@
 .btnCommission:hover,
 .btnActive:hover {
   border: 1px solid var(--primaryColor);
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
 }
 
 .addSplit {
@@ -224,13 +224,13 @@
 .btnCancel:hover {
   background: var(--errorColor);
   border: 1px solid var(--errorColor);
-  color: var(--mainBackground);
+  color: var(--mainBg);
 }
 
 .btnConfirm:hover {
   background: var(--primaryColor);
-  border: 1px solid var(--mainBackground);
-  color: var(--mainBackground);
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
 }
 
 .footerCard {

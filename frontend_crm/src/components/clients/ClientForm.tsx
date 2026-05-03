@@ -236,6 +236,17 @@ export default function ClientsForm({
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.innerModal}>
           <div className={styles.titleForm}>
+            <button type="button" onClick={onClose} className={styles.closeBtn}>
+              <MdClose />
+            </button>
+            {mode === "create" ? (
+              <h4 className={styles.name}>Adicionar cliente</h4>
+            ) : (
+              <div className={styles.titleName}>
+                <span>Editar: </span>
+                <h4 className={styles.name}>{client?.name}</h4>
+              </div>
+            )}
             <button
               type="button"
               className={styles.btnPriority}
@@ -246,17 +257,6 @@ export default function ClientsForm({
               ) : (
                 <IoStarOutline />
               )}
-            </button>
-            {mode === "create" ? (
-              <h4 className={styles.name}>Adicionar cliente</h4>
-            ) : (
-              <div className={styles.titleName}>
-                <span>Editar: </span>
-                <h4 className={styles.name}>{client?.name}</h4>
-              </div>
-            )}
-            <button type="button" onClick={onClose} className={styles.closeBtn}>
-              <MdClose />
             </button>
           </div>
 

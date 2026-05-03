@@ -159,6 +159,10 @@
   color: var(--primaryColor);
 }
 
+.gapNoArrows {
+  margin-bottom: 5px;
+}
+
 .noteInput {
   width: 100%;
   flex: 1;

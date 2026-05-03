@@ -139,7 +139,7 @@ export default function Documentation() {
             Esses valores serão utilizados apenas como referência para gerar uma
             estimativa de valor de documentação.
           </span>
-          {error && <p className={styles.error}>{error}</p>}
+          {error && <p className="error">{error}</p>}
         </div>
         {docsNames.map((doc) => (
           <div key={doc.key} className={styles.doc}>

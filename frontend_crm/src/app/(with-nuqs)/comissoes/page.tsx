@@ -8,7 +8,7 @@ import DealForm from "@/components/Deal/DealForm/DealForm";
 import { Deal } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FaCashRegister } from "react-icons/fa";
-import { BsCashCoin, BsCashStack } from "react-icons/bs";
+import { BsCashCoin } from "react-icons/bs";
 
 import ExpenseCard from "@/components/commissions/Despesas/page";
 import CommissionCard from "@/components/commissions/Comissoes/page";

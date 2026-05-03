@@ -10,8 +10,8 @@
 }
 
 .calendar {
-  background-color: var(--sidebarBackground) !important;
-  border: 1px solid var(--mainBackground) !important;
+  background-color: var(--secondaryBg) !important;
+  border: 1px solid var(--mainBg) !important;
   border: none !important;
   color: var(--primaryText);
 }
@@ -19,31 +19,31 @@
 /* container geral */
 :global(.react-datepicker) {
   background-color: var(--textBase);
-  border: 1px solid var(--mainBackground);
+  border: 1px solid var(--mainBg);
 }
 
 :global(.react-datepicker__month-text) {
   color: var(--primaryText);
   padding: 8px;
   border-radius: 6px;
-  border: 1px solid var(--sidebarBackground);
+  border: 1px solid var(--secondaryBg);
 }
 
 /* hover */
 :global(.react-datepicker__month-text:hover) {
   border: 1px solid var(--primaryColor);
-  background-color: var(--sidebarBackground) !important;
+  background-color: var(--secondaryBg) !important;
   color: var(--primaryColor) !important;
 }
 
 /* navegação (setinhas) */
 :global(.react-datepicker__navigation-icon::before) {
-  border-color: var(--textBase);
+  border-color: var(--mainBg);
 }
 
 /* Mês selecionado */
 :global(.react-datepicker__month-text--selected) {
   background-color: var(--primaryColor) !important;
-  color: var(--mainBackground) !important;
+  color: var(--mainBg) !important;
   font-weight: bold !important;
 }

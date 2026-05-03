@@ -30,6 +30,7 @@ export default function FinishDeals() {
 
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
@@ -349,6 +350,7 @@ export default function FinishDeals() {
       router.push("/login");
       return;
     }
+    setError(null);
 
     try {
       const params = new URLSearchParams();
@@ -372,6 +374,7 @@ export default function FinishDeals() {
       setDeals(data);
     } catch (err: unknown) {
       console.error(err);
+      setError("Erro ao buscar negociações.");
     } finally {
       setInitialIsLoadind(false);
     }
@@ -382,6 +385,7 @@ export default function FinishDeals() {
       router.push("/login");
       return;
     }
+    setError(null);
 
     try {
       const params = new URLSearchParams();
@@ -405,10 +409,13 @@ export default function FinishDeals() {
       setYears(data);
     } catch (err: unknown) {
       console.error(err);
+      setError("Erro ao buscar negociações.");
     }
   }, [token, teamDeals, userId, progressDeals, search]);
 
   const fetchUsers = useCallback(async () => {
+    setError(null);
+
     try {
       const res = await fetch(`${API}/users`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -419,6 +426,7 @@ export default function FinishDeals() {
       setUsers(data);
     } catch (err: unknown) {
       console.error(err);
+      setError("Erro ao buscar usuários");
     }
   }, [token]);
 
@@ -492,17 +500,24 @@ export default function FinishDeals() {
         <div className={styles.boxSteps}>
           <div className={styles.finishedDealsByYearWrap}>
             <div className={styles.yearButtons}>
-              {!loading &&
-                !initialIsLoadind &&
-                yearsSortedDesc.length === 0 && (
+              {error ? (
+                <div className={styles.noItens}>
+                  <h3>⚠️ Erro ao carregar negociações</h3>
+                  <p>Tente novamente ou entre em contato se persistir.</p>
+                </div>
+              ) : (
+                yearsSortedDesc.length === 0 &&
+                !loading &&
+                !initialIsLoadind && (
                   <div className={styles.noItens}>
-                    <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
+                    <h3>😭 Nenhuma negociação encontrada...</h3>
                     <p>
-                      Se o problema persistir entre em contato para corrigirmos
-                      este erro.
+                      Tente ajustar os filtros ou criar uma nova negociação.
                     </p>
                   </div>
-                )}
+                )
+              )}
+              ;
               {yearsSortedDesc.map((y) => {
                 const year = y.year;
                 const total = y.total;

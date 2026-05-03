@@ -12,7 +12,7 @@
 
 /* calendário inteiro */
 .calendar {
-  background: var(--mainBackground) !important;
+  background: var(--mainBg) !important;
   border: 1px solid var(--textBase) !important;
   border: none !important;
 }
@@ -20,7 +20,7 @@
 /* dias */
 .day {
   color: var(--primaryText);
-  border: 1px solid var(--mainBackground) !important;
+  border: 1px solid var(--mainBg) !important;
 }
 
 /* HORAS */
@@ -34,21 +34,21 @@
 }
 
 :global(.react-datepicker__time) {
-  background-color: var(--mainBackground) !important;
+  background-color: var(--mainBg) !important;
 }
 
 :global(.react-datepicker__time-box) {
-  background-color: var(--mainBackground) !important;
+  background-color: var(--mainBg) !important;
 }
 
 :global(.react-datepicker__time-list-item:hover) {
-  background-color: var(--mainBackground) !important;
+  background-color: var(--mainBg) !important;
   color: var(--primaryColor) !important;
 }
 
 :global(.react-datepicker__time-list-item--selected) {
   background-color: var(--primaryColor) !important;
-  color: var(--mainBackground) !important;
+  color: var(--mainBg) !important;
 }
 
 :global(.react-datepicker__header) {
@@ -58,11 +58,11 @@
 
 :global(.react-datepicker__day--selected) {
   background-color: var(--primaryColor) !important;
-  color: var(--mainBackground) !important;
+  color: var(--mainBg) !important;
 }
 
 :global(.react-datepicker__day--keyboard-selected) {
-  background-color: var(--mainBackground) !important;
+  background-color: var(--mainBg) !important;
   color: var(--primaryText) !important;
   border: 1px solid var(--primaryColor) !important;
   border-radius: 6px;
@@ -78,7 +78,7 @@
 }
 
 :global(.react-datepicker__day:hover) {
-  background-color: var(--mainBackground) !important;
+  background-color: var(--mainBg) !important;
   border: 1px solid var(--textBase) !important;
   color: var(--primaryText) !important;
 }

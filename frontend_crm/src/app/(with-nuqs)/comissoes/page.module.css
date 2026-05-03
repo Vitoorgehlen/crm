@@ -41,6 +41,16 @@
   color: var(--primaryText);
 }
 
+.addDeal {
+  background-color: var(--primaryColor);
+  color: var(--primaryText);
+}
+
+.addDeal:hover {
+  background-color: var(--mainBg);
+  color: var(--primaryColor);
+}
+
 .btn {
   background-color: transparent;
   border: 1px solid var(--shadowColor);

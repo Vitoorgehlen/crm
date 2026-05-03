@@ -50,6 +50,7 @@ export default function Deals() {
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isCloseOpen, setIsCloseOpen] = useState(false);
   const [limit, setLimit] = useState(LIMIT);
+  const [error, setError] = useState<string | null>(null);
 
   const [search, setSearch] = useQueryState("search", {
     defaultValue: "",
@@ -331,6 +332,7 @@ export default function Deals() {
     async (paymentMethod: PaymentMethod, pageToFetch: number = 1) => {
       if (!token) return;
       setLoading(true);
+      setError(null);
 
       try {
         const result = await fetchDealsList({
@@ -361,6 +363,7 @@ export default function Deals() {
         }));
       } catch (err: unknown) {
         console.error(err);
+        setError("Erro ao buscar negociações");
       } finally {
         setLoading(false);
         setInitialIsLoadind(false);
@@ -372,6 +375,7 @@ export default function Deals() {
   const fetchAllMethodData = useCallback(async () => {
     if (!token) return;
     setLoading(true);
+    setError(null);
 
     try {
       const methods = Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[];
@@ -414,6 +418,7 @@ export default function Deals() {
       setCurrentPageByMethod(newCurrentPageByMethod);
     } catch (err: unknown) {
       console.error("Erro ao buscar deals:", err);
+      setError("Erro ao buscar negociações");
     } finally {
       setLoading(false);
       setInitialIsLoadind(false);
@@ -613,21 +618,24 @@ export default function Deals() {
                 );
               },
             )}
-
-            {Object.values(dealsByMethod).every(
-              (deals) => deals.length === 0,
-            ) &&
+            {error ? (
+              <div className={styles.noItens}>
+                <h3>⚠️ Erro ao carregar negociações</h3>
+                <p>Tente novamente ou entre em contato se persistir.</p>
+              </div>
+            ) : (
+              Object.values(dealsByMethod).every(
+                (deals) => deals.length === 0,
+              ) &&
               !loading &&
               !initialIsLoadind && (
                 <div className={styles.noItens}>
-                  <h3>😭 Desculpe não encotramos nenhuma negociação...</h3>
-                  <p>
-                    Se o problema persistir entre em contato para corrigirmos
-                    este erro.
-                  </p>
+                  <h3>😭 Nenhuma negociação encontrada...</h3>
+                  <p>Tente ajustar os filtros ou criar uma nova negociação.</p>
                 </div>
-              )}
-
+              )
+            )}
+            ;
             {selectedDeal && (
               <ClosedDeal
                 isOpen={isCloseOpen}

@@ -430,7 +430,7 @@ export default function Home() {
             <div className={styles.card}>
               {error && <p className="error">{error}</p>}
 
-              {notes.length >= 2 && (
+              {notes.length >= 2 ? (
                 <div className={styles.btnsNote}>
                   <button
                     className={styles.btnNote}
@@ -446,6 +446,8 @@ export default function Home() {
                     <IoIosArrowForward />
                   </button>
                 </div>
+              ) : (
+                <div className={styles.gapNoArrows} />
               )}
 
               <div className={styles.noteInput}>

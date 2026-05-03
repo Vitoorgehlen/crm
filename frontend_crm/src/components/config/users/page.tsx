@@ -347,7 +347,7 @@ export default function ConfigUsers({
                   <MdClose />
                 </button>
               </div>
-              {error && <p className={styles.error}>{error}</p>}
+              {error && <p className="error">{error}</p>}
               <div className={styles.box}>
                 <input
                   className={`${styles.labelUser} form-base`}
@@ -409,7 +409,7 @@ export default function ConfigUsers({
                   <MdClose />
                 </button>
               </div>
-              {error && <p className={styles.error}>{error}</p>}
+              {error && <p className="error">{error}</p>}
               {isOpenEditEmail ? (
                 <div className={styles.box}>
                   <input

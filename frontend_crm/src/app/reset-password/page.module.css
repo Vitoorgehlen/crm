@@ -124,7 +124,7 @@
 .eyeButton:hover {
   color: var(--primaryColor);
   border: 1px solid var(--textBase);
-  background-color: var(--mainBackground);
+  background-color: var(--mainBg);
 }
 
 .resetPassword {
@@ -163,7 +163,7 @@
 }
 
 .send:hover {
-  background: var(--mainBackground);
+  background: var(--mainBg);
   border: 1px solid var(--primaryColor);
 }
 
