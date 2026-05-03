@@ -17,6 +17,7 @@ interface Company {
   id: number;
   name: string;
   maxUsers: number;
+  isActive: boolean;
 }
 
 export default function SuperUserPage() {
@@ -94,6 +95,48 @@ export default function SuperUserPage() {
       } else {
         setError(err instanceof Error ? err.message : "Erro inesperado");
       }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleCompanyStatus(company: Company) {
+    if (loading) return;
+    setLoading(true);
+    setError("");
+
+    if (company.isActive) {
+      const confirmActivate = window.confirm(`Reativar ${company.name}?`);
+      if (!confirmActivate) return;
+    } else {
+      const confirmDeactivate = window.confirm(`Desativar ${company.name}?`);
+      if (!confirmDeactivate) return;
+    }
+
+    try {
+      const response = await fetch(`${API}/company/${company.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          isActive: !company.isActive,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok)
+        throw new Error(data.error || "Erro ao atualizar empresa");
+
+      setCompanies((prev) => prev.map((c) => (c.id === company.id ? data : c)));
+
+      if (selectedCompany?.id === company.id) {
+        setSelectedCompany(data);
+      }
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro inesperado");
     } finally {
       setLoading(false);
     }
@@ -448,8 +491,8 @@ export default function SuperUserPage() {
                               </div>
 
                               <button
-                                onClick={handleSubmit}
                                 className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                onClick={handleSubmit}
                               >
                                 <IoMdCheckmark />
                               </button>
@@ -483,10 +526,28 @@ export default function SuperUserPage() {
                           </>
                         ) : (
                           <div className={styles.companyContent}>
-                            <div className={styles.companyInfos}>
+                            <div
+                              className={`${styles.companyInfos} ${!company.isActive && styles.companyDeactivate}`}
+                            >
                               <h4>{company.name}</h4>
                               <h5>{company.maxUsers}</h5>
                             </div>
+
+                            {company.isActive ? (
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                                onClick={() => toggleCompanyStatus(company)}
+                              >
+                                <IoMdClose />
+                              </button>
+                            ) : (
+                              <button
+                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                onClick={() => toggleCompanyStatus(company)}
+                              >
+                                <IoMdCheckmark />
+                              </button>
+                            )}
 
                             <button
                               className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}

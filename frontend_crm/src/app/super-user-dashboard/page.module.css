@@ -115,6 +115,10 @@
   gap: 5px;
 }
 
+.companyDeactivate {
+  color: var(--errorColor);
+}
+
 .inputComp {
   width: 100%;
 }

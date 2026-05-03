@@ -5,7 +5,7 @@ export default function Deals() {
     <DealList
       selectedStatusDeal="OLD_CLIENTS"
       title="Negociações arquivadas"
-      limit={50}
+      limit={20}
     />
   );
 }

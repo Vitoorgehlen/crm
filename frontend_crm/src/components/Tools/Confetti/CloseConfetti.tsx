@@ -619,6 +619,7 @@ export default function Confetti() {
                 </g>
               </svg>
               <h5>VOCÊ É DEMAIS!!!</h5>
+              <h5>Essa é a {totalDeals}° venda no mês!</h5>
             </div>
           )}
         </div>

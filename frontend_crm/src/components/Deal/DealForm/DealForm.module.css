@@ -534,7 +534,7 @@
   .btnDeal {
     padding: 5px;
     border-radius: 6px;
-    max-width: 100px;
+    max-width: 85px;
     cursor: pointer;
 
     color: var(--primaryText);
@@ -542,22 +542,22 @@
   }
 
   .btnDelete {
-    max-width: 100px;
+    max-width: 85px;
     border: 1px solid var(--errorColor);
   }
 
   .deleteRequest {
-    max-width: 100px;
+    max-width: 85px;
     border: 1px solid var(--errorColor);
   }
 
   .btnUpdate {
-    max-width: 100px;
+    max-width: 85px;
     border: 1px solid var(--textBase);
   }
 
   .btnSell {
-    max-width: 100px;
+    max-width: 85px;
     border: 1px solid var(--primaryColor);
   }
 

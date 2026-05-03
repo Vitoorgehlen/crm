@@ -5,7 +5,7 @@ export default function Deals() {
     <DealList
       selectedStatusDeal="POTENTIAL_CLIENTS"
       title="Negociações"
-      limit={50}
+      limit={20}
     />
   );
 }

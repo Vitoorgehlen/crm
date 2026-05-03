@@ -69,9 +69,9 @@ export async function updateCompany(
   return prisma.company.update({
     where: {id: companyId },
     data: {
-      name: name !== undefined ? name : company.name,
-      maxUsers: maxUsers !== undefined ? maxUsers : company.maxUsers,
-      isActive: isActive !== undefined ? isActive : company.isActive,
+      ...(name !== undefined && { name }),
+      ...(maxUsers !== undefined && { maxUsers }),
+      ...(typeof isActive === "boolean" && { isActive }),
     },
   });
 }

@@ -1,5 +1,5 @@
 import { prisma } from "../prisma-client";
-import { Prisma, User } from '@prisma/client';
+import { ClientStatus, DealStepType, Prisma, User } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
 
@@ -88,7 +88,7 @@ export async function getDeals(
   if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
 
   if (filter.dealId) {
-    const data = await prisma.deal.findMany({
+    const data = await prisma.deal.findUnique({
       where: {
         id: filter.dealId,
         createdBy: userId,
@@ -135,10 +135,6 @@ export async function getDeals(
     }
   }
 
-  if (filter?.status && filter.status.length > 0) {
-    where.status = { in: filter.status }
-  }
-
   if (filter?.statusClient && filter.statusClient.length > 0) {
     where.statusClient = { in: filter.statusClient }
   }
@@ -148,7 +144,61 @@ export async function getDeals(
   }
 
   return prisma.$transaction(async (tx) => {
-    const data = await prisma.deal.findMany({
+    if (filter?.status?.includes('OLD_CLIENTS') ||
+        filter?.status?.includes('POTENTIAL_CLIENTS') ||
+        filter?.status?.includes('CLOSED')) {
+
+      let steps: string[] = [];
+      let isClosedFlow = false;
+
+      if (filter?.status.includes('OLD_CLIENTS')) {
+        steps = ['REJECTED', 'UNDER_REVIEW'];
+      } else if (filter?.status?.includes('POTENTIAL_CLIENTS')) {
+        steps = ['APPROVED', 'UNDER_REVIEW', 'MISSING_DOCUMENTS', 'INTERESTED'];
+      } else if (filter?.status.includes('CLOSED')) {
+        steps = [
+          'CONTRACT_SIGNING', 'ITBI', 'NOTARY_SIGNING', 'REGISTRATION',
+          'AWAITING_PAYMENT', 'ENGINEERING_REVIEW', 'BANK_APPROVAL'
+        ];
+        isClosedFlow = true;
+      }
+
+      const unifiedWhere = {
+        ...where,
+        status: { in: filter.status },
+        OR: steps.map(step => ({
+          ...(isClosedFlow
+            ? { currentStep: step as DealStepType }
+            : { statusClient: step as ClientStatus }
+          )
+        }))
+      };
+
+      const data = await tx.deal.findMany({
+        where: unifiedWhere,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: {
+          client: true,
+          creator: { select: { id: true, name: true } },
+          updater: { select: { id: true, name: true } },
+          DealShare: {
+            include: {
+              user: { select: { id: true, name: true } }
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc',
+        },
+      });
+
+      const total = await tx.deal.count({ where: unifiedWhere });
+
+      return { data, total };
+    }
+
+    const data = await tx.deal.findMany({
       where,
       skip: (page - 1) * limit,
       take: limit,
