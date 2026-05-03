@@ -86,6 +86,17 @@ export default function DealForm({
   >(null);
   const [error, setError] = useState("");
 
+  const clientOptions = useMemo(() => {
+    return clients.map((client) => ({
+      value: client.id,
+      label: client.name,
+    }));
+  }, [clients]);
+
+  const selectedClientOption = useMemo(() => {
+    return clientOptions.find((opt) => opt.value === clientId) || null;
+  }, [clientOptions, clientId]);
+
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
       setIsMouseDownInside(false);
@@ -462,7 +473,6 @@ export default function DealForm({
         if (!mounted) return;
         setClients(data.data);
       } catch (err) {
-        console.log(err);
         setError(
           err instanceof Error
             ? err.message
@@ -647,34 +657,19 @@ export default function DealForm({
               {error && <p className="error">{error}</p>}
               {mode === "create" && (
                 <div className={styles.boxTitle}>
-                  <input
-                    list="clients"
-                    className={`form-base ${styles.changeClient}`}
-                    placeholder="Buscar cliente"
-                    value={searchClient}
-                    onChange={(e) => {
-                      const value = e.target.value;
-                      setSearchClient(value);
-
-                      const foundClient = clients.find(
-                        (client) =>
-                          client.name.toLowerCase() === value.toLowerCase(),
-                      );
-                      setClientId(foundClient ? foundClient.id : undefined);
+                  <CustomSelect
+                    options={clientOptions}
+                    value={selectedClientOption}
+                    onChange={(option) => {
+                      if (option) {
+                        setClientId(option.value as number);
+                        setSearchClient(option.label);
+                      } else {
+                        setClientId(undefined);
+                        setSearchClient("");
+                      }
                     }}
                   />
-
-                  <datalist id="clients">
-                    {clients
-                      .slice()
-                      .reverse()
-                      .map((client) => (
-                        <option
-                          key={client.id}
-                          value={client.name || "Cliente não encontrado"}
-                        />
-                      ))}
-                  </datalist>
 
                   <button
                     className={styles.addClient}

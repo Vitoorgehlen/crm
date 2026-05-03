@@ -352,7 +352,7 @@ export default function Commissions() {
             {permissions.includes("DEAL_CREATE") && (
               <Tooltip label={"Adicionar negociação"}>
                 <button
-                  className={`${styles.addDeal} btn-action glass`}
+                  className={`btn-action glass ${styles.addDeal}`}
                   onClick={openCreate}
                   type="button"
                 >

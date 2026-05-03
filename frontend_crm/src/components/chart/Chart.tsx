@@ -103,9 +103,8 @@ export default function ChartLayout() {
         if (!res.ok) throw new Error("Erro ao buscar compromissos");
         const data = await res.json();
         setCommissions(data);
-        console.log(data);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
 

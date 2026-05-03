@@ -4,6 +4,7 @@
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
+  text-align: center !important;
 }
 .input:hover {
   border: 1px solid var(--primaryColor) !important;

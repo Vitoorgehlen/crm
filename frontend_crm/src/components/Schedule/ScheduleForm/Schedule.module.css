@@ -161,6 +161,14 @@
 }
 
 @media (max-width: 768px) {
+  .modal {
+    border-radius: 0;
+  }
+
+  .line {
+    gap: 5px;
+  }
+
   .btnDeal {
     max-width: 100px;
   }

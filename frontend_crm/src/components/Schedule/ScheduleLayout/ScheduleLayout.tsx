@@ -189,7 +189,7 @@ export default function ScheduleLayout() {
         const data = await res.json();
         setSchedules(data);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
 
@@ -405,9 +405,6 @@ export default function ScheduleLayout() {
           onUpdate={handleUpdateSchedule}
           onDelete={(deleteId) => {
             setSchedules((prev) => prev.filter((s) => s.id !== deleteId));
-          }}
-          onSubmit={async (payload) => {
-            console.log(payload);
           }}
         />
       )}

@@ -36,14 +36,13 @@
   margin-right: 10px;
 }
 
-.btn,
-.addDeal {
+.btn {
   color: var(--primaryText);
 }
 
-.addDeal {
+.headerIcons .addDeal {
   background-color: var(--primaryColor);
-  color: var(--primaryText);
+  color: var(--mainBg);
 }
 
 .addDeal:hover {

@@ -38,7 +38,7 @@
 
 .addDeal {
   background-color: var(--primaryColor);
-  color: var(--primaryText);
+  color: var(--mainBg);
 }
 
 .addDeal:hover {

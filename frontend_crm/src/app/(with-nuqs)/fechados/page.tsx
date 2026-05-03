@@ -149,11 +149,6 @@ export default function Deals() {
 
     if (deal.currentStep === newStep) return;
 
-    console.log({
-      activeId: active.id,
-      overId: over.id,
-    });
-
     await handleChangeStepById(dealId, newStep);
   };
 

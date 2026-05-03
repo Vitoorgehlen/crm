@@ -621,7 +621,6 @@ export type ScheduleFormProps = {
     onDelete?: (scheduleId: number) => void;
     onCreate: (newSchedule: Schedule) => void;
     onUpdate: (newSchedule: Schedule) => void
-    onSubmit: (payload: Partial<Schedule>) => Promise<void> | void;
 };
 
 export const DealStatus = {

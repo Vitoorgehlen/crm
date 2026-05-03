@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   CreateSchedulePayload,
   Deal,
@@ -16,6 +16,7 @@ import { useRouter } from "next/navigation";
 import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import DayAndHourPicker from "@/components/Tools/DatePicker/DayPicker/DayAndHourPicker";
+import CustomSelect from "@/components/Tools/Select/CustomSelect";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -46,6 +47,17 @@ export default function ScheduleForm({
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const dealOptions = useMemo(() => {
+    return [...deals].reverse().map((deal) => ({
+      value: deal.id,
+      label: deal.client?.name || "Cliente sem nome",
+    }));
+  }, [deals]);
+
+  const selectedDealOption = useMemo(() => {
+    return dealOptions.find((opt) => opt.value === dealId) || null;
+  }, [dealOptions, dealId]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -204,7 +216,6 @@ export default function ScheduleForm({
         if (!mounted) return;
         setDeals(data.data);
       } catch (err) {
-        console.log(err);
         setError(
           err instanceof Error
             ? err.message
@@ -284,43 +295,25 @@ export default function ScheduleForm({
 
         {error && <p className="error">{error}</p>}
         <div className={styles.line}>
-          <input
-            list="deals"
-            className={`form-base ${styles.changeClient}`}
-            placeholder="Buscar cliente"
-            value={searchClient}
-            onChange={(e) => {
-              const value = e.target.value;
-              setSearchClient(value);
-
-              const foundClient = deals.find(
-                (deal) =>
-                  deal.client?.name.toLowerCase().trim() ===
-                  value.toLowerCase().trim(),
-              );
-
-              setDealId(foundClient ? foundClient.id : undefined);
+          <CustomSelect
+            options={dealOptions}
+            value={selectedDealOption}
+            onChange={(option) => {
+              if (option) {
+                setDealId(option.value as number);
+                setSearchClient(option.label); // opcional
+              } else {
+                setDealId(undefined);
+                setSearchClient("");
+              }
             }}
           />
-
-          <datalist id="deals">
-            {deals
-              .slice()
-              .reverse()
-              .map((deal) => (
-                <option
-                  key={deal.id}
-                  value={deal.client?.name || "Cliente não encontrado"}
-                >
-                  {DealStatus[deal.status].label || ""}
-                </option>
-              ))}
-          </datalist>
-
-          <DayAndHourPicker
-            value={newDate}
-            onChange={(date) => setNewDate(date)}
-          />
+          <div className={styles.dayPicker}>
+            <DayAndHourPicker
+              value={newDate}
+              onChange={(date) => setNewDate(date)}
+            />
+          </div>
         </div>
 
         <p>Compromisso</p>

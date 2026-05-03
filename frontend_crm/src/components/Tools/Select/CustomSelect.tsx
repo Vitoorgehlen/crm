@@ -37,12 +37,25 @@ export default function CustomSelect<T>({
         }),
       }}
       classNames={{
+        menuList: () => styles.menuList,
         control: () => styles.control,
         menu: () => styles.menu,
-        option: (state) =>
-          `${styles.option} ${state.isFocused ? styles.optionFocused : ""} ${
-            state.isSelected ? styles.optionSelected : ""
-          }`,
+        option: (state) => {
+          const index = options.findIndex(
+            (opt) => opt.value === state.data.value,
+          );
+
+          const isFirst = index === 0;
+          const isLast = index === options.length - 1;
+
+          return `
+    ${styles.option}
+    ${state.isFocused ? styles.optionFocused : ""}
+    ${state.isSelected ? styles.optionSelected : ""}
+    ${isFirst && state.isSelected ? styles.firstSelected : ""}
+    ${isLast && state.isSelected ? styles.lastSelected : ""}
+  `;
+        },
         singleValue: () => styles.singleValue,
         placeholder: () => styles.placeholder,
         input: () => styles.input,

@@ -207,11 +207,6 @@
   margin-bottom: 10px;
 }
 
-.changeClient {
-  color: var(--primaryText);
-  border-radius: 6px 0 0 6px;
-}
-
 .addClient {
   display: flex;
   align-items: center;
@@ -516,11 +511,6 @@
 
   .noteSection {
     height: 250px;
-  }
-
-  .changeClient {
-    color: var(--primaryText);
-    border-radius: 6px 0 0 6px;
   }
 
   .btnEditDocValue {

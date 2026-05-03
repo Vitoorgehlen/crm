@@ -79,8 +79,6 @@ export default function SuperUserPage() {
       if (!response.ok)
         throw new Error(data.error || "Erro ao salvar o empresa");
 
-      console.log("NEW COMPANY:", data);
-
       if (selectedCompany) {
         setCompanies((prev) => prev.map((c) => (c.id === data.id ? data : c)));
         setSelectedCompany(null);
@@ -356,7 +354,7 @@ export default function SuperUserPage() {
             : [];
         setCompanies(list);
       } catch (err) {
-        console.log(err);
+        setError(`${err}`);
       } finally {
         setLoading(false);
       }

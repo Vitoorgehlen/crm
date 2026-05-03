@@ -82,7 +82,6 @@ export default function Config() {
       });
 
       const data = await res.json();
-      console.log("API retorno:", data);
       if (!res.ok) throw new Error(data.error || "Erro ao buscar a performace");
       const { dealsAndClients, clientsWithoutDeals } = data;
       setDeals(dealsAndClients);

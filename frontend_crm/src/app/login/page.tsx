@@ -137,14 +137,6 @@ export default function LoginPage() {
                     }
                     required
                   />
-
-                  <button
-                    type="button"
-                    className={`btn-action glass ${styles.eyeButton}  ${styles.eyeButtonInvisible}`}
-                    onClick={() => setShowPassword((prev) => !prev)}
-                  >
-                    {showPassword ? <FaEye /> : <FaEyeSlash />}
-                  </button>
                 </div>
                 <div className={styles.line}>
                   <MdLockOpen className={styles.icon} />

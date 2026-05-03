@@ -575,7 +575,7 @@ export default function CommissionCard({ deals }: any) {
                   </div>
                 )
               )}
-              ;
+
               {yearsSortedDesc.map((year) => {
                 const monthsObj = groupedByYearMonth[year] || {};
                 const total = Object.values(monthsObj).reduce(

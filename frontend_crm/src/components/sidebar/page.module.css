@@ -15,7 +15,7 @@
     width 0.4s ease,
     padding-right 0.4s ease;
 
-  background-color: var(--secondaryBg);
+  background-color: var(--secondaryBackground);
   z-index: 501;
 }
 
@@ -31,7 +31,7 @@
   width: 210px;
   padding-right: 10px;
   background-color: var(--sidebarBg);
-  backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px) !important;
   -webkit-backdrop-filter: blur(10px);
 }
 
@@ -161,7 +161,7 @@
   display: none;
   opacity: 0;
   transition: opacity 0.2s ease;
-  border-bottom: 2px solid var(--secondaryBg);
+  border-bottom: 2px solid transparent;
 }
 
 .sidebar:hover .linkText {
@@ -206,7 +206,7 @@
     margin: 0;
     width: 100%;
     padding: 15px 30px;
-    background-color: var(--secondaryBg);
+    background-color: var(--secondaryBackground);
     height: 65px;
   }
 
@@ -255,7 +255,7 @@
     max-width: 320px;
     height: auto;
     max-height: 85vh;
-    background-color: var(--secondaryBg);
+    background-color: var(--secondaryBackground);
     border-radius: 16px;
     padding: 20px;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);

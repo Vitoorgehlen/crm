@@ -517,7 +517,7 @@ export default function FinishDeals() {
                   </div>
                 )
               )}
-              ;
+
               {yearsSortedDesc.map((y) => {
                 const year = y.year;
                 const total = y.total;

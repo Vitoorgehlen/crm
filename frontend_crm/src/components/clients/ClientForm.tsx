@@ -132,7 +132,7 @@ export default function ClientsForm({
       if (mode === "create") clearForm();
       onClose();
     } catch (err) {
-      console.log(err);
+      console.error(err);
       setError(err instanceof Error ? err.message : "Erro ao enviar formuário");
     } finally {
       setLoading(null);

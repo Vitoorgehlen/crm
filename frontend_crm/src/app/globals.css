@@ -3,7 +3,7 @@
 :root {
   --mainBg: #141519;
   --secondaryBg: #1a1b1e;
-  --sidebarBg: rgba(26, 27, 30, 0.9);
+  --sidebarBg: rgba(26, 27, 30, 0.3);
   --textBase: #6b6c70;
   --primaryText: #f2f6d2;
   --primaryColor: #dbf017;
@@ -26,7 +26,7 @@
 [data-theme="default-light"] {
   --mainBg: #c5c8ba;
   --secondaryBg: #f2f5e9;
-  --sidebarBg: rgba(242, 245, 233, 0.9);
+  --sidebarBg: rgba(242, 245, 233, 0.3);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #869503;
@@ -36,7 +36,7 @@
 [data-theme="blue-dark"] {
   --mainBg: #344850;
   --secondaryBg: #1f2c32;
-  --sidebarBg: rgba(31, 44, 50, 0.9);
+  --sidebarBg: rgba(31, 44, 50, 0.3);
   --primaryColor: #18b2ef;
   --logoColor: rgba(24, 178, 239, 0.02);
 }
@@ -44,7 +44,7 @@
 [data-theme="blue-light"] {
   --mainBg: #c4ced2;
   --secondaryBg: #e5e6f0;
-  --sidebarBg: rgba(229, 230, 240, 0.9);
+  --sidebarBg: rgba(229, 230, 240, 0.3);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #123c63;
@@ -60,7 +60,7 @@
 [data-theme="red-light"] {
   --mainBg: #c5c8ba;
   --secondaryBg: #f2f5e9;
-  --sidebarBg: rgba(242, 245, 233, 0.9);
+  --sidebarBg: rgba(242, 245, 233, 0.3);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #ff3b3b;
@@ -78,7 +78,7 @@
 [data-theme="pink-light"] {
   --mainBg: #d8c5cd;
   --secondaryBg: #eddce2;
-  --sidebarBg: rgba(237, 220, 226, 0.9);
+  --sidebarBg: rgba(237, 220, 226, 0.3);
   --textBase: #6b6c70;
   --primaryText: #141519;
   --primaryColor: #ff66b3;
