@@ -24,7 +24,7 @@ export default function DeleteRequest() {
     useState<DeleteContext>(null);
   const [deleteContextClient, setDeleteContextClient] =
     useState<DeleteContext>(null);
-  const [dealsToDelete, setDealsToDelete] = useState<any[] | null>(null);
+  const [dealsToDelete, setDealsToDelete] = useState<Deal[] | null>(null);
   const [showDeleteModalClient, setShowDeleteModalClient] = useState(false);
 
   const [clientRequest, setClientRequest] = useState<ClientDeletedRequest[]>(
@@ -414,7 +414,7 @@ export default function DeleteRequest() {
             <WarningClient
               message="Tem certeza que deseja excluir o cliente"
               name={deleteContextClient?.name || ""}
-              deals={dealsToDelete?.length || 0}
+              deals={!dealsToDelete ? [] : dealsToDelete}
               onClose={() => {
                 setShowDeleteModalClient(false);
                 setDealsToDelete(null);

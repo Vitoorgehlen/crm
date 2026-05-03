@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Client, ClientFormProps } from "@/types/index";
+import { Client, ClientFormProps, Deal } from "@/types/index";
 import { formatDateForCards } from "@/utils/dateUtils";
 import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
@@ -31,7 +31,7 @@ export default function ClientsForm({
   const [isInvestor, setIsInvestor] = useState(false);
   const [isPriority, setIsPriority] = useState(false);
 
-  const [dealsToDelete, setDealsToDelete] = useState<any[] | null>(null);
+  const [dealsToDelete, setDealsToDelete] = useState<Deal[] | null>(null);
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showCancelDeleteModal, setShowCancelDeleteModal] = useState(false);
