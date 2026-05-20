@@ -13,7 +13,7 @@ interface CustomDatePickerProps {
 export default function DayAndHourPicker({
   value,
   onChange,
-  placeholder = "Selecione data e hora",
+  placeholder = "Selecionar data",
 }: CustomDatePickerProps) {
   return (
     <DatePicker

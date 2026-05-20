@@ -84,3 +84,8 @@
 .control:hover .dropdownIndicator {
   color: var(--primaryColor) !important;
 }
+
+.placeholder {
+  font-size: 15px !important;
+  font-weight: 100 !important;
+}

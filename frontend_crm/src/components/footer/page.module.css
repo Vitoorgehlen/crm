@@ -15,3 +15,7 @@
   background-color: var(--secondaryBg);
   z-index: 500;
 }
+
+.content span {
+  font-size: 10px;
+}

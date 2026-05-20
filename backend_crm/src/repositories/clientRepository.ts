@@ -16,13 +16,28 @@ export async function addClient(
   if (!canCreateClient) throw new Error('Você não tem permissão para criar clientes');
 
   if (!data.name || data.name.length <= 2) throw new Error('Nome curto demais');
+
   const { dateOfBirth, ...rest } = data;
+  let parsedDate: Date | null = null;
+
+  if (dateOfBirth) {
+    if (typeof dateOfBirth === "string") {
+      const [year, month, day] = dateOfBirth.split("-").map(Number);
+      parsedDate = new Date(year, month - 1, day);
+    } else if (dateOfBirth instanceof Date) {
+      parsedDate = new Date(
+        dateOfBirth.getFullYear(),
+        dateOfBirth.getMonth(),
+        dateOfBirth.getDate()
+      );
+    }
+  }
 
   return prisma.$transaction(async (tx) => {
     const newClient = await tx.client.create({
       data: {
         ...rest,
-        dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null,
+        dateOfBirth: parsedDate,
         company: { connect: { id: creator.companyId } },
         creator: { connect: { id: creatorId } },
         updater: { connect: { id: creatorId } },
@@ -60,6 +75,26 @@ export async function getClientById(
   }
 
   return client;
+}
+
+export async function getBirthdayClients(
+  month: number,
+  userId: number,
+) {
+  const canReadClient = await checkUserPermission(userId, 'DEAL_READ');
+  if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
+
+  let startMonth = month - 1;
+  let endMonth = month + 1;
+
+  if (startMonth < 1) startMonth = 12;
+  if (endMonth > 12) endMonth = 1;
+
+  return await prisma.$queryRaw`
+    SELECT * FROM "Client"
+    WHERE EXTRACT(MONTH FROM "dateOfBirth") IN (${startMonth}, ${month}, ${endMonth})
+    AND "createdBy" = ${userId}
+  `;
 }
 
 export async function getClientDeletedRequest(userId: number) {
@@ -253,15 +288,16 @@ export async function updateClient(
   if (updateData.dateOfBirth === '') {
     updateData.dateOfBirth = null;
   } else if (typeof updateData.dateOfBirth === 'string') {
-    let date = new Date(updateData.dateOfBirth);
-    if (isNaN(date.getTime())) {
-      date = new Date(`${updateData.dateOfBirth}T00:00:00Z`);
-    }
-    if (isNaN(date.getTime())) {
-      throw new Error('Formato de dateOfBirth inválido. Use YYYY-MM-DD ou ISO-8601.');
-    }
-    updateData.dateOfBirth = date;
+    const [year, month, day] = updateData.dateOfBirth.split("-").map(Number);
+    updateData.dateOfBirth = new Date(year, month - 1, day);
+  } else if (updateData.dateOfBirth instanceof Date) {
+    updateData.dateOfBirth = new Date(
+      updateData.dateOfBirth.getFullYear(),
+      updateData.dateOfBirth.getMonth(),
+      updateData.dateOfBirth.getDate()
+    );
   }
+
   return prisma.client.update({
     where: { id },
     data: updateData,

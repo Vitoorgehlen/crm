@@ -19,6 +19,7 @@ import tasksRoutes from './routes/tasksRoutes';
 import expenseRoutes from './routes/expenseRoutes';
 import tokenRoutes from './routes/tokenRoutes';
 import resetPassword from './routes/resetPasswordRoutes';
+import contactRoutes from './routes/contactRoutes';
 
 const clientUrl = process.env.CLIENT_URL
 class App {
@@ -58,6 +59,7 @@ class App {
     this.app.use('/', tasksRoutes);
     this.app.use('/', tokenRoutes);
     this.app.use('/', resetPassword);
+    this.app.use('/', contactRoutes);
   }
 }
 

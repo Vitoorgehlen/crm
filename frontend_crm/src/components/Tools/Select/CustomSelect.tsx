@@ -13,6 +13,7 @@ interface CustomSelectProps<T> {
   value: Option<T> | null;
   onChange: (value: Option<T> | null) => void;
   isDisabled?: boolean;
+  placeholder?: string;
 }
 
 export default function CustomSelect<T>({
@@ -20,6 +21,7 @@ export default function CustomSelect<T>({
   value,
   onChange,
   isDisabled,
+  placeholder,
 }: CustomSelectProps<T>) {
   return (
     <Select<Option<T>, false>
@@ -27,6 +29,7 @@ export default function CustomSelect<T>({
       value={value}
       onChange={(option) => onChange(option as Option<T> | null)}
       isDisabled={isDisabled}
+      placeholder={placeholder}
       className={styles.container}
       menuPortalTarget={typeof window !== "undefined" ? document.body : null}
       menuPosition="fixed"

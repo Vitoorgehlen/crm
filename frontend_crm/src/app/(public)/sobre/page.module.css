@@ -1,0 +1,110 @@
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  min-height: 98vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: -60px;
+  gap: 100px;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 40px;
+  width: 100%;
+  flex: 1;
+}
+
+.content p {
+  margin-top: 20px;
+  padding-left: 10px;
+  max-width: 1100px;
+  text-align: justify;
+  color: var(--textBase);
+}
+
+.title {
+  width: 100%;
+  max-width: 1100px;
+  color: var(--primaryText);
+  border-bottom: 1px solid var(--textBase);
+}
+
+.title span {
+  color: var(--primaryColor);
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.moreCloop span {
+  color: var(--primaryColor);
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.mission {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 1100px;
+  color: var(--primaryText);
+}
+
+.mission h3 {
+  border-bottom: 1px solid var(--textBase);
+}
+
+.mission p {
+  width: 100%;
+  max-width: 1000px;
+}
+
+.gridMission {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 5px 10px;
+}
+
+.gridMission p {
+  padding: 10px;
+  margin-top: 10px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin: 0;
+  }
+
+  .content p {
+    padding-left: 0;
+  }
+
+  .title {
+    text-align: center;
+  }
+
+  .title span {
+    font-size: 40px;
+  }
+
+  .moreCloop span {
+    font-size: 12px;
+  }
+
+  .gridMission {
+    gap: 0 10px;
+  }
+
+  .gridMission p {
+    padding: 10px;
+    margin-top: 10px;
+    border-radius: 8px;
+    text-align: center;
+  }
+}

@@ -548,7 +548,9 @@ export default function Home() {
 
               <div className={styles.tasksList}>
                 {tasks !== undefined && tasks.length === 0 && (
-                  <p>Você não possui nenhuma tarefa.</p>
+                  <p className={styles.noTask}>
+                    Você não possui nenhuma tarefa.
+                  </p>
                 )}
                 {groupedTasks &&
                   Object.entries(groupedTasks)

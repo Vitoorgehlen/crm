@@ -11,7 +11,10 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
 
-  const publicPaths = useMemo(() => ["/"], []);
+  const publicPaths = useMemo(
+    () => ["/", "/contato", "/cadastro", "/sobre", "/termos", "/privacidade"],
+    [],
+  );
   const authPages = useMemo(() => ["/login", "/reset-password"], []);
   const SUPaths = useMemo(() => ["/super-user-dashboard"], []);
 
@@ -62,7 +65,7 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   }
 
   if (pathname === "/") return <>{children}</>;
-
+  if (publicPaths.includes(pathname)) return <>{children}</>;
   if (!token && authPages.includes(pathname)) return <>{children}</>;
   if (token && userType === "superuser" && pathname.startsWith("/super-user"))
     return <>{children}</>;

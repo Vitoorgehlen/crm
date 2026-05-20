@@ -916,15 +916,19 @@ export default function ClosedDeal({
                     />
                   </div>
 
-                  <div className={styles.payment}>
-                    <p>Subsídio</p>
-                    <CurrencyInput
-                      className={`form-base ${styles.form}`}
-                      placeholder="Valor de subsídio"
-                      value={subsidyValue}
-                      onChange={setSubsidyValue}
-                    />
-                  </div>
+                  {propertyValue < 250000 &&
+                    downPaymentValue + fgtsValue + financingValue > 50000 &&
+                    downPaymentValue + fgtsValue + financingValue < 250000 && (
+                      <div className={styles.payment}>
+                        <p>Subsídio</p>
+                        <CurrencyInput
+                          className={`form-base ${styles.form}`}
+                          placeholder="Valor de subsídio"
+                          value={subsidyValue}
+                          onChange={setSubsidyValue}
+                        />
+                      </div>
+                    )}
                 </>
               )}
               {paymentMethod === "CREDIT_LETTER" && (
@@ -1476,9 +1480,7 @@ export default function ClosedDeal({
               </div>
 
               <div className={`glass ${styles.list}`}>
-                {note.length === 0 && (
-                  <p>Nenhuma nota do cliente encontrada.</p>
-                )}
+                {note.length === 0 && <p>Nenhuma nota encontrada.</p>}
                 {note.map((note) => (
                   <div key={note.id} className={styles.item}>
                     {isOpenNote === note.id ? (

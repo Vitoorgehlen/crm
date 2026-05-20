@@ -1,0 +1,63 @@
+.footerHome {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+  background-color: var(--textBase);
+  padding: 20px;
+}
+
+.footerColumn {
+  display: flex;
+  flex-direction: column;
+  color: var(--mainBg);
+}
+
+.btnFooter {
+  border: none;
+  cursor: pointer;
+}
+
+.btnFooter {
+  position: relative;
+  width: fit-content;
+  border: none;
+  cursor: pointer;
+  color: var(--mainBg);
+  text-align: start;
+  transition: transform 0.2s ease;
+}
+
+.btnFooter:hover {
+  color: var(--primaryText);
+  transform: translateY(-2px);
+}
+
+.btnFooter::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 2px;
+  background-color: var(--primaryColor);
+  transition: width 0.3s ease;
+}
+
+.btnFooter:hover::after {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin: 0;
+  }
+
+  .menuButton {
+    display: block;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: var(--textBase);
+    transition: transform 0.2s ease;
+  }
+}

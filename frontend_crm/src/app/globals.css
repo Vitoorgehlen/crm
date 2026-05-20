@@ -91,7 +91,7 @@
   margin: 0;
   font-family: var(--font);
   background-color: transparent;
-  scrollbar-color: var(--primaryColor) transparent;
+  scrollbar-color: var(--primaryColor) var(--logoColor);
 }
 
 body {

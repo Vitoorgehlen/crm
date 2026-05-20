@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { addClient, deleteClient, getClientById, getClientDeletedRequest, getMyClients, getTeamClients, updateClient} from '../repositories/clientRepository'
+import { addClient, deleteClient, getBirthdayClients, getClientById, getClientDeletedRequest, getMyClients, getTeamClients, updateClient} from '../repositories/clientRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { Prisma } from '@prisma/client';
@@ -38,6 +38,26 @@ router.get('/clients/:id', loginRequired, async (req, res) => {
 
   try {
     const deal = await getClientById(paramId, userId);
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Erro ao buscar negócio.' });
+  }
+});
+
+router.get('/clients-birthday/:month', loginRequired, async (req, res) => {
+  const month = Number(req.params.month);
+
+  if (isNaN(month)) {
+    return res.status(400).json({ error: 'Mês inválido.' });
+  }
+
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId, role: userRole} = user;
+  if (!userRole) return res.status(400).json({ error: 'ID inválido' });
+
+  try {
+    const deal = await getBirthdayClients(month, userId);
     res.json(deal);
   } catch (err) {
     console.log(err);

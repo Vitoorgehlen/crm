@@ -1,0 +1,201 @@
+.sidebarContent {
+  width: 100%;
+}
+
+.homebar {
+  position: fixed;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  margin: 0;
+  width: 100%;
+  padding: 15px 30px;
+  height: 65px;
+  border-radius: 0;
+  border: none;
+  z-index: 999;
+
+  background-color: var(--sidebarBg);
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.logoHome {
+  width: auto;
+  height: 60px;
+  color: var(--primaryColor);
+  transition: all 0.3s ease;
+  display: block;
+  transform: rotate(270deg);
+}
+
+.logo a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: -10px;
+  text-decoration: none;
+}
+
+.logo:hover .logoHome {
+  color: var(--textBase);
+}
+
+.nameLogo {
+  display: block;
+  margin-top: -20px;
+  color: var(--textBase);
+  font-size: 20px;
+}
+
+.menuButtonsDisplay {
+  display: flex;
+  gap: 10px;
+}
+
+.menuButtons {
+  position: relative;
+  height: 35px;
+  border: none;
+  color: var(--primaryText);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.menuButtons:hover {
+  color: var(--textBase);
+  transform: translateY(-2px);
+}
+
+.menuButtons::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 2px;
+  background-color: var(--primaryColor);
+  transition: width 0.3s ease;
+}
+
+.menuButtons:hover::after {
+  width: 100%;
+}
+
+.menuButtonLogin {
+  position: relative;
+  border: 1px solid var(--primaryColor);
+  border-radius: 8px;
+  padding: 5px 10px 9px 10px;
+  color: var(--primaryText);
+  background-color: var(--mainBg);
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.menuButtonLogin:hover {
+  color: var(--mainBg);
+  background-color: var(--primaryColor);
+  border: 1px solid var(--mainBg);
+}
+
+.menuButtonStart {
+  border: 1px solid var(--primaryText);
+  border-radius: 8px;
+  padding: 5px 10px 9px 10px;
+  color: var(--primaryText);
+  background-color: transparent;
+  transition: transform 0.2s ease;
+  cursor: pointer;
+}
+
+.menuButtonStart:hover {
+  color: var(--mainBg);
+  background-color: var(--primaryText);
+  border: 1px solid var(--mainBg);
+}
+
+.menuButton {
+  display: none;
+}
+
+.sidebarOpen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  pointer-events: all;
+
+  transition: opacity 0s ease;
+
+  width: 100%;
+  height: 100vh;
+  padding: 10px;
+  box-sizing: border-box;
+  transition:
+    width 0.4s ease,
+    padding-right 0.4s ease;
+
+  background-color: var(--sidebarBg);
+  backdrop-filter: blur(7px) !important;
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1001;
+}
+
+.contentbar {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 85%;
+  max-width: 320px;
+  height: auto;
+  gap: 10px;
+  max-height: 85vh;
+  background-color: var(--mainBg);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.sidebarMenu {
+  display: flex;
+  width: 100%;
+  align-items: start;
+  justify-content: space-between;
+  padding-top: 0;
+  margin-bottom: 10px;
+}
+
+.gapNull {
+  width: 25.6px;
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin: 0;
+  }
+
+  .menuButton {
+    display: block;
+    border: none;
+    font-size: 1.6rem;
+    cursor: pointer;
+    color: var(--textBase);
+    transition: transform 0.2s ease;
+  }
+
+  .menuButtonsDisplay .menuButtons,
+  .menuButtonsDisplay .menuButtonStart,
+  .menuButtonsDisplay .menuButtonLogin {
+    display: none;
+  }
+}

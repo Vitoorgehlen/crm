@@ -2,25 +2,454 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  min-height: 100vh;
+  min-height: 98vh;
 
   display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.box {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  width: 560px;
-  height: 300px;
-  border-radius: 20px;
-  border: 1px solid var(--shadowColor);
+  align-items: center;
+  margin-left: -60px;
+  gap: 100px;
 }
 
-.box h1 {
+.descriptionCRM,
+.pricingPlan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
   color: var(--primaryText);
-  margin-bottom: 20px;
+}
+
+.descriptionCloop {
+  background: var(--textBase);
+  color: var(--mainBg);
+  padding: 20px 0;
+}
+
+.cardsDescriptionCloop {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  width: 100%;
+  gap: 20px;
+}
+
+.cardDescriptionCloop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px;
+  width: 80%;
+  max-width: 500px;
+  height: 500px;
+  border-radius: 8px;
+  animation: fadeSlide 0.4s ease;
+
+  background-color: var(--primaryText);
+  color: var(--mainBg);
+}
+
+.cardDescriptionCloop span {
+  color: var(--textBase);
+}
+
+.changeDescriptionCloop {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  gap: 10px;
+}
+
+.addClient {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+}
+
+.addClient p {
+  margin-bottom: 15px;
+}
+
+.iconWrapper {
+  position: relative;
+  width: 80px;
+  height: 80px;
+}
+
+.personAddClient {
+  color: var(--mainBg);
+  font-size: 80px;
+  animation: personBounce 2s infinite;
+}
+
+.checkAddClient {
+  position: absolute;
+  top: 0;
+  right: 10px;
+  font-size: 20px;
+  color: var(--primaryColor);
+  opacity: 0;
+  transform: scale(0.5);
+  animation: checkLoop 2s infinite cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ballonChange {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50px;
+  color: var(--mainBg);
+  font-size: 1.3rem;
+  border: none;
+  background-color: var(--primaryText);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.ballonChange:hover {
+  background-color: var(--primaryColor);
+  color: var(--mainBg);
+}
+
+.ballonChangeActive {
+  background-color: var(--mainBg);
+  color: var(--primaryText);
+}
+
+.title {
+  max-width: 800px;
+}
+
+.titleCloop {
+  color: var(--primaryColor);
+  font-size: 48px;
+  font-weight: 700;
+}
+
+.btnsDescriptionCRM {
+  display: flex;
+  width: 90%;
+  max-width: 500px;
+  gap: 30px;
+}
+
+.useCrm {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: 90%;
+  max-width: 500px;
+  height: 170px;
+  margin-top: 40px;
+  padding: 15px;
+  border: 1px solid var(--primaryColor);
+}
+
+.btn {
+  margin-top: 20px;
+  width: 100%;
+  height: 40px;
+  border-radius: 8px;
+  border: 1px solid var(--primaryText);
+  color: var(--primaryText);
+  cursor: pointer;
+}
+
+.btn:hover {
+  border: 1px solid var(--mainBg);
+  background-color: var(--primaryColor);
+  color: var(--mainBg);
+}
+
+.btnActive {
+  border: 1px solid var(--mainBg);
+  background-color: var(--primaryColor);
+  color: var(--mainBg);
+  cursor: default;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width: 100%;
+  gap: 10px;
+}
+
+.text .line {
+  align-items: start;
+}
+
+.dot {
+  margin-top: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 10px;
+  background-color: var(--primaryColor);
+}
+.slideAnnual {
+  position: relative;
+  display: flex;
+  margin-top: 20px;
+  border-radius: 50px;
+  border: 1px solid var(--textBase);
+}
+
+.slider {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  height: calc(100% - 4px);
+  background-color: var(--primaryColor);
+  border-radius: 50px;
+  transition: transform 0.35s ease;
+  z-index: 0;
+}
+
+.left {
+  transform: translateX(0%);
+}
+
+.right {
+  transform: translateX(100%);
+}
+
+.btnAnnual {
+  flex: 1;
+  z-index: 1;
+  background: none;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+  color: var(--primaryText);
+  transition: color 0.3s ease;
+}
+
+.btnAnnualActive {
+  color: var(--mainBg);
+}
+
+.editYourCrm {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  max-width: 800px;
+  margin: 40px 0;
+  padding: 10px;
+}
+
+.editYourCrm h4 {
+  color: var(--primaryColor);
+}
+
+.pricingBox {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 320px));
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.pricingCard {
+  display: flex;
+  flex-direction: column;
+  text-align: start;
+  width: 320px;
+  height: 450px;
+  padding: 24px;
+  margin-top: 20px;
+  background-color: var(--secondaryBg);
+}
+
+.discount {
+  text-align: end;
+  width: 100%;
+}
+
+.discount span {
+  padding: 0 4px;
+  background-color: var(--textBase);
+  border-radius: 8px;
+  color: var(--mainBg);
+}
+
+.discountGap {
+  height: 20px;
+}
+
+.oldPrice {
+  font-size: 12px;
+  margin-top: 5px;
+  margin-bottom: -5px;
+  color: var(--textBase);
+  text-decoration: line-through;
+  text-decoration-color: var(--textBase);
+  text-decoration-thickness: 1px;
+}
+
+.price {
+  display: flex;
+  align-items: end;
+}
+
+.price p {
+  margin-bottom: 5px;
+}
+
+.priceEnterprise {
+  margin: 7px 0;
+}
+
+.planDescription {
+  text-align: center;
+  border-bottom: 1px solid var(--textBase);
+  padding: 10px 0;
+}
+
+.planDescription span {
+  font-size: 11px;
+}
+
+.planInfos {
+  display: flex;
+  flex-direction: column;
+  margin-top: 20px;
+  width: 100%;
+}
+
+.planInfos span {
+  text-align: end;
+  color: var(--primaryColor);
+}
+
+.line {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.lineIcon {
+  font-size: 1rem;
+  color: var(--textBase);
+}
+
+.line p {
+  color: var(--primaryText);
+}
+
+.infoAllPlan {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 90%;
+  max-width: 800px;
+  margin: 40px 0;
+  padding: 10px;
+}
+
+.allPlanInfos {
+  width: 80%;
+  text-align: start;
+}
+
+@keyframes checkLoop {
+  0% {
+    opacity: 0;
+    transform: scale(0.7) translateY(4px) rotate(360deg);
+  }
+
+  20% {
+    opacity: 1;
+    transform: scale(1.05) translateY(0);
+  }
+
+  35% {
+    transform: scale(1) translateY(0);
+  }
+
+  70% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.7) translateY(4px) rotate(-360deg);
+  }
+}
+
+@keyframes personBounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .main {
+    margin: 0;
+  }
+
+  .descriptionCRM,
+  .pricingPlan {
+    padding: 0 10px;
+  }
+
+  .descriptionCloop {
+    padding: 20px 10px;
+  }
+
+  .cardsDescriptionCloop {
+    flex-direction: column;
+  }
+
+  .cardDescriptionCloop {
+    padding: 20px;
+    width: 90%;
+  }
+
+  .changeDescriptionCloop {
+    flex-direction: row;
+    width: 90%;
+  }
+
+  .pricingBox {
+    gap: 10px;
+  }
+
+  .pricingCard {
+    height: 370px;
+    padding: 20px;
+    margin-top: 5px;
+  }
+
+  .allPlanInfos {
+    width: 90%;
+  }
 }

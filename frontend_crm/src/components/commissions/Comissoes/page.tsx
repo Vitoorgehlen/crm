@@ -708,7 +708,7 @@ export default function CommissionCard({ deals }: any) {
                         </p>
                         <div>
                           {d.DealShare?.map((share) => (
-                            <div key={share.id}>
+                            <div key={share.id} className={styles.lines}>
                               <span>
                                 <strong>Total:</strong>{" "}
                                 {real(Number(share.amount))}

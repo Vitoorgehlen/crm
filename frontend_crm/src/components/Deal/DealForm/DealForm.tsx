@@ -730,7 +730,9 @@ export default function DealForm({
                   {paymentMethod === "FINANCING" && (
                     <>
                       <p>Financiamento</p>
-                      <p>Subsídio</p>
+                      {downPaymentValue + fgtsValue + financingValue > 50000 &&
+                        downPaymentValue + fgtsValue + financingValue <
+                          250000 && <p>Subsídio</p>}
                     </>
                   )}
                   {paymentMethod === "CREDIT_LETTER" && (
@@ -763,13 +765,16 @@ export default function DealForm({
                         value={financingValue}
                         onChange={setFinancingValue}
                       />
-
-                      <CurrencyInput
-                        className={`form-base ${styles.payment}`}
-                        placeholder="Valor de subsídio"
-                        value={subsidyValue}
-                        onChange={setSubsidyValue}
-                      />
+                      {downPaymentValue + fgtsValue + financingValue > 50000 &&
+                        downPaymentValue + fgtsValue + financingValue <
+                          250000 && (
+                          <CurrencyInput
+                            className={`form-base ${styles.payment}`}
+                            placeholder="Valor de subsídio"
+                            value={subsidyValue}
+                            onChange={setSubsidyValue}
+                          />
+                        )}
                     </>
                   )}
 
@@ -933,9 +938,7 @@ export default function DealForm({
                   </div>
 
                   <div className={`glass ${styles.noteList}`}>
-                    {note.length === 0 && (
-                      <p>Nenhuma nota do cliente encontrada.</p>
-                    )}
+                    {note.length === 0 && <p>Nenhuma nota encontrada.</p>}
                     {note.map((note) => (
                       <div key={note.id} className={styles.noteItem}>
                         {isOpenNote === note.id ? (

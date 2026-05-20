@@ -6,7 +6,7 @@ import { MdKeyboardArrowLeft, MdKeyboardArrowRight } from "react-icons/md";
 import { AiOutlinePlus } from "react-icons/ai";
 
 import styles from "./ScheduleLayout.module.css";
-import { Schedule } from "@/types";
+import { Client, Schedule } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import ScheduleForm from "@/components/Schedule/ScheduleForm/Schedule";
 import { formatDateForSchedules } from "@/utils/dateUtils";
@@ -17,7 +17,10 @@ export default function ScheduleLayout() {
 
   const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[] | []>([]);
+  const [clientBirth, setClientBirth] = useState<Client[] | []>([]);
+  const [showBirthday, setShowBirthday] = useState(true);
   const [isWeekOrMonth, setIsWeekOrMonth] = useState(true);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hoveredDay, setHoveredDay] = useState<Date | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isOpenCard, setIsOpenCard] = useState(false);
@@ -173,6 +176,51 @@ export default function ScheduleLayout() {
     );
   };
 
+  function handleShowBirthday() {
+    setShowBirthday((prev) => {
+      const updated = !prev;
+      localStorage.setItem("showBirthDay", JSON.stringify(updated));
+      return updated;
+    });
+  }
+
+  function getBirthdaysForDay(day: Date) {
+    return clientBirth.filter((client) => {
+      const birthDate = client.dateOfBirth;
+      if (!birthDate) return false;
+
+      const birth = new Date(birthDate);
+
+      return (
+        birth.getDate() === day.getDate() && birth.getMonth() === day.getMonth()
+      );
+    });
+  }
+
+  useEffect(() => {
+    if (!token || !showBirthday) return;
+
+    const month = currentDate.getMonth() + 1;
+
+    async function fetchBirthDay() {
+      try {
+        const res = await fetch(`${API}/clients-birthday/${month}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!res.ok) throw new Error("Erro ao buscar aniversariantes");
+
+        const data = await res.json();
+        setClientBirth(data);
+        console.log(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    fetchBirthDay();
+  }, [currentDate, showBirthday, token]);
+
   useEffect(() => {
     if (isLoading) return;
     if (!token) {
@@ -310,6 +358,19 @@ export default function ScheduleLayout() {
                   `}
                 >
                   <div className={styles.events}>
+                    {getBirthdaysForDay(day).length > 0 && (
+                      <div
+                        className={`glass ${styles.birthdayItem}`}
+                        onMouseEnter={(e) => {
+                          setHoveredDay(day);
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => setHoveredDay(null)}
+                      >
+                        <span>🎉 {getBirthdaysForDay(day).length}</span>
+                      </div>
+                    )}
+
                     {getScheduleForDay(day)
                       .slice()
                       .sort(
@@ -341,11 +402,22 @@ export default function ScheduleLayout() {
                   </div>
                 </div>
               ) : (
-                <div
-                  key={index}
-                  className={`${styles.dayColumn} 
-                  ${isPast ? styles.pastDay : ""}`}
-                ></div>
+                <div key={index} className={styles.dayColumn}>
+                  <div className={styles.events}>
+                    {getBirthdaysForDay(day).length > 0 && (
+                      <div
+                        className={`glass ${styles.birthdayItem}`}
+                        onMouseEnter={(e) => {
+                          setHoveredDay(day);
+                          setTooltipPosition({ x: e.clientX, y: e.clientY });
+                        }}
+                        onMouseLeave={() => setHoveredDay(null)}
+                      >
+                        <span>🎉 {getBirthdaysForDay(day).length} </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               );
             })
           : days.map((day, index) => {
@@ -354,38 +426,51 @@ export default function ScheduleLayout() {
               const isTodayDate = isToday(day);
               const hasPending = hasPendingSchedules(day);
 
+              const schedules = getScheduleForDay(day);
+              const birthdays = getBirthdaysForDay(day);
+              const events = [...birthdays, ...schedules];
+
               const shouldShow = !isPast || hasPending;
 
               return shouldShow ? (
                 <button
                   key={index}
                   onClick={() => setSelectedDay(day)}
-                  onMouseEnter={() => setHoveredDay(day)}
+                  onMouseEnter={(e) => {
+                    setHoveredDay(day);
+                    setTooltipPosition({ x: e.clientX, y: e.clientY });
+                  }}
                   onMouseLeave={() => setHoveredDay(null)}
                   className={`${styles.monthDay} ${
                     isCurrentMonth ? styles.currentMonth : styles.otherMonth
                   } ${isTodayDate && styles.today} ${isPast && styles.pastDay}`}
                 >
                   {day.getDate()}
-                  {getScheduleForDay(day).length > 0 && (
+                  {events.length > 0 && (
                     <div className={styles.eventsMonth}>
-                      <p>{getScheduleForDay(day).length}</p>
-                      {getScheduleForDay(day).length === 1 ? (
-                        <span>evento</span>
-                      ) : (
-                        <span>eventos</span>
-                      )}
+                      <p>{events.length}</p>
+
+                      <span>evento{events.length > 1 && "s"}</span>
                     </div>
                   )}
                 </button>
               ) : (
                 <div
                   key={index}
+                  onMouseEnter={() => setHoveredDay(day)}
+                  onMouseLeave={() => setHoveredDay(null)}
                   className={`${styles.monthDay} ${
                     isCurrentMonth ? styles.currentMonth : styles.otherMonth
                   } ${isPast && styles.pastDay}`}
                 >
                   {day.getDate()}
+                  {birthdays.length > 0 && (
+                    <div className={styles.eventsMonth}>
+                      <p>{birthdays.length}</p>
+
+                      <span>evento{birthdays.length > 1 && "s"}</span>
+                    </div>
+                  )}
                 </div>
               );
             })}
@@ -400,6 +485,7 @@ export default function ScheduleLayout() {
             setSelectedDay(null);
             setSelectedSchedule(null);
             setIsOpenCard(false);
+            setHoveredDay(null);
           }}
           onCreate={handleCreateSchedule}
           onUpdate={handleUpdateSchedule}
@@ -410,7 +496,14 @@ export default function ScheduleLayout() {
       )}
 
       {hoveredDay && (
-        <div className={styles.tooltip}>
+        <div
+          className={styles.tooltip}
+          style={{
+            top: tooltipPosition.y + 15,
+            left: tooltipPosition.x,
+            transform: "translateX(-50%)",
+          }}
+        >
           <div className={styles.tooltipTitle}>
             <h5>
               {hoveredDay.toLocaleDateString("pt-BR", {
@@ -419,6 +512,19 @@ export default function ScheduleLayout() {
               })}
             </h5>
           </div>
+          {getBirthdaysForDay(hoveredDay).length > 0 && (
+            <div className={styles.tooltipBirthdays}>
+              <p>
+                Aniversariante
+                {getBirthdaysForDay(hoveredDay).length > 1 && "s"} do dia
+              </p>
+              {getBirthdaysForDay(hoveredDay).length > 0 &&
+                getBirthdaysForDay(hoveredDay).map((client) => (
+                  <span key={client.id}>🎉 {client.name}</span>
+                ))}
+            </div>
+          )}
+
           {getScheduleForDay(hoveredDay).length > 0 ? (
             getScheduleForDay(hoveredDay).map((schedule) => (
               <div

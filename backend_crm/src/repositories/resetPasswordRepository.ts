@@ -35,7 +35,7 @@ export async function confirmReset(token: string, newPassword: string) {
 
   const hashedPassword = await bcrypt.hash(newPassword, 10);
 
-  const updatePassword = prisma.user.update({
+  const updatePassword = await prisma.user.update({
     where: { id: decoded.id },
     data: { password: hashedPassword },
   })

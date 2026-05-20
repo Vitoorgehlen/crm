@@ -25,6 +25,7 @@ export default function DayPicker({
       dayClassName={(date) => styles.day}
       popperPlacement="bottom-end"
       locale={ptBR}
+      dateFormat="dd/MM/yyyy"
       onKeyDown={(e) => e.preventDefault()}
       onFocus={(e) => e.target.blur()}
     />

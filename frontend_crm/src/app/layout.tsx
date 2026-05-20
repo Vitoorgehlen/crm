@@ -2,12 +2,10 @@ import type { Metadata } from "next";
 import { GeistMono } from "geist/font/mono";
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
-import SidebarWrapper from "@/components/sidebar/SidebarWrapper";
-import Footer from "@/components/footer/page";
-import ProtectedRoute from "@/components/protectedRoute/page";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ThemeInitializer from "@/components/config/switchTheme/ThemeInitializer";
 import "react-datepicker/dist/react-datepicker.css";
+import LayoutClientWrapper from "@/components/Tools/LayoutClientWrapper/page";
 
 export const metadata: Metadata = {
   title: "Cloop CRM",
@@ -45,11 +43,7 @@ export default function RootLayout({
           </div>
           <ThemeInitializer />
           <AuthProvider>
-            <ProtectedRoute>
-              <SidebarWrapper />
-              <main className="main-base">{children}</main>
-              <Footer />
-            </ProtectedRoute>
+            <LayoutClientWrapper>{children}</LayoutClientWrapper>
           </AuthProvider>
         </div>
       </body>

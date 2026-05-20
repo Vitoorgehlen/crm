@@ -597,17 +597,20 @@ export default function CloseDealForm({
             </div>
           )}
 
-          {paymentMethod === "FINANCING" && (
-            <div className={styles.payment}>
-              <p>Subsídio</p>
-              <CurrencyInput
-                className={`form-base ${styles.form}`}
-                placeholder="Valor de financiamento"
-                value={subsidyValue}
-                onChange={setSubsidyValue}
-              />
-            </div>
-          )}
+          {paymentMethod === "FINANCING" &&
+            downPaymentValue + fgtsValue + financingValue > 50000 &&
+            propertyValue < 250000 &&
+            downPaymentValue + fgtsValue + financingValue < 250000 && (
+              <div className={styles.payment}>
+                <p>Subsídio</p>
+                <CurrencyInput
+                  className={`form-base ${styles.form}`}
+                  placeholder="Valor de financiamento"
+                  value={subsidyValue}
+                  onChange={setSubsidyValue}
+                />
+              </div>
+            )}
 
           {paymentMethod === "CREDIT_LETTER" && (
             <div className={styles.payment}>

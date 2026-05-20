@@ -27,12 +27,12 @@
   gap: 0;
 }
 
-.sidebar:hover {
+.sidebar:hover:not(.sidebarOpen) {
   width: 210px;
   padding-right: 10px;
   background-color: var(--sidebarBg);
-  backdrop-filter: blur(7px) !important;
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(7px);
+  border-right: 1px solid var(--sidebarBg);
 }
 
 .contentbar {
@@ -51,6 +51,9 @@
   padding: 10px 5px;
 }
 
+.menuButton {
+  display: none;
+}
 .sidebar:hover .sidebarMenu {
   display: flex;
   justify-content: center;
@@ -139,7 +142,7 @@
 }
 
 .sidebar:hover a:hover .linkText {
-  border-bottom: 2px solid var(--primaryColor);
+  position: relative;
 }
 
 .sidebar:hover a:hover .logos {
@@ -158,16 +161,44 @@
 }
 
 .linkText {
-  display: none;
+  position: relative;
   opacity: 0;
-  transition: opacity 0.2s ease;
-  border-bottom: 2px solid transparent;
+  visibility: hidden;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
 }
 
 .sidebar:hover .linkText {
-  display: flex;
   opacity: 1;
+  visibility: visible;
+  position: relative;
   transition-delay: 0.25s;
+}
+
+.hoverUnderline {
+  position: relative;
+  transition:
+    transform 0.2s ease,
+    color 0.2s ease;
+}
+
+.hoverUnderline:hover {
+  transform: translateY(-2px);
+}
+
+.hoverUnderline .linkText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 0%;
+  height: 2px;
+  background-color: var(--primaryColor);
+  transition: width 0.3s ease;
+}
+
+.hoverUnderline:hover .linkText::after {
+  width: 100%;
 }
 
 @keyframes blink {
@@ -238,12 +269,15 @@
   .sidebar,
   .sidebar:hover {
     width: 100%;
-    background-color: var(--mainBg);
   }
 
   .sidebarOpen {
     opacity: 1;
     pointer-events: all;
+
+    background-color: var(--sidebarBg);
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px);
   }
 
   .sidebarOpen .contentbar {
@@ -257,6 +291,7 @@
     max-height: 85vh;
     background-color: var(--mainBg);
     padding: 20px;
+    border-radius: 8px;
     overflow-y: auto;
   }
 
@@ -310,7 +345,13 @@
     color: var(--textBase);
   }
 
+  .sidebar:hover .nameLogo,
+  .sidebarOpen .nameLogo {
+    display: block;
+  }
+
   .menuButton {
+    display: block;
     border: none;
     font-size: 1.6rem;
     cursor: pointer;
@@ -335,5 +376,6 @@
   .sidebar:hover .linkText {
     display: flex;
     opacity: 1;
+    visibility: visible;
   }
 }

@@ -20,7 +20,6 @@ import {
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
@@ -32,7 +31,6 @@ export default function FinishDeal({
   newStep,
 }: CloseDealFormProps) {
   const { token, isLoading } = useAuth();
-  const router = useRouter();
   const API = process.env.NEXT_PUBLIC_API_URL;
 
   const [isOpenDocCost, setIsOpenDocCost] = useState<number | undefined>(
@@ -480,17 +478,26 @@ export default function FinishDeal({
 
               {deal.paymentMethod === "FINANCING" && (
                 <>
-                  {Number(deal.subsidyValue) > 0 && (
-                    <div className={styles.payment}>
-                      <p>Subsídio</p>
-                      <h5>{real(Number(deal.subsidyValue))}</h5>
-                    </div>
-                  )}
-
                   <div className={styles.payment}>
                     <p>Financiado</p>
                     <h5>{real(Number(deal.financingValue))}</h5>
                   </div>
+
+                  {Number(deal.subsidyValue) > 0 &&
+                    Number(deal.downPaymentValue) +
+                      Number(deal.fgtsValue) +
+                      Number(deal.financingValue) >
+                      50000 &&
+                    Number(deal.propertyValue) < 250000 &&
+                    Number(deal.downPaymentValue) +
+                      Number(deal.fgtsValue) +
+                      Number(deal.financingValue) <
+                      250000 && (
+                      <div className={styles.payment}>
+                        <p>Subsídio</p>
+                        <h5>{real(Number(deal.subsidyValue))}</h5>
+                      </div>
+                    )}
                 </>
               )}
 
@@ -807,9 +814,7 @@ export default function FinishDeal({
               </div>
 
               <div className={`glass ${styles.list}`}>
-                {note.length === 0 && (
-                  <p>Nenhuma nota do cliente encontrada.</p>
-                )}
+                {note.length === 0 && <p>Nenhuma nota encontrada.</p>}
                 {note.map((note) => (
                   <div key={note.id} className={styles.item}>
                     {isOpenNote === note.id ? (

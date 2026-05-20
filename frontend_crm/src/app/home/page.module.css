@@ -41,29 +41,30 @@
 }
 
 .btnSlide {
-  display: flex;
-  align-items: center;
-  padding: 3px;
+  position: relative;
   width: 36px;
   height: 20px;
   border-radius: 999px;
   border: 1px solid var(--textBase);
-  transition: all 0.25s ease;
+  transition: border-color 0.25s ease;
 }
 
 .slide {
+  margin: 2px;
+
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-color: var(--textBase);
-  transition: all 0.25s ease;
-}
 
-.btnSlideActive {
-  justify-content: flex-end;
+  background-color: var(--textBase);
+
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease;
 }
 
 .btnSlideActive .slide {
+  transform: translateX(16px);
   background-color: var(--primaryColor);
 }
 
@@ -233,6 +234,10 @@
   color: var(--textBase);
 }
 
+.noTask {
+  text-align: center;
+}
+
 .taskItens {
   display: flex;
   flex-direction: column;
@@ -314,5 +319,9 @@
   .contentSection {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .scheduleSection .titleCard {
+    margin-bottom: 5px;
   }
 }
