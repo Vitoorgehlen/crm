@@ -107,14 +107,41 @@
   padding: 10px 10px 0 10px;
 }
 
+.companyOpen {
+  flex-direction: column;
+}
+
 .companyInfos {
   width: 100%;
   display: flex;
   color: var(--primaryText);
   justify-content: space-between;
+  align-items: start;
   gap: 5px;
 }
 
+.companyInfos h5 {
+  color: var(--textBase);
+}
+
+.companyInfosText {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: var(--textBase);
+}
+
+.companyInfosText h5 {
+  margin-top: 7px;
+}
+
+.btns {
+  display: flex;
+  justify-content: end;
+  width: 100%;
+  gap: 5px;
+}
 .companyDeactivate {
   color: var(--errorColor);
 }

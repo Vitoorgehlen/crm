@@ -20,12 +20,16 @@ export default async (req: Request, res: Response, next: NextFunction) => {
 
     const user = await prisma.user.findUnique({
       where: { id },
-      include: { company: { select: {isActive: true} } }
+      include: { company: true }
     });
 
     if (!user || user.email !== email) return res.status(401).json({ error: 'Usuário inválido' });
 
-    if (!user.company.isActive) return res.status(401).json({ error: 'Empresa inativa' });
+    const isInactive = !user.company.isActive;
+    const isExpired = user.company.expiresAt && new Date() > new Date(user.company.expiresAt);
+
+    if (isInactive || isExpired)
+      return res.status(401).json({ error: 'Empresa inativa ou assinatura expirada' });
 
     const authReq = req as AuthenticatedRequest;
     authReq.user = {

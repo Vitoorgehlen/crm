@@ -4,13 +4,9 @@ import { createDefaultRolePermissions, deleteRolePermissions } from '../reposito
 import superUserOnly from '../middlewares/superUserOnly';
 import loginRequired from '../middlewares/loginRequired';
 import { AuthenticatedRequest } from '../types/express';
+import { SubscriptionPlan } from '@prisma/client';
 
 const router = Router();
-
-interface ISuperUser {
-  id: number;
-  email: string;
-}
 
 router.post('/company', superUserOnly, async(
   req: Request & { superUser?: { id: number; email: string } },
@@ -19,10 +15,20 @@ router.post('/company', superUserOnly, async(
   const superUser = req.superUser;
   if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
 
-  const { name, maxUsers } = req.body;
+  const { name, expiresAt, plan, maxUsers } = req.body;
 
-  if (!name || typeof name !== 'string') {
+  if (name !== undefined && typeof name !== 'string') {
     return res.status(400).json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
+  }
+
+  if (!expiresAt && typeof expiresAt !== 'number') {
+    return res.status(400).json({ error: 'O campo "expiresAt" é obrigatório e deve ser uma string.' });
+  }
+
+  if (plan !== undefined && !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)) {
+    return res.status(400).json({
+      error: 'Plano inválido.'
+    });
   }
 
   if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
@@ -30,7 +36,7 @@ router.post('/company', superUserOnly, async(
   }
 
   try {
-    const newCompany = await addCompany( superUser.id, name, maxUsers );
+    const newCompany = await addCompany( superUser.id, name, expiresAt, plan, maxUsers );
     const newPermissions = await createDefaultRolePermissions(newCompany.id);
     res.status(201).json({
       message: 'Empresa criada com sucesso',
@@ -85,10 +91,20 @@ router.put('/company/:id', superUserOnly, async(
   const companyId = Number(req.params.id);
   if (!companyId || isNaN(companyId)) return res.status(400).json({ error: 'ID inválido' });
 
-  const { name, maxUsers,  isActive} = req.body;
+  const { name, expiresAt, plan, maxUsers, isActive } = req.body;
 
-  if (name && typeof name !== 'string') {
-    return res.status(400).json({ error: 'O campo "name" deve ser uma string.' });
+  if (name !== undefined && typeof name !== 'string') {
+    return res.status(400).json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
+  }
+
+  if (expiresAt !== undefined && typeof expiresAt !== 'number') {
+    return res.status(400).json({ error: 'O campo "expiresAt" deve ser uma string.' });
+  }
+
+  if (plan !== undefined && !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)) {
+    return res.status(400).json({
+      error: 'Plano inválido.'
+    });
   }
 
   if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
@@ -104,6 +120,8 @@ router.put('/company/:id', superUserOnly, async(
       superUser.id,
       companyId,
       name,
+      expiresAt,
+      plan,
       maxUsers,
       isActive
     );

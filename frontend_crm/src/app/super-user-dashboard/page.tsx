@@ -10,15 +10,62 @@ import { IoMdCheckmark, IoMdClose } from "react-icons/io";
 import { docsNames, Documentation, NotePad, User } from "@/types";
 import { IoMdPersonAdd } from "react-icons/io";
 import { AddAdmin } from "./add-admin";
+import CustomSelect, { Option } from "@/components/Tools/Select/CustomSelect";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 interface Company {
   id: number;
   name: string;
+  plan: SubscriptionPlan | null;
+  expiresAt: string | null;
   maxUsers: number;
   isActive: boolean;
 }
+
+export type SubscriptionPlan = "SOLO" | "TEAM" | "AGENCY" | "ENTERPRISE";
+
+const planOptions: Option<SubscriptionPlan>[] = [
+  {
+    value: "SOLO",
+    label: "Solo",
+  },
+  {
+    value: "TEAM",
+    label: "Team",
+  },
+  {
+    value: "AGENCY",
+    label: "Agency",
+  },
+  {
+    value: "ENTERPRISE",
+    label: "Enterprise",
+  },
+];
+
+const expiresOptions: Option<number>[] = [
+  {
+    value: 30,
+    label: "+30 dias",
+  },
+  {
+    value: 90,
+    label: "+90 dias",
+  },
+  {
+    value: 180,
+    label: "+180 dias",
+  },
+  {
+    value: 360,
+    label: "+360 dias",
+  },
+  {
+    value: 720,
+    label: "+720 dias",
+  },
+];
 
 export default function SuperUserPage() {
   const router = useRouter();
@@ -28,9 +75,13 @@ export default function SuperUserPage() {
   const [companies, setCompanies] = useState<Company[]>([]);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
   const [companyName, setCompanyName] = useState("");
+  const [selectedPlan, setSelectedPlan] =
+    useState<Option<SubscriptionPlan> | null>(null);
   const [companyUsers, setCompanyUsers] = useState<number | undefined>(
     undefined,
   );
+  const [addExpire, setAddExpire] = useState<Option<number> | null>(null);
+  const [selectedIsActive, setSelectedIsActive] = useState(true);
 
   const [newNote, setNewNote] = useState<string>("");
   const [notes, setNotes] = useState<NotePad[]>([]);
@@ -52,8 +103,12 @@ export default function SuperUserPage() {
     try {
       const payload = {
         name: companyName,
+        expiresAt: addExpire?.value,
+        plan: selectedPlan?.value,
         maxUsers: companyUsers,
       };
+
+      console.log(payload);
 
       let response: Response;
       if (selectedCompany && selectedCompany.id) {
@@ -88,6 +143,8 @@ export default function SuperUserPage() {
       }
 
       setCompanyName("");
+      setAddExpire(null);
+      setSelectedPlan(null);
       setCompanyUsers(undefined);
     } catch (err: unknown) {
       if (err instanceof Error) {
@@ -106,23 +163,29 @@ export default function SuperUserPage() {
     setError("");
 
     if (company.isActive) {
-      const confirmActivate = window.confirm(`Reativar ${company.name}?`);
-      if (!confirmActivate) return;
-    } else {
       const confirmDeactivate = window.confirm(`Desativar ${company.name}?`);
       if (!confirmDeactivate) return;
+    } else {
+      const confirmActivate = window.confirm(`Reativar ${company.name}?`);
+      if (!confirmActivate) return;
     }
 
     try {
+      const payload = {
+        name: company.name,
+        expiresAt: 0,
+        plan: company.plan,
+        maxUsers: company.maxUsers,
+        isActive: !company.isActive,
+      };
+
       const response = await fetch(`${API}/company/${company.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          isActive: !company.isActive,
-        }),
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -130,11 +193,19 @@ export default function SuperUserPage() {
       if (!response.ok)
         throw new Error(data.error || "Erro ao atualizar empresa");
 
-      setCompanies((prev) => prev.map((c) => (c.id === company.id ? data : c)));
+      setCompanies((prev) =>
+        prev.map((c) =>
+          c.id === company.id ? { ...c, isActive: !c.isActive } : c,
+        ),
+      );
 
       if (selectedCompany?.id === company.id) {
-        setSelectedCompany(data);
+        setSelectedCompany((prev) =>
+          prev ? { ...prev, isActive: !prev.isActive } : null,
+        );
+        setSelectedIsActive(!company.isActive);
       }
+      setSelectedCompany(null);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Erro inesperado");
     } finally {
@@ -439,6 +510,21 @@ export default function SuperUserPage() {
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
                   />
+
+                  <CustomSelect<SubscriptionPlan>
+                    options={planOptions}
+                    value={selectedPlan}
+                    onChange={setSelectedPlan}
+                    placeholder="Plano"
+                  />
+
+                  <CustomSelect<number>
+                    options={expiresOptions}
+                    value={addExpire}
+                    onChange={setAddExpire}
+                    placeholder="Renovar"
+                  />
+
                   <input
                     className={`form-base ${styles.inputMaxUser}`}
                     type="number"
@@ -469,7 +555,9 @@ export default function SuperUserPage() {
                       <div key={company.id} className={styles.company}>
                         {isSelected ? (
                           <>
-                            <div className={styles.companyContent}>
+                            <div
+                              className={`${styles.companyContent} ${styles.companyOpen}`}
+                            >
                               <div className={styles.companyInfos}>
                                 <input
                                   className={`form-base ${styles.inputComp}`}
@@ -479,37 +567,97 @@ export default function SuperUserPage() {
                                     setCompanyName(e.target.value)
                                   }
                                 />
+                              </div>
+                              <div className={styles.companyInfos}>
+                                <div className={styles.companyInfosText}>
+                                  <p>Max Users:</p>
+                                  <input
+                                    className={`form-base ${styles.inputMaxUser}`}
+                                    type="number"
+                                    value={companyUsers}
+                                    onChange={(e) =>
+                                      setCompanyUsers(Number(e.target.value))
+                                    }
+                                  />
+                                </div>
 
-                                <input
-                                  className={`form-base ${styles.inputMaxUser}`}
-                                  type="number"
-                                  value={companyUsers}
-                                  onChange={(e) =>
-                                    setCompanyUsers(Number(e.target.value))
-                                  }
-                                />
+                                <div className={styles.companyInfosText}>
+                                  <p>Planos:</p>
+                                  <CustomSelect<SubscriptionPlan>
+                                    options={planOptions}
+                                    value={selectedPlan}
+                                    onChange={setSelectedPlan}
+                                    placeholder="Plano"
+                                  />
+                                </div>
+
+                                <div className={styles.companyInfosText}>
+                                  <p>Vencimento:</p>
+                                  {company.expiresAt === null ? (
+                                    <h5>Vitalício</h5>
+                                  ) : (
+                                    <h5>
+                                      {company.expiresAt
+                                        ? new Date(
+                                            company.expiresAt,
+                                          ).toLocaleDateString("pt-BR")
+                                        : "Vitalício"}
+                                    </h5>
+                                  )}
+                                </div>
+
+                                <div className={styles.companyInfosText}>
+                                  <p>Adicionar dias:</p>
+                                  <CustomSelect<number>
+                                    options={expiresOptions}
+                                    value={addExpire}
+                                    onChange={setAddExpire}
+                                    placeholder="Renovar"
+                                  />
+                                </div>
+
+                                <div className={styles.companyInfosText}>
+                                  <p>
+                                    {!selectedIsActive
+                                      ? "Ativar:"
+                                      : "Desativar:"}
+                                  </p>
+                                  <button
+                                    className={`btn-action glass ${styles.btnCompany} 
+                                    ${selectedIsActive ? styles.btnCompDel : styles.btnCompEnv}`}
+                                    onClick={() => toggleCompanyStatus(company)}
+                                  >
+                                    {selectedIsActive ? (
+                                      <IoMdClose />
+                                    ) : (
+                                      <IoMdCheckmark />
+                                    )}
+                                  </button>
+                                </div>
                               </div>
 
-                              <button
-                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
-                                onClick={handleSubmit}
-                              >
-                                <IoMdCheckmark />
-                              </button>
+                              <div className={styles.btns}>
+                                <button
+                                  className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                  onClick={handleSubmit}
+                                >
+                                  <IoMdCheckmark />
+                                </button>
 
-                              <button
-                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
-                                onClick={() => setSelectedCompany(null)}
-                              >
-                                <IoMdClose />
-                              </button>
+                                <button
+                                  className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
+                                  onClick={() => setSelectedCompany(null)}
+                                >
+                                  <IoMdClose />
+                                </button>
 
-                              <button
-                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
-                                onClick={() => setIsOpenCreateUsers(true)}
-                              >
-                                <IoMdPersonAdd />
-                              </button>
+                                <button
+                                  className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
+                                  onClick={() => setIsOpenCreateUsers(true)}
+                                >
+                                  <IoMdPersonAdd />
+                                </button>
+                              </div>
                             </div>
 
                             <div className={styles.companyContent}>
@@ -530,31 +678,29 @@ export default function SuperUserPage() {
                               className={`${styles.companyInfos} ${!company.isActive && styles.companyDeactivate}`}
                             >
                               <h4>{company.name}</h4>
+                              <h5>{company.plan ? company.plan : "S/Plano"}</h5>
+                              <h5>
+                                {company.expiresAt
+                                  ? new Date(
+                                      company.expiresAt,
+                                    ).toLocaleDateString("pt-BR")
+                                  : "Vitalício"}
+                              </h5>
                               <h5>{company.maxUsers}</h5>
                             </div>
-
-                            {company.isActive ? (
-                              <button
-                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompDel}`}
-                                onClick={() => toggleCompanyStatus(company)}
-                              >
-                                <IoMdClose />
-                              </button>
-                            ) : (
-                              <button
-                                className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
-                                onClick={() => toggleCompanyStatus(company)}
-                              >
-                                <IoMdCheckmark />
-                              </button>
-                            )}
 
                             <button
                               className={`btn-action glass ${styles.btnCompany} ${styles.btnCompEnv}`}
                               onClick={() => {
                                 setSelectedCompany(company);
                                 setCompanyName(company.name);
+                                setSelectedIsActive(company.isActive);
                                 setCompanyUsers(company.maxUsers);
+                                setSelectedPlan(
+                                  planOptions.find(
+                                    (p) => p.value === company.plan,
+                                  ) || null,
+                                );
                               }}
                             >
                               <MdEdit />

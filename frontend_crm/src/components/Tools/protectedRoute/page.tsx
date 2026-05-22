@@ -17,7 +17,6 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
   );
   const authPages = useMemo(() => ["/login", "/reset-password"], []);
   const SUPaths = useMemo(() => ["/super-user-dashboard"], []);
-
   useEffect(() => {
     if (isLoading) return;
 

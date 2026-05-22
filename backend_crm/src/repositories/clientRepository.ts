@@ -1,6 +1,8 @@
 import { prisma } from "../prisma-client";
 import { Prisma } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
+import { PLAN_CONFIG } from "../utils/plans";
+import { cp } from "fs";
 
 export async function addClient(
   creatorId: number,
@@ -193,9 +195,17 @@ export async function getTeamClients(
   return prisma.$transaction(async (tx) => {
     const company = await tx.user.findUnique({
       where: { id: userId },
-      select: { companyId: true }
+      select: {
+        company: { select: { plan: true } },
+        companyId: true }
     });
     if (!company) throw new Error('Empresa não encontrada');
+
+    if (company.company.plan) {
+      const hasTeamDeals = PLAN_CONFIG[company.company.plan].features.teamDeals;
+      if (!hasTeamDeals)
+        throw new Error('Seu plano não possui acesso a negociações em equipe');
+    }
 
     if (selectedUser !== null) {
       const userSelected = await tx.user.findUnique({

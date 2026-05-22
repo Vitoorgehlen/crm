@@ -1,9 +1,14 @@
 import { prisma } from "../prisma-client";
+import { PLAN_CONFIG } from "../utils/plans";
+import { SubscriptionPlan } from "@prisma/client";
 
 export async function addCompany(
   superUserId: number,
   name: string,
+  expiresAt: number,
+  plan: SubscriptionPlan,
   maxUsers?: number,
+
 ) {
   const isSuperUser = await prisma.superUser.findUnique({
     where: { id: superUserId },
@@ -13,14 +18,27 @@ export async function addCompany(
     throw new Error('Você não tem permisão de criar uma empresa.');
   }
 
-  const DEFAULT_MAX_USERS = 2;
-  const DEFAULT_ACTIVE = true;
+  const planConfig = PLAN_CONFIG[plan];
+    if (!planConfig) {
+      throw new Error('Plano não encontrado.');
+    }
+
+  const finalExpire = new Date();
+  finalExpire.setDate(finalExpire.getDate() + expiresAt);
+
+
+  const finalMaxUsers =
+    maxUsers && maxUsers > 0
+      ? maxUsers
+      : planConfig.limits.maxUsers;
 
   return prisma.company.create({
     data: {
       name: name,
-      maxUsers: maxUsers = maxUsers && maxUsers > 0 ? maxUsers : DEFAULT_MAX_USERS,
-      isActive: DEFAULT_ACTIVE,
+      expiresAt: finalExpire,
+      plan,
+      maxUsers: finalMaxUsers,
+      isActive: true,
     },
   });
 }
@@ -52,6 +70,8 @@ export async function updateCompany(
   superUserId: number,
   companyId: number,
   name?: string,
+  expiresAt?: number,
+  plan?: SubscriptionPlan,
   maxUsers?: number,
   isActive?: boolean,
 ) {
@@ -60,17 +80,57 @@ export async function updateCompany(
   });
 
   if (!isSuperUser) {
-    throw new Error('Você não tem permisão de criar uma empresa.');
+    throw new Error("Você não tem permissão de editar uma empresa.");
   }
 
-  const company = await prisma.company.findUnique({ where: { id: companyId }})
-  if (!company) throw new Error('Empresa não encontrada.');
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+  });
+
+  if (!company) {
+    throw new Error("Empresa não encontrada.");
+  }
+
+  let finalMaxUsers: number | null | undefined;
+
+  if (plan) {
+    const planConfig = PLAN_CONFIG[plan];
+
+    if (!planConfig) {
+      throw new Error("Plano não encontrado.");
+    }
+
+    finalMaxUsers =
+      maxUsers && maxUsers > 0
+        ? maxUsers
+        : planConfig.limits.maxUsers;
+  }
+
+  let finalExpire: Date | undefined;
+
+  if (expiresAt !== undefined && expiresAt > 1) {
+    const today = new Date();
+
+    const baseDate =
+      company.expiresAt && company.expiresAt > today
+        ? new Date(company.expiresAt)
+        : today;
+
+    baseDate.setDate(baseDate.getDate() + expiresAt);
+    finalExpire = baseDate;
+  }
 
   return prisma.company.update({
-    where: {id: companyId },
+    where: { id: companyId },
     data: {
       ...(name !== undefined && { name }),
-      ...(maxUsers !== undefined && { maxUsers }),
+      ...(plan !== undefined && { plan }),
+      ...(finalExpire !== undefined && {
+        expiresAt: finalExpire,
+      }),
+      ...(finalMaxUsers !== undefined && {
+        maxUsers: finalMaxUsers,
+      }),
       ...(typeof isActive === "boolean" && { isActive }),
     },
   });

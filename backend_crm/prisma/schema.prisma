@@ -16,10 +16,12 @@ model SuperUser {
 }
 
 model Company {
-  id       Int     @id @default(autoincrement())
-  name     String
-  maxUsers Int?
-  isActive Boolean @default(true)
+  id        Int               @id @default(autoincrement())
+  name      String
+  plan      SubscriptionPlan?
+  expiresAt DateTime?
+  maxUsers  Int?
+  isActive  Boolean           @default(true)
 
   users                     User[]
   clients                   Client[]
@@ -29,6 +31,13 @@ model Company {
   rolePermissions           RolePermission[]
   Schedule                  Schedule[]
   documentationValuesCustom DocumentationValueCustom[]
+}
+
+enum SubscriptionPlan {
+  SOLO
+  TEAM
+  AGENCY
+  ENTERPRISE
 }
 
 model User {
