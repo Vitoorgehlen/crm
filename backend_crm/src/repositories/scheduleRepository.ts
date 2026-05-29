@@ -2,7 +2,6 @@ import { prisma } from "../prisma-client";
 import { Prisma } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
-// Criar um compromisso
 export async function addSchedule(
   data: Omit<Prisma.ScheduleUncheckedCreateInput, "creator" | "updater" | "deal"> & { dealId?: number; },
   userId: number
@@ -14,7 +13,16 @@ export async function addSchedule(
     })
     if (!user) throw new Error('Usuário não encontrado.');
 
-    const { dealId, finish, ...rest } = data;
+    const { dealId, finish, type, ...rest } = data;
+
+    if (type === 'callback') {
+      const hasCallback = await tx.schedule.findFirst({
+        where: { dealId, type: 'callback' }
+      })
+
+      if(hasCallback) throw new Error('Só pode existir um lembrete de chamada.');
+    }
+
     if (dealId) {
       const deal = await tx.deal.findUnique({
         where: { id: dealId },
@@ -62,7 +70,6 @@ export async function addSchedule(
   });
 }
 
-// Pega o compromissos
 export function getSchedules(userId: number) {
   const oneMonthAgo = new Date();
   oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
@@ -83,6 +90,29 @@ export function getSchedules(userId: number) {
         }
        }
      }
+  });
+}
+
+export async function getSchedulesCallback(paramId: number, userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { companyId: true }
+  });
+  if (!user) throw new Error('Usuário não encontrado.');
+
+  const deal = await prisma.deal.findUnique({
+    where: { id: paramId, companyId: user.companyId }
+  });
+  if (!deal) throw new Error('Negociação não encontrada.');
+
+  return prisma.schedule.findFirst({
+    where: {
+      dealId: deal.id,
+      type: 'callback'
+    },
+    orderBy: {
+      reminderAt: "asc",
+    },
   });
 }
 

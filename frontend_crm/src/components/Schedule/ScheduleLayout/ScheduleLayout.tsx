@@ -18,7 +18,6 @@ export default function ScheduleLayout() {
   const router = useRouter();
   const [schedules, setSchedules] = useState<Schedule[] | []>([]);
   const [clientBirth, setClientBirth] = useState<Client[] | []>([]);
-  const [showBirthday, setShowBirthday] = useState(true);
   const [isWeekOrMonth, setIsWeekOrMonth] = useState(true);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   const [hoveredDay, setHoveredDay] = useState<Date | null>(null);
@@ -164,24 +163,37 @@ export default function ScheduleLayout() {
     return text.charAt(0).toUpperCase() + text.slice(1, -1);
   }
 
-  const handleCreateSchedule = (newSchedule: Schedule) => {
-    setSchedules((prev) => [...prev, newSchedule]);
-  };
-
-  const handleUpdateSchedule = (updatedSchedule: Schedule) => {
-    setSchedules((prev) =>
-      prev.map((schedule) =>
-        schedule.id === updatedSchedule.id ? updatedSchedule : schedule,
-      ),
-    );
-  };
-
-  function handleShowBirthday() {
-    setShowBirthday((prev) => {
-      const updated = !prev;
-      localStorage.setItem("showBirthDay", JSON.stringify(updated));
-      return updated;
+  async function fetchSchedules() {
+    const res = await fetch(`${API}/schedule`, {
+      headers: { Authorization: `Bearer ${token}` },
     });
+
+    const data = await res.json();
+    setSchedules(data);
+  }
+
+  function getTooltipStyle() {
+    const tooltipWidth = 250;
+    const tooltipHeight = 220;
+
+    let top = tooltipPosition.y + 15;
+    let left = tooltipPosition.x;
+
+    if (top + tooltipHeight > window.innerHeight) {
+      top = tooltipPosition.y - tooltipHeight - 15;
+    }
+
+    if (left + tooltipWidth > window.innerWidth) {
+      left = window.innerWidth - tooltipWidth - 10;
+    }
+    if (left < 10) {
+      left = 10;
+    }
+
+    return {
+      top,
+      left,
+    };
   }
 
   function getBirthdaysForDay(day: Date) {
@@ -198,7 +210,7 @@ export default function ScheduleLayout() {
   }
 
   useEffect(() => {
-    if (!token || !showBirthday) return;
+    if (!token) return;
 
     const month = currentDate.getMonth() + 1;
 
@@ -219,7 +231,7 @@ export default function ScheduleLayout() {
     }
 
     fetchBirthDay();
-  }, [currentDate, showBirthday, token]);
+  }, [currentDate, token]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -487,23 +499,12 @@ export default function ScheduleLayout() {
             setIsOpenCard(false);
             setHoveredDay(null);
           }}
-          onCreate={handleCreateSchedule}
-          onUpdate={handleUpdateSchedule}
-          onDelete={(deleteId) => {
-            setSchedules((prev) => prev.filter((s) => s.id !== deleteId));
-          }}
+          onSuccess={fetchSchedules}
         />
       )}
 
       {hoveredDay && (
-        <div
-          className={styles.tooltip}
-          style={{
-            top: tooltipPosition.y + 15,
-            left: tooltipPosition.x,
-            transform: "translateX(-50%)",
-          }}
-        >
+        <div className={styles.tooltip} style={{ ...getTooltipStyle() }}>
           <div className={styles.tooltipTitle}>
             <h5>
               {hoveredDay.toLocaleDateString("pt-BR", {

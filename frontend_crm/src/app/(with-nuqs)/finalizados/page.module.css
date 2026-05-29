@@ -140,14 +140,6 @@
   border-radius: 8px;
 }
 
-.pendingSection p {
-  border: 1px solid var(--shadowColor);
-}
-
-.pendingSection p:last-child {
-  border: none;
-}
-
 .noItens {
   display: flex;
   flex-direction: column;

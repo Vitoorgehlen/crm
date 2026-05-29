@@ -41,7 +41,7 @@ const LIMIT = 5;
 
 export default function Deals() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
   const [initialIsLoadind, setInitialIsLoadind] = useState(true);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -334,7 +334,7 @@ export default function Deals() {
           token,
           apiUrl: API!,
           search,
-          teamDeals,
+          teamDeals: planRules?.includes("TEAM_DEALS") ? teamDeals : false,
           userId,
           limit,
           page: pageToFetch,
@@ -364,7 +364,7 @@ export default function Deals() {
         setInitialIsLoadind(false);
       }
     },
-    [token, search, teamDeals, userId, limit],
+    [token, search, teamDeals, planRules, userId, limit],
   );
 
   const fetchAllMethodData = useCallback(async () => {
@@ -385,7 +385,7 @@ export default function Deals() {
         token,
         apiUrl: API!,
         search,
-        teamDeals,
+        teamDeals: planRules?.includes("TEAM_DEALS") ? teamDeals : false,
         userId,
         limit,
         items,
@@ -418,7 +418,7 @@ export default function Deals() {
       setLoading(false);
       setInitialIsLoadind(false);
     }
-  }, [token, search, teamDeals, userId, limit]);
+  }, [token, search, teamDeals, planRules, userId, limit]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -449,9 +449,17 @@ export default function Deals() {
     }
 
     const t = setTimeout(fetchAllMethodData, 400);
-    fetchUsers();
+    if (planRules?.includes("TEAM_DASHBOARD")) fetchUsers();
     return () => clearTimeout(t);
-  }, [fetchAllMethodData, isLoading, userId, token, fetchUsers, router]);
+  }, [
+    fetchAllMethodData,
+    isLoading,
+    userId,
+    token,
+    planRules,
+    fetchUsers,
+    router,
+  ]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -630,7 +638,7 @@ export default function Deals() {
                 </div>
               )
             )}
-            ;
+
             {selectedDeal && (
               <ClosedDeal
                 isOpen={isCloseOpen}

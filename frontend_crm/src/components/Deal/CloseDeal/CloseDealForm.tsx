@@ -40,8 +40,11 @@ export default function CloseDealForm({
   initialPropertyValue,
   initialCommissionAmount,
 }: CloseDealFormProps) {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, planRules } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
+
+  const splitPlan = planRules?.includes("SPLIT_COMMISSION");
+  const splitCompanyPlan = planRules?.includes("COMPANY_COMMISSION_SPLIT");
 
   const [companyUsers, setCompanyUsers] = useState<
     Array<{ id: number; name?: string }>
@@ -121,7 +124,7 @@ export default function CloseDealForm({
   );
 
   const userOptions = [
-    { value: 0, label: "Empresa" },
+    ...(splitCompanyPlan ? [{ value: 0, label: "Empresa" }] : []),
     ...companyUsers.map((u) => ({
       value: u.id,
       label: u.name ?? `Usuário ${u.id}`,
@@ -148,6 +151,8 @@ export default function CloseDealForm({
   };
 
   function addSplit() {
+    if (!splitPlan) return;
+
     setSplits((prev) => [
       ...prev,
       {
@@ -257,6 +262,10 @@ export default function CloseDealForm({
     }
     if (!propertyValue || Number.isNaN(propertyValue) || propertyValue <= 0) {
       return "Informe o valor do imóvel.";
+    }
+
+    if (!splitPlan) {
+      return null;
     }
 
     if (splitMethod === "percentage") {
@@ -377,7 +386,7 @@ export default function CloseDealForm({
       }
     }
 
-    loadUsers();
+    if (planRules?.includes("SPLIT_COMMISSION")) loadUsers();
     return () => {
       mounted = false;
     };
@@ -387,7 +396,7 @@ export default function CloseDealForm({
     if (!isOpen) return;
     const initial: CommissionSplit[] = [];
 
-    if (deal.createdBy) {
+    if (splitPlan && deal.createdBy) {
       initial.push({
         userId: Number(deal.createdBy),
         isCompany: false,
@@ -398,14 +407,16 @@ export default function CloseDealForm({
       });
     }
 
-    initial.push({
-      userId: null,
-      isCompany: true,
-      percentage: 0,
-      amount: 0,
-      notes: "",
-      isPaid: false,
-    });
+    if (splitCompanyPlan) {
+      initial.push({
+        userId: null,
+        isCompany: true,
+        percentage: 0,
+        amount: 0,
+        notes: "",
+        isPaid: false,
+      });
+    }
 
     setSplits(initial);
     setPaymentMethod(
@@ -692,142 +703,146 @@ export default function CloseDealForm({
           </>
         )}
 
-        <div className={styles.boxCommissionShare}>
-          <div className={styles.splitCommissionTitle}>
-            <p>Divisão da comissão</p>
-            <button
-              className={`btn-action
+        {splitPlan && (
+          <div className={styles.boxCommissionShare}>
+            <div className={styles.splitCommissionTitle}>
+              <p>Divisão da comissão</p>
+              <button
+                className={`btn-action
                 ${styles.btnCommission} 
                 ${splitMethod === "percentage" && styles.btnActive}`}
-              type="button"
-              onClick={() => setSplitMethod("percentage")}
-            >
-              %
-            </button>
-            <button
-              className={`btn-action
+                type="button"
+                onClick={() => setSplitMethod("percentage")}
+              >
+                %
+              </button>
+              <button
+                className={`btn-action
                 ${styles.btnCommission} 
                 ${splitMethod === "amount" && styles.btnActive}`}
-              type="button"
-              onClick={() => setSplitMethod("amount")}
-            >
-              R$
-            </button>
-            <button
-              className={styles.addSplit}
-              type="button"
-              onClick={addSplit}
-            >
-              <MdOutlineAddCircle />
-            </button>
-          </div>
+                type="button"
+                onClick={() => setSplitMethod("amount")}
+              >
+                R$
+              </button>
+              {splitPlan && (
+                <button
+                  className={styles.addSplit}
+                  type="button"
+                  onClick={addSplit}
+                >
+                  <MdOutlineAddCircle />
+                </button>
+              )}
+            </div>
 
-          {splits.map((s, i) => {
-            const selectedOption = s.isCompany
-              ? userOptions.find((opt) => opt.value === 0) || null
-              : userOptions.find((opt) => opt.value === s.userId) || null;
+            {splits.map((s, i) => {
+              const selectedOption = s.isCompany
+                ? userOptions.find((opt) => opt.value === 0) || null
+                : userOptions.find((opt) => opt.value === s.userId) || null;
 
-            return (
-              <div key={i} className={styles.border}>
-                <div className={styles.boxSplitCommission}>
-                  <CustomSelect
-                    options={userOptions}
-                    value={selectedOption}
-                    onChange={(option) => {
-                      if (!option) return;
+              return (
+                <div key={i} className={styles.border}>
+                  <div className={styles.boxSplitCommission}>
+                    <CustomSelect
+                      options={userOptions}
+                      value={selectedOption}
+                      onChange={(option) => {
+                        if (!option) return;
 
-                      const isCompany = option.value === null;
+                        const isCompany = option.value === 0;
 
-                      updateSplit(i, {
-                        isCompany,
-                        userId: isCompany ? null : Number(option.value),
-                      });
-                    }}
-                  />
+                        updateSplit(i, {
+                          isCompany,
+                          userId: isCompany ? null : Number(option.value),
+                        });
+                      }}
+                    />
 
-                  {splitMethod === "percentage" ? (
-                    <>
-                      <input
-                        type="type"
-                        className={`form-base ${styles.form}`}
-                        style={{ width: 90 }}
-                        value={s.percentage === 0 ? "" : s.percentage}
-                        onChange={(e) => {
-                          let value = e.target.value;
-                          value = value.replace(",", ".");
+                    {splitMethod === "percentage" ? (
+                      <>
+                        <input
+                          type="type"
+                          className={`form-base ${styles.form}`}
+                          style={{ width: 90 }}
+                          value={s.percentage === 0 ? "" : s.percentage}
+                          onChange={(e) => {
+                            let value = e.target.value;
+                            value = value.replace(",", ".");
 
-                          if (value === "") {
-                            updateSplit(i, { percentage: 0 });
-                            return;
-                          }
+                            if (value === "") {
+                              updateSplit(i, { percentage: 0 });
+                              return;
+                            }
 
-                          const parsed = parseFloat(value);
+                            const parsed = parseFloat(value);
 
-                          if (!isNaN(parsed)) {
+                            if (!isNaN(parsed)) {
+                              updateSplit(i, {
+                                percentage: Math.min(parseFloat(value), 100),
+                              });
+                            }
+                          }}
+                        />
+                        <span> ≈ R$ {computedAmountFor(i)}</span>
+                      </>
+                    ) : (
+                      <>
+                        <input
+                          type="text"
+                          className={`form-base ${styles.form}`}
+                          style={{ width: 120 }}
+                          value={real(Number(s.amount ?? 0))}
+                          onChange={(e) => {
+                            let numeric =
+                              Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                            if (numeric >= 99999999.99) numeric = 99999999.99;
                             updateSplit(i, {
-                              percentage: Math.min(parseFloat(value), 100),
+                              amount: numeric,
                             });
-                          }
-                        }}
-                      />
-                      <span> ≈ R$ {computedAmountFor(i)}</span>
-                    </>
-                  ) : (
-                    <>
-                      <input
-                        type="text"
-                        className={`form-base ${styles.form}`}
-                        style={{ width: 120 }}
-                        value={real(Number(s.amount ?? 0))}
-                        onChange={(e) => {
-                          let numeric =
-                            Number(e.target.value.replace(/\D/g, "")) / 100;
+                          }}
+                          placeholder="Valor"
+                        />
+                      </>
+                    )}
 
-                          if (numeric >= 99999999.99) numeric = 99999999.99;
-                          updateSplit(i, {
-                            amount: numeric,
-                          });
-                        }}
-                        placeholder="Valor"
-                      />
-                    </>
-                  )}
+                    <input
+                      type="text"
+                      className={`form-base ${styles.form}`}
+                      placeholder="Observação"
+                      value={s.notes ?? ""}
+                      onChange={(e) =>
+                        updateSplit(i, {
+                          notes: e.target.value,
+                        })
+                      }
+                    />
 
-                  <input
-                    type="text"
-                    className={`form-base ${styles.form}`}
-                    placeholder="Observação"
-                    value={s.notes ?? ""}
-                    onChange={(e) =>
-                      updateSplit(i, {
-                        notes: e.target.value,
-                      })
-                    }
-                  />
-
-                  <button
-                    className={`${styles.addSplit} ${styles.removeSplit}`}
-                    type="button"
-                    onClick={() => removeSplit(i)}
-                  >
-                    <IoRemoveCircle />
-                  </button>
+                    <button
+                      className={`${styles.addSplit} ${styles.removeSplit}`}
+                      type="button"
+                      onClick={() => removeSplit(i)}
+                    >
+                      <IoRemoveCircle />
+                    </button>
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
 
-          <div className={styles.sum}>
-            {splitMethod === "percentage" ? (
-              <span>Somatório: {totalPercentage.toFixed(2)}%</span>
-            ) : (
-              <span>
-                Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
-                {commissionAmount.toFixed(2)}
-              </span>
-            )}
+            <div className={styles.sum}>
+              {splitMethod === "percentage" ? (
+                <span>Somatório: {totalPercentage.toFixed(2)}%</span>
+              ) : (
+                <span>
+                  Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
+                  {commissionAmount.toFixed(2)}
+                </span>
+              )}
+            </div>
           </div>
-        </div>
+        )}
 
         <div className={styles.btnCancelAndConfirm}>
           <button

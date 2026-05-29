@@ -12,10 +12,10 @@ interface AuthContextType {
   token: string | null;
   userType: "user" | "superuser" | null;
   userId: number | null;
-  companyPlan: string | null;
+  planRules: string[] | null;
   login: (
     token: string,
-    companyPlan: string,
+    planRules: string[] | null,
     userType: "user" | "superuser",
   ) => void;
   permissions: string[];
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userType, setUserType] = useState<"user" | "superuser" | null>(null);
   const [userId, setUserId] = useState<number | null>(null);
   const [permissions, setPermissions] = useState<string[]>([]);
-  const [companyPlan, setCompanyPlan] = useState<string | null>(null);
+  const [planRules, setPlanRules] = useState<string[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   function getUserIdFromToken(token: string | null): number | null {
@@ -78,16 +78,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = (
     newToken: string,
-    newCompanyPlan: string,
+    newPlanRules: string[] | null,
     newUserType: "user" | "superuser",
   ) => {
     setToken(newToken);
     setUserType(newUserType);
     setUserId(getUserIdFromToken(newToken));
-    setCompanyPlan(newCompanyPlan);
+    setPlanRules(newPlanRules);
+
     localStorage.setItem("token", newToken);
     localStorage.setItem("userType", newUserType);
-    localStorage.setItem("companyPlan", newCompanyPlan);
+    localStorage.setItem("planRules", JSON.stringify(newPlanRules));
     if (newUserType === "user") fetchPermissions(newToken);
   };
 
@@ -96,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUserType(null);
     setUserId(null);
     setPermissions([]);
-    setCompanyPlan(null);
+    setPlanRules(null);
     localStorage.removeItem("token");
     localStorage.removeItem("userType");
     localStorage.removeItem("companyPlan");
@@ -105,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setIsLoading(true);
     const savedToken = localStorage.getItem("token");
-    const savedCompanyPlan = localStorage.getItem("companyPlan");
+    const savedPlanRules = localStorage.getItem("planRules");
     const savedUserType = localStorage.getItem("userType") as
       | "user"
       | "superuser"
@@ -113,8 +114,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (savedToken && savedUserType) {
       setToken(savedToken);
       setUserType(savedUserType);
-      setCompanyPlan(savedCompanyPlan);
       setUserId(getUserIdFromToken(savedToken));
+      if (savedPlanRules) setPlanRules(JSON.parse(savedPlanRules));
       if (savedUserType === "user") fetchPermissions(savedToken);
     }
     setIsLoading(false);
@@ -126,7 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         token,
         userType,
         userId,
-        companyPlan,
+        planRules,
         login,
         permissions,
         logout,

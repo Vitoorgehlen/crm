@@ -1,6 +1,7 @@
 import { prisma } from "../prisma-client";
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { PLAN_CONFIG } from "../utils/plans";
 
 
 export async function tokenIndex(email: string, password: string) {
@@ -8,6 +9,15 @@ export async function tokenIndex(email: string, password: string) {
   let userType = 'user';
   user = await prisma.user.findUnique({
     where: { email },
+    select: {
+      id: true,
+      password: true,
+      company: {
+        select: {
+          plan: true
+        }
+      }
+    }
   });
 
   if (!user) {
@@ -34,6 +44,13 @@ export async function tokenIndex(email: string, password: string) {
   const token = jwt.sign({ id, email }, process.env.TOKEN_SECRET, {
     expiresIn: expiration,
   });
-  return { token, userType};
+
+  const companyPlan = userType === 'user' && 'company' in user ? user.company?.plan : undefined;
+  const plan = companyPlan ? PLAN_CONFIG[companyPlan] : null;
+  const planRules = plan
+    ? Object.entries(plan.features).filter(([_, enabled]) => enabled === true).map(([feature]) => feature)
+    : [];
+
+  return { token, planRules, userType};
 }
 

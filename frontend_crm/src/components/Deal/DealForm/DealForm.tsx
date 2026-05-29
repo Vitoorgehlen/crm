@@ -11,6 +11,7 @@ import {
   Documentation,
   Note,
   PaymentMethod,
+  Schedule,
 } from "@/types";
 import { MdClose } from "react-icons/md";
 import { formatDateForCards } from "@/utils/dateUtils";
@@ -30,6 +31,7 @@ import Link from "next/link";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
+import Callback from "@/components/Schedule/CallbackPopup/Callback";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -52,6 +54,8 @@ export default function DealForm({
   const [isCloseOpen, setIsCloseOpen] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [showClientPopup, setShowClientPopup] = useState(false);
+  const [openCallback, setOpenCallback] = useState(false);
+  const [callback, setCallback] = useState<Schedule | null>(null);
 
   const [searchClient, setSearchClient] = useState("");
   const [clientId, setClientId] = useState<number | undefined>(undefined);
@@ -372,6 +376,27 @@ export default function DealForm({
     }
   };
 
+  const fetchCallback = useCallback(async () => {
+    if (!deal) return;
+    setLoading("read");
+
+    try {
+      const res = await fetch(`${API}/schedule-callback/${deal.id}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar a documentação");
+
+      setCallback(data);
+    } catch (err: unknown) {
+      console.error(err);
+    } finally {
+      setLoading(null);
+    }
+  }, [token]);
+
   const fetchDocs = useCallback(async () => {
     setLoading("read");
 
@@ -428,7 +453,8 @@ export default function DealForm({
 
   useEffect(() => {
     fetchDocs();
-  }, [fetchDocs]);
+    fetchCallback();
+  }, [fetchDocs, fetchCallback]);
 
   useEffect(() => {
     const result = sumDocs(
@@ -613,6 +639,28 @@ export default function DealForm({
                         deal?.updatedAt ?? deal?.createdAt ?? "",
                       )}`}
                       </span>
+
+                      <div className={styles.boxEvent}>
+                        <button
+                          type="button"
+                          className={`glass ${styles.btnEvent} ${styles.invisible}`}
+                          onClick={() => setOpenCallback(true)}
+                        >
+                          {callback ? "Remarcar" : "Marcar"}
+                        </button>
+                        {callback ? (
+                          <span>{callback.label}</span>
+                        ) : (
+                          <span>Agende o próximo contato!</span>
+                        )}
+                        <button
+                          type="button"
+                          className={`glass ${styles.btnEvent}`}
+                          onClick={() => setOpenCallback(true)}
+                        >
+                          {callback ? "Remarcar" : "Marcar"}
+                        </button>
+                      </div>
                     </>
                   )}
                 </div>
@@ -1139,6 +1187,16 @@ export default function DealForm({
           </div>
         )}
 
+        {openCallback && deal && (
+          <Callback
+            isOpen={openCallback}
+            schedule={callback}
+            deal={deal}
+            onClose={() => setOpenCallback(false)}
+            onSuccess={async () => await fetchCallback()}
+          />
+        )}
+
         {deleteContext && (
           <WarningDeal
             message={deleteContext.message}
@@ -1166,9 +1224,7 @@ export default function DealForm({
             initialFgtsValue={fgtsValue}
             initialFinancingValue={financingValue}
             initialCreditLetterValue={creditLetterValue}
-            newStep={async () => {
-              /* noop */
-            }}
+            newStep={async () => {}}
           />
         )}
         {isCreateOpen && (

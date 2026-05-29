@@ -28,8 +28,8 @@ export async function fetchDeals(
 ): Promise<Deal[]> {
     const { team = false, search = '', status, statusClient, selectedUser = null } = filters;
 
-    const basePath = team ? '/team-deals' : '/deals';
-    
+    let basePath = team ? '/team-deals' : '/deals';
+   
     const params = new URLSearchParams();
     
     if (search.trim()) params.set('name', search.trim());
@@ -80,10 +80,10 @@ export async function fetchDealsList(params: FetchDealsParams): Promise<FetchDea
   if (userId) queryParams.append("userId", userId);
   if (dealId) queryParams.append("dealId", dealId);
 
-  const url = teamDeals
+  let url = teamDeals
     ? `${apiUrl}/team-deals?${queryParams.toString()}`
     : `${apiUrl}/deals?${queryParams.toString()}`;
-
+  
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
   });

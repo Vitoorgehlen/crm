@@ -16,13 +16,10 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Clients() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
 
   const [users, setUsers] = useState<User[]>([]);
-
-  const [ignoreClientEffect, setIgnoreClientEffect] = useState(false);
-  const [clientIdRaw, setClientId] = useQueryState("clientId");
-  const clientId = clientIdRaw ?? null;
+  const [clientId] = useQueryState("clientId");
 
   const [clients, setClients] = useState<Client[]>([]);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
@@ -66,10 +63,12 @@ export default function Clients() {
         if (teamClients && selectedUser)
           params.append("userId", String(selectedUser.id));
         if (clientId) params.append("clientId", clientId);
+        const hasTeamDeals = planRules?.includes("TEAM_DEALS");
 
-        const url = teamClients
-          ? `${API}/team-clients?${params.toString()}`
-          : `${API}/clients?${params.toString()}`;
+        const url =
+          teamClients && hasTeamDeals
+            ? `${API}/team-clients?${params.toString()}`
+            : `${API}/clients?${params.toString()}`;
 
         const res = await fetch(url, {
           headers: { Authorization: `Bearer ${token}` },
@@ -91,7 +90,7 @@ export default function Clients() {
         setInitialLoading(false);
       }
     },
-    [token, teamClients, search, selectedUser, limit, clientId],
+    [token, teamClients, search, planRules, selectedUser, limit, clientId],
   );
 
   const fetchUsers = useCallback(async () => {
@@ -183,11 +182,11 @@ export default function Clients() {
   }, [page, token, clientId, teamClients, selectedUser, search]);
 
   useEffect(() => {
-    if (token) fetchUsers();
-  }, [token, fetchUsers]);
+    if (!token) return;
+    if (planRules?.includes("TEAM_DEALS")) fetchUsers();
+  }, [token, planRules]);
 
   useEffect(() => {
-    if (ignoreClientEffect) return;
     if (!clientId || clients.length === 0) return;
     if (clientId === null) return;
 

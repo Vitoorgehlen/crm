@@ -20,12 +20,7 @@ import {
 } from "@/types";
 import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
-import { IoRemoveCircle } from "react-icons/io5";
-import {
-  MdOutlineAddCircle,
-  MdCheckBoxOutlineBlank,
-  MdCheckBox,
-} from "react-icons/md";
+import { MdCheckBoxOutlineBlank, MdCheckBox } from "react-icons/md";
 import { GiCheckMark } from "react-icons/gi";
 import { getDaysSinceLastContact } from "@/utils/getDaysLastContact";
 import { BsCashCoin } from "react-icons/bs";
@@ -34,6 +29,7 @@ import Link from "next/link";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
+import EditCommission from "../EditCommission/EditCommission";
 
 export default function ClosedDeal({
   isOpen,
@@ -43,8 +39,11 @@ export default function ClosedDeal({
   newStep,
   onUpdateDealShare,
 }: CloseDealFormProps) {
-  const { token, permissions, isLoading, userId } = useAuth();
+  const { token, permissions, isLoading, userId, planRules } = useAuth();
   const API = process.env.NEXT_PUBLIC_API_URL;
+
+  const splitPlan = planRules?.includes("SPLIT_COMMISSION");
+  const splitCompanyPlan = planRules?.includes("COMPANY_COMMISSION_SPLIT");
 
   const [companyUsers, setCompanyUsers] = useState<
     Array<{ id: number; name?: string }>
@@ -124,6 +123,8 @@ export default function ClosedDeal({
   );
   const [splits, setSplits] = useState<CommissionSplit[]>([]);
 
+  const [editCommission, setEditCommission] = useState(false);
+
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -148,7 +149,7 @@ export default function ClosedDeal({
   );
 
   const userOptions = [
-    { label: "Empresa", value: 0 },
+    ...(splitCompanyPlan ? [{ value: 0, label: "Empresa" }] : []),
     ...companyUsers.map((u) => ({
       label: u.name ?? `Usuário ${u.id}`,
       value: u.id,
@@ -254,7 +255,7 @@ export default function ClosedDeal({
 
     if (splitMethod === "percentage") {
       const pct = s.percentage ?? 0;
-      return (commissionAmount * pct) / 100;
+      return Number(((commissionAmount * pct) / 100).toFixed(2));
     }
 
     return s.amount ?? 0;
@@ -615,7 +616,7 @@ export default function ClosedDeal({
       }
     }
 
-    loadUsers();
+    if (planRules?.includes("SPLIT_COMMISSION")) loadUsers();
     return () => {
       mounted = false;
     };
@@ -1015,35 +1016,18 @@ export default function ClosedDeal({
 
             <div className={styles.boxCommissionShare}>
               <div className={styles.splitCommissionTitle}>
-                <p>Divisão da comissão</p>
+                <div className={styles.gap} />
+                <p>{splitPlan ? "Comissões" : "Comissão"}</p>
 
-                <button
-                  className={`btn-action ${styles.btnCommission} ${
-                    splitMethod === "percentage" && styles.btnActive
-                  }`}
-                  type="button"
-                  onClick={() => setSplitMethod("percentage")}
-                >
-                  %
-                </button>
-
-                <button
-                  className={`btn-action ${styles.btnCommission} ${
-                    splitMethod === "amount" && styles.btnActive
-                  }`}
-                  type="button"
-                  onClick={() => setSplitMethod("amount")}
-                >
-                  R$
-                </button>
-
-                <button
-                  className={styles.addSplit}
-                  type="button"
-                  onClick={addSplit}
-                >
-                  <MdOutlineAddCircle />
-                </button>
+                {splitPlan && (
+                  <button
+                    type="button"
+                    className={`btn-action glass ${styles.btnEditCommission}`}
+                    onClick={() => setEditCommission(true)}
+                  >
+                    Editar comissões
+                  </button>
+                )}
               </div>
 
               {splits.map((s, i) => {
@@ -1054,128 +1038,45 @@ export default function ClosedDeal({
                 return (
                   <div key={i} className={styles.border}>
                     <div className={styles.boxSplitCommission}>
-                      <CustomSelect
-                        options={userOptions}
-                        value={selectedOption}
-                        isDisabled={s.isPaid}
-                        onChange={(option) => {
-                          if (!option) return;
-
-                          const isCompany = option.value === 0;
-
-                          updateSplit(i, {
-                            isCompany,
-                            userId: isCompany ? null : Number(option.value),
-                          });
-                        }}
-                      />
-
-                      <input
-                        type="text"
-                        className={`form-base ${styles.form}`}
-                        placeholder="Observação"
-                        value={s.notes ?? ""}
-                        onChange={(e) =>
-                          updateSplit(i, {
-                            notes: e.target.value,
-                          })
-                        }
-                      />
+                      <p>{selectedOption?.label}</p>
+                      <span>{s.notes ?? ""}</span>
                       {s.isPaid && (
-                        <>
-                          <button
-                            className={`btn-action glass ${styles.btnPaidActive}`}
-                            type="button"
-                            onClick={() => {
-                              const total =
-                                splitMethod === "percentage"
-                                  ? computedAmountFor(i)
-                                  : (splits[i].amount ?? 0);
+                        <button
+                          className={`btn-action glass ${styles.btnPaidActive}`}
+                          type="button"
+                          onClick={() => {
+                            const updated = {
+                              ...splits[i],
+                              received: 0,
+                              isPaid: false,
+                            };
 
-                              const updated = {
-                                ...splits[i],
-                                received: 0,
-                                isPaid: false,
-                              };
-
-                              updateSplit(i, updated);
-                              updateDealShare(updated);
-                            }}
-                          >
-                            <GiCheckMark /> Recebido
-                          </button>
-
-                          <button
-                            className={`${styles.addSplit} ${styles.removeSplit}`}
-                            type="button"
-                            onClick={() => removeSplit(i)}
-                          >
-                            <IoRemoveCircle />
-                          </button>
-                        </>
+                            updateSplit(i, updated);
+                            updateDealShare(updated);
+                          }}
+                        >
+                          <GiCheckMark /> Recebido
+                        </button>
                       )}
                     </div>
 
                     {!s.isPaid && (
                       <div className={styles.boxSplitCommission}>
-                        {splitMethod === "percentage" ? (
+                        {splitPlan && (
                           <div className={styles.inputPercentage}>
                             <div className={styles.inputWrapper}>
-                              <input
-                                type="text"
-                                className={`form-base ${styles.form}`}
-                                style={{ width: 60 }}
-                                disabled={s.isPaid}
-                                value={s.percentage === 0 ? "" : s.percentage}
-                                onChange={(e) => {
-                                  let value = e.target.value.replace(",", ".");
-
-                                  if (value === "") {
-                                    updateSplit(i, { percentage: 0 });
-                                    return;
-                                  }
-
-                                  const parsed = parseFloat(value);
-
-                                  if (!isNaN(parsed)) {
-                                    updateSplit(i, {
-                                      percentage: Math.min(parsed, 100),
-                                    });
-                                  }
-                                }}
-                              />
-                              <span className={styles.suffix}>%</span>
+                              <span>
+                                {s.percentage === 0
+                                  ? ""
+                                  : s.percentage?.toFixed(2)}
+                                %
+                              </span>
                             </div>
-                            <span className={styles.totalPercentage}>
-                              {" "}
-                              ≈ <br />
-                              R$ <br />
-                              {computedAmountFor(i)}
-                            </span>
                           </div>
-                        ) : (
-                          <input
-                            type="text"
-                            className={`form-base ${styles.form}`}
-                            style={{ width: 110 }}
-                            disabled={s.isPaid}
-                            value={real(Number(s.amount ?? 0))}
-                            onChange={(e) => {
-                              let numeric =
-                                Number(e.target.value.replace(/\D/g, "")) / 100;
-
-                              if (numeric >= 99999999.99) numeric = 99999999.99;
-
-                              updateSplit(i, {
-                                amount: numeric,
-                              });
-                            }}
-                            placeholder="Valor"
-                          />
                         )}
 
                         <div className={styles.paidValue}>
-                          <p>Valor recebido:</p>
+                          <span>Valor recebido:</span>
                           <CurrencyInput
                             className={`form-base ${styles.form}`}
                             placeholder="Pago"
@@ -1214,30 +1115,43 @@ export default function ClosedDeal({
                         >
                           Receber
                         </button>
-
-                        <button
-                          className={`${styles.addSplit} ${styles.removeSplit}`}
-                          type="button"
-                          onClick={() => removeSplit(i)}
-                        >
-                          <IoRemoveCircle />
-                        </button>
                       </div>
                     )}
                   </div>
                 );
               })}
 
-              <div className={styles.sum}>
-                {splitMethod === "percentage" ? (
-                  <span>Somatório: {totalPercentage.toFixed(2)}%</span>
-                ) : (
-                  <span>
-                    Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
-                    {commissionAmount.toFixed(2)}
-                  </span>
-                )}
-              </div>
+              {splitPlan && (
+                <div className={styles.sum}>
+                  {splitMethod === "percentage" ? (
+                    <span>Somatório: {totalPercentage.toFixed(2)}%</span>
+                  ) : (
+                    <span>
+                      Somatório: R$ {totalAmounts.toFixed(2)} / Comissão R${" "}
+                      {commissionAmount.toFixed(2)}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {editCommission && (
+                <EditCommission
+                  splits={splits}
+                  splitMethod={splitMethod}
+                  setSplitMethod={setSplitMethod}
+                  commissionAmount={commissionAmount}
+                  splitPlan={splitPlan}
+                  userOptions={userOptions}
+                  onAddSplit={addSplit}
+                  onRemoveSplit={removeSplit}
+                  onUpdateSplit={updateSplit}
+                  computedAmountFor={computedAmountFor}
+                  totalPercentage={totalPercentage}
+                  totalAmounts={totalAmounts}
+                  onUpdateDealShare={updateDealShare}
+                  onClose={() => setEditCommission(false)}
+                />
+              )}
             </div>
 
             <div className={styles.btnCancelAndConfirm}>

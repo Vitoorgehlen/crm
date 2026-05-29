@@ -7,7 +7,7 @@ const Footer = () => {
   return (
     <div className={styles.content}>
       <span></span>
-      <span>© 2026 Cloop. Seu funil imobiliário, simplificado.</span>
+      <span>© 2026 Cloop. CRM imobiliário inteligente.</span>
       <span>V{packageJson.version}</span>
     </div>
   );

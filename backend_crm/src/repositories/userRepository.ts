@@ -3,7 +3,7 @@ import { Prisma, UserRole } from '@prisma/client';
 import bcrypt from 'bcrypt';
 import { isEmail } from 'validator';
 import { checkUserPermission } from './rolePermissionRepository';
-import { sameCompany } from '../utils/sameCompany';
+import { PLAN_CONFIG } from "../utils/plans";
 
 
 export async function addUser(
@@ -24,8 +24,10 @@ export async function addUser(
     where: { id: userId },
     select: { companyId: true }
   });
-
   if (!creator) throw new Error('Usuário criador não encontrado');
+
+  const canCreateUser = await checkUserPermission(userId, 'USER_CREATE');
+  if (!canCreateUser) throw new Error('Você não tem permissão para criar usuários.');
 
   const limitUsers = await prisma.company.findUnique({
     where: { id: creator.companyId },
@@ -55,13 +57,18 @@ export async function addUser(
 }
 
 export async function getUser(id: number) {
-  const userCompany = await prisma.user.findUnique({
+  const user = await prisma.user.findUnique({
     where: { id },
-    select: { companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true }
   })
+  if (!user) throw new Error('Usuário não encontrado.');
+
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
 
   return prisma.user.findMany({
-    where: { companyId: userCompany?.companyId },
+    where: { companyId: user.companyId },
   });
 }
 
@@ -99,18 +106,26 @@ export async function updateTeamUser(
   id: number,
   newData: Partial<Prisma.UserUpdateInput>,
 ) {
-  const isSameCompany = sameCompany({requesterId: userId, targetId: id});
-  if (!isSameCompany) throw new Error('Usuários não são da mesma empresa.' );
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { company: { select: { plan: true } }, companyId: true }
+  });
+
+  const targetUser = await prisma.user.findUnique({
+    where: { id, companyId: user?.companyId },
+    select: { role: true, companyId: true }
+  });
+  if (!user || !targetUser) throw new Error('Usuário não encontrado.');
 
   const hasAccess = await checkUserPermission(userId, 'USER_UPDATE');
   if (!hasAccess) throw new Error('Você não tem permissão para editar o usuário.' );
 
-  const user = await prisma.user.findUnique({
-    where: { id },
-    select: { role: true },
-  });
-  if (!user) throw new Error('Usuário não encontrado');
-  if (user.role === 'ADMIN') throw new Error('Você não tem permisão de editar esse usuário');
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
+
+  if (targetUser.role === 'ADMIN')
+    throw new Error('Você não tem permisão de editar esse usuário');
 
   const dataToUpdate: any = { ...newData };
 
@@ -133,16 +148,20 @@ export async function deleteTeamMember(
   requesterRole: UserRole,
   targetId: number
 ) {
-  const isSameCompany = sameCompany({requesterId, targetId });
-  if (!isSameCompany) throw new Error('Usuários não são da mesma empresa.' );
+  const user = await prisma.user.findUnique({
+    where: { id: requesterId },
+    select: { company: { select: { plan: true } }, companyId: true }
+  })
+  if (!user) throw new Error('Usuário não encontrado.');
 
-  console.log(requesterRole)
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.ROLE_SYSTEM;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
 
-  if (requesterRole !== 'ADMIN') {
+  if (requesterRole !== 'ADMIN')
     throw new Error('Apenas administradores podem remover usuários');
-  }
 
   return await prisma.user.delete({
-    where: { id: targetId }
+    where: { id: targetId, companyId: user.companyId }
   });
 }

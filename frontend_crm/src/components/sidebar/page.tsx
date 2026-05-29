@@ -18,8 +18,11 @@ import { useState } from "react";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const { permissions } = useAuth();
+  const { permissions, planRules } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+
+  const expensePlan = planRules?.includes("EXPENSE_DASHBOARD");
+  const requestPlan = planRules?.includes("DELETE_REQUESTS");
 
   return (
     <>
@@ -152,7 +155,7 @@ const Sidebar = () => {
                 <p className={`linkText ${styles.linkText}`}>Comissões</p>
               </div>
             </Link>
-            {permissions.includes("ALL_DEAL_DELETE") && (
+            {permissions.includes("ALL_DEAL_DELETE") && expensePlan && (
               <Link href="/desempenho" onClick={() => setIsOpen(false)}>
                 <div
                   className={`${pathname === "/desempenho" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
@@ -162,7 +165,7 @@ const Sidebar = () => {
                 </div>
               </Link>
             )}
-            {permissions.includes("ALL_DEAL_DELETE") && (
+            {permissions.includes("ALL_DEAL_DELETE") && requestPlan && (
               <Link href="/requisicoes" onClick={() => setIsOpen(false)}>
                 <div
                   className={`${pathname === "/requisicoes" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}

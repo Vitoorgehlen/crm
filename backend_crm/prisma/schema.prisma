@@ -353,6 +353,7 @@ enum recurrenceTypes {
 model Schedule {
   id         Int       @id @default(autoincrement())
   dealId     Int?
+  type       String?
   label      String
   finish     Boolean?
   reminderAt DateTime?

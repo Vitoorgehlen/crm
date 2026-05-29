@@ -175,6 +175,7 @@
 .formNote {
   width: 100%;
   height: 100%;
+  min-height: 200px;
   overflow-y: auto;
   color: var(--primaryText);
   word-wrap: break-word;
@@ -184,14 +185,30 @@
   line-height: 1.4;
 }
 
-.btnSave {
-  color: var(--textBase);
-  font-size: 1.5rem;
-  border: none;
+.btnTask {
+  padding: 5px;
+  color: var(--primaryText);
+  border-radius: 6px;
+  width: 100%;
+  max-width: 50px;
   cursor: pointer;
+
+  border: 1px solid var(--textBase);
 }
 
-.btnSave:hover {
+.btnDelete {
+  max-width: 180px;
+  border: 1px solid var(--shadowColor);
+  color: var(--textBase);
+}
+
+.btnTask:hover {
+  border: 1px solid var(--primaryColor);
+}
+
+.btnDelete:hover {
+  background: var(--errorColor);
+  border: 1px solid var(--errorColor);
   color: var(--primaryText);
 }
 
@@ -215,6 +232,25 @@
   margin: 5px 0;
   width: 95%;
   gap: 5px;
+}
+
+.titleTask {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.lineTitleTask {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  justify-content: space-between;
+}
+
+.underlineTitleTask {
+  max-width: 200px;
 }
 
 .inputForm {
@@ -301,6 +337,17 @@
   border-radius: 10px;
   max-width: 100%;
   width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .titleTask {
+    flex-direction: column;
+  }
+
+  .underlineTitleTask {
+    max-width: 250px;
+    gap: 20px;
+  }
 }
 
 @media (max-width: 768px) {

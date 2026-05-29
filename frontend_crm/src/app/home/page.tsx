@@ -15,7 +15,7 @@ import {
 } from "@/types";
 import { useAuth } from "@/contexts/AuthContext";
 import ScheduleLayout from "@/components/Schedule/ScheduleLayout/ScheduleLayout";
-import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
+import { RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { FaTimes, FaCheck } from "react-icons/fa";
 import { IoIosArrowBack, IoIosArrowForward } from "react-icons/io";
 
@@ -53,6 +53,9 @@ export default function Home() {
   const [isOpenNote, setIsOpenNote] = useState(true);
   const [isOpenSchedule, setIsOpenSchedule] = useState(true);
   const [error, setError] = useState("");
+
+  const hasFinishedTasks =
+    (tasks?.filter((task) => task.isFinish).length ?? 0) > 0;
 
   const fetchMe = useCallback(async () => {
     try {
@@ -175,6 +178,24 @@ export default function Home() {
       if (!res.ok) throw new Error("Erro ao criar tarefa");
       await res.json();
       resetTask();
+      fetchTasks();
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function clearTasks() {
+    try {
+      const res = await fetch(`${API}/tasks-clear/`, {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro ao apagar tarefa");
+      await res.json();
       fetchTasks();
     } catch (err) {
       console.error(err);
@@ -516,33 +537,50 @@ export default function Home() {
                     <span>Editando...</span>
                   </>
                 ) : (
-                  <>
-                    <input
-                      type="text"
-                      placeholder="Tarefa"
-                      value={taskContent}
-                      className={`form-base ${styles.inputForm}`}
-                      onChange={(e) => setTaskContent(e.target.value)}
-                    />
-
-                    <CustomSelect
-                      options={priorityOptions}
-                      value={selectedPriority}
-                      onChange={(option) => {
-                        if (option) {
-                          setTaskPriority(option.value as TasksPriority);
-                        }
-                      }}
-                    />
-
-                    <button
-                      type="button"
-                      className={styles.btnSave}
-                      onClick={handleAddTask}
+                  <div className={styles.titleTask}>
+                    <div className={styles.lineTitleTask}>
+                      <input
+                        type="text"
+                        placeholder="Tarefa"
+                        value={taskContent}
+                        className={`form-base ${styles.inputForm}`}
+                        onChange={(e) => setTaskContent(e.target.value)}
+                      />
+                    </div>
+                    <div
+                      className={`${styles.lineTitleTask} ${styles.underlineTitleTask}`}
                     >
-                      <RiSave3Fill />
-                    </button>
-                  </>
+                      <CustomSelect
+                        options={priorityOptions}
+                        value={selectedPriority}
+                        onChange={(option) => {
+                          if (option) {
+                            setTaskPriority(option.value as TasksPriority);
+                          }
+                        }}
+                      />
+
+                      {taskContent && (
+                        <button
+                          type="button"
+                          className={`btn-action glass ${styles.btnTask}`}
+                          onClick={handleAddTask}
+                        >
+                          <span>Salvar</span>
+                        </button>
+                      )}
+
+                      {!taskContent && hasFinishedTasks && (
+                        <button
+                          type="button"
+                          className={`btn-action glass ${styles.btnTask} ${styles.btnDelete}`}
+                          onClick={clearTasks}
+                        >
+                          <span>Limpar tarefas concluídas</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 )}
               </div>
 

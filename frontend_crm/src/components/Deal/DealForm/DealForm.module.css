@@ -136,6 +136,37 @@
   font-size: 1.5rem;
 }
 
+.invisible {
+  opacity: 0;
+  visibility: hidden;
+  user-select: none;
+  cursor: default;
+}
+
+.boxEvent {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: center;
+  color: var(--textBase);
+}
+
+.btnEvent {
+  padding: 5px;
+  border-radius: 6px;
+  color: var(--primaryText);
+  width: 80px;
+  border: 1px solid var(--textBase);
+  cursor: pointer;
+}
+
+.btnEvent:hover {
+  background: var(--primaryColor);
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
+}
+
 .titleAndInputs {
   width: 100%;
   gap: 5px;

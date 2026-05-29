@@ -25,7 +25,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Config() {
   const router = useRouter();
-  const { token, permissions, isLoading, logout } = useAuth();
+  const { token, permissions, isLoading, logout, planRules } = useAuth();
   const [isConfigUser, setIsConfigUser] = useState(true);
   const [isConfigTeam, setIsConfigTeam] = useState(false);
   const [isOpenPermissions, setIsOpenPermissions] = useState(false);
@@ -38,6 +38,8 @@ export default function Config() {
   const [user, setUser] = useState<User | null>(null);
   const [users, setUsers] = useState<User[]>([]);
 
+  const rolePlan = planRules?.includes("ROLE_SYSTEM");
+  const permissionsPlan = planRules?.includes("EDITABLE_PERMISSIONS");
   const [loading, setLoading] = useState(false);
 
   const availableTabs = [
@@ -65,7 +67,7 @@ export default function Config() {
 
   const handleUpdate = async () => {
     await fetchMe();
-    await fetchUsers();
+    if (rolePlan) await fetchUsers();
   };
 
   const fetchUsers = useCallback(async () => {
@@ -105,8 +107,8 @@ export default function Config() {
     }
 
     fetchMe();
-    fetchUsers();
-  }, [isLoading, token]);
+    if (rolePlan) fetchUsers();
+  }, [isLoading, token, rolePlan]);
 
   return (
     <div className={styles.page}>
@@ -137,7 +139,7 @@ export default function Config() {
                   <FaUserEdit />
                 </button>
               </Tooltip>
-              {permissions.includes("USER_UPDATE") && (
+              {permissions.includes("USER_UPDATE") && rolePlan && (
                 <Tooltip label={"Configurações da equipe"}>
                   <button
                     className={`${
@@ -154,7 +156,7 @@ export default function Config() {
                   </button>
                 </Tooltip>
               )}
-              {user?.role === "ADMIN" && (
+              {user?.role === "ADMIN" && permissionsPlan && (
                 <Tooltip label={"Permissões"}>
                   <button
                     className={`${
@@ -194,7 +196,7 @@ export default function Config() {
 
         <div className={styles.content}>
           <div className={styles.settings}>
-            {isConfigTeam && (
+            {isConfigTeam && rolePlan && (
               <div className={styles.contentConfig}>
                 <button
                   className={`glass ${styles.createUser}`}
@@ -291,7 +293,7 @@ export default function Config() {
           />
         )}
 
-        {isOpenCreateUsers && (
+        {isOpenCreateUsers && rolePlan && (
           <ConfigUsers
             mode="create"
             onUpdate={() => handleUpdate()}
@@ -299,7 +301,7 @@ export default function Config() {
           />
         )}
 
-        {isOpenPermissions && (
+        {isOpenPermissions && permissionsPlan && (
           <Permissions
             userRole={user?.role || ""}
             onClose={() => setIsOpenPermissions(false)}

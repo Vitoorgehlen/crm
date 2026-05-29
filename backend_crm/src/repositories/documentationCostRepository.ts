@@ -3,7 +3,6 @@ import { Prisma } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 
 
-// Criar um DocumentationCost
 export async function addDocumentationCost(
   data: Omit<Prisma.DocumentationCostCreateInput,
   'creator' | 'deal' | 'updater' > & {
@@ -49,7 +48,6 @@ export async function addDocumentationCost(
   });
 }
 
-// Pega o valor da documentação
 export function getDocumentationCost(dealId: number) {
   return prisma.documentationCost.findMany({
     where: { dealId },
@@ -57,7 +55,6 @@ export function getDocumentationCost(dealId: number) {
   });
 }
 
-// Atualizar documentação
 export async function updateDocumentationCost(
   id: number,
   newData: Partial<Prisma.DocumentationCostUncheckedUpdateInput>,

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
-import { addTasks, deleteTasks, getTasks, updateTasks } from '../repositories/tasksRepository';
+import { addTasks, clearTasks, deleteTasks, getTasks, updateTasks } from '../repositories/tasksRepository';
 
 const router = Router();
 
@@ -59,6 +59,20 @@ router.put('/tasks/:id', loginRequired, async (req: Request, res: Response) => {
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Erro ao atualizar a Tarefa' });
+  }
+});
+
+router.delete('/tasks-clear/', loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: 'Usuário não identificada.' });
+
+  try {
+    const deletedTask = await clearTasks(userId);
+    return res.status(200).json(deletedTask);
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: 'Erro ao deletar a Tarefa' });
   }
 });
 

@@ -2,7 +2,6 @@ import { prisma } from "../prisma-client";
 import { Prisma } from '@prisma/client';
 import { checkUserPermission } from './rolePermissionRepository';
 import { PLAN_CONFIG } from "../utils/plans";
-import { cp } from "fs";
 
 export async function addClient(
   creatorId: number,
@@ -59,24 +58,38 @@ export async function getClientById(
   id: number,
   userId: number,
 ) {
-  const client = await prisma.client.findUnique({
-    where: { id },
-    include: {
-      creator: { select: { name: true, email: true } },
-      updater: { select: { name: true, email: true } }
-    },
-  });
-  if (!client) throw new Error ('Cliente não encontrado');
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({
+      where: { id: userId },
+      select: {
+        company: { select: { plan: true } },
+        companyId: true },
+    });
+    if (!user) throw new Error('Usuário não encontrado.');
 
-  if (userId !== client.createdBy) {
-    const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
-    if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
-  } else {
-    const canReadClient = await checkUserPermission(userId, 'DEAL_READ');
-    if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
-  }
+    const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
+    if (!hasTeamDeals)
+      throw new Error('Seu plano não possui permissão para ler clientes da equipe');
 
-  return client;
+    const client = await tx.client.findUnique({
+      where: { id, companyId: user.companyId },
+      include: {
+        creator: { select: { name: true, email: true } },
+        updater: { select: { name: true, email: true } }
+      },
+    });
+    if (!client) throw new Error ('Cliente não encontrado');
+
+    if (userId !== client.createdBy) {
+      const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
+      if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
+    } else {
+      const canReadClient = await checkUserPermission(userId, 'DEAL_READ');
+      if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
+    }
+
+    return client;
+  })
 }
 
 export async function getBirthdayClients(
@@ -103,9 +116,18 @@ export async function getClientDeletedRequest(userId: number) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { companyId: true },
+      select: {
+        company: { select: { plan: true } },
+        companyId: true },
     });
     if (!user) throw new Error('Usuário não encontrado.');
+
+    const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
+    if (!hasTeamDeals)
+      throw new Error('Seu plano não possui acesso a requisições');
+
+    const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_DELETE');
+    if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
 
     return tx.client.findMany({
       where: {
@@ -130,6 +152,9 @@ export async function getMyClients(
   const where: any = {
     createdBy: userId,
   };
+
+  const canReadClient = await checkUserPermission(userId, 'DEAL_READ');
+  if (!canReadClient) throw new Error('Você não tem permissão para ver os clientes.');
 
   if (clientId) {
       const data = await prisma.client.findMany({
@@ -188,7 +213,7 @@ export async function getTeamClients(
   selectedUser: number | null,
   clientId?: number) {
   const canReadClient = await checkUserPermission(userId, 'ALL_DEAL_READ');
-  if (!canReadClient) throw new Error('Você não tem permissão para ler clientes');
+  if (!canReadClient) throw new Error('Você não tem permissão para ler clientes da equipe');
 
   const where: any = {};
 
@@ -201,11 +226,9 @@ export async function getTeamClients(
     });
     if (!company) throw new Error('Empresa não encontrada');
 
-    if (company.company.plan) {
-      const hasTeamDeals = PLAN_CONFIG[company.company.plan].features.teamDeals;
-      if (!hasTeamDeals)
-        throw new Error('Seu plano não possui acesso a negociações em equipe');
-    }
+    const hasTeamDeals = PLAN_CONFIG[company.company.plan].features.TEAM_DEALS;
+    if (!hasTeamDeals)
+      throw new Error('Seu plano não possui acesso a negociações em equipe');
 
     if (selectedUser !== null) {
       const userSelected = await tx.user.findUnique({
@@ -271,67 +294,70 @@ export async function updateClient(
   newData: Partial<Prisma.ClientUncheckedUpdateInput>,
   userId: number,
 ) {
-  const clientToUpdate = await prisma.client.findUnique({
-    where: { id }
-  });
-  if (!clientToUpdate) throw new Error('Cliente não encontrado');
+  return prisma.$transaction(async (tx) => {
+    const currentUser = await tx.user.findUnique({
+      where: { id: userId },
+      select: { company: { select: { plan: true } }, companyId: true }
+    });
+    if (!currentUser) throw new Error('Usuario não encontrado não encontrado');
 
-  const currentUser = await prisma.user.findUnique({
-    where: { id: userId }
-  });
-  if (!currentUser) throw new Error('Usuario não encontrado não encontrado');
+    const clientToUpdate = await tx.client.findUnique({
+      where: { id, companyId: currentUser.companyId }
+    });
+    if (!clientToUpdate) throw new Error('Cliente não encontrado');
 
-  if (clientToUpdate.companyId !== currentUser.companyId) {
-    throw new Error('Você não tem permissão de editar clientes dessa empresa');
-  }
+    if (userId !== clientToUpdate.createdBy) {
+      const hasTeamDeals = PLAN_CONFIG[currentUser.company.plan].features.TEAM_DEALS;
+      if (!hasTeamDeals)
+        throw new Error('Seu plano não possui acesso a negociações em equipe');
 
-  if (userId !== clientToUpdate.createdBy) {
-    const canUpdateClient = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
-    if (!canUpdateClient) throw new Error('Você não tem permissão para atualizar clientes.');
-  } else {
-    const canUpdateClient = await checkUserPermission(userId, 'DEAL_UPDATE');
-    if (!canUpdateClient) throw new Error('Você não tem permissão para atualizar clientes.');
-  }
+      const canUpdateClient = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
+      if (!canUpdateClient) throw new Error('Você não tem permissão para atualizar clientes.');
+    } else {
+      const canUpdateClient = await checkUserPermission(userId, 'DEAL_UPDATE');
+      if (!canUpdateClient) throw new Error('Você não tem permissão para atualizar clientes.');
+    }
 
-  const updateData = { ...newData,updatedBy: userId };
+    const updateData = { ...newData,updatedBy: userId };
 
-  if (updateData.dateOfBirth === '') {
-    updateData.dateOfBirth = null;
-  } else if (typeof updateData.dateOfBirth === 'string') {
-    const [year, month, day] = updateData.dateOfBirth.split("-").map(Number);
-    updateData.dateOfBirth = new Date(year, month - 1, day);
-  } else if (updateData.dateOfBirth instanceof Date) {
-    updateData.dateOfBirth = new Date(
-      updateData.dateOfBirth.getFullYear(),
-      updateData.dateOfBirth.getMonth(),
-      updateData.dateOfBirth.getDate()
-    );
-  }
+    if (updateData.dateOfBirth === '') {
+      updateData.dateOfBirth = null;
+    } else if (typeof updateData.dateOfBirth === 'string') {
+      const [year, month, day] = updateData.dateOfBirth.split("-").map(Number);
+      updateData.dateOfBirth = new Date(year, month - 1, day);
+    } else if (updateData.dateOfBirth instanceof Date) {
+      updateData.dateOfBirth = new Date(
+        updateData.dateOfBirth.getFullYear(),
+        updateData.dateOfBirth.getMonth(),
+        updateData.dateOfBirth.getDate()
+      );
+    }
 
-  return prisma.client.update({
-    where: { id },
-    data: updateData,
-  });
+    return tx.client.update({
+      where: { id },
+      data: updateData,
+    });
+  })
 }
 
 export async function deleteClient(id: number, userId: number) {
   return prisma.$transaction(async (tx) => {
-    const clientToDelete = await tx.client.findUnique({
-      where: { id }
-    });
-    if (!clientToDelete) throw new Error('Cliente não encontrado');
-
     const currentUser = await tx.user.findUnique({
-      where: { id: userId }
+      where: { id: userId },
+      select: { company: {select: { plan: true } }, companyId: true }
     });
     if (!currentUser) throw new Error('Usuario não encontrado não encontrado');
 
+    const clientToDelete = await tx.client.findUnique({
+      where: { id, companyId: currentUser.companyId }
+    });
+    if (!clientToDelete) throw new Error('Cliente não encontrado');
 
-    if (currentUser.companyId !== clientToDelete.companyId) {
-      throw new Error('Você não tem permissão para apagar clientes desta empresa.');
-    }
+    if (clientToDelete.createdBy !== userId) {
+      const hasTeamDeals = PLAN_CONFIG[currentUser.company.plan].features.DELETE_REQUESTS;
+      if (!hasTeamDeals)
+        throw new Error('Seu plano não possui acesso a negociações em equipe');
 
-    if (clientToDelete.createdBy !== currentUser.id) {
       const canDeleteClient = await checkUserPermission(userId, 'ALL_DEAL_DELETE');
       if (!canDeleteClient) throw new Error('Você não tem permissão para apagar clientes');
     } else {

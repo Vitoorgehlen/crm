@@ -465,7 +465,7 @@ export default function Confetti() {
                   />
                 </g>
                 <path
-                  fill="ty:0.2;ill:#FFFFFF;enable-background:new    ;"
+                  fill="ty:0.2;ill:#FFFFFF;enable-background:new;"
                   d="M255.96,95.983c0,5.891-4.781,10.672-10.672,10.672
 	s-10.656-4.781-10.656-10.672s4.765-10.656,10.656-10.656S255.96,90.093,255.96,95.983z"
                 />

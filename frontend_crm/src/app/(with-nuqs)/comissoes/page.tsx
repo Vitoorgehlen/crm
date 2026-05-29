@@ -19,7 +19,9 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Commissions() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
+
+  const expensePlan = planRules?.includes("EXPENSE_DASHBOARD");
 
   const [deals, setDeals] = useState<Deal[]>([]);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -333,7 +335,7 @@ export default function Commissions() {
               </button>
             </Tooltip>
 
-            {permissions.includes("EXPENSE_READ") && (
+            {permissions.includes("EXPENSE_READ") && expensePlan && (
               <Tooltip label={"Despesas"}>
                 <button
                   className={`btn-action glass ${styles.btn}
@@ -378,7 +380,7 @@ export default function Commissions() {
         </div>
         <div className={styles.cardBox}>
           {isOpenCommission && <CommissionCard deals={deals} />}
-          {isOpenExpense && (
+          {isOpenExpense && expensePlan && (
             <ExpenseCard selectedYearStats={selectedYearStats} />
           )}
         </div>

@@ -29,7 +29,7 @@ export default function DealList({
   limit: initialLimit,
 }: DealListProps) {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
   const [initialLoading, setInitialLoading] = useState(true);
 
   const [dealId, setDealId] = useQueryState("dealId");
@@ -225,7 +225,7 @@ export default function DealList({
         token,
         apiUrl: API!,
         search,
-        teamDeals,
+        teamDeals: planRules?.includes("TEAM_DEALS") ? teamDeals : false,
         userId,
         limit,
         page: pageToFetch,
@@ -273,7 +273,6 @@ export default function DealList({
 
       if (data.data && data.data.length > 0) {
         setSelectedDeal(data.data[0]);
-        // setIsEditOpen(true);
         setDealsByStatus({
           [data.data[0].statusClient]: [data.data[0]],
         });
@@ -307,7 +306,7 @@ export default function DealList({
         token,
         apiUrl: API!,
         search,
-        teamDeals,
+        teamDeals: planRules?.includes("TEAM_DEALS") ? teamDeals : false,
         userId,
         limit,
         items,
@@ -333,7 +332,16 @@ export default function DealList({
       setLoading(false);
       setInitialLoading(false);
     }
-  }, [token, search, teamDeals, userId, limit, selectedStatusDeal, statusList]);
+  }, [
+    token,
+    search,
+    teamDeals,
+    userId,
+    limit,
+    planRules,
+    selectedStatusDeal,
+    statusList,
+  ]);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -385,8 +393,8 @@ export default function DealList({
 
   useEffect(() => {
     if (!token) return;
-    fetchUsers();
-  }, [token]);
+    if (planRules?.includes("TEAM_DEALS")) fetchUsers();
+  }, [token, planRules]);
 
   useEffect(() => {
     if (!dealId) {

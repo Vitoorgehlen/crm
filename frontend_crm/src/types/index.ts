@@ -560,6 +560,7 @@ export type NotePad = {
 export type Schedule = {
     id: number;
     dealId?: number;
+    type?: string;
     label: string;
     finish: boolean;
     reminderAt?: string;
@@ -608,6 +609,7 @@ export type ExpenseProps = {
 
 export type CreateSchedulePayload = {
     dealId?: number;
+    type?: string;
     label: string;
     finish: boolean;
     reminderAt?: string;
@@ -618,9 +620,7 @@ export type ScheduleFormProps = {
     day: Date | null; 
     schedule: Schedule | null; 
     onClose: () => void;
-    onDelete?: (scheduleId: number) => void;
-    onCreate: (newSchedule: Schedule) => void;
-    onUpdate: (newSchedule: Schedule) => void
+    onSuccess?: () => Promise<void> | void;
 };
 
 export const DealStatus = {

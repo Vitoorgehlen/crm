@@ -18,7 +18,9 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Config() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
+
+  const expensePlan = planRules?.includes("EXPENSE_DASHBOARD");
 
   const [hasSearched, setHasSearched] = useState(false);
 
@@ -103,173 +105,177 @@ export default function Config() {
 
   return (
     <main className={styles.main}>
-      <div className={styles.headerContent}>
-        <div className={styles.title}>
-          <h3>Desempenho</h3>
-          <h5>da Equipe</h5>
-        </div>
-        <div className={styles.headerIcons}>
-          {!hasSearched && (
-            <>
-              <UserSelect
-                users={users}
-                value={selectedUserObject}
-                onChange={(user) => {
-                  setSelectedUser(user?.id?.toString() || "ALL");
-                }}
-              />
-              <MonthPicker
-                value={startMonthValue}
-                onChange={(value) => {
-                  if (!value) {
-                    setStartMonth("");
-                    return;
-                  }
+      {expensePlan && (
+        <>
+          <div className={styles.headerContent}>
+            <div className={styles.title}>
+              <h3>Desempenho</h3>
+              <h5>da Equipe</h5>
+            </div>
+            <div className={styles.headerIcons}>
+              {!hasSearched && (
+                <>
+                  <UserSelect
+                    users={users}
+                    value={selectedUserObject}
+                    onChange={(user) => {
+                      setSelectedUser(user?.id?.toString() || "ALL");
+                    }}
+                  />
+                  <MonthPicker
+                    value={startMonthValue}
+                    onChange={(value) => {
+                      if (!value) {
+                        setStartMonth("");
+                        return;
+                      }
 
-                  const formatted = `${value.year}-${String(
-                    value.month + 1,
-                  ).padStart(2, "0")}`;
+                      const formatted = `${value.year}-${String(
+                        value.month + 1,
+                      ).padStart(2, "0")}`;
 
-                  setStartMonth(formatted);
+                      setStartMonth(formatted);
 
-                  const firstDay = new Date(value.year, value.month, 1);
-                  const lastDay = new Date(value.year, value.month + 1, 0);
+                      const firstDay = new Date(value.year, value.month, 1);
+                      const lastDay = new Date(value.year, value.month + 1, 0);
 
-                  setStartDate(firstDay.toISOString());
-                  setEndDate(lastDay.toISOString());
-                }}
-              />
-            </>
-          )}
+                      setStartDate(firstDay.toISOString());
+                      setEndDate(lastDay.toISOString());
+                    }}
+                  />
+                </>
+              )}
 
-          {!hasSearched ? (
-            startMonth && (
-              <Tooltip label={"Pesquisar"}>
-                <button
-                  className={`glass btn-action ${styles.search}`}
-                  onClick={() => {
-                    fetchClientsAndDeals();
-                    setHasSearched(true);
-                  }}
-                >
-                  <FaSearch />
-                </button>
-              </Tooltip>
-            )
-          ) : (
-            <Tooltip label={"Limpar"}>
-              <button
-                className={`glass btn-action ${styles.search}`}
-                onClick={() => {
-                  setStartMonth("");
-                  setDeals([]);
-                  setClients([]);
-                  setHasSearched(false);
-                }}
-              >
-                <FaTimes />
-              </button>
-            </Tooltip>
-          )}
-        </div>
-      </div>
-      <div className={deals.length === 0 ? styles.listEmpty : styles.list}>
-        {deals.length === 0 ? (
-          <p>Selecione um mês e pesquise o desempenho da equipe.</p>
-        ) : (
-          <table className={`glass ${styles.dealsTable}`}>
-            <thead>
-              <tr>
-                <th>Cliente</th>
-                <th>Valor total</th>
-                <th>Status</th>
-                <th>Criado em</th>
-                <th>Criado por</th>
-              </tr>
-            </thead>
-            <tbody>
-              {deals
-                .slice()
-                .reverse()
-                .map((d) => {
-                  const totalValue =
-                    d.paymentMethod === "CASH"
-                      ? Number(d.cashValue ?? 0) +
-                        Number(d.fgtsValue ?? 0) +
-                        Number(d.downPaymentValue ?? 0)
-                      : d.paymentMethod === "FINANCING"
-                        ? Number(d.financingValue ?? 0) +
-                          Number(d.subsidyValue ?? 0) +
-                          Number(d.fgtsValue ?? 0) +
-                          Number(d.downPaymentValue ?? 0)
-                        : d.paymentMethod === "CREDIT_LETTER"
-                          ? Number(d.creditLetterValue ?? 0) +
-                            Number(d.subsidyValue ?? 0) +
+              {!hasSearched ? (
+                startMonth && (
+                  <Tooltip label={"Pesquisar"}>
+                    <button
+                      className={`glass btn-action ${styles.search}`}
+                      onClick={() => {
+                        fetchClientsAndDeals();
+                        setHasSearched(true);
+                      }}
+                    >
+                      <FaSearch />
+                    </button>
+                  </Tooltip>
+                )
+              ) : (
+                <Tooltip label={"Limpar"}>
+                  <button
+                    className={`glass btn-action ${styles.search}`}
+                    onClick={() => {
+                      setStartMonth("");
+                      setDeals([]);
+                      setClients([]);
+                      setHasSearched(false);
+                    }}
+                  >
+                    <FaTimes />
+                  </button>
+                </Tooltip>
+              )}
+            </div>
+          </div>
+          <div className={deals.length === 0 ? styles.listEmpty : styles.list}>
+            {deals.length === 0 ? (
+              <p>Selecione um mês e pesquise o desempenho da equipe.</p>
+            ) : (
+              <table className={`glass ${styles.dealsTable}`}>
+                <thead>
+                  <tr>
+                    <th>Cliente</th>
+                    <th>Valor total</th>
+                    <th>Status</th>
+                    <th>Criado em</th>
+                    <th>Criado por</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deals
+                    .slice()
+                    .reverse()
+                    .map((d) => {
+                      const totalValue =
+                        d.paymentMethod === "CASH"
+                          ? Number(d.cashValue ?? 0) +
                             Number(d.fgtsValue ?? 0) +
                             Number(d.downPaymentValue ?? 0)
-                          : 0;
+                          : d.paymentMethod === "FINANCING"
+                            ? Number(d.financingValue ?? 0) +
+                              Number(d.subsidyValue ?? 0) +
+                              Number(d.fgtsValue ?? 0) +
+                              Number(d.downPaymentValue ?? 0)
+                            : d.paymentMethod === "CREDIT_LETTER"
+                              ? Number(d.creditLetterValue ?? 0) +
+                                Number(d.subsidyValue ?? 0) +
+                                Number(d.fgtsValue ?? 0) +
+                                Number(d.downPaymentValue ?? 0)
+                              : 0;
 
-                  return (
-                    <tr key={d.id}>
-                      <td>{d.client?.name || "Não encontrado"}</td>
-                      <td>
-                        {totalValue.toLocaleString("pt-BR", {
-                          style: "currency",
-                          currency: "BRL",
-                        })}
-                      </td>
-                      <td>
-                        {DealStatus[d.status as keyof typeof DealStatus]
-                          ?.label || "Não encontrado"}
-                      </td>
-                      <td>
-                        {d.createdAt
-                          ? formatDateForFinish(d.createdAt)
-                          : "Não encontrado"}
-                      </td>
-                      <td>{d.creator?.name || "Não encontrado"}</td>
-                    </tr>
-                  );
-                })}
-            </tbody>
-          </table>
-        )}
-      </div>
+                      return (
+                        <tr key={d.id}>
+                          <td>{d.client?.name || "Não encontrado"}</td>
+                          <td>
+                            {totalValue.toLocaleString("pt-BR", {
+                              style: "currency",
+                              currency: "BRL",
+                            })}
+                          </td>
+                          <td>
+                            {DealStatus[d.status as keyof typeof DealStatus]
+                              ?.label || "Não encontrado"}
+                          </td>
+                          <td>
+                            {d.createdAt
+                              ? formatDateForFinish(d.createdAt)
+                              : "Não encontrado"}
+                          </td>
+                          <td>{d.creator?.name || "Não encontrado"}</td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            )}
+          </div>
 
-      <div className={styles.list}>
-        {clients.length > 0 && (
-          <>
-            <h4>Clientes criados sem negociação</h4>
-            <table className={`glass ${styles.dealsTable}`}>
-              <thead>
-                <tr>
-                  <th>Cliente</th>
-                  <th>Investidor</th>
-                  <th>Criado em</th>
-                  <th>Criado por</th>
-                </tr>
-              </thead>
-              <tbody>
-                {clients
-                  .slice()
-                  .reverse()
-                  .map((c) => (
-                    <tr key={c.id}>
-                      <td>{c.name || "Não encontrado"}</td>
-                      <td>{c.isInvestor ? "Sim" : "Não"}</td>
-                      <td>
-                        {c.createdAt
-                          ? formatDateForFinish(c.createdAt)
-                          : "Não encontrado"}
-                      </td>
-                      <td>{c.creator?.name || "Não encontrado"}</td>
+          <div className={styles.list}>
+            {clients.length > 0 && (
+              <>
+                <h4>Clientes criados sem negociação</h4>
+                <table className={`glass ${styles.dealsTable}`}>
+                  <thead>
+                    <tr>
+                      <th>Cliente</th>
+                      <th>Investidor</th>
+                      <th>Criado em</th>
+                      <th>Criado por</th>
                     </tr>
-                  ))}
-              </tbody>
-            </table>
-          </>
-        )}
-      </div>
+                  </thead>
+                  <tbody>
+                    {clients
+                      .slice()
+                      .reverse()
+                      .map((c) => (
+                        <tr key={c.id}>
+                          <td>{c.name || "Não encontrado"}</td>
+                          <td>{c.isInvestor ? "Sim" : "Não"}</td>
+                          <td>
+                            {c.createdAt
+                              ? formatDateForFinish(c.createdAt)
+                              : "Não encontrado"}
+                          </td>
+                          <td>{c.creator?.name || "Não encontrado"}</td>
+                        </tr>
+                      ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </div>
+        </>
+      )}
     </main>
   );
 }

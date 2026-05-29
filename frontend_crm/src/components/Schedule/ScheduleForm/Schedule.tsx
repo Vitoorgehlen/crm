@@ -4,7 +4,6 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   CreateSchedulePayload,
   Deal,
-  DealStatus,
   DeleteContext,
   Schedule,
   ScheduleFormProps,
@@ -25,9 +24,7 @@ export default function ScheduleForm({
   day,
   schedule,
   onClose,
-  onDelete,
-  onCreate,
-  onUpdate,
+  onSuccess,
 }: ScheduleFormProps) {
   const router = useRouter();
   const { token, isLoading } = useAuth();
@@ -126,7 +123,7 @@ export default function ScheduleForm({
       if (!response.ok)
         throw new Error(data.error || "Erro ao salvar a agenda");
 
-      if (onCreate) onCreate(data);
+      if (onSuccess) await onSuccess();
     } catch (err: unknown) {
       setError(
         err instanceof Error
@@ -154,7 +151,7 @@ export default function ScheduleForm({
       if (!response.ok)
         throw new Error(data.error || "Erro ao editar a agenda");
 
-      if (onUpdate) onUpdate(data);
+      if (onSuccess) await onSuccess();
     } catch (err: unknown) {
       setError(
         err instanceof Error
@@ -182,11 +179,7 @@ export default function ScheduleForm({
       }
 
       setError("");
-      if (onDelete && schedule.id) {
-        onDelete(schedule.id);
-      } else {
-        onClose();
-      }
+      if (onSuccess) await onSuccess();
       onClose();
     } catch (err) {
       console.error(err);

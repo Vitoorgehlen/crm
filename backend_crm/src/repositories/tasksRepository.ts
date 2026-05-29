@@ -1,7 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../prisma-client";
 
-// Criar uma tarefa
 export async function addTasks(
   newData: Prisma.TasksUncheckedCreateInput,
   userId: number
@@ -16,7 +15,6 @@ export async function addTasks(
   });
 }
 
-// Pega as Tarefas
 export function getTasks(userId: number) {
   return prisma.tasks.findMany({
     where: { createdBy: userId },
@@ -24,7 +22,6 @@ export function getTasks(userId: number) {
   });
 }
 
-// Atualizar as Tarefas
 export async function updateTasks(
   id: number,
   newData: Partial<Prisma.TasksUncheckedUpdateInput>,
@@ -45,7 +42,15 @@ export async function updateTasks(
   });
 }
 
-// apagar as Tarefas
+export async function clearTasks(userId: number) {
+  return prisma.$transaction(async (tx) => {
+    const user = await tx.user.findUnique({ where: { id: userId } });
+    if (!user) throw new Error('Tarefa não encontrada.');
+
+    return await tx.tasks.deleteMany({ where: { createdBy: user.id, isFinish: true } });
+  });
+}
+
 export async function deleteTasks(
   id: number,
   userId: number

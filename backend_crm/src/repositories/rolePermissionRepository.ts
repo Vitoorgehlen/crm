@@ -1,5 +1,6 @@
 import { prisma } from "../prisma-client";
 import { Permission, Prisma, UserRole } from '@prisma/client';
+import { PLAN_CONFIG } from "../utils/plans";
 
 const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ADMIN: [
@@ -57,9 +58,8 @@ export async function getMyRolePermissions(
 ): Promise<Permission[]> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true, role: true },
+    select: { companyId: true, role: true }
   });
-
   if (!user) throw new Error('Empresa não encontrada.');
 
   const rolePermissions = await prisma.rolePermission.findMany({
@@ -82,10 +82,13 @@ export async function getRolePermissionsByCompany(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true },
+    select: { company: { select: { plan: true } }, companyId: true }
   });
-
   if (!user) throw new Error('Empresa não encontrada.');
+
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.ROLE_SYSTEM;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
 
   return prisma.rolePermission.findMany({
     where: { companyId: user.companyId },
@@ -144,10 +147,14 @@ export async function updateRolePermission(
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true },
+    select: { company: { select: { plan: true } }, companyId: true }
   });
-
   if (!user) throw new Error("Usuário não encontrado");
+
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
+
   const companyId = user.companyId;
 
   const validPermissions = new Set(Object.values(Permission));
@@ -212,10 +219,15 @@ export async function updateRolePermission(
 export async function resetRolePermissionsDefault(userId: number, role: UserRole) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true }
   })
-
   if (!user) throw new Error("Usuário não encontrado");
+
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
+  if (!hasTeamDeals)
+    throw new Error('Seu plano não possui acesso a negociações em equipe');
+
+
   if (role !== "ADMIN") throw new Error("Somente administradores podem resetar permissões");
 
   const companyId = user.companyId;

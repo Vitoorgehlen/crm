@@ -107,7 +107,7 @@ router.get('/deals-finished', loginRequired, async (req, res) => {
   if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
 
   const search = String(req.query.search || '').trim();
-  const teamDeals = req.query.teamDeals === 'true';
+  const TEAM_DEALS = req.query.TEAM_DEALS === 'true';
   const targetId = Number(req.query.userId) || null;
   const progressDeals = req.query.progressDeals === 'true';
 
@@ -115,7 +115,7 @@ router.get('/deals-finished', loginRequired, async (req, res) => {
   const year = Number(req.query.year) || currentYear;
 
   try {
-    const deal = await getFinishedDealsYears(userId, { search, progressDeals, teamDeals, targetId, year } );
+    const deal = await getFinishedDealsYears(userId, { search, progressDeals, TEAM_DEALS, targetId, year } );
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -130,12 +130,12 @@ router.get('/deals-total-finished', loginRequired, async (req, res) => {
 
   const search = String(req.query.search || '').trim();
 
-  const teamDeals = req.query.teamDeals === 'true';
+  const TEAM_DEALS = req.query.TEAM_DEALS === 'true';
   const progressDeals = req.query.progressDeals === 'true';
   const targetId = Number(req.query.userId) || null;
 
   try {
-    const deal = await getTotalDealsOfYear(userId, progressDeals, teamDeals, search,targetId);
+    const deal = await getTotalDealsOfYear(userId, progressDeals, TEAM_DEALS, search,targetId);
     res.json(deal);
   } catch (err) {
     console.log(err);

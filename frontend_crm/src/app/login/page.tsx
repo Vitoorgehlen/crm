@@ -37,8 +37,8 @@ export default function LoginPage() {
 
       if (!response.ok) throw new Error(data.error || "Erro ao fazer login");
 
-      const { userType, companyPlan } = data;
-      login(data.token, companyPlan, userType);
+      const { userType, planRules } = data;
+      login(data.token, planRules, userType);
 
       if (userType === "user") {
         router.push("/home");

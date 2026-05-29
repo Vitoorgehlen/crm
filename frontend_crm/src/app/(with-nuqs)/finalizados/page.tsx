@@ -15,7 +15,7 @@ const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function FinishDeals() {
   const router = useRouter();
-  const { token, permissions, isLoading } = useAuth();
+  const { token, permissions, isLoading, planRules } = useAuth();
   const [initialIsLoadind, setInitialIsLoadind] = useState(true);
 
   const [users, setUsers] = useState<User[]>([]);
@@ -359,7 +359,8 @@ export default function FinishDeals() {
       if (selectedYear) params.append("year", String(selectedYear));
       params.append("progressDeals", progressDeals ? "true" : "false");
       params.append("teamDeals", teamDeals ? "true" : "false");
-      if (teamDeals && userId) params.append("userId", userId);
+      const hasTeamDeals = planRules?.includes("TEAM_DEALS");
+      if (teamDeals && userId && hasTeamDeals) params.append("userId", userId);
 
       const url = `${API}/deals-finished?${params.toString()}`;
 
@@ -442,13 +443,14 @@ export default function FinishDeals() {
     }
 
     fetchDealsData();
-    fetchUsers();
+    if (planRules?.includes("TEAM_DEALS")) fetchUsers();
   }, [
     fetchDealsData,
     isLoading,
     userId,
     token,
     fetchUsers,
+    planRules,
     router,
     selectedYear,
   ]);

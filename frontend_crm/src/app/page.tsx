@@ -454,6 +454,8 @@ export default function Home() {
                 </h3>
                 <p>/mês</p>
               </div>
+
+              {priceAnnual && <span>Valor anual cobrado integralmente</span>}
             </div>
 
             <button

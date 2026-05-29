@@ -40,14 +40,17 @@ export default function HeaderPage({
   const handleToggleTeamDeals = () => {
     const newValue = !teamDeals;
     setTeamDeals(newValue);
-
     if (!newValue) setSelectedUser(null);
   };
+
+  const planRules = localStorage.getItem("planRules");
+  const teamPlan = planRules?.includes("TEAM_DEALS");
+
   return (
     <div className={styles.headerContent}>
       <div className={`${teamDeals && styles.titleTeam} ${styles.title}`}>
         <h3>{title}</h3>
-        <h5>{teamDeals && " da equipe"}</h5>
+        <h5>{teamDeals && teamPlan && " da equipe"}</h5>
       </div>
       <div className={styles.headerIcons}>
         {!showClearButton && (
@@ -57,12 +60,12 @@ export default function HeaderPage({
               type="text"
               placeholder={`${
                 title === "Clientes" ? "Buscar clientes" : "Buscar negociações"
-              } ${teamDeals ? "da equipe" : ""}`}
+              } ${teamDeals && teamPlan ? "da equipe" : ""}`}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
 
-            {teamDeals && (
+            {teamDeals && teamPlan && (
               <UserSelect
                 users={users}
                 value={selectedUser}
@@ -70,7 +73,7 @@ export default function HeaderPage({
               />
             )}
 
-            {permissions.includes("ALL_DEAL_READ") && (
+            {permissions.includes("ALL_DEAL_READ") && teamPlan && (
               <Tooltip label={"Modo equipe"}>
                 <button
                   className={`${

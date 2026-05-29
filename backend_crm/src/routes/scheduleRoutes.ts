@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { addSchedule, deleteOldsSchedule, deleteSchedule, editSchedule, getSchedules } from '../repositories/scheduleRepository'
+import { addSchedule, deleteOldsSchedule, deleteSchedule, editSchedule, getSchedules, getSchedulesCallback } from '../repositories/scheduleRepository'
 import type { AuthenticatedRequest } from '../types/express';
 import loginRequired from '../middlewares/loginRequired';
 import { cronOnly } from '../middlewares/cronOnly';
@@ -35,6 +35,27 @@ router.get('/schedule', loginRequired, async(req, res) => {
 
     try {
     const getSchedule = await getSchedules(userId);
+    res.status(201).json(getSchedule);
+  } catch (err) {
+    console.error(err);
+    res.status(403).json({ error: 'Erro ao pegar compromissos.' });
+  }
+});
+
+router.get('/schedule-callback/:id', loginRequired, async(req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+
+  const paramId = Number(req.params.id);
+
+  if (isNaN(paramId)) {
+    return res.status(400).json({ error: 'ID inválido' });
+  }
+
+  if (!userId) return res.status(400).json({ error: 'Usuário inválido.' });
+
+    try {
+    const getSchedule = await getSchedulesCallback(paramId, userId);
     res.status(201).json(getSchedule);
   } catch (err) {
     console.error(err);
