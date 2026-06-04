@@ -640,8 +640,12 @@ export default function ClosedDeal({
 
       const comAmt = Number(deal.commissionAmount ?? 0);
       if (comAmt > 0) {
-        shares.forEach((s) => {
-          s.percentage = +(((s.amount ?? 0) / comAmt) * 100);
+        const calculated = shares.map((s) => ((s.amount ?? 0) / comAmt) * 100);
+        const total = calculated.reduce((a, b) => a + b, 0);
+        const factor = 100 / total;
+
+        shares.forEach((s, index) => {
+          s.percentage = Number((calculated[index] * factor).toFixed(2));
         });
 
         const hasInstallmentValue = Number(installmentValue ?? 0) > 0;
@@ -827,21 +831,19 @@ export default function ClosedDeal({
 
             <div className={styles.paymentTitle}>
               <div className={styles.payment}>
-                <p>Valor do imóvel</p>
+                {paymentMethod === "FINANCING" ? (
+                  <>
+                    <p>Valor do</p>
+                    <p>imóvel</p>
+                  </>
+                ) : (
+                  <p>Valor do imóvel</p>
+                )}
                 <CurrencyInput
                   className={`form-base ${styles.form}`}
                   placeholder="Valor do imóvel"
                   value={propertyValue}
                   onChange={setPropertyValue}
-                />
-              </div>
-              <div className={styles.payment}>
-                <p>Valor total da comissão</p>
-                <CurrencyInput
-                  className={`form-base ${styles.form}`}
-                  placeholder="Valor da comissão"
-                  value={commissionAmount}
-                  onChange={setCommissionAmount}
                 />
               </div>
 
@@ -1140,6 +1142,7 @@ export default function ClosedDeal({
                   splitMethod={splitMethod}
                   setSplitMethod={setSplitMethod}
                   commissionAmount={commissionAmount}
+                  setCommissionAmount={setCommissionAmount}
                   splitPlan={splitPlan}
                   userOptions={userOptions}
                   onAddSplit={addSplit}
@@ -1149,12 +1152,23 @@ export default function ClosedDeal({
                   totalPercentage={totalPercentage}
                   totalAmounts={totalAmounts}
                   onUpdateDealShare={updateDealShare}
+                  onSubmit={() => handleSubmit()}
                   onClose={() => setEditCommission(false)}
                 />
               )}
             </div>
 
             <div className={styles.btnCancelAndConfirm}>
+              {!isFirstStep && (
+                <button
+                  className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
+                  type="button"
+                  onClick={(e) => handleChangeStep(e, "back")}
+                >
+                  <span>Voltar etapa</span>
+                </button>
+              )}
+
               {isFirstStep &&
                 (deal.createdBy === userId
                   ? permissions.includes("DEAL_CLOSE_DELETE")
@@ -1163,25 +1177,24 @@ export default function ClosedDeal({
                     className={`btn-action glass ${styles.btnDeal} ${styles.btnCancel}`}
                     type="button"
                     onClick={(e) => {
-                      if (isFirstStep) {
-                        setDeleteContext({
-                          message: "Deseja cancelar a negociação com",
-                          name: deal.client?.name ?? "",
-                          onConfirm: () => handleChangeStep(e, "back"),
-                        });
-                      } else handleChangeStep(e, "back");
+                      setDeleteContext({
+                        message: "Deseja cancelar a negociação com",
+                        name: deal.client?.name ?? "",
+                        onConfirm: () => handleChangeStep(e, "back"),
+                      });
                     }}
                   >
-                    <span>
-                      {isFirstStep ? "Cancelar negociação" : "Voltar etapa"}
-                    </span>
+                    <span>Cancelar negociação</span>
                   </button>
                 )}
 
               <button
                 className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
                 type="button"
-                onClick={(e) => handleSubmit(e)}
+                onClick={async (e) => {
+                  await handleSubmit(e);
+                  onClose();
+                }}
               >
                 <span>Atualizar</span>
               </button>
@@ -1356,6 +1369,11 @@ export default function ClosedDeal({
                         </div>
                         <div className={styles.lineDoc}>
                           <span>{doc.notes}</span>
+                          <span className={styles.noteDate}>
+                            {new Date(doc.createdAt || "").toLocaleDateString(
+                              "pt-BR",
+                            )}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -1428,35 +1446,44 @@ export default function ClosedDeal({
                         </div>
                       </>
                     ) : (
-                      <>
-                        <span>{note.content}</span>
+                      <div className={styles.note}>
+                        <div className={styles.noteContent}>
+                          <span>{note.content}</span>
 
-                        <div className={styles.btnsNote}>
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenNote(note.id);
-                              setNewNote(note.content);
-                            }}
-                          >
-                            <RiPencilFill />
-                          </button>
-                          <button
-                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
-                            type="button"
-                            onClick={() =>
-                              setDeleteContext({
-                                message: "Deseja cancelar essa nota",
-                                name: note.content ?? "",
-                                onConfirm: () => handleDeleteNote(note.id),
-                              })
-                            }
-                          >
-                            <RiEraserFill />
-                          </button>
+                          <div className={styles.btnsNote}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenNote(note.id);
+                                setNewNote(note.content);
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={async () => {
+                                if (!deal) return;
+                                setDeleteContext({
+                                  message:
+                                    "Tem certeza que deseja excluir a nota",
+                                  name: note.content,
+                                  onConfirm: () => handleDeleteNote(note.id),
+                                });
+                              }}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </div>
                         </div>
-                      </>
+                        <span className={styles.noteDate}>
+                          {new Date(note.createdAt || "").toLocaleDateString(
+                            "pt-BR",
+                          )}
+                        </span>
+                      </div>
                     )}
                   </div>
                 ))}

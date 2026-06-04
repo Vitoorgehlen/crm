@@ -195,6 +195,29 @@ span .currentPage {
   color: var(--textBase);
 }
 
+.noItens .addDeal {
+  padding: 5px 7px;
+  margin-top: 50px;
+}
+
+.addDeal {
+  color: var(--textBase);
+  cursor: pointer;
+}
+
+.addDeal:hover {
+  color: var(--primaryText);
+  background-color: var(--mainBg);
+  border: 1px solid var(--primaryColor);
+}
+
+.addDeal .dealInfos {
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
 @keyframes spin {
   0% {
     transform: rotate(0deg);

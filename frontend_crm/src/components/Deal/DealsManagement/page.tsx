@@ -457,6 +457,17 @@ export default function DealList({
           <div className={styles.noItens}>
             <h3>😭 Nenhuma negociação encontrada...</h3>
             <p>Tente ajustar os filtros ou criar uma nova negociação.</p>
+
+            <button
+              type="button"
+              className={`glass ${styles.addDeal}`}
+              onClick={openCreate}
+            >
+              <div className={styles.dealInfos}>
+                <h4>+</h4>
+                <p>Adicionar negociação</p>
+              </div>
+            </button>
           </div>
         ) : (
           <div className={styles.cardsDeals}>
@@ -521,6 +532,16 @@ export default function DealList({
                   ) : (
                     <>
                       <div className={styles.dealList}>
+                        <button
+                          type="button"
+                          className={`glass ${styles.addDeal}`}
+                          onClick={openCreate}
+                        >
+                          <div className={styles.dealInfos}>
+                            <h4>+</h4>
+                            <p>Negociações</p>
+                          </div>
+                        </button>
                         {currentDeals
                           .slice()
                           .sort(

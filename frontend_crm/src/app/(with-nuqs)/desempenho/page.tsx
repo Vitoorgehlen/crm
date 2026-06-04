@@ -25,7 +25,11 @@ export default function Config() {
   const [hasSearched, setHasSearched] = useState(false);
 
   const [startDate, setStartDate] = useState("");
-  const [startMonth, setStartMonth] = useQueryState("month", {
+  const [startMonth, setStartMonth] = useQueryState("startMonth", {
+    defaultValue: "",
+  });
+
+  const [endMonth, setEndMonth] = useQueryState("endMonth", {
     defaultValue: "",
   });
   const [endDate, setEndDate] = useState("");
@@ -46,6 +50,26 @@ export default function Config() {
         month: Number(startMonth.split("-")[1]) - 1,
       }
     : null;
+
+  const endMonthValue = endMonth
+    ? {
+        year: Number(endMonth.split("-")[0]),
+        month: Number(endMonth.split("-")[1]) - 1,
+      }
+    : null;
+
+  const [lastSearch, setLastSearch] = useState({
+    startMonth: "",
+    endMonth: "",
+    selectedUser: "",
+  });
+
+  const filtersChanged =
+    startMonth !== lastSearch.startMonth ||
+    endMonth !== lastSearch.endMonth ||
+    selectedUser !== lastSearch.selectedUser;
+
+  const showSearchButton = !hasSearched || filtersChanged;
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -113,20 +137,53 @@ export default function Config() {
               <h5>da Equipe</h5>
             </div>
             <div className={styles.headerIcons}>
-              {!hasSearched && (
-                <>
-                  <UserSelect
-                    users={users}
-                    value={selectedUserObject}
-                    onChange={(user) => {
-                      setSelectedUser(user?.id?.toString() || "ALL");
-                    }}
-                  />
+              <UserSelect
+                users={users}
+                value={selectedUserObject}
+                onChange={(user) => {
+                  setSelectedUser(user?.id?.toString() || "ALL");
+                }}
+              />
+
+              <div className={`glass ${styles.selectMonth}`}>
+                <MonthPicker
+                  value={startMonthValue}
+                  placeholder="Início"
+                  onChange={(value) => {
+                    if (!value) {
+                      setStartMonth("");
+                      return;
+                    }
+
+                    const formatted = `${value.year}-${String(
+                      value.month + 1,
+                    ).padStart(2, "0")}`;
+
+                    setStartMonth(formatted);
+
+                    const firstDay = new Date(
+                      value.year,
+                      value.month,
+                      1,
+                      0,
+                      0,
+                      0,
+                      0,
+                    );
+
+                    setStartDate(firstDay.toISOString());
+                  }}
+                />
+              </div>
+
+              {startDate !== "" && (
+                <div className={`glass ${styles.selectMonth}`}>
                   <MonthPicker
-                    value={startMonthValue}
+                    value={endMonthValue}
+                    placeholder="Final"
                     onChange={(value) => {
                       if (!value) {
-                        setStartMonth("");
+                        setEndMonth("");
                         return;
                       }
 
@@ -134,38 +191,49 @@ export default function Config() {
                         value.month + 1,
                       ).padStart(2, "0")}`;
 
-                      setStartMonth(formatted);
+                      setEndMonth(formatted);
 
-                      const firstDay = new Date(value.year, value.month, 1);
-                      const lastDay = new Date(value.year, value.month + 1, 0);
+                      const lastDay = new Date(
+                        value.year,
+                        value.month + 1,
+                        0,
+                        23,
+                        59,
+                        59,
+                        999,
+                      );
 
-                      setStartDate(firstDay.toISOString());
                       setEndDate(lastDay.toISOString());
                     }}
                   />
-                </>
+                </div>
               )}
 
-              {!hasSearched ? (
-                startMonth && (
-                  <Tooltip label={"Pesquisar"}>
-                    <button
-                      className={`glass btn-action ${styles.search}`}
-                      onClick={() => {
-                        fetchClientsAndDeals();
-                        setHasSearched(true);
-                      }}
-                    >
-                      <FaSearch />
-                    </button>
-                  </Tooltip>
-                )
+              {showSearchButton ? (
+                <Tooltip label={"Pesquisar"}>
+                  <button
+                    className={`glass btn-action ${styles.search}`}
+                    onClick={() => {
+                      fetchClientsAndDeals();
+
+                      setLastSearch({
+                        startMonth,
+                        endMonth,
+                        selectedUser,
+                      });
+                      setHasSearched(true);
+                    }}
+                  >
+                    <FaSearch />
+                  </button>
+                </Tooltip>
               ) : (
                 <Tooltip label={"Limpar"}>
                   <button
                     className={`glass btn-action ${styles.search}`}
                     onClick={() => {
                       setStartMonth("");
+                      setEndMonth("");
                       setDeals([]);
                       setClients([]);
                       setHasSearched(false);

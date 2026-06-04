@@ -114,7 +114,6 @@
 }
 
 .payment p {
-  width: 100px;
   white-space: pre-line;
 }
 
@@ -457,6 +456,25 @@
   width: 100%;
 }
 
+.note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.noteContent {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+
+.noteDate {
+  font-size: 10px;
+  color: var(--textBase);
+}
+
 .btnsNote {
   gap: 5px;
   max-width: 35px;
@@ -490,7 +508,9 @@
 }
 
 .lineDoc {
+  display: flex;
   width: 100%;
+  justify-content: space-between;
 }
 
 .lineDoc span {
@@ -566,7 +586,7 @@
 }
 
 .description span {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--textBase);
 }
 

@@ -776,6 +776,11 @@ export default function FinishDeal({
                         </div>
                         <div className={styles.lineDoc}>
                           <span>{doc.notes}</span>
+                          <span className={styles.noteDate}>
+                            {new Date(doc.createdAt || "").toLocaleDateString(
+                              "pt-BR",
+                            )}
+                          </span>
                         </div>
                       </div>
                     )}
@@ -848,35 +853,44 @@ export default function FinishDeal({
                         </div>
                       </>
                     ) : (
-                      <>
-                        <span>{note.content}</span>
+                      <div className={styles.note}>
+                        <div className={styles.noteContent}>
+                          <span>{note.content}</span>
 
-                        <div className={styles.btnsNote}>
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenNote(note.id);
-                              setNewNote(note.content);
-                            }}
-                          >
-                            <RiPencilFill />
-                          </button>
-                          <button
-                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
-                            type="button"
-                            onClick={() =>
-                              setDeleteContext({
-                                message: "Deseja cancelar essa nota",
-                                name: note.content ?? "",
-                                onConfirm: () => handleDeleteNote(note.id),
-                              })
-                            }
-                          >
-                            <RiEraserFill />
-                          </button>
+                          <div className={styles.btnsNote}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenNote(note.id);
+                                setNewNote(note.content);
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={async () => {
+                                if (!deal) return;
+                                setDeleteContext({
+                                  message:
+                                    "Tem certeza que deseja excluir a nota",
+                                  name: note.content,
+                                  onConfirm: () => handleDeleteNote(note.id),
+                                });
+                              }}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </div>
                         </div>
-                      </>
+                        <span className={styles.noteDate}>
+                          {new Date(note.createdAt || "").toLocaleDateString(
+                            "pt-BR",
+                          )}
+                        </span>
+                      </div>
                     )}
                   </div>
                 ))}

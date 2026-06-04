@@ -146,6 +146,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
       setIsOpenEdit(null);
     } catch (err) {
       console.error(err);
+      setError("Erro ao editar despesa.");
     }
   }
 
@@ -164,6 +165,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
       fetchExpense();
     } catch (err) {
       console.error(err);
+      setError("Erro ao deletar despesa.");
     }
   }
 
@@ -179,9 +181,11 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
 
       if (!res.ok) throw new Error("Erro buscar data inicial da despesa");
       const data = await res.json();
+      setInitialLoading(false);
       setFirstExpense(data?.createdAt ?? "");
     } catch (err) {
       console.error(err);
+      setError("Erro ao ler despesa.");
     }
   }, [token]);
 
@@ -200,8 +204,20 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
       setExpenses(data);
     } catch (err) {
       console.error(err);
+      setError("Erro ao ler despesa.");
     }
   }, [selectYear, token]);
+
+  const getMonthName = useMemo(() => {
+    if (!selectedMonth) return "";
+
+    const [yearStr, monthStr] = selectedMonth.split("-");
+    const year = Number(yearStr.trim());
+    const month = Number(monthStr.trim());
+
+    const date = new Date(year, month, 1);
+    return date.toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+  }, [selectedMonth]);
 
   const months = useMemo(() => {
     if (!firstExpense) return [];
@@ -246,6 +262,19 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
     setFilteredExpenses(filtered);
   }, [expenses, selectedMonth]);
 
+  useEffect(() => {
+    if (options.length > 0 && !selected) {
+      const currentMonth = `${new Date().getFullYear()}-${new Date().getMonth()}`;
+      const currentOption = options.find((opt) => opt.value === currentMonth);
+
+      if (currentOption) {
+        setSelectedMonth(currentMonth);
+      } else if (options.length > 0) {
+        setSelectedMonth(options[options.length - 1].value);
+      }
+    }
+  }, [options, selected]);
+
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -253,62 +282,87 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
           <div>
             <div className={`glass ${styles.cashStatsCardExpense}`}>
               <div className={`glass ${styles.cardGoal}`}>
-                <div className={styles.infoCardExpense}>
-                  <h3>Despesas</h3>
-                  <CustomSelect
-                    options={options}
-                    value={selected}
-                    onChange={(opt) => {
-                      if (!opt) return;
-                      setSelectedMonth(opt.value);
-                    }}
-                  />
-                </div>
+                <strong>Movimentações</strong>
               </div>
-              <div className={styles.card}>
-                <p className={styles.received}>Média recebida:</p>
-                <span>{real(Number(selectedYearStats.monthAverage))}</span>
-              </div>
-              <div className={styles.card}>
-                <p className={styles.received}>Total de despesas:</p>
-                <span>
-                  {real(
-                    Number(
-                      expenses.reduce(
-                        (acc, item) => acc + Number(item.value),
-                        0,
-                      ),
-                    ),
-                  )}
-                </span>
-              </div>
-              <div className={styles.card}>
-                <p className={styles.received}>Total de despesas pagas:</p>
-                <span>
-                  {real(
-                    Number(
-                      expenses
-                        .filter((item) => item.isPaid)
-                        .reduce((acc, item) => acc + Number(item.value), 0),
-                    ),
-                  )}
-                </span>
-              </div>
-              <div className={styles.card}>
-                <p className={styles.received}>Média líquida:</p>
-                <span>
-                  {real(
-                    Number(selectedYearStats.monthAverage) -
-                      Number(
-                        expenses.reduce(
-                          (acc, item) => acc + Number(item.value),
-                          0,
-                        ),
-                      ),
-                  )}
-                </span>
-              </div>
+              <table className={`glass ${styles.dealsTable}`}>
+                <thead>
+                  <tr>
+                    <th></th>
+                    <th>Descrição</th>
+                    <th>Movimentação</th>
+                    <th>Data</th>
+                    <th>Responsável</th>
+                    <th>Valor</th>
+                    <th>Saldo após movimentação</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredExpenses
+                    .slice()
+                    .reverse()
+                    .map((exp) => (
+                      <tr key={exp.id}>
+                        <td>{exp.label || "Não encontrada"}</td>
+                        <td>
+                          {new Date(exp.newDueDate).getDate() ||
+                            "Não encontrado"}
+                        </td>
+                        <td>
+                          {real(Number(exp.value)) || "Valor não encontrado"}
+                        </td>
+                        <td>
+                          <button
+                            className={`glass ${styles.btnIsPaid} 
+                                ${exp.isPaid && styles.btnIsPaidActive}`}
+                            onClick={() => {
+                              handleEditExpense({
+                                ...exp,
+                                isPaid: !exp.isPaid,
+                              });
+                            }}
+                          >
+                            {exp.isPaid ? "Pago" : "Pagar"}
+                          </button>
+                        </td>
+                        <td>
+                          <div className={styles.edit}>
+                            <button
+                              className={styles.btnEdit}
+                              onClick={() => {
+                                setIsOpenEdit(exp.id);
+                                setIsOpenEdit(exp.id);
+                                setNewExpense(exp.label);
+                                setNewExpenseValue(Number(exp.value));
+                                setNewDueDate(new Date(exp.newDueDate));
+                                setRecurrenceType(exp.recurrenceType ?? "NONE");
+                              }}
+                            >
+                              <RiPencilFill />
+                            </button>
+                            <button
+                              className={styles.btnDel}
+                              onClick={async () => {
+                                if (!exp) return;
+
+                                setDeleteContext({
+                                  message:
+                                    "Tem certeza que deseja excluir a despesa",
+                                  name: exp.label ?? "",
+                                  onConfirm: () => handleDeleteExpense(exp),
+                                });
+                              }}
+                            >
+                              <RiEraserFill />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
             </div>
+          </div>
+          <div>
             <div className={`glass ${styles.cashStatsCardExpense}`}>
               <div className={`glass ${styles.cardGoal}`}>
                 <strong>Adicionar despesa</strong>
@@ -316,7 +370,7 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
               <div className={styles.card}>
                 <input
                   type="text"
-                  className="form-base"
+                  className={`form-base ${styles.form}`}
                   placeholder="Despesa"
                   value={newExpense}
                   onChange={(e) => setNewExpense(e.target.value)}
@@ -344,21 +398,24 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                   )}
               </div>
             </div>
-          </div>
-          <div>
-            {error ? (
-              <div className={styles.noItens}>
-                <h3>⚠️ Erro ao carregar despesas</h3>
-                <p>Tente novamente ou entre em contato se persistir.</p>
-              </div>
-            ) : (
-              <div className={styles.noItens}>
-                <h3>😭 Nenhuma despesa encontrada...</h3>
-                <p>Tente ajustar os filtros ou criar uma nova despesa.</p>
-              </div>
-            )}
-            {(!error || filteredExpenses.length > 0) && !initialLoading && (
+
+            {(!error || filteredExpenses.length > 0) && !initialLoading ? (
               <div className={`glass ${styles.cashStatsCardExpense}`}>
+                <div className={styles.infoCardExpense}>
+                  {selected ? (
+                    <h5>{getMonthName}</h5>
+                  ) : (
+                    <h5>Selecione um mês</h5>
+                  )}
+                  <CustomSelect
+                    options={options}
+                    value={selected}
+                    onChange={(opt) => {
+                      if (!opt) return;
+                      setSelectedMonth(opt.value);
+                    }}
+                  />
+                </div>
                 <table className={`glass ${styles.dealsTable}`}>
                   <thead>
                     <tr>
@@ -503,6 +560,20 @@ export default function ExpenseCard({ selectedYearStats }: ExpenseProps) {
                   </tbody>
                 </table>
               </div>
+            ) : (
+              <>
+                {error ? (
+                  <div className={styles.noItens}>
+                    <h3>⚠️ Erro ao carregar despesas</h3>
+                    <p>Tente novamente ou entre em contato se persistir.</p>
+                  </div>
+                ) : (
+                  <div className={styles.noItens}>
+                    <h3>😭 Nenhuma despesa encontrada...</h3>
+                    <p>Tente ajustar os filtros ou criar uma nova despesa.</p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>

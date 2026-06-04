@@ -154,7 +154,7 @@ export async function getDeals(
       let isClosedFlow = false;
 
       if (filter?.status.includes('OLD_CLIENTS')) {
-        steps = ['REJECTED', 'UNDER_REVIEW'];
+        steps = ['REJECTED', 'DROPPED_OUT'];
       } else if (filter?.status?.includes('POTENTIAL_CLIENTS')) {
         steps = ['APPROVED', 'UNDER_REVIEW', 'MISSING_DOCUMENTS', 'INTERESTED'];
       } else if (filter?.status.includes('CLOSED')) {

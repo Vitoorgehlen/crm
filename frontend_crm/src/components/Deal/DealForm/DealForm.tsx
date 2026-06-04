@@ -60,6 +60,7 @@ export default function DealForm({
   const [searchClient, setSearchClient] = useState("");
   const [clientId, setClientId] = useState<number | undefined>(undefined);
   const [status, setStatus] = useState<DealStatus>("POTENTIAL_CLIENTS");
+  const [targetDealStatus, setTargetDealStatus] = useState("");
   const [statusClient, setStatusClient] = useState<ClientStatus>("INTERESTED");
   const [isPriority, setIsPriority] = useState(false);
   const [searchProfile, setSearchProfile] = useState("");
@@ -80,6 +81,7 @@ export default function DealForm({
     { label: string; value: number; description: string }[]
   >([]);
 
+  const [switchStatus, setSwitchStatus] = useState(false);
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
   const [newNote, setNewNote] = useState("");
   const [note, setNote] = useState<Array<Note>>([]);
@@ -139,6 +141,19 @@ export default function DealForm({
     setFinancingValue(0);
     setCreditLetterValue(0);
     setError("");
+  }
+
+  function openPopup() {
+    if (!deal) return;
+    const oldClients = ["REJECTED", "DROPPED_OUT"];
+    const oldStatusIsOldClient = oldClients.includes(deal.statusClient);
+    const newStatusIsOldClient = oldClients.includes(statusClient);
+
+    const switchStatus = oldStatusIsOldClient !== newStatusIsOldClient;
+
+    setTargetDealStatus(newStatusIsOldClient ? "Arquivados" : "Negociações");
+
+    return switchStatus;
   }
 
   const handleCreateClient = async (payload: Partial<Client>) => {
@@ -930,7 +945,11 @@ export default function DealForm({
                   <button
                     className={`btn-action glass ${styles.btnDeal} ${styles.btnUpdate}`}
                     type="button"
-                    onClick={(e) => handleSubmit(e, onSubmit, false)}
+                    onClick={(e) => {
+                      const switchDealStatus = openPopup();
+                      if (switchDealStatus) setSwitchStatus(true);
+                      else handleSubmit(e, onSubmit, false);
+                    }}
                   >
                     {loading === "save" ? (
                       <span>Atualizando...</span>
@@ -1020,37 +1039,45 @@ export default function DealForm({
                             </div>
                           </>
                         ) : (
-                          <>
-                            <span>{note.content}</span>
+                          <div className={styles.note}>
+                            <div className={styles.noteContent}>
+                              <span>{note.content}</span>
 
-                            <div className={styles.btnsNote}>
-                              <button
-                                className={styles.btnEditDocValue}
-                                type="button"
-                                onClick={() => {
-                                  setIsOpenNote(note.id);
-                                  setNewNote(note.content);
-                                }}
-                              >
-                                <RiPencilFill />
-                              </button>
-                              <button
-                                className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
-                                type="button"
-                                onClick={async () => {
-                                  if (!deal) return;
-                                  setDeleteContext({
-                                    message:
-                                      "Tem certeza que deseja excluir a nota",
-                                    name: note.content,
-                                    onConfirm: () => handleDeleteNote(note.id),
-                                  });
-                                }}
-                              >
-                                <RiEraserFill />
-                              </button>
+                              <div className={styles.btnsNote}>
+                                <button
+                                  className={styles.btnEditDocValue}
+                                  type="button"
+                                  onClick={() => {
+                                    setIsOpenNote(note.id);
+                                    setNewNote(note.content);
+                                  }}
+                                >
+                                  <RiPencilFill />
+                                </button>
+                                <button
+                                  className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                                  type="button"
+                                  onClick={async () => {
+                                    if (!deal) return;
+                                    setDeleteContext({
+                                      message:
+                                        "Tem certeza que deseja excluir a nota",
+                                      name: note.content,
+                                      onConfirm: () =>
+                                        handleDeleteNote(note.id),
+                                    });
+                                  }}
+                                >
+                                  <RiEraserFill />
+                                </button>
+                              </div>
                             </div>
-                          </>
+                            <span className={styles.noteDate}>
+                              {new Date(
+                                note.createdAt || "",
+                              ).toLocaleDateString("pt-BR")}
+                            </span>
+                          </div>
                         )}
                       </div>
                     ))}
@@ -1233,6 +1260,30 @@ export default function DealForm({
             client={undefined}
             onSubmit={handleCreateClient}
             onClose={() => setIsCreateOpen(false)}
+          />
+        )}
+        {switchStatus && (
+          <WarningDeal
+            message={
+              <>
+                Ao atualizar a negociação para{" "}
+                <span className={styles.primaryColor}>
+                  {ClientStatus[statusClient]?.label}
+                </span>
+                , o cliente{" "}
+                <span className={styles.primaryColor}>
+                  {deal?.client?.name}
+                </span>{" "}
+                será enviado para{" "}
+                <span className={styles.primaryColor}>{targetDealStatus}</span>.
+                Deseja prosseguir
+              </>
+            }
+            onClose={() => setSwitchStatus(false)}
+            onConfirm={async () => {
+              await handleSubmit(new Event("submit") as any, onSubmit, false);
+              setSwitchStatus(false);
+            }}
           />
         )}
       </div>

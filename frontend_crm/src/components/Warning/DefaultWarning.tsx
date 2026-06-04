@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { MdClose } from "react-icons/md";
 
 import styles from "./WarningCard.module.css";
 
 type WarningCardProps = {
-  message: string;
-  name: string;
+  message: ReactNode;
+  name?: string;
   cancelDelete?: boolean;
   onClose: () => void;
   onConfirm: () => Promise<void> | void;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import styles from "./page.module.css";
@@ -31,6 +31,9 @@ export default function Home() {
 
   const [tasks, setTasks] = useState<Tasks[]>();
   const [notes, setNotes] = useState<NotePad[]>([]);
+  const [noteHeight, setNoteHeight] = useState(200);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
   const [originalNote, setOriginalNote] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const currentNote = notes[currentIndex];
@@ -362,6 +365,29 @@ export default function Home() {
     if (savedSchedule !== null) {
       setIsOpenSchedule(JSON.parse(savedSchedule));
     }
+
+    const savedHeight = localStorage.getItem("noteHeight");
+    if (savedHeight) {
+      setNoteHeight(Number(savedHeight));
+    }
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!textareaRef.current) return;
+
+      const currentHeight = textareaRef.current.offsetHeight;
+
+      setNoteHeight((prev) => {
+        if (prev !== currentHeight) {
+          localStorage.setItem("noteHeight", String(currentHeight));
+          return currentHeight;
+        }
+
+        return prev;
+      });
+    }, 300);
+    return () => clearInterval(interval);
   }, []);
 
   return (
@@ -476,6 +502,8 @@ export default function Home() {
                   <textarea
                     className={`form-base ${styles.formNote}`}
                     placeholder="Nota"
+                    ref={textareaRef}
+                    style={{ height: `${noteHeight}px` }}
                     value={currentNote?.content || ""}
                     onChange={(e) => {
                       const updated = [...notes];

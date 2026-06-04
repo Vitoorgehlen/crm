@@ -21,11 +21,8 @@ import {
   useSensor,
   useSensors,
   closestCenter,
+  Modifier,
 } from "@dnd-kit/core";
-import {
-  restrictToHorizontalAxis,
-  restrictToVerticalAxis,
-} from "@dnd-kit/modifiers";
 import { PaymentMethod } from "@/types/index";
 import HeaderPage from "@/components/searchbar/page";
 import DraggableCard from "@/components/Tools/draggableAndDroppable/draggableCard";
@@ -88,6 +85,54 @@ export default function Deals() {
   >({} as Record<PaymentMethod, number>);
 
   const [loading, setLoading] = useState(false);
+
+  const restrictToWorkflow = (isMobile: boolean): Modifier => {
+    return ({ transform, draggingNodeRect, active }) => {
+      if (!draggingNodeRect || !active) return transform;
+
+      const dealId = Number(active.id);
+      const deal = findDealById(dealId);
+      if (!deal) return transform;
+
+      const methodSection = document.querySelector(
+        `[data-method="${deal.paymentMethod}"]`,
+      );
+      if (!methodSection)
+        return isMobile ? { ...transform, x: 0 } : { ...transform, y: 0 };
+
+      const stepElements = methodSection.querySelectorAll(`.${styles.column}`);
+      if (stepElements.length === 0)
+        return isMobile ? { ...transform, x: 0 } : { ...transform, y: 0 };
+
+      const firstStepElement = stepElements[0] as HTMLElement;
+      const lastStepElement = stepElements[
+        stepElements.length - 1
+      ] as HTMLElement;
+
+      const firstRect = firstStepElement.getBoundingClientRect();
+      const lastRect = lastStepElement.getBoundingClientRect();
+
+      if (isMobile) {
+        const minY = firstRect.top - draggingNodeRect.top;
+        const maxY = lastRect.bottom - draggingNodeRect.bottom;
+
+        return {
+          ...transform,
+          x: 0,
+          y: Math.min(maxY, Math.max(minY, transform.y)),
+        };
+      } else {
+        const minX = firstRect.left - draggingNodeRect.left;
+        const maxX = lastRect.right - draggingNodeRect.right;
+
+        return {
+          ...transform,
+          x: Math.min(maxX, Math.max(minX, transform.x)),
+          y: 0,
+        };
+      }
+    };
+  };
 
   const handleUpdateDealShare = useCallback((updatedDeal: Deal) => {
     setSelectedDeal((prev) => {
@@ -508,9 +553,7 @@ export default function Deals() {
           collisionDetection={closestCenter}
           onDragEnd={handleDragEnd}
           sensors={sensors}
-          modifiers={
-            isMobile ? [restrictToVerticalAxis] : [restrictToHorizontalAxis]
-          }
+          modifiers={[restrictToWorkflow(isMobile)]}
         >
           <div className={styles.boxSteps}>
             {(Object.keys(WORKFLOW_BY_METHOD) as PaymentMethod[]).map(
@@ -523,7 +566,11 @@ export default function Deals() {
                 if (currentDeals.length === 0) return null;
 
                 return (
-                  <section key={method} className={styles.methodSection}>
+                  <section
+                    key={method}
+                    className={styles.methodSection}
+                    data-method={method}
+                  >
                     <header className={styles.methodHeader}>
                       <h5>{PAYMENT_METHOD_LABEL[method]}</h5>
                       <span className={styles.methodCount}>

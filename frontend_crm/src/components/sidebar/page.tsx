@@ -115,14 +115,6 @@ const Sidebar = () => {
                 <p className={`linkText ${styles.linkText}`}>Clientes</p>
               </div>
             </Link>
-            <Link href="/arquivados" onClick={() => setIsOpen(false)}>
-              <div
-                className={`${pathname === "/arquivados" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
-              >
-                <FaRegFolderOpen className={styles.logos} />
-                <p className={`linkText ${styles.linkText}`}>Arquivados</p>
-              </div>
-            </Link>
             <Link href="/negociacoes" onClick={() => setIsOpen(false)}>
               <div
                 className={`${pathname === "/negociacoes" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
@@ -147,12 +139,12 @@ const Sidebar = () => {
                 <p className={`linkText ${styles.linkText}`}>Finalizados</p>
               </div>
             </Link>
-            <Link href="/comissoes" onClick={() => setIsOpen(false)}>
+            <Link href="/financeiro" onClick={() => setIsOpen(false)}>
               <div
-                className={`${pathname === "/comissoes" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
+                className={`${pathname === "/financeiro" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
               >
                 <LuCalculator className={styles.logos} />
-                <p className={`linkText ${styles.linkText}`}>Comissões</p>
+                <p className={`linkText ${styles.linkText}`}>Financeiro</p>
               </div>
             </Link>
             {permissions.includes("ALL_DEAL_DELETE") && expensePlan && (
@@ -165,6 +157,14 @@ const Sidebar = () => {
                 </div>
               </Link>
             )}
+            <Link href="/arquivados" onClick={() => setIsOpen(false)}>
+              <div
+                className={`${pathname === "/arquivados" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
+              >
+                <FaRegFolderOpen className={styles.logos} />
+                <p className={`linkText ${styles.linkText}`}>Arquivados</p>
+              </div>
+            </Link>
             {permissions.includes("ALL_DEAL_DELETE") && requestPlan && (
               <Link href="/requisicoes" onClick={() => setIsOpen(false)}>
                 <div

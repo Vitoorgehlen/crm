@@ -337,6 +337,30 @@
   width: 100%;
 }
 
+.description {
+  width: 100%;
+  text-align: start;
+}
+
+.note {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.noteContent {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  align-items: center;
+}
+
+.noteDate {
+  font-size: 10px;
+  color: var(--textBase);
+}
+
 .btnsNote {
   gap: 5px;
   max-width: 35px;

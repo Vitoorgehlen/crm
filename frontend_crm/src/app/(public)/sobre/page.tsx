@@ -71,7 +71,7 @@ export default function About() {
         </div>
 
         <div className={styles.mission}>
-          <h3>Nossa vissão</h3>
+          <h3>Nossa visão</h3>
           <p>
             Ser referência em relacionamento e pós-venda para profissionais do
             mercado imobiliário.

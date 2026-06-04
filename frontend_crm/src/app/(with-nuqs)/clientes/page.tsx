@@ -232,15 +232,6 @@ export default function Clients() {
             </div>
           )}
 
-          {/* {clients.length === 0 && !initialLoading ? (
-            <div className={styles.noItens}>
-              <h3>😭 Desculpe não encotramos nenhum cliente...</h3>
-              <p>
-                Se o problema persistir entre em contato para corrigirmos este
-                erro.
-              </p>
-            </div>
-          ) : ( */}
           {error ? (
             <div className={styles.noItens}>
               <h3>⚠️ Erro ao carregar clientes</h3>
@@ -250,9 +241,30 @@ export default function Clients() {
             <div className={styles.noItens}>
               <h3>😭 Nenhum cliente encontrada...</h3>
               <p>Tente ajustar os filtros ou criar um cliente novo.</p>
+
+              <button
+                type="button"
+                className={`glass ${styles.addClient}`}
+                onClick={openCreate}
+              >
+                <div className={styles.clientInfos}>
+                  <h4>+</h4>
+                  <p>Adicionar cliente</p>
+                </div>
+              </button>
             </div>
           ) : (
             <div className={styles.clientList}>
+              <button
+                type="button"
+                className={`glass ${styles.addClient}`}
+                onClick={openCreate}
+              >
+                <div className={styles.clientInfos}>
+                  <h4>+</h4>
+                  <p>Adicionar cliente</p>
+                </div>
+              </button>
               {clients.map((client, index) => {
                 return (
                   <button

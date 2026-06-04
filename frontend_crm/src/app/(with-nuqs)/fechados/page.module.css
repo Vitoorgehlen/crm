@@ -82,6 +82,7 @@
 .column {
   display: flex;
   flex-direction: column;
+  min-width: 130px;
   min-height: 150px;
   height: 100%;
   align-items: center;

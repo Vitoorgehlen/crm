@@ -260,6 +260,14 @@ export default function ScheduleLayout() {
     fetchSchedules();
   }, [isLoading, token, router, selectedDay]);
 
+  useEffect(() => {
+    const savedView = localStorage.getItem("scheduleView");
+
+    if (savedView !== null) {
+      setIsWeekOrMonth(JSON.parse(savedView));
+    }
+  }, []);
+
   return (
     <div className={styles.calendar}>
       <div className={styles.header}>
@@ -288,6 +296,9 @@ export default function ScheduleLayout() {
             onClick={() => {
               setIsWeekOrMonth((prev) => {
                 const next = !prev;
+
+                localStorage.setItem("scheduleView", JSON.stringify(next));
+
                 if (next) {
                   setCurrentDate(new Date());
                 } else {
@@ -296,6 +307,7 @@ export default function ScheduleLayout() {
                     new Date(today.getFullYear(), today.getMonth(), 1),
                   );
                 }
+
                 return next;
               });
             }}

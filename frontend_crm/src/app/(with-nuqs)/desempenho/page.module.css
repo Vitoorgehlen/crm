@@ -39,6 +39,10 @@
   margin-right: 10px;
 }
 
+.selectMonth {
+  max-width: 80px;
+}
+
 .search {
   color: var(--primaryText);
 }

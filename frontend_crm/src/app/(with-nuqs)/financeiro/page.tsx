@@ -10,8 +10,8 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FaCashRegister } from "react-icons/fa";
 import { BsCashCoin } from "react-icons/bs";
 
-import ExpenseCard from "@/components/commissions/Despesas/page";
-import CommissionCard from "@/components/commissions/Comissoes/page";
+import ExpenseCard from "@/components/financial/Despesas/page";
+import CommissionCard from "@/components/financial/Comissoes/page";
 import { useQueryState } from "nuqs";
 import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 

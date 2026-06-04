@@ -8,6 +8,22 @@
   grid-template-columns: repeat(1, 1fr);
 }
 
+.noItens .addClient {
+  padding: 5px 7px;
+  margin-top: 50px;
+}
+
+.addClient {
+  color: var(--textBase);
+  cursor: pointer;
+}
+
+.addClient:hover {
+  color: var(--primaryText);
+  background-color: var(--mainBg);
+  border: 1px solid var(--primaryColor);
+}
+
 .client {
   display: flex;
   flex-direction: column;

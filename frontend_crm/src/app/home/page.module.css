@@ -98,6 +98,15 @@
   grid-column: span 1;
 }
 
+.chartSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.chartSection > :last-child {
+  flex: 1;
+}
+
 .titleCard {
   position: relative;
   display: flex;
@@ -181,8 +190,23 @@
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: pre-wrap;
-  resize: none;
+  resize: vertical;
   line-height: 1.4;
+}
+
+.formNote::-webkit-resizer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+  cursor: ns-resize;
+  background: linear-gradient(135deg, transparent 50%, var(--textBase) 50%);
+  border-radius: 0 0 4px 0;
+}
+
+.formNote:hover::-webkit-resizer {
+  background: linear-gradient(135deg, transparent 50%, var(--primaryColor) 50%);
 }
 
 .btnTask {
@@ -347,6 +371,10 @@
   .underlineTitleTask {
     max-width: 250px;
     gap: 20px;
+  }
+
+  .formNote {
+    max-height: 300px;
   }
 }
 
