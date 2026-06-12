@@ -10,7 +10,7 @@ import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FaCashRegister } from "react-icons/fa";
 import { BsCashCoin } from "react-icons/bs";
 
-import ExpenseCard from "@/components/financial/Despesas/page";
+import ExpenseCard from "@/components/financial/Financeiro/page";
 import CommissionCard from "@/components/financial/Comissoes/page";
 import { useQueryState } from "nuqs";
 import Tooltip from "@/components/Tools/Tooltip/Tooltip";
@@ -318,7 +318,7 @@ export default function Commissions() {
       <main className={styles.main}>
         <div className={styles.headerContent}>
           <div className={styles.title}>
-            <h3>{isOpenCommission ? "Comissões" : "Despesas"}</h3>
+            <h3>{isOpenCommission ? "Comissões" : "Financeiro"}</h3>
           </div>
           <div className={styles.headerIcons}>
             <Tooltip label={"Suas comissões"}>
@@ -336,7 +336,7 @@ export default function Commissions() {
             </Tooltip>
 
             {permissions.includes("EXPENSE_READ") && expensePlan && (
-              <Tooltip label={"Despesas"}>
+              <Tooltip label={"Financeiro"}>
                 <button
                   className={`btn-action glass ${styles.btn}
                 ${isOpenExpense && styles.btnActive}

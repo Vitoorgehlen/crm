@@ -37,6 +37,7 @@ export default function DealList({
 
   const [showConfetti, setShowConfetti] = useState(false);
 
+  const [createStatus, setCreateStatus] = useState<string | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -118,7 +119,8 @@ export default function DealList({
     return `${totalCash} ${text}`;
   }
 
-  function openCreate() {
+  function openCreate(initialStatus?: string) {
+    setCreateStatus(initialStatus || null);
     setIsCreateOpen(true);
     setSelectedDeal(null);
   }
@@ -461,7 +463,7 @@ export default function DealList({
             <button
               type="button"
               className={`glass ${styles.addDeal}`}
-              onClick={openCreate}
+              onClick={() => openCreate()}
             >
               <div className={styles.dealInfos}>
                 <h4>+</h4>
@@ -535,7 +537,7 @@ export default function DealList({
                         <button
                           type="button"
                           className={`glass ${styles.addDeal}`}
-                          onClick={openCreate}
+                          onClick={() => openCreate(statusObj.dbValue)}
                         >
                           <div className={styles.dealInfos}>
                             <h4>+</h4>
@@ -622,6 +624,7 @@ export default function DealList({
           mode="create"
           isOpen={isCreateOpen}
           deal={undefined}
+          initialStatus={createStatus}
           onClose={() => {
             setIsCreateOpen(false);
             setSelectedDeal(null);

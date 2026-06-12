@@ -311,6 +311,9 @@ export default function ClientsForm({
               value={dateOfBirth}
               onChange={(date) => setDateOfBirth(date)}
               placeholder="Data de nascimento (opcional)"
+              startYear={new Date().getFullYear() - 90}
+              endYear={new Date().getFullYear() - 15}
+              reverse={true}
             />
 
             <label>

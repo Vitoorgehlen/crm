@@ -192,6 +192,7 @@ export type DealFormProps = {
     mode: "create" | "edit";
     isOpen: boolean;
     deal?: Deal | null;
+    initialStatus?: string | null;
     clients?: Client[]; 
     onClientUpdated?: (client: Client) => void;
     onClose: () => void;
@@ -586,17 +587,23 @@ export type Expense = {
   id: number;
   label: string;
   value: number;
+  isIncome?: boolean;
   newDueDate: string;
-  isRecurring: boolean;
-  isPaid: boolean;
   recurrenceType?: string;
+  isPaid: boolean;
+  createdBy: number;
+  isRecurringActive: boolean;
+  creator?: {
+    name: string;
+  };
 };
 
 export type ExpensePayload = {
   label: string;
   value: number;
+  isIncome?: boolean;
   newDueDate: string;
-  isRecurring: boolean;
+  isRecurringActive: boolean;
   isPaid: boolean;
   recurrenceType?: string;
 };
@@ -606,6 +613,40 @@ export type ExpenseProps = {
     monthAverage: number;
   };
 };
+
+export type FinancialMovementType =
+  | "INCOME"
+  | "EXPENSE"
+  | "COMMISSION";
+
+export interface FinancialMovement {
+  id: number;
+  companyId: number;
+  type: FinancialMovementType;
+  description: string;
+  amount: string; // Prisma Decimal geralmente vem como string
+  createdAt: string;
+
+  creator?: {
+    name: string;
+  };
+
+  expense?: {
+    id: number;
+    label: string;
+  };
+
+  dealShare?: {
+    deal: {
+      id: number;
+      client: {
+        name: string;
+      };
+    };
+  };
+
+  balanceAfter: number;
+}
 
 export type CreateSchedulePayload = {
     dealId?: number;

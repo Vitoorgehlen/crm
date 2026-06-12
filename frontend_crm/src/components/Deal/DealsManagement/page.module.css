@@ -133,6 +133,7 @@ span .currentPage {
 
 .dealInfos {
   display: flex;
+  min-height: 40px;
   flex-direction: column;
   width: 100%;
 }

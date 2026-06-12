@@ -21,6 +21,7 @@ model Company {
   plan      SubscriptionPlan
   expiresAt DateTime
   maxUsers  Int?
+  balance   Decimal          @default(0) @db.Decimal(10, 2)
   isActive  Boolean          @default(true)
 
   users                     User[]
@@ -31,6 +32,7 @@ model Company {
   rolePermissions           RolePermission[]
   Schedule                  Schedule[]
   documentationValuesCustom DocumentationValueCustom[]
+  financialMovements        FinancialMovement[]
 }
 
 enum SubscriptionPlan {
@@ -84,12 +86,22 @@ model User {
   dealSharesCreated   DealShare[] @relation("UserDealSharesCreated")
   dealSharesUpdated   DealShare[] @relation("UserDealSharesUpdated")
 
+  // Expenses
+  createdExpenses Expense[] @relation("createdExpenses")
+  updatedExpenses Expense[] @relation("updatedExpenses")
+
   // Commissions
   tasks Tasks[] @relation("UserTasks")
 
-  Deal     Deal[]
-  Client   Client[]
-  notePads NotePad[]
+  // Financial Movement
+  createdFinancialMovements FinancialMovement[] @relation("createdFinancialMovements")
+  updatedFinancialMovements FinancialMovement[] @relation("updatedFinancialMovements")
+
+  Deal               Deal[]
+  Client             Client[]
+  notePads           NotePad[]
+  expenses           Expense[]
+  financialMovements FinancialMovement[]
 }
 
 enum UserRole {
@@ -264,8 +276,9 @@ model DealShare {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user    User?   @relation("UserCommissions", fields: [userId], references: [id])
 
-  creator User @relation("UserDealSharesCreated", fields: [createdBy], references: [id])
-  updater User @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id])
+  creator            User                @relation("UserDealSharesCreated", fields: [createdBy], references: [id])
+  updater            User                @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id])
+  financialMovements FinancialMovement[]
 }
 
 model DocumentationValueDefault {
@@ -329,25 +342,72 @@ model Note {
 }
 
 model Expense {
-  id             Int              @id @default(autoincrement())
-  companyId      Int
-  label          String
-  value          Decimal          @db.Decimal(10, 2)
-  newDueDate     DateTime
-  isRecurring    Boolean          @default(false)
-  recurrenceType recurrenceTypes?
-  isPaid         Boolean          @default(false)
-  createdBy      Int
-  updatedBy      Int
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  company        Company          @relation(fields: [companyId], references: [id])
+  id                Int              @id @default(autoincrement())
+  companyId         Int
+  label             String
+  value             Decimal          @db.Decimal(10, 2)
+  isIncome          Boolean?
+  newDueDate        DateTime
+  parentExpenseId   Int?
+  recurrenceType    recurrenceTypes?
+  isRecurringActive Boolean          @default(true)
+  isPaid            Boolean          @default(false)
+  createdBy         Int
+  updatedBy         Int
+  createdAt         DateTime         @default(now())
+  updatedAt         DateTime         @updatedAt
+  company           Company          @relation(fields: [companyId], references: [id])
+
+  creator            User                @relation("createdExpenses", fields: [createdBy], references: [id])
+  updater            User                @relation("updatedExpenses", fields: [updatedBy], references: [id])
+  user               User?               @relation(fields: [userId], references: [id])
+  userId             Int?
+  parentExpense      Expense?            @relation("ExpenseRecurrence", fields: [parentExpenseId], references: [id])
+  childExpenses      Expense[]           @relation("ExpenseRecurrence")
+  financialMovements FinancialMovement[]
+
+  @@index([parentExpenseId])
 }
 
 enum recurrenceTypes {
-  MONTHLY
-  YEARLY
+  NONE
   WEEKLY
+  BIWEEKLY
+  MONTHLY
+  BIMONTHLY
+  QUARTERLY
+  SEMIANNUAL
+  YEARLY
+}
+
+model FinancialMovement {
+  id          Int                   @id @default(autoincrement())
+  companyId   Int
+  type        FinancialMovementType
+  description String
+  amount      Decimal               @db.Decimal(10, 2)
+  createdBy   Int
+  updatedBy   Int
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+
+  company     Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  expenseId   Int?       @unique
+  expense     Expense?   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  dealShareId Int?       @unique
+  dealShare   DealShare? @relation(fields: [dealShareId], references: [id], onDelete: Cascade)
+  creator     User       @relation("createdFinancialMovements", fields: [createdBy], references: [id])
+  updater     User       @relation("updatedFinancialMovements", fields: [updatedBy], references: [id])
+  user        User?      @relation(fields: [userId], references: [id])
+  userId      Int?
+
+  @@index([companyId, createdAt, type])
+}
+
+enum FinancialMovementType {
+  INCOME
+  EXPENSE
+  COMMISSION
 }
 
 model Schedule {

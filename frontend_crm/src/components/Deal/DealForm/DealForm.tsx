@@ -39,6 +39,7 @@ export default function DealForm({
   mode,
   isOpen,
   deal = null,
+  initialStatus,
   clients: clientsProp,
   onClose,
   onSubmit,
@@ -548,8 +549,11 @@ export default function DealForm({
       setError("");
     } else if (mode === "create") {
       clearForm();
+      if (initialStatus && initialStatus !== "null") {
+        setStatusClient(initialStatus as ClientStatus);
+      }
     }
-  }, [deal, mode]);
+  }, [deal, mode, initialStatus]);
 
   useEffect(() => {
     if (paymentMethod === "CASH") {

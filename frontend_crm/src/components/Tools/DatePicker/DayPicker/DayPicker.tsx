@@ -9,6 +9,9 @@ interface CustomDatePickerProps {
   value: Date | null;
   onChange: (date: Date | null) => void;
   placeholder?: string;
+  startYear?: number;
+  endYear?: number;
+  reverse?: boolean;
 }
 
 const months: Option<number>[] = [
@@ -26,16 +29,24 @@ const months: Option<number>[] = [
   { value: 11, label: "Dezembro" },
 ];
 
-const years: Option<number>[] = Array.from({ length: 50 }, (_, i) => ({
-  value: 2000 + i,
-  label: String(2000 + i),
-}));
-
 export default function DayPicker({
   value,
   onChange,
   placeholder = "Selecione uma data",
+  startYear = new Date().getFullYear() - 100,
+  endYear = new Date().getFullYear() + 10,
+  reverse = false,
 }: CustomDatePickerProps) {
+  let years: Option<number>[] = Array.from(
+    { length: endYear - startYear + 1 },
+    (_, i) => ({
+      value: startYear + i,
+      label: String(startYear + i),
+    }),
+  );
+
+  if (reverse) years.reverse();
+
   return (
     <DatePicker
       selected={value}

@@ -437,7 +437,10 @@ export async function updateDealShare(
   });
   if (!user) throw new Error('Usuário não encontrado.');
 
-  const dealShare = await prisma.dealShare.findUnique({ where: { id, companyId: user.companyId } });
+  const dealShare = await prisma.dealShare.findUnique({
+    where: { id, companyId: user.companyId },
+    include: { deal: { include: { client: true } } }
+  });
   if (!dealShare) throw new Error('Comissão não encontrada.');
 
   if (dealShare.createdBy !== userId) {
@@ -457,18 +460,66 @@ export async function updateDealShare(
     updatedBy: userId
   }
 
-  if (newData.isPaid === false && dealShare.isPaid === true) {
+  if (!newData.isPaid && dealShare.isPaid) {
     updateDate.paidAt = null;
     updateDate.received = 0;
   }
 
-  if (newData.isPaid === true && dealShare.isPaid === false) {
+  if (newData.isPaid && !dealShare.isPaid) {
     updateDate.paidAt = new Date();
   }
 
-  return prisma.dealShare.update({
-    where: { id, companyId: user.companyId },
-    data: updateDate,
+  return prisma.$transaction(async (tx) => {
+    const updatedShare = await tx.dealShare.update({
+      where: {
+        id,
+        companyId: user.companyId,
+      },
+      data: updateDate,
+    });
+
+    let updatedMovement;
+
+    if (dealShare.isCompany) {
+      const movement = await tx.financialMovement.findUnique({
+        where: { dealShareId: id }
+      });
+
+      const newValue = updateDate.amount !== undefined
+        ? Number(updateDate.amount)
+        : dealShare.amount.toNumber();
+
+      if (updateDate.isPaid) {
+        if (movement) {
+          updatedMovement = await tx.financialMovement.update({
+            where: { dealShareId: id },
+            data: {
+              amount: newValue,
+              updatedBy: userId
+            }
+          })
+        } else {
+          updatedMovement = await tx.financialMovement.create({
+            data: {
+              companyId: user.companyId,
+              type: 'COMMISSION',
+              description: `Comissão da venda de  ${dealShare.deal.client.name}`,
+              amount: newValue,
+              dealShareId: id,
+              createdBy: userId,
+              updatedBy: userId,
+            },
+          });
+        }
+      } else {
+        if (movement) {
+          updatedMovement = await tx.financialMovement.delete({
+            where: { dealShareId: id },
+          });
+        }
+      }
+    }
+    return { updatedShare, updatedMovement };
   });
 }
 

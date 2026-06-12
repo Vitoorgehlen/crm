@@ -17,6 +17,7 @@ import goalsRoutes from './routes/goalsRoutes';
 import scheduleRoutes from './routes/scheduleRoutes';
 import tasksRoutes from './routes/tasksRoutes';
 import expenseRoutes from './routes/expenseRoutes';
+import financialMovementRoutes from './routes/financialMovementRoutes';
 import tokenRoutes from './routes/tokenRoutes';
 import resetPassword from './routes/resetPasswordRoutes';
 import contactRoutes from './routes/contactRoutes';
@@ -56,6 +57,7 @@ class App {
     this.app.use('/', goalsRoutes);
     this.app.use('/', scheduleRoutes);
     this.app.use('/', expenseRoutes);
+    this.app.use('/', financialMovementRoutes);
     this.app.use('/', tasksRoutes);
     this.app.use('/', tokenRoutes);
     this.app.use('/', resetPassword);

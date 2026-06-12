@@ -31,6 +31,7 @@
   justify-content: space-around;
   color: var(--primaryText);
   width: 100%;
+  min-height: 35px;
   border-radius: 8px;
   padding: 10px;
   text-align: center;
@@ -38,9 +39,38 @@
   border: 1px solid var(--textBase);
 }
 
+.selectMovements {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.selectMovement {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.tableContainer {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.btnAdd {
+  cursor: pointer;
+}
+
+.btnAdd:hover {
+  border: 1px solid var(--primaryColor);
+}
+
 .infoCardExpense {
   display: flex;
   align-items: center;
+  text-align: center;
   gap: 5px;
   justify-content: space-around;
   width: 100%;
@@ -57,7 +87,11 @@
 }
 
 .form {
-  min-width: 180px;
+  min-width: 100%;
+}
+
+.payment {
+  min-width: 120px;
 }
 
 .received {
@@ -79,6 +113,12 @@
   margin: 2px;
 
   border: 1px solid var(--textBase);
+}
+
+.btnSave:hover {
+  color: var(--primaryColor);
+  background-color: var(--textBase);
+  border: 1px solid var(--primaryColor);
 }
 
 .cardAddExpense {
@@ -133,7 +173,7 @@
 }
 
 .dealsTable tbody tr:nth-child(odd) {
-  background: var(--textBase);
+  background: var(--mainBg);
 }
 
 .dealsTable tbody tr:nth-child(even) {
@@ -159,9 +199,62 @@
   font-size: 1rem;
 }
 
+.iconRecived {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--primaryText);
+}
+
+.infoMovements {
+  color: var(--textBase);
+}
+
+.accountBalance {
+  white-space: nowrap;
+  display: inline-block;
+  color: var(--primaryText);
+}
+
+.isIncome {
+  color: var(--successColor);
+}
+
+.isExpense {
+  color: var(--errorColor);
+}
+
+.icon {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.arrowUp,
+.arrowDown {
+  position: absolute;
+  bottom: 0px;
+  right: -4px;
+  width: 15px;
+  height: 15px;
+  color: var(--primaryText);
+  border-radius: 50%;
+  padding: 2px;
+}
+
+.arrowDown {
+  background-color: var(--successColor);
+}
+
+.arrowUp {
+  background-color: var(--errorColor);
+}
+
 .btnIsPaid {
   color: var(--primaryText);
-  background: var(--mainBg);
   border-radius: 5px;
   max-width: 90px;
   width: 100%;
@@ -170,28 +263,38 @@
   cursor: pointer;
   transition: 200ms;
 
-  border: 1px solid var(--textBase);
+  border: 1px solid var(--shadowColor);
 }
 
-.btnIsPaid:hover {
+.dealsTable tbody tr:nth-child(even) .btnIsPaid {
+  color: var(--textBase);
+  border: 1px solid var(--mainBg);
+}
+
+.btnIsPaid:hover,
+.dealsTable tbody tr:nth-child(even) .btnIsPaid:hover {
   border: 1px solid var(--primaryColor);
+  color: var(--primaryText);
 }
 
-.btnIsPaidActive {
-  background-color: var(--textBase);
+.btnIsPaidActive,
+.dealsTable tbody tr:nth-child(even) .btnIsPaidActive {
+  background-color: var(--primaryColor);
   border: 1px solid var(--mainBg);
   color: var(--mainBg);
 }
 
 .edit {
   display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 3px;
   padding: 0 3px;
 }
 
 .btnEdit {
+  color: var(--textBase);
   border: none;
-  color: var(--mainBg);
   font-size: 0.9rem;
   cursor: pointer;
 }
@@ -203,7 +306,7 @@
 .btnDel {
   border: none;
   margin-left: 5px;
-  color: var(--mainBg);
+  color: var(--textBase);
   font-size: 0.9rem;
   cursor: pointer;
 }
@@ -222,13 +325,15 @@
   color: var(--textBase);
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1200px) {
   .expenseMain {
     flex-direction: column;
     padding: 10px;
     gap: 0;
   }
+}
 
+@media (max-width: 768px) {
   .cashStatsCardExpense {
     margin-bottom: 10px;
   }
@@ -237,7 +342,21 @@
     padding: 5px;
   }
 
+  .cardAddExpense {
+    padding-right: 4px;
+  }
+
   .cardGoal h3 {
     font-size: 16px;
+  }
+
+  .onlyDesktop {
+    display: none;
+    visibility: hidden;
+  }
+
+  .dealsTable {
+    width: 100%;
+    overflow-x: scroll;
   }
 }
