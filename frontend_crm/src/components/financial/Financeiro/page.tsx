@@ -28,9 +28,6 @@ export default function ExpenseCard() {
   const [isOpenIncome, setIsOpenIncome] = useState(false);
   const [isOpenExpense, setIsOpenExpense] = useState(false);
   const [isOpenEdit, setIsOpenEdit] = useState<number | null>(null);
-  const [isOpenEditRecurrence, setIsOpenEditRecurrence] = useState<
-    number | null
-  >(null);
   const [initialRangeExpense, setInitialRangeExpense] = useState("");
   const [finalRangeExpense, setFinalRangeExpense] = useState("");
   const [expenses, setExpenses] = useState<Expense[]>([]);
@@ -62,7 +59,6 @@ export default function ExpenseCard() {
     setIsOpenIncome(false);
     setIsOpenExpense(false);
     setIsOpenEdit(null);
-    setIsOpenEditRecurrence(null);
 
     setNewExpense("");
     setNewExpenseValue(null);
@@ -836,7 +832,6 @@ export default function ExpenseCard() {
                                       onClick={() => {
                                         setIsOpenExpense(false);
                                         setIsOpenEdit(exp.id);
-                                        setIsOpenEditRecurrence(null);
                                         setNewExpense(exp.label);
                                         setNewExpenseValue(Number(exp.value));
                                         setNewDueDate(new Date(exp.newDueDate));

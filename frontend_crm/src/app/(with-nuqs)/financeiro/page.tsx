@@ -199,74 +199,74 @@ export default function Commissions() {
     };
   }, [deals]);
 
-  const selectedYearStats = useMemo(() => {
-    const currentYear = new Date().getFullYear();
-    const currentMonth = new Date().getMonth();
-    const year = Number(selectedYear) || new Date().getFullYear();
-    const stats = statsCash.yearlyStats[year] || {
-      total: 0,
-      received: 0,
-      toReceived: 0,
-      dealsFinish: 0,
-      dealsToFinish: 0,
-    };
+  // const selectedYearStats = useMemo(() => {
+  //   const currentYear = new Date().getFullYear();
+  //   const currentMonth = new Date().getMonth();
+  //   const year = Number(selectedYear) || new Date().getFullYear();
+  //   const stats = statsCash.yearlyStats[year] || {
+  //     total: 0,
+  //     received: 0,
+  //     toReceived: 0,
+  //     dealsFinish: 0,
+  //     dealsToFinish: 0,
+  //   };
 
-    const lastYearStats = statsCash.yearlyStats[year - 1] || {
-      total: 0,
-      received: 0,
-      toReceived: 0,
-      dealsFinish: 0,
-      dealsToFinish: 0,
-    };
+  //   const lastYearStats = statsCash.yearlyStats[year - 1] || {
+  //     total: 0,
+  //     received: 0,
+  //     toReceived: 0,
+  //     dealsFinish: 0,
+  //     dealsToFinish: 0,
+  //   };
 
-    const comparStats =
-      lastYearStats.total > 0
-        ? (Number(stats.total) * 100) / Number(lastYearStats.total)
-        : 0;
+  //   const comparStats =
+  //     lastYearStats.total > 0
+  //       ? (Number(stats.total) * 100) / Number(lastYearStats.total)
+  //       : 0;
 
-    let comparStatsFair = 0;
+  //   let comparStatsFair = 0;
 
-    if (currentYear === year) {
-      let currentYearSum = 0;
-      let lastYearSum = 0;
-      for (let month = 0; month <= currentMonth; month++) {
-        const currentMonthData = statsCash.monthlyStats[year]?.[month] || {
-          total: 0,
-          received: 0,
-          toReceived: 0,
-          dealsFinish: 0,
-          dealsToFinish: 0,
-        };
-        const lastMonthData = statsCash.monthlyStats[year - 1]?.[month] || {
-          total: 0,
-          received: 0,
-          toReceived: 0,
-          dealsFinish: 0,
-          dealsToFinish: 0,
-        };
+  //   if (currentYear === year) {
+  //     let currentYearSum = 0;
+  //     let lastYearSum = 0;
+  //     for (let month = 0; month <= currentMonth; month++) {
+  //       const currentMonthData = statsCash.monthlyStats[year]?.[month] || {
+  //         total: 0,
+  //         received: 0,
+  //         toReceived: 0,
+  //         dealsFinish: 0,
+  //         dealsToFinish: 0,
+  //       };
+  //       const lastMonthData = statsCash.monthlyStats[year - 1]?.[month] || {
+  //         total: 0,
+  //         received: 0,
+  //         toReceived: 0,
+  //         dealsFinish: 0,
+  //         dealsToFinish: 0,
+  //       };
 
-        currentYearSum += Number(currentMonthData.total || 0);
-        lastYearSum += Number(lastMonthData.total || 0);
+  //       currentYearSum += Number(currentMonthData.total || 0);
+  //       lastYearSum += Number(lastMonthData.total || 0);
 
-        comparStatsFair =
-          lastYearSum > 0 ? (currentYearSum * 100) / lastYearSum : 0;
-      }
-    }
+  //       comparStatsFair =
+  //         lastYearSum > 0 ? (currentYearSum * 100) / lastYearSum : 0;
+  //     }
+  //   }
 
-    const isCurrentYear = year === new Date().getFullYear();
-    const monthsInYear = isCurrentYear ? new Date().getMonth() + 1 : 12;
-    const monthAverage = stats.received / Math.max(1, monthsInYear);
+  //   const isCurrentYear = year === new Date().getFullYear();
+  //   const monthsInYear = isCurrentYear ? new Date().getMonth() + 1 : 12;
+  //   const monthAverage = stats.received / Math.max(1, monthsInYear);
 
-    return {
-      year,
-      total: stats.total,
-      received: stats.received,
-      toReceived: stats.toReceived,
-      comparStats,
-      comparStatsFair,
-      monthAverage,
-    };
-  }, [statsCash.yearlyStats, statsCash.monthlyStats, selectedYear]);
+  //   return {
+  //     year,
+  //     total: stats.total,
+  //     received: stats.received,
+  //     toReceived: stats.toReceived,
+  //     comparStats,
+  //     comparStatsFair,
+  //     monthAverage,
+  //   };
+  // }, [statsCash.yearlyStats, statsCash.monthlyStats, selectedYear]);
 
   const fetchDealsData = useCallback(async () => {
     if (!token) return;
@@ -380,9 +380,7 @@ export default function Commissions() {
         </div>
         <div className={styles.cardBox}>
           {isOpenCommission && <CommissionCard deals={deals} />}
-          {isOpenExpense && expensePlan && (
-            <ExpenseCard selectedYearStats={selectedYearStats} />
-          )}
+          {isOpenExpense && expensePlan && <ExpenseCard />}
         </div>
       </main>
     </div>
