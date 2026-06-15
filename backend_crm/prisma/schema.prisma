@@ -33,6 +33,7 @@ model Company {
   Schedule                  Schedule[]
   documentationValuesCustom DocumentationValueCustom[]
   financialMovements        FinancialMovement[]
+  goals                     Goals[]
 }
 
 enum SubscriptionPlan {
@@ -78,7 +79,7 @@ model User {
   scheduleUpdated Schedule[] @relation("UserScheduleUpdates")
 
   // Hierarchy
-  supervisor   User?  @relation("UserHierarchy", fields: [supervisorId], references: [id])
+  supervisor   User?  @relation("UserHierarchy", fields: [supervisorId], references: [id], onDelete: SetNull)
   subordinates User[] @relation("UserHierarchy")
 
   // Commissions
@@ -102,6 +103,7 @@ model User {
   notePads           NotePad[]
   expenses           Expense[]
   financialMovements FinancialMovement[]
+  goals              Goals[]
 }
 
 enum UserRole {
@@ -167,8 +169,8 @@ model Client {
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  creator         User  @relation("UserClients", fields: [createdBy], references: [id])
-  updater         User  @relation("UserClientUpdates", fields: [updatedBy], references: [id])
+  creator         User  @relation("UserClients", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater         User  @relation("UserClientUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
   deleteRequester User? @relation("ClientDeleteRequestUser", fields: [deleteRequestBy], references: [id])
 
   deals  Deal[] @relation("ClientDeals")
@@ -212,8 +214,8 @@ model Deal {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   client  Client  @relation("ClientDeals", fields: [clientId], references: [id])
 
-  creator         User  @relation("UserDeals", fields: [createdBy], references: [id])
-  updater         User  @relation("UserDealsUpdates", fields: [updatedBy], references: [id])
+  creator         User  @relation("UserDeals", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater         User  @relation("UserDealsUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
   deleteRequester User? @relation("DealDeleteRequestUser", fields: [deleteRequestBy], references: [id])
 
   notes             Note[]
@@ -276,8 +278,8 @@ model DealShare {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
   user    User?   @relation("UserCommissions", fields: [userId], references: [id])
 
-  creator            User                @relation("UserDealSharesCreated", fields: [createdBy], references: [id])
-  updater            User                @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id])
+  creator            User                @relation("UserDealSharesCreated", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater            User                @relation("UserDealSharesUpdated", fields: [updatedBy], references: [id], onDelete: Cascade)
   financialMovements FinancialMovement[]
 }
 
@@ -323,8 +325,8 @@ model DocumentationCost {
   updatedAt DateTime @updatedAt
 
   deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  creator User @relation("UserDocumentations", fields: [createdBy], references: [id])
-  updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id])
+  creator User @relation("UserDocumentations", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater User @relation("UserDocumentationsUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
 }
 
 model Note {
@@ -337,8 +339,8 @@ model Note {
   updatedAt DateTime @updatedAt
 
   deal    Deal @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  creator User @relation("UserNotes", fields: [createdBy], references: [id])
-  updater User @relation("UserNotesUpdates", fields: [updatedBy], references: [id])
+  creator User @relation("UserNotes", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater User @relation("UserNotesUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
 }
 
 model Expense {
@@ -356,10 +358,10 @@ model Expense {
   updatedBy         Int
   createdAt         DateTime         @default(now())
   updatedAt         DateTime         @updatedAt
-  company           Company          @relation(fields: [companyId], references: [id])
+  company           Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  creator            User                @relation("createdExpenses", fields: [createdBy], references: [id])
-  updater            User                @relation("updatedExpenses", fields: [updatedBy], references: [id])
+  creator            User                @relation("createdExpenses", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater            User                @relation("updatedExpenses", fields: [updatedBy], references: [id], onDelete: Cascade)
   user               User?               @relation(fields: [userId], references: [id])
   userId             Int?
   parentExpense      Expense?            @relation("ExpenseRecurrence", fields: [parentExpenseId], references: [id])
@@ -396,8 +398,8 @@ model FinancialMovement {
   expense     Expense?   @relation(fields: [expenseId], references: [id], onDelete: Cascade)
   dealShareId Int?       @unique
   dealShare   DealShare? @relation(fields: [dealShareId], references: [id], onDelete: Cascade)
-  creator     User       @relation("createdFinancialMovements", fields: [createdBy], references: [id])
-  updater     User       @relation("updatedFinancialMovements", fields: [updatedBy], references: [id])
+  creator     User       @relation("createdFinancialMovements", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater     User       @relation("updatedFinancialMovements", fields: [updatedBy], references: [id], onDelete: Cascade)
   user        User?      @relation(fields: [userId], references: [id])
   userId      Int?
 
@@ -424,8 +426,8 @@ model Schedule {
   updatedAt  DateTime  @updatedAt
 
   deal    Deal?   @relation(fields: [dealId], references: [id], onDelete: Cascade)
-  creator User    @relation("UserSchedule", fields: [createdBy], references: [id])
-  updater User    @relation("UserScheduleUpdates", fields: [updatedBy], references: [id])
+  creator User    @relation("UserSchedule", fields: [createdBy], references: [id], onDelete: Cascade)
+  updater User    @relation("UserScheduleUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
@@ -437,7 +439,7 @@ model Tasks {
   createdBy Int
   updatedAt DateTime     @updatedAt
 
-  creator User @relation("UserTasks", fields: [createdBy], references: [id])
+  creator User @relation("UserTasks", fields: [createdBy], references: [id], onDelete: Cascade)
 }
 
 enum TaskPriority {
@@ -449,11 +451,15 @@ enum TaskPriority {
 model Goals {
   id        Int      @id @default(autoincrement())
   isCompany Boolean  @default(false)
+  companyId Int?
   userId    Int
   value     Decimal  @db.Decimal(10, 2)
   year      Int
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Cascade)
 }
 
 model NotePad {

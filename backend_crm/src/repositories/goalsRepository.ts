@@ -7,10 +7,18 @@ export async function addGoals(
   userId: number
 ) {
   const year = new Date().getFullYear();
+  const user = await prisma.user.findUnique({
+    where: {  id: userId },
+    select: { companyId: true }
+  })
+
+  if (!user)
+    throw new Error("Usuário não encontrado");
 
   return prisma.goals.create({
     data: {
       ...newData,
+      companyId: user.companyId,
       userId,
       year,
     },

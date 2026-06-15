@@ -136,8 +136,20 @@ export async function updateCompany(
   });
 }
 
-export function deleteCompany(id: number) {
-  return prisma.company.delete({
-      where: { id }
+export async function deleteCompany(id: number) {
+  await prisma.$transaction(async (tx) => {
+    const users = await tx.user.findMany({
+      where: { companyId: id },
+      select: { id: true }
+    });
+
+    const userIds = users.map(u => u.id);
+
+    await tx.documentationCost.deleteMany({
+      where: {  },
+    });
+
+    // Agora deletar a empresa (que deletará os usuários em cascade)
+    await tx.company.delete({ where: { id } });
   });
 }

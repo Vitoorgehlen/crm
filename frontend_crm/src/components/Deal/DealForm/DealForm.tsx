@@ -757,7 +757,11 @@ export default function DealForm({
                 <div className={styles.box}>
                   <CustomSelect
                     options={statusOptions}
-                    value={selectedStatusOption || null}
+                    value={
+                      selectedStatusOption ??
+                      statusOptions.find((opt) => opt.value === "INTERESTED") ??
+                      null
+                    }
                     onChange={(option) => {
                       if (option) {
                         setStatusClient(option.value);

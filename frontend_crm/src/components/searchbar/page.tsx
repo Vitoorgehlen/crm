@@ -95,7 +95,7 @@ export default function HeaderPage({
               >
                 <button
                   className={`${styles.addDeal} btn-action glass`}
-                  onClick={onCreate}
+                  onClick={() => onCreate()}
                   type="button"
                 >
                   {title === "Clientes" ? (
