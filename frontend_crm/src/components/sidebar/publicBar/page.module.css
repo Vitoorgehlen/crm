@@ -23,7 +23,7 @@
 
 .logoHome {
   width: auto;
-  height: 60px;
+  height: 50px;
   color: var(--primaryColor);
   transition: all 0.3s ease;
   display: block;
@@ -45,7 +45,7 @@
 
 .nameLogo {
   display: block;
-  margin-top: -20px;
+  margin-top: -15px;
   color: var(--textBase);
   font-size: 20px;
 }

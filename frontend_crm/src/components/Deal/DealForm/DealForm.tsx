@@ -895,7 +895,7 @@ export default function DealForm({
                   type="button"
                   onClick={(e) => handleSubmit(e, onSubmit, false)}
                 >
-                  {loading === "save" ? "Enviando" : "Enviar"}
+                  {loading === "save" ? <span>Salvando...</span> : "Salvar"}
                 </button>
               ) : (
                 <div className={styles.footerCard}>

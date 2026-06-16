@@ -200,6 +200,10 @@ input:hover {
   text-align: center;
 }
 
+.defaultTitle {
+  color: var(--primaryColor);
+}
+
 .arrow-pagination {
   border: none;
   cursor: pointer;

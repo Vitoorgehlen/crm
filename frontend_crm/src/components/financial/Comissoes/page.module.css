@@ -124,8 +124,8 @@
 .yearBtn {
   text-align: center;
   padding: 8px 12px;
-  color: var(--mainBg);
-  border: 1px solid var(--mainBg);
+  color: var(--textBase);
+  border: 1px solid var(--textBase);
   font-size: 1rem;
   border-radius: 20px;
   cursor: pointer;
@@ -139,7 +139,7 @@
 
 .yearBtnActive {
   background-color: var(--mainBg);
-  color: var(--textBase);
+  color: var(--primaryText);
   border: 1px solid var(--primaryColor);
 }
 
@@ -157,7 +157,7 @@
 .monthToggleActive {
   color: var(--textBase);
   background: var(--secondaryBg);
-  border: 1px solid var(--mainBg);
+  border: 1px solid var(--textBase);
   border-radius: 20px;
   padding: 5px 10px 6px 10px;
   display: flex;
@@ -166,17 +166,18 @@
   gap: 5px;
   justify-content: center;
   cursor: pointer;
-  border: none;
 }
 
 .monthToggle:hover,
 .monthToggleActive:hover {
   color: var(--mainBg);
   background: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
 }
 
 .monthToggleActive {
-  color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  color: var(--primaryText);
 }
 
 .dealsOfMonth {

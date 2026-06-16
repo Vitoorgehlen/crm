@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
 import { AiOutlineLoading3Quarters } from "react-icons/ai";
+import Logo from "@/utils/Logo";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token, userType, isLoading } = useAuth();

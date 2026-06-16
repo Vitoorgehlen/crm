@@ -13,6 +13,44 @@
   color: var(--primaryText);
 }
 
+.line {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+  width: 80%;
+  max-width: 500px;
+  border: 1px solid var(--shadowColor);
+  padding: 3px 15px;
+}
+
+.line:hover {
+  border-bottom: 1px solid var(--primaryColor);
+}
+
+.inputForm {
+  background: none;
+  border: none;
+  color: var(--primaryText);
+  outline: none;
+  width: 100%;
+}
+
+.eyeButton {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--primaryText);
+  font-size: 1.1rem;
+  width: 35px;
+  height: 35px;
+  border: 1px solid var(--shadowColor);
+}
+
+.eyeButton:hover {
+  color: var(--mainBg);
+  background-color: var(--primaryColor);
+}
+
 .title {
   font-size: 18px;
 }

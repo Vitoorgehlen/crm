@@ -27,8 +27,15 @@ export async function addExpense(
     });
 
     if (!createdCompany) throw new Error('Erro ao buscar despesas');
-    if (new Date(data.newDueDate) < createdCompany.createdAt)
-      throw new Error(`Você só pode salvar despesas após a data de criação da sua empresa. (${new Date(createdCompany.createdAt).toLocaleDateString('pt-BR')})`);
+
+    const companyCreatedAt = new Date(createdCompany.createdAt);
+    const dueDate = new Date(data.newDueDate);
+
+    const companyYearMonth = companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
+    const dueYearMonth = dueDate.getFullYear() * 100 + dueDate.getMonth();
+
+    if (dueYearMonth < companyYearMonth)
+      throw new Error(`Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`);
     const isPaid = data.isIncome || data.recurrenceType === 'NONE';
 
     const dueDates: Date[] = [];
@@ -276,8 +283,15 @@ export async function updateExpense(
     });
 
     if (!createdCompany) throw new Error('Erro ao buscar despesas');
-    if (parsedNewDueDate < createdCompany.createdAt)
-      throw new Error(`Você só pode salvar despesas após a data de criação da sua empresa. (${new Date(createdCompany.createdAt).getDate()})`);
+
+    const companyCreatedAt = new Date(createdCompany.createdAt);
+    const dueDate = new Date(parsedNewDueDate);
+
+    const companyYearMonth = companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
+    const dueYearMonth = dueDate.getFullYear() * 100 + dueDate.getMonth();
+
+    if (dueYearMonth < companyYearMonth)
+      throw new Error(`Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`);
 
     const updatedExpense = await tx.expense.update({
       where: { id },

@@ -6,6 +6,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import styles from "./page.module.css";
 import { ConfigMeProps } from "@/types";
 import { MdKeyboardArrowRight, MdKeyboardArrowDown } from "react-icons/md";
+import { FaEye, FaEyeSlash } from "react-icons/fa6";
+
 import ThemeSwitcher from "../switchTheme/page";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
@@ -20,6 +22,7 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
   const [isOpenPassword, setIsOpenPassword] = useState(false);
   const [myNewPassword, setMyNewPassword] = useState("");
   const [myNewPassword2, setMyNewPassword2] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -221,18 +224,36 @@ export default function EditMe({ u, onUpdate }: ConfigMeProps) {
       </button>
       {isOpenPassword && (
         <div className={styles.labelsSetting}>
-          <input
-            className={`${styles.labelSetting} form-base`}
-            type="password"
-            placeholder="Nova senha"
-            onChange={(e) => setMyNewPassword(e.target.value)}
-          />
-          <input
-            className={`${styles.labelSetting} form-base`}
-            type="password"
-            placeholder="Confirme a senha"
-            onChange={(e) => setMyNewPassword2(e.target.value)}
-          />
+          <div className={`${styles.line} form-base`}>
+            <input
+              type={showPassword ? "text" : "password"}
+              className={styles.inputForm}
+              placeholder="Nova senha"
+              onChange={(e) => setMyNewPassword(e.target.value)}
+            />
+            <button
+              type="button"
+              className={`btn-action glass ${styles.eyeButton}`}
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <FaEye /> : <FaEyeSlash />}
+            </button>
+          </div>
+          <div className={`${styles.line} form-base`}>
+            <input
+              className={styles.inputForm}
+              type={showPassword ? "text" : "password"}
+              placeholder="Confirme a senha"
+              onChange={(e) => setMyNewPassword2(e.target.value)}
+            />
+            <button
+              type="button"
+              className={`btn-action glass ${styles.eyeButton}`}
+              onClick={() => setShowPassword((prev) => !prev)}
+            >
+              {showPassword ? <FaEye /> : <FaEyeSlash />}
+            </button>
+          </div>
         </div>
       )}
 

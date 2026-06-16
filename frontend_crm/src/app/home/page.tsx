@@ -26,13 +26,17 @@ import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Home() {
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, permissions, planRules } = useAuth();
+  const expensePlan = planRules?.includes("EXPENSE_DASHBOARD");
   const router = useRouter();
 
   const [tasks, setTasks] = useState<Tasks[]>();
   const [notes, setNotes] = useState<NotePad[]>([]);
   const [noteHeight, setNoteHeight] = useState(200);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const [commissionChart, setCommissionChart] = useState([]);
+  const [companyChart, setCompanyChart] = useState([]);
 
   const [originalNote, setOriginalNote] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -55,6 +59,7 @@ export default function Home() {
   const [isOpenChart, setIsOpenChart] = useState(true);
   const [isOpenNote, setIsOpenNote] = useState(true);
   const [isOpenSchedule, setIsOpenSchedule] = useState(true);
+
   const [error, setError] = useState("");
 
   const hasFinishedTasks =
@@ -117,6 +122,40 @@ export default function Home() {
       console.error(err);
     }
   }, [token]);
+
+  const fetchCommissionChart = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/chart-commissions`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar gráfico");
+
+      setCommissionChart(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [token]);
+
+  const fetchCompanyChart = useCallback(async () => {
+    if (!expensePlan || !permissions.includes("EXPENSE_READ")) return;
+
+    try {
+      const res = await fetch(`${API}/chart-company`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.error || "Erro ao buscar gráfico");
+
+      setCompanyChart(data);
+    } catch (err) {
+      console.error(err);
+    }
+  }, [token, expensePlan, permissions]);
 
   function handleToggleOpenCard(card: string) {
     if (card === "task") {
@@ -343,7 +382,9 @@ export default function Home() {
     fetchMe();
     fetchTasks();
     fetchNotes();
-  }, [isLoading, token]);
+    fetchCommissionChart();
+    fetchCompanyChart();
+  }, [isLoading, token, expensePlan, permissions, fetchCompanyChart]);
 
   useEffect(() => {
     const savedTask = localStorage.getItem("isOpenTask");
@@ -539,7 +580,21 @@ export default function Home() {
                 </button>
               </Tooltip>
             </div>
-            {isOpenChart && <ChartLayout />}
+            {isOpenChart && (
+              <div>
+                <ChartLayout
+                  title={companyChart.length > 0 ? "Minhas comissões" : ""}
+                  data={commissionChart}
+                />
+
+                {companyChart.length > 0 && (
+                  <ChartLayout
+                    title="Faturamento da empresa"
+                    data={companyChart}
+                  />
+                )}
+              </div>
+            )}
           </div>
         )}
 

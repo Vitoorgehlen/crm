@@ -105,7 +105,7 @@
   align-items: center;
   justify-content: space-between;
   width: 180px;
-  height: 35px;
+  height: 38px;
   cursor: pointer;
 }
 
@@ -208,13 +208,14 @@
   }
 
   .form {
-    width: 170px;
+    min-height: 38px;
+    width: 175px;
     color: var(--primaryText);
     margin-bottom: 10px;
   }
 
   .btnIvestor {
-    width: 170px;
+    width: 175px;
     margin-top: 10px;
   }
 }

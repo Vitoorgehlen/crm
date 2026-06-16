@@ -234,6 +234,7 @@ span .currentPage {
   }
 
   .statusCard {
+    border-left: none;
     border-top: 1px solid var(--textBase);
   }
 

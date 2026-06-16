@@ -365,13 +365,13 @@ export default function ConfigUsers({
               <div className={styles.box}>
                 <input
                   className={`${styles.labelUser} form-base`}
-                  type="password"
+                  type="text"
                   placeholder="Nova senha"
                   onChange={(e) => setNewPassword(e.target.value)}
                 />
                 <input
                   className={`${styles.labelUser} form-base`}
-                  type="password"
+                  type="text"
                   placeholder="Confirme a senha"
                   onChange={(e) => setNewPassword2(e.target.value)}
                 />
@@ -434,7 +434,7 @@ export default function ConfigUsers({
                 </div>
               ) : (
                 <div className={`${styles.box} ${styles.boxClose}`}>
-                  <h5>Alterar E-mail</h5>
+                  <h5>Alterar e-mail</h5>
                   <button
                     type="button"
                     className={`btn-action glass ${styles.btnEditUser}`}
@@ -448,13 +448,13 @@ export default function ConfigUsers({
                 <div className={styles.box}>
                   <input
                     className={`${styles.labelUser} form-base`}
-                    type="password"
+                    type="text"
                     placeholder="Nova senha"
                     onChange={(e) => setNewPassword(e.target.value)}
                   />
                   <input
                     className={`${styles.labelUser} form-base`}
-                    type="password"
+                    type="text"
                     placeholder="Confirme a senha"
                     onChange={(e) => setNewPassword2(e.target.value)}
                   />

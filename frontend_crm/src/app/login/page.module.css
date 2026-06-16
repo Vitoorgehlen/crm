@@ -26,14 +26,14 @@
 }
 
 .logoName {
-  width: 70px;
+  width: 60px;
   transform: rotate(90deg);
   color: var(--primaryColor);
 }
 
 .nameLogo {
   color: var(--textBase);
-  margin-top: -60px;
+  margin-top: -50px;
   margin-bottom: 30px;
   font-size: 55px;
   font-weight: 600;
