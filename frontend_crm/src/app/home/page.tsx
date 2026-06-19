@@ -3,6 +3,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type ChartItem = {
+  name: string;
+  value: number;
+};
+
 import styles from "./page.module.css";
 import {
   DeleteContext,
@@ -35,8 +40,8 @@ export default function Home() {
   const [noteHeight, setNoteHeight] = useState(200);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const [commissionChart, setCommissionChart] = useState([]);
-  const [companyChart, setCompanyChart] = useState([]);
+  const [commissionChart, setCommissionChart] = useState<ChartItem[]>([]);
+  const [companyChart, setCompanyChart] = useState<ChartItem[]>([]);
 
   const [originalNote, setOriginalNote] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -587,12 +592,13 @@ export default function Home() {
                   data={commissionChart}
                 />
 
-                {companyChart.length > 0 && (
-                  <ChartLayout
-                    title="Faturamento da empresa"
-                    data={companyChart}
-                  />
-                )}
+                {companyChart.length > 0 &&
+                  companyChart.some((item) => item.value > 0) && (
+                    <ChartLayout
+                      title="Faturamento da empresa"
+                      data={companyChart}
+                    />
+                  )}
               </div>
             )}
           </div>
