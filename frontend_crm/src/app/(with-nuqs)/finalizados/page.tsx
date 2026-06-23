@@ -197,6 +197,7 @@ export default function FinishDeals() {
       setSelectedYear(null);
     } else {
       setSelectedYear(year);
+      setSelectedMonth(null);
     }
   }
 
@@ -455,18 +456,6 @@ export default function FinishDeals() {
     selectedYear,
   ]);
 
-  useEffect(() => {
-    if (!selectedYear) return;
-    fetchDealsData();
-  }, [selectedYear]);
-
-  useEffect(() => {
-    if (selectedYear === null && yearsSortedDesc.length > 0) {
-      const lastYear = yearsSortedDesc[yearsSortedDesc.length - 1]?.year;
-      setSelectedYear(lastYear);
-    }
-  }, [yearsSortedDesc, selectedYear]);
-
   return (
     <div className={styles.page}>
       <main className={styles.main}>
@@ -539,7 +528,7 @@ export default function FinishDeals() {
               })}
             </div>
 
-            {selectedYear !== null && groupedByYearMonth[selectedYear] && (
+            {selectedYear !== null && groupedByYearMonth[selectedYear] ? (
               <>
                 <div className={`glass ${styles.monthsList}`}>
                   {Object.keys(groupedByYearMonth[selectedYear])
@@ -565,7 +554,7 @@ export default function FinishDeals() {
                     })}
                 </div>
 
-                {selectedMonth !== null && (
+                {selectedMonth !== null ? (
                   <div className={styles.dealsOfMonth}>
                     {dealsForSelectedMonth
                       .filter((d) => {
@@ -601,8 +590,14 @@ export default function FinishDeals() {
                         </button>
                       ))}
                   </div>
+                ) : (
+                  <p className={styles.selectMonth}>
+                    Selecione o mês desejado.
+                  </p>
                 )}
               </>
+            ) : (
+              <p className={styles.selectYear}>Selecione o ano desejado.</p>
             )}
           </div>
           <div className={styles.pendingSection}>

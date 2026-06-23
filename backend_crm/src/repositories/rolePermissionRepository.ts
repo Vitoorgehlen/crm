@@ -1,52 +1,77 @@
 import { prisma } from "../prisma-client";
-import { Permission, Prisma, UserRole } from '@prisma/client';
+import { Permission, Prisma, UserRole } from "@prisma/client";
 import { PLAN_CONFIG } from "../utils/plans";
 
 const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ADMIN: [
-  'USER_CREATE', 'USER_UPDATE',
-  'DEAL_CREATE', 'DEAL_READ', 'DEAL_UPDATE', 'DEAL_DELETE',
-  'ALL_DEAL_CREATE', 'ALL_DEAL_READ', 'ALL_DEAL_UPDATE', 'ALL_DEAL_DELETE',
-  'DEAL_CLOSE', 'DEAL_CLOSE_DELETE',
-  'ALL_DEAL_CLOSE', 'ALL_DEAL_CLOSE_DELETE',
-  'EXPENSE_CREATE', 'EXPENSE_READ', 'EXPENSE_UPDATE', 'EXPENSE_DELETE',
-],
-MANAGER: [
-  'USER_UPDATE',
-  'DEAL_CREATE', 'DEAL_READ', 'DEAL_UPDATE', 'DEAL_DELETE',
-  'ALL_DEAL_CREATE', 'ALL_DEAL_READ', 'ALL_DEAL_UPDATE', 'ALL_DEAL_DELETE',
-  'DEAL_CLOSE', 'DEAL_CLOSE_DELETE',
-  'ALL_DEAL_CLOSE',
-],
-BROKER: [
-  'DEAL_CREATE', 'DEAL_READ', 'DEAL_UPDATE',
-  'DEAL_CLOSE',
-],
-ASSISTANT: [
-  'DEAL_READ', 'DEAL_UPDATE', 'DEAL_DELETE',
-  'ALL_DEAL_READ', 'ALL_DEAL_UPDATE', 'ALL_DEAL_DELETE',
-],
-SECRETARY: [
-  'DEAL_READ', 'DEAL_UPDATE',
-  'ALL_DEAL_READ', 'ALL_DEAL_UPDATE',
-  'DEAL_CLOSE',
-  'ALL_DEAL_CLOSE',
-  'EXPENSE_CREATE', 'EXPENSE_READ', 'EXPENSE_UPDATE', 'EXPENSE_DELETE',
+    "USER_CREATE",
+    "USER_UPDATE",
+    "DEAL_CREATE",
+    "DEAL_READ",
+    "DEAL_UPDATE",
+    "DEAL_DELETE",
+    "ALL_DEAL_CREATE",
+    "ALL_DEAL_READ",
+    "ALL_DEAL_UPDATE",
+    "ALL_DEAL_DELETE",
+    "DEAL_CLOSE",
+    "DEAL_CLOSE_DELETE",
+    "ALL_DEAL_CLOSE",
+    "ALL_DEAL_CLOSE_DELETE",
+    "EXPENSE_CREATE",
+    "EXPENSE_READ",
+    "EXPENSE_UPDATE",
+    "EXPENSE_DELETE",
+  ],
+  MANAGER: [
+    "USER_UPDATE",
+    "DEAL_CREATE",
+    "DEAL_READ",
+    "DEAL_UPDATE",
+    "DEAL_DELETE",
+    "ALL_DEAL_CREATE",
+    "ALL_DEAL_READ",
+    "ALL_DEAL_UPDATE",
+    "ALL_DEAL_DELETE",
+    "DEAL_CLOSE",
+    "DEAL_CLOSE_DELETE",
+    "ALL_DEAL_CLOSE",
+  ],
+  BROKER: ["DEAL_CREATE", "DEAL_READ", "DEAL_UPDATE", "DEAL_CLOSE"],
+  ASSISTANT: [
+    "DEAL_READ",
+    "DEAL_UPDATE",
+    "DEAL_DELETE",
+    "ALL_DEAL_READ",
+    "ALL_DEAL_UPDATE",
+    "ALL_DEAL_DELETE",
+  ],
+  SECRETARY: [
+    "DEAL_READ",
+    "DEAL_UPDATE",
+    "ALL_DEAL_READ",
+    "ALL_DEAL_UPDATE",
+    "DEAL_CLOSE",
+    "ALL_DEAL_CLOSE",
+    "EXPENSE_CREATE",
+    "EXPENSE_READ",
+    "EXPENSE_UPDATE",
+    "EXPENSE_DELETE",
   ],
 };
 
 type PermissionUpdate = { permission: Permission; allowed: boolean };
 
 export async function createDefaultRolePermissions(companyId: number) {
-  const permissionsToCreate = Object.entries(DEFAULT_ROLE_PERMISSIONS)
-    .flatMap(([role, permissions]) =>
-      permissions.map(permission => ({
+  const permissionsToCreate = Object.entries(DEFAULT_ROLE_PERMISSIONS).flatMap(
+    ([role, permissions]) =>
+      permissions.map((permission) => ({
         companyId,
         role: role as UserRole,
         permission,
         allowed: true,
-      }))
-    );
+      })),
+  );
 
   return prisma.rolePermission.createMany({
     data: permissionsToCreate,
@@ -54,13 +79,13 @@ export async function createDefaultRolePermissions(companyId: number) {
 }
 
 export async function getMyRolePermissions(
-  userId: number
+  userId: number,
 ): Promise<Permission[]> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true, role: true }
+    select: { companyId: true, role: true },
   });
-  if (!user) throw new Error('Empresa não encontrada.');
+  if (!user) throw new Error("Empresa não encontrada.");
 
   const rolePermissions = await prisma.rolePermission.findMany({
     where: {
@@ -71,24 +96,24 @@ export async function getMyRolePermissions(
     select: { permission: true },
   });
 
-  return rolePermissions.map(rolePer => rolePer.permission);
+  return rolePermissions.map((rolePer) => rolePer.permission);
 }
 
 export async function getRolePermissionsByCompany(
   userId: number,
-  role: UserRole
+  role: UserRole,
 ) {
-  if (role !== 'ADMIN') throw new Error('Você não tem permissão de editar.');
+  if (role !== "ADMIN") throw new Error("Você não tem permissão de editar.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Empresa não encontrada.');
+  if (!user) throw new Error("Empresa não encontrada.");
 
   const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.ROLE_SYSTEM;
   if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a negociações em equipe');
+    throw new Error("Seu plano não possui acesso a negociações em equipe");
 
   return prisma.rolePermission.findMany({
     where: { companyId: user.companyId },
@@ -97,26 +122,26 @@ export async function getRolePermissionsByCompany(
 
 export async function checkUserPermission(
   userId: number,
-  requiredPermission: Permission
+  requiredPermission: Permission,
 ): Promise<boolean> {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: {
       role: true,
-      companyId: true
-    }
+      companyId: true,
+    },
   });
 
-  if (!user) throw new Error('Usuário não encontrado');
+  if (!user) throw new Error("Usuário não encontrado");
 
   const permission = await prisma.rolePermission.findUnique({
     where: {
       companyId_role_permission: {
         companyId: user.companyId,
         role: user.role,
-        permission: requiredPermission
-      }
-    }
+        permission: requiredPermission,
+      },
+    },
   });
 
   return permission?.allowed ?? false;
@@ -128,39 +153,56 @@ export async function updateRolePermission(
   userId: number,
   userRole: UserRole,
   role: UserRole,
-  updatesRaw: PermissionUpdateRaw
+  updatesRaw: PermissionUpdateRaw,
 ) {
-  if (userRole !== 'ADMIN') throw new Error("Somente administradores podem editar as regras");
+  if (userRole !== "ADMIN")
+    throw new Error("Somente administradores podem editar as regras");
   let updates: PermissionUpdate[] = [];
 
   if (Array.isArray(updatesRaw)) {
     updates = updatesRaw;
-  } else if (updatesRaw && typeof updatesRaw === "object" && "permission" in updatesRaw) {
+  } else if (
+    updatesRaw &&
+    typeof updatesRaw === "object" &&
+    "permission" in updatesRaw
+  ) {
     updates = [updatesRaw];
   } else {
-    throw new Error("Campo 'updates' precisa ser um array de { permission, allowed }.");
+    throw new Error(
+      "Campo 'updates' precisa ser um array de { permission, allowed }.",
+    );
   }
 
-  if (!updates.every(u => typeof u.permission === "string" && typeof u.allowed === "boolean")) {
-    throw new Error("Cada item precisa de { permission: string, allowed: boolean }.");
+  if (
+    !updates.every(
+      (u) => typeof u.permission === "string" && typeof u.allowed === "boolean",
+    )
+  ) {
+    throw new Error(
+      "Cada item precisa de { permission: string, allowed: boolean }.",
+    );
   }
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
   if (!user) throw new Error("Usuário não encontrado");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
   if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a negociações em equipe');
+    throw new Error("Seu plano não possui acesso a negociações em equipe");
 
   const companyId = user.companyId;
 
   const validPermissions = new Set(Object.values(Permission));
 
   const cleaned: { permission: Permission; allowed: boolean }[] = updates
-    .map((u) => ({ permission: u.permission as Permission, allowed: !!u.allowed }))
+    .map((u) => ({
+      permission: u.permission as Permission,
+      allowed: !!u.allowed,
+    }))
     .filter((u) => validPermissions.has(u.permission));
 
   if (cleaned.length === 0) {
@@ -212,28 +254,36 @@ export async function updateRolePermission(
       where: { companyId, role },
     });
 
-    return { created: toCreate.map(c => c.permission), deleted: toDelete, current: result };
+    return {
+      created: toCreate.map((c) => c.permission),
+      deleted: toDelete,
+      current: result,
+    };
   });
 }
 
-export async function resetRolePermissionsDefault(userId: number, role: UserRole) {
+export async function resetRolePermissionsDefault(
+  userId: number,
+  role: UserRole,
+) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
-  })
+    select: { company: { select: { plan: true } }, companyId: true },
+  });
   if (!user) throw new Error("Usuário não encontrado");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EDITABLE_PERMISSIONS;
   if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a negociações em equipe');
+    throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-
-  if (role !== "ADMIN") throw new Error("Somente administradores podem resetar permissões");
+  if (role !== "ADMIN")
+    throw new Error("Somente administradores podem resetar permissões");
 
   const companyId = user.companyId;
   await prisma.rolePermission.deleteMany({
     where: { companyId },
-  })
+  });
 
   return createDefaultRolePermissions(companyId);
 }

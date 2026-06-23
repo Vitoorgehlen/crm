@@ -406,6 +406,7 @@ export default function DealForm({
         throw new Error(data.error || "Erro ao buscar a documentação");
 
       setCallback(data);
+      console.log(`Callback: ${data}`);
     } catch (err: unknown) {
       console.error(err);
     } finally {

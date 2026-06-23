@@ -1,75 +1,109 @@
-import { Router, Request, Response } from 'express';
-import { addCompany, deleteCompany, getCompany, getMaxUsersCompany, updateCompany } from '../repositories/companyRepository';
-import { createDefaultRolePermissions, deleteRolePermissions } from '../repositories/rolePermissionRepository';
-import superUserOnly from '../middlewares/superUserOnly';
-import loginRequired from '../middlewares/loginRequired';
-import { AuthenticatedRequest } from '../types/express';
-import { SubscriptionPlan } from '@prisma/client';
+import { Router, Request, Response } from "express";
+import {
+  addCompany,
+  deleteCompany,
+  getAutoPayment,
+  getCompany,
+  getMaxUsersCompany,
+  toggleAutoPayment,
+  updateCompany,
+} from "../repositories/companyRepository";
+import {
+  createDefaultRolePermissions,
+  deleteRolePermissions,
+} from "../repositories/rolePermissionRepository";
+import superUserOnly from "../middlewares/superUserOnly";
+import loginRequired from "../middlewares/loginRequired";
+import { AuthenticatedRequest } from "../types/express";
+import { SubscriptionPlan } from "@prisma/client";
 
 const router = Router();
 
-router.post('/company', superUserOnly, async(
-  req: Request & { superUser?: { id: number; email: string } },
-  res: Response
-) => {
-  const superUser = req.superUser;
-  if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
+router.post(
+  "/company",
+  superUserOnly,
+  async (
+    req: Request & { superUser?: { id: number; email: string } },
+    res: Response,
+  ) => {
+    const superUser = req.superUser;
+    if (!superUser) return res.status(403).json({ error: "Acesso negado." });
 
-  const { name, expiresAt, plan, maxUsers } = req.body;
+    const { name, expiresAt, plan, maxUsers } = req.body;
 
-  if (name !== undefined && typeof name !== 'string') {
-    return res.status(400).json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
-  }
+    if (name !== undefined && typeof name !== "string") {
+      return res
+        .status(400)
+        .json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
+    }
 
-  if (!expiresAt && typeof expiresAt !== 'number') {
-    return res.status(400).json({ error: 'O campo "expiresAt" é obrigatório e deve ser uma string.' });
-  }
+    if (!expiresAt && typeof expiresAt !== "number") {
+      return res.status(400).json({
+        error: 'O campo "expiresAt" é obrigatório e deve ser uma string.',
+      });
+    }
 
-  if (plan !== undefined && !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)) {
-    return res.status(400).json({
-      error: 'Plano inválido.'
-    });
-  }
+    if (
+      plan !== undefined &&
+      !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)
+    ) {
+      return res.status(400).json({
+        error: "Plano inválido.",
+      });
+    }
 
-  if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
-    return res.status(400).json({ error: 'maxUsers deve ser um número positivo.' });
-  }
+    if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
+      return res
+        .status(400)
+        .json({ error: "maxUsers deve ser um número positivo." });
+    }
 
-  try {
-    const newCompany = await addCompany( superUser.id, name, expiresAt, plan, maxUsers );
-    const newPermissions = await createDefaultRolePermissions(newCompany.id);
-    res.status(201).json({
-      message: 'Empresa criada com sucesso',
-      newCompany,
-      newPermissions: newPermissions.count,
-    });
-  } catch (err) {
-    console.error(err);
-    res.status(403).json({ error: 'Erro ao criar o valor de nota.' });
-  }
-});
+    try {
+      const newCompany = await addCompany(
+        superUser.id,
+        name,
+        expiresAt,
+        plan,
+        maxUsers,
+      );
+      const newPermissions = await createDefaultRolePermissions(newCompany.id);
+      res.status(201).json({
+        message: "Empresa criada com sucesso",
+        newCompany,
+        newPermissions: newPermissions.count,
+      });
+    } catch (err) {
+      console.error(err);
+      res.status(403).json({ error: "Erro ao criar o valor de nota." });
+    }
+  },
+);
 
-router.get('/company', superUserOnly, async(
-  req: Request & { superUser?: { id: number; email: string } },
-  res: Response
-) => {
-  const superUser = req.superUser;
-  if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
+router.get(
+  "/company",
+  superUserOnly,
+  async (
+    req: Request & { superUser?: { id: number; email: string } },
+    res: Response,
+  ) => {
+    const superUser = req.superUser;
+    if (!superUser) return res.status(403).json({ error: "Acesso negado." });
 
-  try {
-    const note = await getCompany();
-    res.json(note);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar o valor de nota.' });
-  }
-});
+    try {
+      const note = await getCompany();
+      res.json(note);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Erro ao buscar o valor de nota." });
+    }
+  },
+);
 
-router.get('/company-max-users', loginRequired, async (req, res) => {
+router.get("/company-max-users", loginRequired, async (req, res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId } = user;
   if (!user) {
-    return res.status(400).json({ error: 'Usuário inválido.' });
+    return res.status(400).json({ error: "Usuário inválido." });
   }
 
   try {
@@ -77,84 +111,136 @@ router.get('/company-max-users', loginRequired, async (req, res) => {
     res.json(user);
   } catch (err) {
     console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar usuário.' });
+    res.status(500).json({ error: "Erro ao buscar usuário." });
   }
 });
 
-router.put('/company/:id', superUserOnly, async(
-  req: Request & { superUser?: { id: number; email: string } },
-  res: Response
-) => {
-  const superUser = req.superUser;
-  if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
-
-  const companyId = Number(req.params.id);
-  if (!companyId || isNaN(companyId)) return res.status(400).json({ error: 'ID inválido' });
-
-  const { name, expiresAt, plan, maxUsers, isActive } = req.body;
-
-  if (name !== undefined && typeof name !== 'string') {
-    return res.status(400).json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
-  }
-
-  if (expiresAt !== undefined && typeof expiresAt !== 'number') {
-    return res.status(400).json({ error: 'O campo "expiresAt" deve ser uma string.' });
-  }
-
-  if (plan !== undefined && !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)) {
-    return res.status(400).json({
-      error: 'Plano inválido.'
-    });
-  }
-
-  if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
-    return res.status(400).json({ error: 'maxUsers deve ser um número positivo.' });
-  }
-
-  if (typeof isActive !== 'undefined' && typeof isActive !== 'boolean') {
-    return res.status(400).json({ error: 'isActive" deve ser um booleano.' });
-  }
+router.get("/auto-payment", loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: "Usuário inválido." });
 
   try {
-    const newCompany = await updateCompany(
-      superUser.id,
-      companyId,
-      name,
-      expiresAt,
-      plan,
-      maxUsers,
-      isActive
-    );
+    const company = await getAutoPayment(userId);
+
+    res.status(200).json(company);
+  } catch (err) {
+    console.error(err);
+    res.status(403).json({ error: "Erro ao ver pagamento automatico." });
+  }
+});
+
+router.put("/auto-payment", loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+  if (!userId) return res.status(400).json({ error: "Usuário inválido." });
+
+  const { autoPayment } = req.body;
+
+  try {
+    const newCompany = await toggleAutoPayment(userId, autoPayment);
 
     res.status(200).json(newCompany);
   } catch (err) {
     console.error(err);
-    res.status(403).json({ error: 'Erro ao criar o valor de nota.' });
+    res.status(403).json({ error: "Erro ao editar o pagamento automatico." });
   }
 });
 
-router.delete('/company/:id', superUserOnly, async(
-  req: Request & { superUser?: { id: number; email: string } },
-  res: Response
-) => {
-  const superUser = req.superUser;
-  if (!superUser) return res.status(403).json({ error: 'Acesso negado.' });
+router.put(
+  "/company/:id",
+  superUserOnly,
+  async (
+    req: Request & { superUser?: { id: number; email: string } },
+    res: Response,
+  ) => {
+    const superUser = req.superUser;
+    if (!superUser) return res.status(403).json({ error: "Acesso negado." });
 
-  const id = Number(req.params.id);
-  if (!id || isNaN(id)) return res.status(400).json({ error: 'ID inválido' });
+    const companyId = Number(req.params.id);
+    if (!companyId || isNaN(companyId))
+      return res.status(400).json({ error: "ID inválido" });
 
-  try {
-    const permissions = await deleteRolePermissions(id)
-    const company = await deleteCompany(id);
-    res.json({
-      message: 'Empresa removida com sucesso',
-      company,
-      rolePermissionDeleted: permissions.count,
-    }).status(200);
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({ error: 'Erro ao buscar a empresa.' });
-  }
-});
+    const { name, expiresAt, plan, maxUsers, isActive } = req.body;
+
+    if (name !== undefined && typeof name !== "string") {
+      return res
+        .status(400)
+        .json({ error: 'O campo "name" é obrigatório e deve ser uma string.' });
+    }
+
+    if (expiresAt !== undefined && typeof expiresAt !== "number") {
+      return res
+        .status(400)
+        .json({ error: 'O campo "expiresAt" deve ser uma string.' });
+    }
+
+    if (
+      plan !== undefined &&
+      !Object.values(SubscriptionPlan).includes(plan as SubscriptionPlan)
+    ) {
+      return res.status(400).json({
+        error: "Plano inválido.",
+      });
+    }
+
+    if (maxUsers && (isNaN(maxUsers) || maxUsers <= 0)) {
+      return res
+        .status(400)
+        .json({ error: "maxUsers deve ser um número positivo." });
+    }
+
+    if (typeof isActive !== "undefined" && typeof isActive !== "boolean") {
+      return res.status(400).json({ error: 'isActive" deve ser um booleano.' });
+    }
+
+    try {
+      const newCompany = await updateCompany(
+        superUser.id,
+        companyId,
+        name,
+        expiresAt,
+        plan,
+        maxUsers,
+        isActive,
+      );
+
+      res.status(200).json(newCompany);
+    } catch (err) {
+      console.error(err);
+      res.status(403).json({ error: "Erro ao criar o valor de nota." });
+    }
+  },
+);
+
+router.delete(
+  "/company/:id",
+  superUserOnly,
+  async (
+    req: Request & { superUser?: { id: number; email: string } },
+    res: Response,
+  ) => {
+    const superUser = req.superUser;
+    if (!superUser) return res.status(403).json({ error: "Acesso negado." });
+
+    const id = Number(req.params.id);
+    if (!id || isNaN(id)) return res.status(400).json({ error: "ID inválido" });
+
+    try {
+      const permissions = await deleteRolePermissions(id);
+      const company = await deleteCompany(id);
+      res
+        .json({
+          message: "Empresa removida com sucesso",
+          company,
+          rolePermissionDeleted: permissions.count,
+        })
+        .status(200);
+    } catch (err) {
+      console.log(err);
+      res.status(500).json({ error: "Erro ao buscar a empresa." });
+    }
+  },
+);
 
 export default router;

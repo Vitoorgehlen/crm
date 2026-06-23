@@ -1,46 +1,45 @@
 import { prisma } from "../prisma-client";
-import { ClientStatus, DealStepType, Prisma, User } from '@prisma/client';
-import { checkUserPermission } from './rolePermissionRepository';
+import { ClientStatus, DealStepType, Prisma, User } from "@prisma/client";
+import { checkUserPermission } from "./rolePermissionRepository";
 import { PLAN_CONFIG } from "../utils/plans";
 
-
 export async function addDeal(
-  data: Omit<Prisma.DealCreateInput, 'creator' | 'client' | 'company'> & {
+  data: Omit<Prisma.DealCreateInput, "creator" | "client" | "company"> & {
     creatorId: number;
     clientId: number;
   },
   userId: number,
 ) {
-  const canCreateDeal = await checkUserPermission(userId, 'DEAL_CREATE');
-  if (!canCreateDeal) throw new Error('Você não tem permissão para criar negociações');
+  const canCreateDeal = await checkUserPermission(userId, "DEAL_CREATE");
+  if (!canCreateDeal)
+    throw new Error("Você não tem permissão para criar negociações");
 
   const { creatorId, clientId, ...dealData } = data;
 
   return prisma.$transaction(async (tx) => {
     const creator = await tx.user.findUnique({
       where: { id: userId },
-      select: { companyId: true }
+      select: { companyId: true },
     });
-    if (!creator) throw new Error('Usuário não encontrado.');
+    if (!creator) throw new Error("Usuário não encontrado.");
 
     const client = await tx.client.findUnique({
       where: { id: clientId, companyId: creator.companyId },
       select: { companyId: true },
     });
-    if (!client) throw new Error('Cliente não encontrado.');
-
+    if (!client) throw new Error("Cliente não encontrado.");
 
     return tx.deal.create({
       data: {
         ...dealData,
-        status: 'POTENTIAL_CLIENTS',
+        status: "POTENTIAL_CLIENTS",
         creator: { connect: { id: creatorId } },
         client: { connect: { id: clientId } },
         updater: { connect: { id: creatorId } },
         company: { connect: { id: client.companyId } },
       },
     });
-  })
+  });
 }
 
 export async function getDealsByClient(id: number, userId: number) {
@@ -49,45 +48,57 @@ export async function getDealsByClient(id: number, userId: number) {
       where: { id: userId },
       select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!userCompany) throw new Error ('Usuário não encontrado');
+    if (!userCompany) throw new Error("Usuário não encontrado");
 
     const targetClient = await tx.client.findUnique({
       where: { id, companyId: userCompany.companyId },
-      select: { creator: {
-        select: {
-          id: true,
-          companyId: true
-        }
-      }},
+      select: {
+        creator: {
+          select: {
+            id: true,
+            companyId: true,
+          },
+        },
+      },
     });
-    if (!targetClient) throw new Error ('Usuário não encontrado');
+    if (!targetClient) throw new Error("Usuário não encontrado");
 
     if (userId !== targetClient.creator.id) {
-      const hasTeamDeals = PLAN_CONFIG[userCompany.company.plan].features.TEAM_DEALS;
-        if (!hasTeamDeals)
-          throw new Error('Seu plano não possui acesso a negociações em equipe');
+      const hasTeamDeals =
+        PLAN_CONFIG[userCompany.company.plan].features.TEAM_DEALS;
+      if (!hasTeamDeals)
+        throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-      const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
-      if (!canReadDeal) throw new Error('Você não tem permissão para ver as negociações');
+      const canReadDeal = await checkUserPermission(userId, "ALL_DEAL_READ");
+      if (!canReadDeal)
+        throw new Error("Você não tem permissão para ver as negociações");
     } else {
-      const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-      if (!canReadDeal) throw new Error('Você não tem permissão para ver as negociações');
+      const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+      if (!canReadDeal)
+        throw new Error("Você não tem permissão para ver as negociações");
     }
 
     return tx.deal.findMany({
-      where: { clientId: id }
+      where: { clientId: id },
     });
   });
 }
 
 export async function getDeals(
   userId: number,
-  filter: { search?: string; dealId?: number; status?: string[]; statusClient?: string[]; paymentMethod?: string},
+  filter: {
+    search?: string;
+    dealId?: number;
+    status?: string[];
+    statusClient?: string[];
+    paymentMethod?: string;
+  },
   page: number,
   limit: number,
 ) {
-  const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-  if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+  const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+  if (!canReadDeal)
+    throw new Error("Você não tem permissão para visualizar as negociações");
 
   if (filter.dealId) {
     const data = await prisma.deal.findUnique({
@@ -101,14 +112,14 @@ export async function getDeals(
         updater: { select: { id: true, name: true } },
         DealShare: {
           include: {
-            user: { select: { id: true, name: true } }
-          }
-        }
-      }
+            user: { select: { id: true, name: true } },
+          },
+        },
+      },
     });
 
     const total = await prisma.deal.count({
-      where: { createdBy: userId }
+      where: { createdBy: userId },
     });
 
     return { data, total };
@@ -116,7 +127,7 @@ export async function getDeals(
 
   const where: any = {
     createdBy: userId,
-  }
+  };
 
   if (filter?.search && filter.search.trim()) {
     where.client = {
@@ -124,43 +135,49 @@ export async function getDeals(
         {
           name: {
             contains: filter.search,
-            mode: 'insensitive',
+            mode: "insensitive",
           },
         },
         {
           phone: {
             contains: filter.search,
-            mode: 'insensitive',
+            mode: "insensitive",
           },
-        }
-      ]
-    }
+        },
+      ],
+    };
   }
 
   if (filter?.statusClient && filter.statusClient.length > 0) {
-    where.statusClient = { in: filter.statusClient }
+    where.statusClient = { in: filter.statusClient };
   }
 
   if (filter?.paymentMethod) {
-    where.paymentMethod = filter.paymentMethod
+    where.paymentMethod = filter.paymentMethod;
   }
 
   return prisma.$transaction(async (tx) => {
-    if (filter?.status?.includes('OLD_CLIENTS') ||
-        filter?.status?.includes('POTENTIAL_CLIENTS') ||
-        filter?.status?.includes('CLOSED')) {
-
+    if (
+      filter?.status?.includes("OLD_CLIENTS") ||
+      filter?.status?.includes("POTENTIAL_CLIENTS") ||
+      filter?.status?.includes("CLOSED")
+    ) {
       let steps: string[] = [];
       let isClosedFlow = false;
 
-      if (filter?.status.includes('OLD_CLIENTS')) {
-        steps = ['REJECTED', 'DROPPED_OUT'];
-      } else if (filter?.status?.includes('POTENTIAL_CLIENTS')) {
-        steps = ['APPROVED', 'UNDER_REVIEW', 'MISSING_DOCUMENTS', 'INTERESTED'];
-      } else if (filter?.status.includes('CLOSED')) {
+      if (filter?.status.includes("OLD_CLIENTS")) {
+        steps = ["REJECTED", "DROPPED_OUT"];
+      } else if (filter?.status?.includes("POTENTIAL_CLIENTS")) {
+        steps = ["APPROVED", "UNDER_REVIEW", "MISSING_DOCUMENTS", "INTERESTED"];
+      } else if (filter?.status.includes("CLOSED")) {
         steps = [
-          'CONTRACT_SIGNING', 'ITBI', 'NOTARY_SIGNING', 'REGISTRATION',
-          'AWAITING_PAYMENT', 'ENGINEERING_REVIEW', 'BANK_APPROVAL'
+          "CONTRACT_SIGNING",
+          "ITBI",
+          "NOTARY_SIGNING",
+          "REGISTRATION",
+          "AWAITING_PAYMENT",
+          "ENGINEERING_REVIEW",
+          "BANK_APPROVAL",
         ];
         isClosedFlow = true;
       }
@@ -168,12 +185,11 @@ export async function getDeals(
       const unifiedWhere = {
         ...where,
         status: { in: filter.status },
-        OR: steps.map(step => ({
+        OR: steps.map((step) => ({
           ...(isClosedFlow
             ? { currentStep: step as DealStepType }
-            : { statusClient: step as ClientStatus }
-          )
-        }))
+            : { statusClient: step as ClientStatus }),
+        })),
       };
 
       const data = await tx.deal.findMany({
@@ -186,12 +202,12 @@ export async function getDeals(
           updater: { select: { id: true, name: true } },
           DealShare: {
             include: {
-              user: { select: { id: true, name: true } }
-            }
-          }
+              user: { select: { id: true, name: true } },
+            },
+          },
         },
         orderBy: {
-          createdAt: 'desc',
+          createdAt: "desc",
         },
       });
 
@@ -210,27 +226,25 @@ export async function getDeals(
         updater: { select: { id: true, name: true } },
         DealShare: {
           include: {
-            user: {select: {id: true, name: true }}
-          }
-        }
-
+            user: { select: { id: true, name: true } },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
-  const total = await tx.deal.count({ where });
+    const total = await tx.deal.count({ where });
 
-  return { data, total }
-  })
+    return { data, total };
+  });
 }
 
-export async function getDealsOfCurrentMonth(
-  userId: number,
-) {
-  const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-  if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+export async function getDealsOfCurrentMonth(userId: number) {
+  const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+  if (!canReadDeal)
+    throw new Error("Você não tem permissão para visualizar as negociações");
 
   const now = new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
@@ -238,67 +252,81 @@ export async function getDealsOfCurrentMonth(
     now.getFullYear(),
     now.getMonth() + 1,
     0,
-    23, 59, 59, 999
+    23,
+    59,
+    59,
+    999,
   );
 
   return await prisma.deal.count({
     where: {
       createdBy: userId,
       status: {
-        in: ['CLOSED', 'FINISHED'],
+        in: ["CLOSED", "FINISHED"],
       },
       closedAt: {
         gte: startOfMonth,
         lte: endOfMonth,
-      }
-    }
+      },
+    },
   });
 }
 
 export async function getFinishedDealsYears(
   userId: number,
-  filter: { search?: string; progressDeals: boolean; TEAM_DEALS? : boolean; targetId?: number | null; year: number},
+  filter: {
+    search?: string;
+    progressDeals: boolean;
+    TEAM_DEALS?: boolean;
+    targetId?: number | null;
+    year: number;
+  },
 ) {
-  const startDate = new Date(filter.year, 0 ,1);
+  const startDate = new Date(filter.year, 0, 1);
   const endDate = new Date(filter.year, 11, 31, 23, 59, 59, 999);
 
   const where: any = {
     closedAt: {
       gte: startDate,
-      lte: endDate
-    }
-  }
+      lte: endDate,
+    },
+  };
 
-  if (filter.progressDeals) where.status = { in: ['FINISHED', 'CLOSED'] };
-  else where.status = { in: ['FINISHED'] };
+  if (filter.progressDeals) where.status = { in: ["FINISHED", "CLOSED"] };
+  else where.status = { in: ["FINISHED"] };
 
   if (filter?.search && filter.search.trim()) {
     where.client = {
       OR: [
-        { name: { contains: filter.search, mode: 'insensitive' }},
-        { phone: { contains: filter.search, mode: 'insensitive' }}
-      ]
-    }
+        { name: { contains: filter.search, mode: "insensitive" } },
+        { phone: { contains: filter.search, mode: "insensitive" } },
+      ],
+    };
   }
 
   return prisma.$transaction(async (tx) => {
-    const user = await tx .user.findUnique({
+    const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: {select: { plan: true } },companyId: true }
-    })
-    if (!user) throw new Error('Você não foi encontrado no banco de dados');
+      select: { company: { select: { plan: true } }, companyId: true },
+    });
+    if (!user) throw new Error("Você não foi encontrado no banco de dados");
 
     if (filter.TEAM_DEALS || filter.targetId) {
       const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
       if (!hasTeamDeals)
-        throw new Error('Seu plano não possui acesso a negociações em equipe');
+        throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-      const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
-      if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações dos outros usuários');
-
+      const canReadDeal = await checkUserPermission(userId, "ALL_DEAL_READ");
+      if (!canReadDeal)
+        throw new Error(
+          "Você não tem permissão para visualizar as negociações dos outros usuários",
+        );
     } else {
-      const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-      if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+      const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+      if (!canReadDeal)
+        throw new Error(
+          "Você não tem permissão para visualizar as negociações",
+        );
     }
 
     if (filter.TEAM_DEALS) {
@@ -313,16 +341,15 @@ export async function getFinishedDealsYears(
         updater: { select: { id: true, name: true } },
         DealShare: {
           include: {
-            user: {select: {id: true, name: true }}
-          }
-        }
-
+            user: { select: { id: true, name: true } },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
-  })
+  });
 }
 
 export async function getTotalDealsOfYear(
@@ -330,28 +357,34 @@ export async function getTotalDealsOfYear(
   progressDeals: boolean,
   TEAM_DEALS: boolean,
   search?: string | null,
-  targetId?: number | null
+  targetId?: number | null,
 ) {
   return prisma.$transaction(async (tx) => {
-    const user = await tx .user.findUnique({
+    const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
-    })
-    if (!user) throw new Error('Você não foi encontrado no banco de dados');
+      select: { company: { select: { plan: true } }, companyId: true },
+    });
+    if (!user) throw new Error("Você não foi encontrado no banco de dados");
 
     if (TEAM_DEALS) {
       const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
       if (!hasTeamDeals)
-        throw new Error('Seu plano não possui acesso a negociações em equipe');
+        throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-      const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
-    if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações dos outros usuários');
+      const canReadDeal = await checkUserPermission(userId, "ALL_DEAL_READ");
+      if (!canReadDeal)
+        throw new Error(
+          "Você não tem permissão para visualizar as negociações dos outros usuários",
+        );
     } else {
-      const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-      if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+      const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+      if (!canReadDeal)
+        throw new Error(
+          "Você não tem permissão para visualizar as negociações",
+        );
     }
 
-    const statusFilter = progressDeals ? ['FINISHED', 'CLOSED'] : ['FINISHED'];
+    const statusFilter = progressDeals ? ["FINISHED", "CLOSED"] : ["FINISHED"];
     const rows = await tx.$queryRaw<
       { year: number; month: number; total: number }[]
     >`
@@ -365,17 +398,20 @@ export async function getTotalDealsOfYear(
         d."closedAt" IS NOT NULL
         AND d."status"::text IN (${Prisma.join(statusFilter)})
 
-        ${search
-          ? Prisma.sql`AND c."name" ILIKE ${'%' + search + '%'}`
-          : Prisma.sql``}
+        ${
+          search
+            ? Prisma.sql`AND c."name" ILIKE ${"%" + search + "%"}`
+            : Prisma.sql``
+        }
 
-        ${!TEAM_DEALS && !targetId
-          ? Prisma.sql`AND d."createdBy" = ${userId}`
-          : TEAM_DEALS && !targetId
-            ? Prisma.sql`AND d."companyId" = ${user.companyId}`
-            : targetId
-              ? Prisma.sql`AND d."createdBy" = ${targetId}`
-              : Prisma.sql``
+        ${
+          !TEAM_DEALS && !targetId
+            ? Prisma.sql`AND d."createdBy" = ${userId}`
+            : TEAM_DEALS && !targetId
+              ? Prisma.sql`AND d."companyId" = ${user.companyId}`
+              : targetId
+                ? Prisma.sql`AND d."createdBy" = ${targetId}`
+                : Prisma.sql``
         }
 
       GROUP BY year, month
@@ -391,7 +427,7 @@ export async function getTotalDealsOfYear(
       if (!result[year]) {
         result[year] = {
           total: 0,
-          months: []
+          months: [],
         };
       }
 
@@ -399,39 +435,47 @@ export async function getTotalDealsOfYear(
 
       result[year].months.push({
         month,
-        total: Number(row.total)
+        total: Number(row.total),
       });
     }
 
     return Object.entries(result).map(([year, data]) => ({
       year: Number(year),
       total: data.total,
-      months: data.months.sort((a, b) => a.month - b.month)
+      months: data.months.sort((a, b) => a.month - b.month),
     }));
-  })
+  });
 }
 
 export async function getTeamDeals(
   userId: number,
-  filter: { search?: string; dealId?: number; status?: string[]; statusClient?: string[]; paymentMethod?: string; selectedUserId?: number },
+  filter: {
+    search?: string;
+    dealId?: number;
+    status?: string[];
+    statusClient?: string[];
+    paymentMethod?: string;
+    selectedUserId?: number;
+  },
   page: number,
-  limit: number
+  limit: number,
 ) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
+      select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
     const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não possui acesso a negociações em equipe');
+      throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-    const canReadDeal = await checkUserPermission(userId, 'ALL_DEAL_READ');
-    if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+    const canReadDeal = await checkUserPermission(userId, "ALL_DEAL_READ");
+    if (!canReadDeal)
+      throw new Error("Você não tem permissão para visualizar as negociações");
 
-    const where: any = { companyId: user.companyId }
+    const where: any = { companyId: user.companyId };
 
     if (filter.dealId) {
       const data = await prisma.deal.findMany({
@@ -445,10 +489,10 @@ export async function getTeamDeals(
           updater: { select: { id: true, name: true } },
           DealShare: {
             include: {
-              user: { select: { id: true, name: true } }
-            }
-          }
-        }
+              user: { select: { id: true, name: true } },
+            },
+          },
+        },
       });
 
       return { data, total: data.length };
@@ -460,39 +504,39 @@ export async function getTeamDeals(
           {
             name: {
               contains: filter.search,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
           },
           {
             phone: {
               contains: filter.search,
-              mode: 'insensitive',
+              mode: "insensitive",
             },
-          }
-        ]
-      }
+          },
+        ],
+      };
     }
 
     if (filter?.status && filter.status.length > 0) {
-      where.status = { in: filter.status }
+      where.status = { in: filter.status };
     }
 
     if (filter?.statusClient && filter.statusClient.length > 0) {
-      where.statusClient = { in: filter.statusClient }
+      where.statusClient = { in: filter.statusClient };
     }
 
     if (filter?.paymentMethod) {
-      where.paymentMethod = filter.paymentMethod
+      where.paymentMethod = filter.paymentMethod;
     }
 
     if (filter.selectedUserId) {
       const selectedUser = await tx.user.findUnique({
         where: { id: filter.selectedUserId },
-        select: { companyId: true }
+        select: { companyId: true },
       });
 
       if (user.companyId !== selectedUser?.companyId) {
-        throw new Error('Sem permissão para ler negociações desse usuário');
+        throw new Error("Sem permissão para ler negociações desse usuário");
       }
 
       where.createdBy = filter.selectedUserId;
@@ -508,19 +552,18 @@ export async function getTeamDeals(
         updater: { select: { id: true, name: true } },
         DealShare: {
           include: {
-            user: {select: {id: true, name: true }}
-          }
-        }
-
+            user: { select: { id: true, name: true } },
+          },
+        },
       },
       orderBy: {
-        createdAt: 'desc',
+        createdAt: "desc",
       },
     });
 
     const total = await tx.deal.count({ where });
 
-    return { data, total }
+    return { data, total };
   });
 }
 
@@ -532,26 +575,28 @@ export async function getTeamPerformace(
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
   if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a desempenho em equipe');
+    throw new Error("Seu plano não possui acesso a desempenho em equipe");
 
-  const canReadPerformance = await checkUserPermission(userId, 'ALL_DEAL_READ');
-  if (!canReadPerformance) throw new Error('Você não tem permissão para visualizar a performace');
+  const canReadPerformance = await checkUserPermission(userId, "ALL_DEAL_READ");
+  if (!canReadPerformance)
+    throw new Error("Você não tem permissão para visualizar a performace");
 
-  const dealsWhere: any = { companyId: user.companyId }
+  const dealsWhere: any = { companyId: user.companyId };
 
-  if (selectedUser) dealsWhere.createdBy = selectedUser
+  if (selectedUser) dealsWhere.createdBy = selectedUser;
 
   if (startDate && endDate) {
     dealsWhere.createdAt = {
       gte: new Date(startDate),
       lte: new Date(endDate),
-    }
+    };
   }
 
   const dealsAndClients = await prisma.deal.findMany({
@@ -561,16 +606,16 @@ export async function getTeamPerformace(
       creator: { select: { id: true, name: true } },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
 
   const clientWhere = {
     ...dealsWhere,
     deals: {
-      none: {}
-    }
-  }
+      none: {},
+    },
+  };
 
   const clientsWithoutDeals = await prisma.client.findMany({
     where: clientWhere,
@@ -578,7 +623,7 @@ export async function getTeamPerformace(
       creator: { select: { id: true, name: true } },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
 
@@ -589,16 +634,21 @@ export async function getDealDeletedRequest(userId: number) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
+      select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
-    const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
+    const hasTeamDeals =
+      PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não permite requisições de exclusão');
+      throw new Error("Seu plano não permite requisições de exclusão");
 
-    const canReadPerformance = await checkUserPermission(userId, 'ALL_DEAL_DELETE');
-    if (!canReadPerformance) throw new Error('Você não tem permissão para apagar negociações');
+    const canReadPerformance = await checkUserPermission(
+      userId,
+      "ALL_DEAL_DELETE",
+    );
+    if (!canReadPerformance)
+      throw new Error("Você não tem permissão para apagar negociações");
 
     return await tx.deal.findMany({
       where: {
@@ -607,7 +657,7 @@ export async function getDealDeletedRequest(userId: number) {
       },
       include: {
         client: true,
-        deleteRequester: { select: { name: true }}
+        deleteRequester: { select: { name: true } },
       },
     });
   });
@@ -620,37 +670,46 @@ export async function updateDeal(
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  const targetDeal = await prisma.deal.findUnique({ where: { id, companyId: user.companyId } });
-  if (!targetDeal) throw new Error('Negociação não encontrada.');
+  const targetDeal = await prisma.deal.findUnique({
+    where: { id, companyId: user.companyId },
+  });
+  if (!targetDeal) throw new Error("Negociação não encontrada.");
 
   if (userId !== targetDeal.createdBy) {
     const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não permite requisições de exclusão');
+      throw new Error("Seu plano não permite requisições de exclusão");
 
-    const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
-    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    const canUpdateDeal = await checkUserPermission(userId, "ALL_DEAL_UPDATE");
+    if (!canUpdateDeal)
+      throw new Error("Você não tem permissão para editar as negociações");
   } else {
-    const canUpdateDeal = await checkUserPermission(userId, 'DEAL_UPDATE');
-    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    const canUpdateDeal = await checkUserPermission(userId, "DEAL_UPDATE");
+    if (!canUpdateDeal)
+      throw new Error("Você não tem permissão para editar as negociações");
   }
 
   const updateData = { ...newData, updatedBy: userId };
 
-  if (newData.status === 'CLOSED' || newData.status === 'FINISHED') {
-    throw new Error('Para fechar ou finalizar a negociação, utilize a função adequada.');
+  if (newData.status === "CLOSED" || newData.status === "FINISHED") {
+    throw new Error(
+      "Para fechar ou finalizar a negociação, utilize a função adequada.",
+    );
   }
 
   let newStatus = newData.status;
   if (newData.statusClient) {
-    if (newData.statusClient === 'REJECTED' || newData.statusClient === 'DROPPED_OUT') {
-      newStatus = 'OLD_CLIENTS';
-    } else if (targetDeal.status === 'OLD_CLIENTS'){
-      newStatus = 'POTENTIAL_CLIENTS';
+    if (
+      newData.statusClient === "REJECTED" ||
+      newData.statusClient === "DROPPED_OUT"
+    ) {
+      newStatus = "OLD_CLIENTS";
+    } else if (targetDeal.status === "OLD_CLIENTS") {
+      newStatus = "POTENTIAL_CLIENTS";
     }
   }
 
@@ -663,55 +722,61 @@ export async function updateDeal(
   });
 }
 
-export async function deleteDeal(
-  id: number,
-  userId: number,
-) {
+export async function deleteDeal(id: number, userId: number) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
+      select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
     const targetDeal = await tx.deal.findUnique({
       where: { id, companyId: user.companyId },
-      include: { client: true }
-      });
-    if (!targetDeal) throw new Error('Negociação não encontrada.');
+      include: { client: true },
+    });
+    if (!targetDeal) throw new Error("Negociação não encontrada.");
 
     if (userId !== targetDeal.client.createdBy) {
-      const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
+      const hasTeamDeals =
+        PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
       if (!hasTeamDeals)
-        throw new Error('Seu plano não permite requisições de exclusão');
+        throw new Error("Seu plano não permite requisições de exclusão");
 
-      const canDeleteDeal = await checkUserPermission(userId, 'ALL_DEAL_DELETE');
-      if (!canDeleteDeal) throw new Error('Você não tem permissão para apagar as negociações');
+      const canDeleteDeal = await checkUserPermission(
+        userId,
+        "ALL_DEAL_DELETE",
+      );
+      if (!canDeleteDeal)
+        throw new Error("Você não tem permissão para apagar as negociações");
     } else {
-      const canDeleteDeal = await checkUserPermission(userId, 'DEAL_DELETE');
+      const canDeleteDeal = await checkUserPermission(userId, "DEAL_DELETE");
       if (!canDeleteDeal) {
         return tx.deal.update({
-            where: { id, companyId: user.companyId },
-            data: {
-              deleteRequest: true,
-              deleteRequestBy: userId,
-              deleteRequestAt: new Date(),
-             },
-          });
+          where: { id, companyId: user.companyId },
+          data: {
+            deleteRequest: true,
+            deleteRequestBy: userId,
+            deleteRequestAt: new Date(),
+          },
+        });
       }
     }
 
-    const deleteDeal = await tx.deal.delete({ where: { id, companyId: user.companyId } });
+    const deleteDeal = await tx.deal.delete({
+      where: { id, companyId: user.companyId },
+    });
 
     const remainingDeals = await tx.deal.count({
       where: { clientId: targetDeal.client.id },
     });
 
     if (remainingDeals === 0) {
-      const deleteClient = await  tx.client.delete({ where: { id: targetDeal.client.id, companyId: user.companyId } })
-      return { deleteDeal, deleteClient }
-    };
+      const deleteClient = await tx.client.delete({
+        where: { id: targetDeal.client.id, companyId: user.companyId },
+      });
+      return { deleteDeal, deleteClient };
+    }
 
-    return deleteDeal
-  })
+    return deleteDeal;
+  });
 }

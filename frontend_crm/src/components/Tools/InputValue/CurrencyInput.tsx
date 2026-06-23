@@ -96,7 +96,6 @@ export default function CurrencyInput({
       placeholder={placeholder}
       value={formatCurrency(value)}
       onChange={handleChange}
-      // Opcional: impede input de caracteres inválidos no nível do browser
       onKeyPress={(e) => {
         if (
           !/[\d]/.test(e.key) &&

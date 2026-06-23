@@ -1,20 +1,20 @@
 import { prisma } from "../prisma-client";
-import { Documentation, Prisma } from '@prisma/client';
+import { Documentation, Prisma } from "@prisma/client";
 import { checkUserPermission } from "./rolePermissionRepository";
 //! ----------------------------- DEFAULT -------------------------------
 
 // CRIA OU ATUALIZA um DocumentationDefault (SUPER User)
 export async function upsertDocumentationDefaults(
-  docs: Prisma.DocumentationValueDefaultCreateInput[]
+  docs: Prisma.DocumentationValueDefaultCreateInput[],
 ) {
   return prisma.$transaction(
     docs.map((doc) =>
       prisma.documentationValueDefault.upsert({
-        where: { documentation: doc.documentation as Documentation},
+        where: { documentation: doc.documentation as Documentation },
         update: { value: doc.value },
         create: doc,
-      })
-    )
+      }),
+    ),
   );
 }
 
@@ -22,7 +22,8 @@ export async function upsertDocumentationDefaults(
 export function getDocumentationDefaultSU() {
   return prisma.$transaction(async (tx) => {
     return await tx.documentationValueDefault.findMany();
-})};
+  });
+}
 
 // Pega as documentações (todos)
 export function getDocumentationDefault(userId: number) {
@@ -34,26 +35,27 @@ export function getDocumentationDefault(userId: number) {
       select: { companyId: true },
     });
 
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
     customDocs = await tx.documentationValueCustom.findMany({
-      where: { companyId: user.companyId }
-    })
+      where: { companyId: user.companyId },
+    });
 
     const defaultDocs = await tx.documentationValueDefault.findMany();
 
     const customMap = new Map(
-      customDocs.map((doc) => [doc.documentation, doc])
+      customDocs.map((doc) => [doc.documentation, doc]),
     );
 
     const result = defaultDocs.map((defaultDocs) => {
       const custom = customMap.get(defaultDocs.documentation);
 
       return custom ?? defaultDocs;
-    })
+    });
 
     return result;
-})};
+  });
+}
 
 // // Apaga documentação
 // export async function deleteDocumentationDefault(
@@ -74,13 +76,13 @@ export function getDocumentationDefault(userId: number) {
 //! ----------------------------- CUSTOM -------------------------------
 export async function upsertDocumentationCustom(
   docs: { documentation: Documentation; value: number }[],
-  userId: number
+  userId: number,
 ) {
   const user = await prisma.user.findFirst({
-      where: { id: userId },
-      select: { companyId: true }
-    });
-    if (!user) throw new Error('Usuário não encontrado.');
+    where: { id: userId },
+    select: { companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
   return prisma.$transaction(
     docs.map((doc) =>
@@ -88,43 +90,42 @@ export async function upsertDocumentationCustom(
         where: {
           companyId_documentation: {
             companyId: user.companyId,
-            documentation: doc.documentation as Documentation
-          }
+            documentation: doc.documentation as Documentation,
+          },
         },
         update: { value: doc.value },
         create: {
-          documentation: doc.documentation  as Documentation,
+          documentation: doc.documentation as Documentation,
           value: doc.value,
-          companyId: user.companyId
-        }
-      })
-    )
+          companyId: user.companyId,
+        },
+      }),
+    ),
   );
 }
 
 // Apaga documentação
-export async function deleteDocumentationCustom(
-  userId: number
-) {
+export async function deleteDocumentationCustom(userId: number) {
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findFirst({
       where: { id: userId },
-      select: { companyId: true }
+      select: { companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
-    const hasAccess = await checkUserPermission(userId, 'DEAL_DELETE');
-    if (!hasAccess) throw new Error('Você não tem permissão para apagar documentação.' );
+    const hasAccess = await checkUserPermission(userId, "DEAL_DELETE");
+    if (!hasAccess)
+      throw new Error("Você não tem permissão para apagar documentação.");
 
     const documentationExist = await tx.documentationValueCustom.findMany({
       where: {
         companyId: user.companyId,
       },
     });
-    if (!documentationExist) throw new Error('Documentação não existe.');
+    if (!documentationExist) throw new Error("Documentação não existe.");
 
     return tx.documentationValueCustom.deleteMany({
-      where: { companyId: user.companyId }
+      where: { companyId: user.companyId },
     });
   });
 }

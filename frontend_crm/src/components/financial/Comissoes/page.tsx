@@ -95,6 +95,7 @@ export default function CommissionCard({ deals }: any) {
       setSelectedYear(null);
     } else {
       setSelectedYear(year);
+      setSelectedMonth(null);
       const goal = goals.find((goal) => goal.year === year);
       setAnnualGoal(goal);
       setAnnualGoalValue(goal?.value ?? 0);
@@ -598,7 +599,7 @@ export default function CommissionCard({ deals }: any) {
               })}
             </div>
 
-            {selectedYear !== null && groupedByYearMonth[selectedYear] && (
+            {selectedYear !== null && groupedByYearMonth[selectedYear] ? (
               <>
                 <div className={`glass ${styles.monthsList}`}>
                   {Object.keys(groupedByYearMonth[selectedYear])
@@ -675,12 +676,17 @@ export default function CommissionCard({ deals }: any) {
                           </div>
                         </button>
                       ))}
-                    {dealsForSelectedMonth.length === 0 && (
-                      <p>Selecione o mês desejado.</p>
-                    )}
                   </div>
                 )}
+
+                {dealsForSelectedMonth.length === 0 && (
+                  <p className={styles.selectMonth}>
+                    Selecione o mês desejado.
+                  </p>
+                )}
               </>
+            ) : (
+              <p className={styles.selectYear}>Selecione o ano desejado.</p>
             )}
           </div>
 

@@ -4,16 +4,15 @@ import { prisma } from "../prisma-client";
 // Criar uma Meta
 export async function addGoals(
   newData: Prisma.GoalsUncheckedCreateInput,
-  userId: number
+  userId: number,
 ) {
   const year = new Date().getFullYear();
   const user = await prisma.user.findUnique({
-    where: {  id: userId },
-    select: { companyId: true }
-  })
+    where: { id: userId },
+    select: { companyId: true },
+  });
 
-  if (!user)
-    throw new Error("Usuário não encontrado");
+  if (!user) throw new Error("Usuário não encontrado");
 
   return prisma.goals.create({
     data: {
@@ -29,7 +28,7 @@ export async function addGoals(
 export function getGoals(userId: number) {
   return prisma.goals.findMany({
     where: { userId },
-    orderBy: { id: 'desc' },
+    orderBy: { id: "desc" },
   });
 }
 
@@ -41,9 +40,10 @@ export async function updateGoals(
 ) {
   return prisma.$transaction(async (tx) => {
     const goals = await tx.goals.findUnique({ where: { id } });
-    if (!goals) throw new Error('Meta não encontrada.');
+    if (!goals) throw new Error("Meta não encontrada.");
 
-    if (goals.userId !== userId) throw new Error('Você não pode editar essa Meta.');
+    if (goals.userId !== userId)
+      throw new Error("Você não pode editar essa Meta.");
 
     return await tx.goals.update({
       where: { id },
@@ -55,15 +55,13 @@ export async function updateGoals(
 }
 
 // apagar as Metas
-export async function deleteGoals(
-  id: number,
-  userId: number
- ) {
+export async function deleteGoals(id: number, userId: number) {
   return prisma.$transaction(async (tx) => {
     const goals = await tx.goals.findUnique({ where: { id } });
-    if (!goals) throw new Error('Meta não encontrada.');
+    if (!goals) throw new Error("Meta não encontrada.");
 
-    if (goals.userId !== userId) throw new Error('Você não pode apagar essa Tarefa.');
+    if (goals.userId !== userId)
+      throw new Error("Você não pode apagar essa Tarefa.");
 
     return await tx.goals.delete({ where: { id } });
   });

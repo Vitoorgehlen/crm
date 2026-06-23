@@ -1,6 +1,7 @@
 import { prisma } from "../prisma-client";
 import { PLAN_CONFIG } from "../utils/plans";
 import { SubscriptionPlan } from "@prisma/client";
+import { checkUserPermission } from "./rolePermissionRepository";
 
 export async function addCompany(
   superUserId: number,
@@ -8,29 +9,25 @@ export async function addCompany(
   expiresAt: number,
   plan: SubscriptionPlan,
   maxUsers?: number,
-
 ) {
   const isSuperUser = await prisma.superUser.findUnique({
     where: { id: superUserId },
   });
 
   if (!isSuperUser) {
-    throw new Error('Você não tem permisão de criar uma empresa.');
+    throw new Error("Você não tem permisão de criar uma empresa.");
   }
 
   const planConfig = PLAN_CONFIG[plan];
-    if (!planConfig) {
-      throw new Error('Plano não encontrado.');
-    }
+  if (!planConfig) {
+    throw new Error("Plano não encontrado.");
+  }
 
   const finalExpire = new Date();
   finalExpire.setDate(finalExpire.getDate() + expiresAt);
 
-
   const finalMaxUsers =
-    maxUsers && maxUsers > 0
-      ? maxUsers
-      : planConfig.limits.maxUsers;
+    maxUsers && maxUsers > 0 ? maxUsers : planConfig.limits.maxUsers;
 
   return prisma.company.create({
     data: {
@@ -50,20 +47,55 @@ export async function getMaxUsersCompany(userId: number) {
   });
 
   if (!user?.companyId) {
-    throw new Error('Empresa não encontrada.');
+    throw new Error("Empresa não encontrada.");
   }
 
   return prisma.company.findUnique({
     where: { id: user.companyId },
     select: {
       maxUsers: true,
-      users: { select: { id: true }},
+      users: { select: { id: true } },
     },
   });
 }
 
 export function getCompany() {
   return prisma.company.findMany();
+}
+
+export async function getAutoPayment(userId: number) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("Usuário não encontrado.");
+
+  const canCreateDeal = await checkUserPermission(userId, "EXPENSE_UPDATE");
+  if (!canCreateDeal)
+    throw new Error("Você não tem permissão para editar despesas");
+
+  const company = await prisma.company.findUnique({
+    where: { id: user.companyId },
+    select: { autoPayExpenses: true },
+  });
+
+  return company?.autoPayExpenses;
+}
+
+export async function toggleAutoPayment(userId: number, autoPayment: boolean) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw new Error("Usuário não encontrado.");
+
+  const canCreateDeal = await checkUserPermission(userId, "EXPENSE_UPDATE");
+  if (!canCreateDeal)
+    throw new Error("Você não tem permissão para editar despesas");
+
+  const company = await prisma.company.findUnique({
+    where: { id: user.companyId },
+  });
+  if (!company) throw new Error("Empresa não encontrada.");
+
+  return prisma.company.update({
+    where: { id: company.id },
+    data: { autoPayExpenses: autoPayment },
+  });
 }
 
 export async function updateCompany(
@@ -101,9 +133,7 @@ export async function updateCompany(
     }
 
     finalMaxUsers =
-      maxUsers && maxUsers > 0
-        ? maxUsers
-        : planConfig.limits.maxUsers;
+      maxUsers && maxUsers > 0 ? maxUsers : planConfig.limits.maxUsers;
   }
 
   let finalExpire: Date | undefined;
@@ -140,13 +170,13 @@ export async function deleteCompany(id: number) {
   await prisma.$transaction(async (tx) => {
     const users = await tx.user.findMany({
       where: { companyId: id },
-      select: { id: true }
+      select: { id: true },
     });
 
-    const userIds = users.map(u => u.id);
+    const userIds = users.map((u) => u.id);
 
     await tx.documentationCost.deleteMany({
-      where: {  },
+      where: {},
     });
 
     // Agora deletar a empresa (que deletará os usuários em cascade)

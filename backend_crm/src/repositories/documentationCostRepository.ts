@@ -1,11 +1,12 @@
 import { prisma } from "../prisma-client";
-import { Prisma } from '@prisma/client';
-import { checkUserPermission } from './rolePermissionRepository';
-
+import { Prisma } from "@prisma/client";
+import { checkUserPermission } from "./rolePermissionRepository";
 
 export async function addDocumentationCost(
-  data: Omit<Prisma.DocumentationCostCreateInput,
-  'creator' | 'deal' | 'updater' > & {
+  data: Omit<
+    Prisma.DocumentationCostCreateInput,
+    "creator" | "deal" | "updater"
+  > & {
     creatorId: number;
     dealId: number;
   },
@@ -20,22 +21,25 @@ export async function addDocumentationCost(
       companyId: true,
     },
   });
-  if (!deal) throw new Error('Deal não encontrado.');
+  if (!deal) throw new Error("Deal não encontrado.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true }
-  })
-  if (!user) throw new Error('Usuário não encontrado.');
+    select: { companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  if (deal.companyId !== user.companyId) throw new Error('Você não pode adicionar documentação para essa empresa.');
+  if (deal.companyId !== user.companyId)
+    throw new Error("Você não pode adicionar documentação para essa empresa.");
 
   if (deal.createdBy !== userId) {
-    const canCreateDeal = await checkUserPermission(userId, 'ALL_DEAL_CREATE');
-    if (!canCreateDeal) throw new Error('Você não tem permissão para criar documentações');
+    const canCreateDeal = await checkUserPermission(userId, "ALL_DEAL_CREATE");
+    if (!canCreateDeal)
+      throw new Error("Você não tem permissão para criar documentações");
   } else {
-    const canCreateDeal = await checkUserPermission(userId, 'DEAL_CREATE');
-    if (!canCreateDeal) throw new Error('Você não tem permissão para criar documentações');
+    const canCreateDeal = await checkUserPermission(userId, "DEAL_CREATE");
+    if (!canCreateDeal)
+      throw new Error("Você não tem permissão para criar documentações");
   }
 
   return prisma.documentationCost.create({
@@ -51,14 +55,14 @@ export async function addDocumentationCost(
 export function getDocumentationCost(dealId: number) {
   return prisma.documentationCost.findMany({
     where: { dealId },
-    orderBy: { createdAt: 'desc' }
+    orderBy: { createdAt: "desc" },
   });
 }
 
 export async function updateDocumentationCost(
   id: number,
   newData: Partial<Prisma.DocumentationCostUncheckedUpdateInput>,
-  userId: number
+  userId: number,
 ) {
   const updateData = { ...newData, updatedBy: userId };
   const docCost = await prisma.documentationCost.findUnique({
@@ -68,22 +72,25 @@ export async function updateDocumentationCost(
       createdBy: true,
     },
   });
-  if (!docCost) throw new Error('Documentação não encontrada.');
+  if (!docCost) throw new Error("Documentação não encontrada.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true }
-  })
-  if (!user) throw new Error('Usuário não encontrado.');
+    select: { companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  if (docCost.deal.companyId !== user.companyId) throw new Error('Você não pode editar documentação para essa empresa.');
+  if (docCost.deal.companyId !== user.companyId)
+    throw new Error("Você não pode editar documentação para essa empresa.");
 
   if (docCost.createdBy !== userId) {
-    const canUpdateDoc = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
-    if (!canUpdateDoc) throw new Error('Você não tem permissão para editar documentações');
+    const canUpdateDoc = await checkUserPermission(userId, "ALL_DEAL_UPDATE");
+    if (!canUpdateDoc)
+      throw new Error("Você não tem permissão para editar documentações");
   } else {
-    const canUpdateDoc = await checkUserPermission(userId, 'DEAL_UPDATE');
-    if (!canUpdateDoc) throw new Error('Você não tem permissão para editar documentações');
+    const canUpdateDoc = await checkUserPermission(userId, "DEAL_UPDATE");
+    if (!canUpdateDoc)
+      throw new Error("Você não tem permissão para editar documentações");
   }
 
   return prisma.documentationCost.update({
@@ -92,10 +99,7 @@ export async function updateDocumentationCost(
   });
 }
 
-export async function deleteDocumentationCost(
-  id: number,
-  userId: number
-) {
+export async function deleteDocumentationCost(id: number, userId: number) {
   const docCost = await prisma.documentationCost.findUnique({
     where: { id },
     select: {
@@ -103,22 +107,25 @@ export async function deleteDocumentationCost(
       deal: true,
     },
   });
-  if (!docCost) throw new Error('Documentação não encontrada.');
+  if (!docCost) throw new Error("Documentação não encontrada.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true }
-  })
-  if (!user) throw new Error('Usuário não encontrado.');
+    select: { companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  if (docCost.deal.companyId !== user.companyId) throw new Error('Você não pode editar documentação para essa empresa.');
+  if (docCost.deal.companyId !== user.companyId)
+    throw new Error("Você não pode editar documentação para essa empresa.");
 
   if (docCost.createdBy !== userId) {
-    const canUpdateDoc = await checkUserPermission(userId, 'ALL_DEAL_DELETE');
-    if (!canUpdateDoc) throw new Error('Você não tem permissão para editar documentações');
+    const canUpdateDoc = await checkUserPermission(userId, "ALL_DEAL_DELETE");
+    if (!canUpdateDoc)
+      throw new Error("Você não tem permissão para editar documentações");
   } else {
-    const canUpdateDoc = await checkUserPermission(userId, 'DEAL_DELETE');
-    if (!canUpdateDoc) throw new Error('Você não tem permissão para editar documentações');
+    const canUpdateDoc = await checkUserPermission(userId, "DEAL_DELETE");
+    if (!canUpdateDoc)
+      throw new Error("Você não tem permissão para editar documentações");
   }
-  return prisma.documentationCost.delete({ where: { id }})
+  return prisma.documentationCost.delete({ where: { id } });
 }

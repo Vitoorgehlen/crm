@@ -1,7 +1,10 @@
 import { prisma } from "../prisma-client";
 
 // Cria/Edita nota Global
-export async function addNotePadGlobal(content: string, slot: number | undefined) {
+export async function addNotePadGlobal(
+  content: string,
+  slot: number | undefined,
+) {
   return prisma.$transaction(async (tx) => {
     if (slot !== undefined) {
       return tx.notePad.updateMany({
@@ -17,7 +20,7 @@ export async function addNotePadGlobal(content: string, slot: number | undefined
 
     const last = await tx.notePad.findFirst({
       where: { userId: null },
-      orderBy: { slot: 'desc' },
+      orderBy: { slot: "desc" },
     });
 
     const nextSlot = (last?.slot ?? -1) + 1;
@@ -55,7 +58,7 @@ export function getNotePadGlobal() {
 // Pega as notas
 export function getNotePad(userId: number) {
   return prisma.$transaction(async (tx) => {
-    const globals  = await tx.notePad.findMany({ where: { userId: null } });
+    const globals = await tx.notePad.findMany({ where: { userId: null } });
     const userNote = await tx.notePad.findFirst({ where: { userId } });
     if (!userNote) return globals;
 

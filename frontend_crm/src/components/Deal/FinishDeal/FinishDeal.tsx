@@ -44,7 +44,6 @@ export default function FinishDeal({
   const [docCostValue, setDocCostValue] = useState<number>(0);
   const [docCostNote, setDocCostNote] = useState("");
   const [docCost, setDocCost] = useState<Array<DocumentationCost>>([]);
-  const [docCostTotal, setDocCostTotal] = useState<number>(0);
   const [users, setUsers] = useState<{ id: number; name: string }[]>([]);
 
   const [isOpenNote, setIsOpenNote] = useState<number | undefined>(undefined);
@@ -62,40 +61,6 @@ export default function FinishDeal({
   const negociationDuration = calculateDuration(deal.createdAt, deal.closedAt);
   const saleDuration = calculateDuration(deal.closedAt, deal.finalizedAt);
   const negociationTotal = calculateDuration(deal.closedAt, deal.finalizedAt);
-
-  useEffect(() => {
-    let mounted = true;
-    if (!isOpen) return;
-    if (isLoading) return;
-
-    async function loadUsers() {
-      if (!token) return;
-      try {
-        const res = await fetch(`${API}/users`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) throw new Error("Erro ao buscar usuários");
-        const data = await res.json();
-        if (!mounted) return;
-        setUsers(data);
-      } catch (err) {
-        console.error(err);
-      }
-    }
-
-    loadUsers();
-    return () => {
-      mounted = false;
-    };
-  }, [isOpen, token, isLoading, API]);
-
-  const userMap = useMemo(() => {
-    const m = new Map<number, string>();
-    users.forEach((u) => {
-      if (u?.id != null) m.set(Number(u.id), u.name);
-    });
-    return m;
-  }, [users]);
 
   function computedAmountFor(index: number) {
     const s = splits[index];
@@ -274,6 +239,44 @@ export default function FinishDeal({
     }
   }
 
+  const userMap = useMemo(() => {
+    const m = new Map<number, string>();
+    users.forEach((u) => {
+      if (u?.id != null) m.set(Number(u.id), u.name);
+    });
+    return m;
+  }, [users]);
+
+  const docCostTotal = useMemo(() => {
+    return docCost.reduce((sum, item) => sum + Number(item.value ?? 0), 0);
+  }, [docCost]);
+
+  useEffect(() => {
+    let mounted = true;
+    if (!isOpen) return;
+    if (isLoading) return;
+
+    async function loadUsers() {
+      if (!token) return;
+      try {
+        const res = await fetch(`${API}/users`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Erro ao buscar usuários");
+        const data = await res.json();
+        if (!mounted) return;
+        setUsers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    loadUsers();
+    return () => {
+      mounted = false;
+    };
+  }, [isOpen, token, isLoading, API]);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -339,12 +342,6 @@ export default function FinishDeal({
         if (!res.ok) throw new Error("Erro ao buscar valores de documentação");
         const data = await res.json();
         setDocCost(data);
-        const total = data.reduce(
-          (sum: number, item: DocumentationCost) =>
-            sum + Number(item.value ?? 0),
-          0,
-        );
-        setDocCostTotal(total);
       } catch (err) {
         console.error(err);
       }
@@ -645,7 +642,7 @@ export default function FinishDeal({
                     <span>Editando</span>
                   </>
                 ) : (
-                  <div>
+                  <div className={styles.addDocContainer}>
                     <div className={styles.divAddDoc}>
                       <input
                         type="text"

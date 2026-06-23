@@ -16,13 +16,13 @@ model SuperUser {
 }
 
 model Company {
-  id        Int              @id @default(autoincrement())
-  name      String
-  plan      SubscriptionPlan
-  expiresAt DateTime
-  maxUsers  Int?
-  balance   Decimal          @default(0) @db.Decimal(10, 2)
-  isActive  Boolean          @default(true)
+  id              Int              @id @default(autoincrement())
+  name            String
+  plan            SubscriptionPlan
+  expiresAt       DateTime
+  maxUsers        Int?
+  autoPayExpenses Boolean          @default(true)
+  isActive        Boolean          @default(true)
 
   users                     User[]
   clients                   Client[]

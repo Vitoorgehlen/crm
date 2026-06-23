@@ -1,28 +1,28 @@
-import express from 'express';
-import cors from 'cors';
-import type { Application } from 'express';
-import superUserRoutes from './routes/superUserRoutes';
-import companyRoutes from './routes/companyRoutes';
-import commissionRoutes from './routes/commissionRoutes';
-import rolePermissionRoutes from './routes/rolePermissionRoutes';
-import userRoutes from './routes/userRoutes';
-import clientsRoutes from './routes/clientsRoutes';
-import dealRoutes from './routes/dealRoutes';
-import documentationCostRoutes from './routes/documentationCostRoutes';
-import previousDocumentationRoutes from './routes/previousDocumentationRoutes';
-import noteRoutes from './routes/noteRoutes';
-import notePadRoutes from './routes/notePadRoutes';
-import dealShareRoutes from './routes/dealShareRoutes';
-import goalsRoutes from './routes/goalsRoutes';
-import scheduleRoutes from './routes/scheduleRoutes';
-import tasksRoutes from './routes/tasksRoutes';
-import expenseRoutes from './routes/expenseRoutes';
-import financialMovementRoutes from './routes/financialMovementRoutes';
-import tokenRoutes from './routes/tokenRoutes';
-import resetPassword from './routes/resetPasswordRoutes';
-import contactRoutes from './routes/contactRoutes';
+import express from "express";
+import cors from "cors";
+import type { Application } from "express";
+import superUserRoutes from "./routes/superUserRoutes";
+import companyRoutes from "./routes/companyRoutes";
+import commissionRoutes from "./routes/commissionRoutes";
+import rolePermissionRoutes from "./routes/rolePermissionRoutes";
+import userRoutes from "./routes/userRoutes";
+import clientsRoutes from "./routes/clientsRoutes";
+import dealRoutes from "./routes/dealRoutes";
+import documentationCostRoutes from "./routes/documentationCostRoutes";
+import previousDocumentationRoutes from "./routes/previousDocumentationRoutes";
+import noteRoutes from "./routes/noteRoutes";
+import notePadRoutes from "./routes/notePadRoutes";
+import dealShareRoutes from "./routes/dealShareRoutes";
+import goalsRoutes from "./routes/goalsRoutes";
+import scheduleRoutes from "./routes/scheduleRoutes";
+import tasksRoutes from "./routes/tasksRoutes";
+import expenseRoutes from "./routes/expenseRoutes";
+import financialMovementRoutes from "./routes/financialMovementRoutes";
+import tokenRoutes from "./routes/tokenRoutes";
+import resetPassword from "./routes/resetPasswordRoutes";
+import contactRoutes from "./routes/contactRoutes";
 
-const clientUrl = process.env.CLIENT_URL
+const clientUrl = process.env.CLIENT_URL;
 class App {
   public app: Application;
 
@@ -33,35 +33,37 @@ class App {
   }
 
   middlewares() {
-    this.app.use(cors({
-      origin: clientUrl,
-      credentials: true
-    }));
+    this.app.use(
+      cors({
+        origin: clientUrl,
+        credentials: true,
+      }),
+    );
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json());
   }
 
   routes() {
-    this.app.use('/', superUserRoutes);
-    this.app.use('/', companyRoutes);
-    this.app.use('/', rolePermissionRoutes);
-    this.app.use('/', userRoutes);
-    this.app.use('/', commissionRoutes);
-    this.app.use('/', clientsRoutes);
-    this.app.use('/', dealRoutes);
-    this.app.use('/', documentationCostRoutes);
-    this.app.use('/', previousDocumentationRoutes);
-    this.app.use('/', noteRoutes);
-    this.app.use('/', notePadRoutes);
-    this.app.use('/', dealShareRoutes);
-    this.app.use('/', goalsRoutes);
-    this.app.use('/', scheduleRoutes);
-    this.app.use('/', expenseRoutes);
-    this.app.use('/', financialMovementRoutes);
-    this.app.use('/', tasksRoutes);
-    this.app.use('/', tokenRoutes);
-    this.app.use('/', resetPassword);
-    this.app.use('/', contactRoutes);
+    this.app.use("/", superUserRoutes);
+    this.app.use("/", companyRoutes);
+    this.app.use("/", rolePermissionRoutes);
+    this.app.use("/", userRoutes);
+    this.app.use("/", commissionRoutes);
+    this.app.use("/", clientsRoutes);
+    this.app.use("/", dealRoutes);
+    this.app.use("/", documentationCostRoutes);
+    this.app.use("/", previousDocumentationRoutes);
+    this.app.use("/", noteRoutes);
+    this.app.use("/", notePadRoutes);
+    this.app.use("/", dealShareRoutes);
+    this.app.use("/", goalsRoutes);
+    this.app.use("/", scheduleRoutes);
+    this.app.use("/", expenseRoutes);
+    this.app.use("/", financialMovementRoutes);
+    this.app.use("/", tasksRoutes);
+    this.app.use("/", tokenRoutes);
+    this.app.use("/", resetPassword);
+    this.app.use("/", contactRoutes);
   }
 }
 

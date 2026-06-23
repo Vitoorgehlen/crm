@@ -1,8 +1,7 @@
 import { prisma } from "../prisma-client";
-import { Prisma, DealStepType, PaymentMethod } from '@prisma/client';
-import { checkUserPermission } from './rolePermissionRepository';
+import { Prisma, DealStepType, PaymentMethod } from "@prisma/client";
+import { checkUserPermission } from "./rolePermissionRepository";
 import { PLAN_CONFIG } from "../utils/plans";
-
 
 const WORKFLOW: Record<PaymentMethod, DealStepType[]> = {
   CASH: [
@@ -18,15 +17,15 @@ const WORKFLOW: Record<PaymentMethod, DealStepType[]> = {
     DealStepType.NOTARY_SIGNING,
     DealStepType.ITBI,
     DealStepType.REGISTRATION,
-    DealStepType.AWAITING_PAYMENT
+    DealStepType.AWAITING_PAYMENT,
   ],
   CREDIT_LETTER: [
     DealStepType.CONTRACT_SIGNING,
     DealStepType.NOTARY_SIGNING,
     DealStepType.ITBI,
     DealStepType.REGISTRATION,
-    DealStepType.AWAITING_PAYMENT
-  ]
+    DealStepType.AWAITING_PAYMENT,
+  ],
 };
 
 export async function closeDeal(
@@ -41,38 +40,50 @@ export async function closeDeal(
   const result = await prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
+      select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
-    const targetDeal = await tx.deal.findUnique({ where: { id, companyId: user.companyId } });
-    if (!targetDeal) throw new Error('Negociação não encontrada.');
+    const targetDeal = await tx.deal.findUnique({
+      where: { id, companyId: user.companyId },
+    });
+    if (!targetDeal) throw new Error("Negociação não encontrada.");
 
     if (userId !== targetDeal.createdBy) {
-      const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE');
-      if (!canUpdateDeal) throw new Error('Você não tem permissão para fechar uma negociações');
+      const canUpdateDeal = await checkUserPermission(userId, "ALL_DEAL_CLOSE");
+      if (!canUpdateDeal)
+        throw new Error("Você não tem permissão para fechar uma negociações");
     } else {
-      const canCloseDeal = await checkUserPermission(userId, 'DEAL_CLOSE');
-      if (!canCloseDeal) throw new Error('Você não tem permissão para fechar uma negociações');
+      const canCloseDeal = await checkUserPermission(userId, "DEAL_CLOSE");
+      if (!canCloseDeal)
+        throw new Error("Você não tem permissão para fechar uma negociações");
     }
 
-    const chosenPaymentMethod = typeof newData.paymentMethod === 'object'
-    ? (newData.paymentMethod as  any).set
-    : newData.paymentMethod ?? targetDeal.paymentMethod;
-    if (!chosenPaymentMethod) throw new Error('Método de pagamento não definido.');
+    const chosenPaymentMethod =
+      typeof newData.paymentMethod === "object"
+        ? (newData.paymentMethod as any).set
+        : (newData.paymentMethod ?? targetDeal.paymentMethod);
+    if (!chosenPaymentMethod)
+      throw new Error("Método de pagamento não definido.");
 
     if (!WORKFLOW[chosenPaymentMethod as PaymentMethod]) {
-      throw new Error('Método de pagamento inválido para criar o passo a passo.')
+      throw new Error(
+        "Método de pagamento inválido para criar o passo a passo.",
+      );
     }
 
     let currentStepValue;
-    if (targetDeal.currentStep === null || targetDeal.currentStep === undefined) {
+    if (
+      targetDeal.currentStep === null ||
+      targetDeal.currentStep === undefined
+    ) {
       currentStepValue = WORKFLOW[chosenPaymentMethod as PaymentMethod][0];
     } else {
       currentStepValue = targetDeal.currentStep;
     }
 
-    const splitCommission = PLAN_CONFIG[user.company.plan].features.SPLIT_COMMISSION;
+    const splitCommission =
+      PLAN_CONFIG[user.company.plan].features.SPLIT_COMMISSION;
     if (!splitCommission) {
       newData.splits = [
         {
@@ -80,29 +91,39 @@ export async function closeDeal(
           isCompany: false,
           percentage: 100,
           isPaid: false,
-        }
-      ]
-    };
+        },
+      ];
+    }
 
-    if (!newData.commissionAmount) throw new Error('Valor da comissão é obrigatório.');
+    if (!newData.commissionAmount)
+      throw new Error("Valor da comissão é obrigatório.");
 
-    const commissionTotal = new Prisma.Decimal(String(newData.commissionAmount))
+    const commissionTotal = new Prisma.Decimal(
+      String(newData.commissionAmount),
+    );
 
     if (!Array.isArray(newData.splits) || newData.splits.length === 0)
-      throw new Error('Defina a divisão da comissão (splits).')
+      throw new Error("Defina a divisão da comissão (splits).");
 
-    const hasAmount = newData.splits.some(s => s.amount !== undefined);
-    const hasPercentage = newData.splits.some(s => s.percentage !== undefined);
+    const hasAmount = newData.splits.some((s) => s.amount !== undefined);
+    const hasPercentage = newData.splits.some(
+      (s) => s.percentage !== undefined,
+    );
 
     if (hasAmount && hasPercentage)
-      throw new Error('Utilize ou a divisão por valor, ou em porcentagem. Jamais use os dois juntos.')
+      throw new Error(
+        "Utilize ou a divisão por valor, ou em porcentagem. Jamais use os dois juntos.",
+      );
 
     const createdShares: Array<any> = [];
 
     if (hasPercentage) {
-      const sumPercent = newData.splits.reduce((acc, s) => acc + (s.percentage || 0), 0)
+      const sumPercent = newData.splits.reduce(
+        (acc, s) => acc + (s.percentage || 0),
+        0,
+      );
       if (Math.round(sumPercent * 100) / 100 !== 100) {
-        throw new Error('A soma dos percentuais deve ser 100.');
+        throw new Error("A soma dos percentuais deve ser 100.");
       }
 
       for (const s of newData.splits) {
@@ -123,13 +144,17 @@ export async function closeDeal(
     } else {
       const sumAmounts = newData.splits.reduce((acc, s) => {
         const v = s.amount ?? 0;
-        return new Prisma.Decimal(String(acc)).add(new Prisma.Decimal(String(v)));
+        return new Prisma.Decimal(String(acc)).add(
+          new Prisma.Decimal(String(v)),
+        );
       }, new Prisma.Decimal(0));
 
-      if (!sumAmounts.equals(commissionTotal)) throw new Error('O somatório não está correto.');
+      if (!sumAmounts.equals(commissionTotal))
+        throw new Error("O somatório não está correto.");
 
       for (const s of newData.splits) {
-        if (s.amount === undefined) throw new Error('Cada split deve ter "amount" neste modo.');
+        if (s.amount === undefined)
+          throw new Error('Cada split deve ter "amount" neste modo.');
         const amountDecimal = new Prisma.Decimal(String(s.amount));
         if (!amountDecimal.equals(0)) {
           createdShares.push({
@@ -145,17 +170,18 @@ export async function closeDeal(
       }
     }
 
-    const hasCompanySplit = createdShares.some(s => s.isCompany === true);
+    const hasCompanySplit = createdShares.some((s) => s.isCompany === true);
     if (hasCompanySplit) {
-      const canSplitWithCompany = PLAN_CONFIG[user.company.plan].features.COMPANY_COMMISSION_SPLIT;
+      const canSplitWithCompany =
+        PLAN_CONFIG[user.company.plan].features.COMPANY_COMMISSION_SPLIT;
 
       if (!canSplitWithCompany)
-        throw new Error('Seu plano não permite dividir comissão com a empresa');
+        throw new Error("Seu plano não permite dividir comissão com a empresa");
     }
 
     const userIds = createdShares
-      .filter(s => s.userId !== null)
-      .map(s => Number(s.userId))
+      .filter((s) => s.userId !== null)
+      .map((s) => Number(s.userId))
       .filter(Boolean);
 
     if (userIds.length > 0) {
@@ -164,9 +190,13 @@ export async function closeDeal(
         select: { id: true, companyId: true },
       });
 
-      const invalid = users.find(u => u.companyId !== user.companyId);
-      if (invalid) throw new Error('Um dos usuários dos splits não pertence à mesma empresa.');
-      if (users.length !== userIds.length) throw new Error('Algum usuário dos splits não existe.');
+      const invalid = users.find((u) => u.companyId !== user.companyId);
+      if (invalid)
+        throw new Error(
+          "Um dos usuários dos splits não pertence à mesma empresa.",
+        );
+      if (users.length !== userIds.length)
+        throw new Error("Algum usuário dos splits não existe.");
     }
 
     await tx.deal.update({
@@ -185,18 +215,21 @@ export async function closeDeal(
         bonusInstallmentCount: newData.bonusInstallmentCount,
         propertyValue: newData.propertyValue ?? targetDeal.propertyValue,
         commissionAmount: commissionTotal.toFixed(2),
-        status: 'CLOSED',
+        status: "CLOSED",
         paymentMethod: chosenPaymentMethod,
         currentStep: currentStepValue,
         updatedBy: userId,
-        closedAt: targetDeal.status !== 'CLOSED' ? new Date() : targetDeal.closedAt,
+        closedAt:
+          targetDeal.status !== "CLOSED" ? new Date() : targetDeal.closedAt,
       },
     });
 
-    const existingShares = await tx.dealShare.findMany({ where: { dealId: id }})
+    const existingShares = await tx.dealShare.findMany({
+      where: { dealId: id },
+    });
     const existingMap = new Map<string, (typeof existingShares)[0]>();
     for (const es of existingShares) {
-      const key = es.userId ? `u:${es.userId}` : 'company';
+      const key = es.userId ? `u:${es.userId}` : "company";
       if (existingMap.has(key)) {
         throw new Error(`Existe usuários repetidos (${key}).`);
       }
@@ -204,7 +237,7 @@ export async function closeDeal(
     }
 
     for (const s of createdShares) {
-      const key = s.userId ? `u:${s.userId}` : 'company';
+      const key = s.userId ? `u:${s.userId}` : "company";
       const amountDecimal = new Prisma.Decimal(String(s.amount));
 
       if (existingMap.has(key)) {
@@ -246,13 +279,13 @@ export async function closeDeal(
     }
 
     const leftovers = Array.from(existingMap.values());
-    const paidLeftover = leftovers.find(l => l.isPaid);
+    const paidLeftover = leftovers.find((l) => l.isPaid);
     if (paidLeftover) {
-      throw new Error('Impossível excluir comissão já paga.')
+      throw new Error("Impossível excluir comissão já paga.");
     }
 
     for (const l of leftovers)
-      await tx.dealShare.delete({where: {id: l.id} });
+      await tx.dealShare.delete({ where: { id: l.id } });
 
     const full = await tx.deal.findUnique({
       where: { id },
@@ -277,80 +310,111 @@ export async function updateStep(
   return prisma.$transaction(async (tx) => {
     const user = await tx.user.findUnique({
       where: { id: userId },
-      select: { company: { select: { plan: true } }, companyId: true }
+      select: { company: { select: { plan: true } }, companyId: true },
     });
-    if (!user) throw new Error('Usuário não encontrado.');
+    if (!user) throw new Error("Usuário não encontrado.");
 
-    const targetDeal = await tx.deal.findUnique({ where: { id, companyId: user.companyId } });
-    if (!targetDeal) throw new Error('Negociação não encontrada.');
+    const targetDeal = await tx.deal.findUnique({
+      where: { id, companyId: user.companyId },
+    });
+    if (!targetDeal) throw new Error("Negociação não encontrada.");
 
     if (userId !== targetDeal.createdBy) {
       const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
       if (!hasTeamDeals)
-        throw new Error('Seu plano não possui acesso a negociações em equipesad');
+        throw new Error(
+          "Seu plano não possui acesso a negociações em equipesad",
+        );
 
-      const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
-      if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+      const canUpdateDeal = await checkUserPermission(
+        userId,
+        "ALL_DEAL_UPDATE",
+      );
+      if (!canUpdateDeal)
+        throw new Error("Você não tem permissão para editar as negociações");
     } else {
-      const canUpdateDeal = await checkUserPermission(userId, 'DEAL_UPDATE');
-      if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+      const canUpdateDeal = await checkUserPermission(userId, "DEAL_UPDATE");
+      if (!canUpdateDeal)
+        throw new Error("Você não tem permissão para editar as negociações");
     }
 
     if (targetDeal.currentStep === null)
-      throw new Error('Ação inválida, não existe passo atual.');
+      throw new Error("Ação inválida, não existe passo atual.");
 
     const paymentMethod = targetDeal.paymentMethod;
     const steps = WORKFLOW[paymentMethod];
-    if (!steps) throw new Error('Workflow não definido para esse método de pagamento');
+    if (!steps)
+      throw new Error("Workflow não definido para esse método de pagamento");
     const currentStepIndex = steps.indexOf(targetDeal.currentStep);
     const lastStepIndex = steps.length;
     let newCurrentStep;
 
-    if (changeStep === 'next') {
+    if (changeStep === "next") {
       newCurrentStep = currentStepIndex + 1;
 
       if (newCurrentStep >= lastStepIndex) {
         return await tx.deal.update({
           where: { id },
           data: {
-            status: 'FINISHED',
+            status: "FINISHED",
             finalizedAt: new Date(),
           },
         });
-      };
-    } else if (changeStep === 'back') {
-      newCurrentStep = currentStepIndex -1;
-
-      if (targetDeal.status === 'FINISHED') {
-
-      if (userId !== targetDeal.createdBy) {
-        const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE_DELETE');
-        if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
-      } else {
-        const canUpdateDeal = await checkUserPermission(userId, 'DEAL_CLOSE_DELETE');
-        if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
       }
+    } else if (changeStep === "back") {
+      newCurrentStep = currentStepIndex - 1;
+
+      if (targetDeal.status === "FINISHED") {
+        if (userId !== targetDeal.createdBy) {
+          const canUpdateDeal = await checkUserPermission(
+            userId,
+            "ALL_DEAL_CLOSE_DELETE",
+          );
+          if (!canUpdateDeal)
+            throw new Error(
+              "Você não tem permissão para editar as negociações",
+            );
+        } else {
+          const canUpdateDeal = await checkUserPermission(
+            userId,
+            "DEAL_CLOSE_DELETE",
+          );
+          if (!canUpdateDeal)
+            throw new Error(
+              "Você não tem permissão para editar as negociações",
+            );
+        }
 
         return await tx.deal.update({
           where: { id, companyId: user.companyId },
           data: {
-            status: 'CLOSED',
+            status: "CLOSED",
             finalizedAt: null,
           },
         });
-      };
+      }
 
       if (newCurrentStep < 0) {
         if (userId !== targetDeal.createdBy) {
-          const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE_DELETE');
+          const canUpdateDeal = await checkUserPermission(
+            userId,
+            "ALL_DEAL_CLOSE_DELETE",
+          );
 
           if (!canUpdateDeal)
-            throw new Error('Você não tem permissão para editar as negociações');
+            throw new Error(
+              "Você não tem permissão para editar as negociações",
+            );
         } else {
-          const canUpdateDeal = await checkUserPermission(userId, 'DEAL_CLOSE_DELETE');
+          const canUpdateDeal = await checkUserPermission(
+            userId,
+            "DEAL_CLOSE_DELETE",
+          );
 
           if (!canUpdateDeal)
-            throw new Error('Você não tem permissão para editar as negociações');
+            throw new Error(
+              "Você não tem permissão para editar as negociações",
+            );
         }
 
         await tx.dealShare.deleteMany({
@@ -360,16 +424,16 @@ export async function updateStep(
         return await tx.deal.update({
           where: { id, companyId: user.companyId },
           data: {
-            status: 'POTENTIAL_CLIENTS',
+            status: "POTENTIAL_CLIENTS",
             commissionAmount: null,
             currentStep: null,
             closedAt: null,
             finalizedAt: null,
           },
         });
-      };
+      }
     } else {
-      throw new Error('Ação inválida.');
+      throw new Error("Ação inválida.");
     }
 
     return await tx.deal.update({
@@ -388,34 +452,39 @@ export async function updateStepDnd(
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  const targetDeal = await prisma.deal.findUnique({ where: { id, companyId: user.companyId } });
-  if (!targetDeal) throw new Error('Negociação não encontrada.');
+  const targetDeal = await prisma.deal.findUnique({
+    where: { id, companyId: user.companyId },
+  });
+  if (!targetDeal) throw new Error("Negociação não encontrada.");
 
   if (userId !== targetDeal.createdBy) {
     const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não possui acesso a negociações em equipe');
+      throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-    const canUpdateDeal = await checkUserPermission(userId, 'ALL_DEAL_UPDATE');
-    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    const canUpdateDeal = await checkUserPermission(userId, "ALL_DEAL_UPDATE");
+    if (!canUpdateDeal)
+      throw new Error("Você não tem permissão para editar as negociações");
   } else {
-    const canUpdateDeal = await checkUserPermission(userId, 'DEAL_UPDATE');
-    if (!canUpdateDeal) throw new Error('Você não tem permissão para editar as negociações');
+    const canUpdateDeal = await checkUserPermission(userId, "DEAL_UPDATE");
+    if (!canUpdateDeal)
+      throw new Error("Você não tem permissão para editar as negociações");
   }
 
   if (targetDeal.currentStep === null)
-    throw new Error('Ação inválida, não existe passo atual.');
+    throw new Error("Ação inválida, não existe passo atual.");
 
   const paymentMethod = targetDeal.paymentMethod;
   const steps = WORKFLOW[paymentMethod];
-  if (!steps) throw new Error('Workflow não definido para esse método de pagamento');
+  if (!steps)
+    throw new Error("Workflow não definido para esse método de pagamento");
 
   if (!steps.includes(changeStep as DealStepType)) {
-    throw new Error('Step inválido para esse workflow');
+    throw new Error("Step inválido para esse workflow");
   }
 
   return await prisma.deal.update({
@@ -433,32 +502,37 @@ export async function updateDealShare(
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
   const dealShare = await prisma.dealShare.findUnique({
     where: { id, companyId: user.companyId },
-    include: { deal: { include: { client: true } } }
+    include: { deal: { include: { client: true } } },
   });
-  if (!dealShare) throw new Error('Comissão não encontrada.');
+  if (!dealShare) throw new Error("Comissão não encontrada.");
 
   if (dealShare.createdBy !== userId) {
     const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não possui acesso a negociações em equipe');
+      throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-    const canUpdateCloseDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE');
-    if (!canUpdateCloseDeal) throw new Error('Você não tem permissão para editar comissão');
+    const canUpdateCloseDeal = await checkUserPermission(
+      userId,
+      "ALL_DEAL_CLOSE",
+    );
+    if (!canUpdateCloseDeal)
+      throw new Error("Você não tem permissão para editar comissão");
   } else if (dealShare.createdBy === userId || dealShare.userId === userId) {
-    const canUpdateCloseDeal = await checkUserPermission(userId, 'DEAL_CLOSE');
-    if (!canUpdateCloseDeal) throw new Error('Você não tem permissão para editar comissão');
+    const canUpdateCloseDeal = await checkUserPermission(userId, "DEAL_CLOSE");
+    if (!canUpdateCloseDeal)
+      throw new Error("Você não tem permissão para editar comissão");
   }
 
   let updateDate: Partial<Prisma.DealShareUncheckedUpdateInput> = {
     ...newData,
-    updatedBy: userId
-  }
+    updatedBy: userId,
+  };
 
   if (!newData.isPaid && dealShare.isPaid) {
     updateDate.paidAt = null;
@@ -482,12 +556,13 @@ export async function updateDealShare(
 
     if (dealShare.isCompany) {
       const movement = await tx.financialMovement.findUnique({
-        where: { dealShareId: id }
+        where: { dealShareId: id },
       });
 
-      const newValue = updateDate.amount !== undefined
-        ? Number(updateDate.amount)
-        : dealShare.amount.toNumber();
+      const newValue =
+        updateDate.amount !== undefined
+          ? Number(updateDate.amount)
+          : dealShare.amount.toNumber();
 
       if (updateDate.isPaid) {
         if (movement) {
@@ -495,14 +570,14 @@ export async function updateDealShare(
             where: { dealShareId: id },
             data: {
               amount: newValue,
-              updatedBy: userId
-            }
-          })
+              updatedBy: userId,
+            },
+          });
         } else {
           updatedMovement = await tx.financialMovement.create({
             data: {
               companyId: user.companyId,
-              type: 'COMMISSION',
+              type: "COMMISSION",
               description: `Comissão da venda de  ${dealShare.deal.client.name}`,
               amount: newValue,
               dealShareId: id,
@@ -523,44 +598,56 @@ export async function updateDealShare(
   });
 }
 
-export async function deleteAllDealShare(
-  dealId: number,
-  userId: number
- ) {
-   const user = await prisma.user.findUnique({
-     where: { id: userId },
-     select: { company: { select: { plan: true } }, companyId: true }
-   });
-   if (!user) throw new Error('Usuário não encontrado.');
+export async function deleteAllDealShare(dealId: number, userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { company: { select: { plan: true } }, companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
-   const dealShare = await prisma.dealShare.findFirst({ where: { dealId, companyId: user.companyId } });
-  if (!dealShare) throw new Error('Comissão não encontrada.');
+  const dealShare = await prisma.dealShare.findFirst({
+    where: { dealId, companyId: user.companyId },
+  });
+  if (!dealShare) throw new Error("Comissão não encontrada.");
 
-  const paidCount = await prisma.dealShare.count({ where: { dealId, companyId: user.companyId, isPaid: false } });
-  if (paidCount > 0) throw new Error('Comissão paga não pode ser apagada.');
+  const paidCount = await prisma.dealShare.count({
+    where: { dealId, companyId: user.companyId, isPaid: false },
+  });
+  if (paidCount > 0) throw new Error("Comissão paga não pode ser apagada.");
 
   if (dealShare.createdBy !== userId) {
     const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.TEAM_DEALS;
     if (!hasTeamDeals)
-      throw new Error('Seu plano não possui acesso a negociações em equipe');
+      throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-    const canDeleteCloseDeal = await checkUserPermission(userId, 'ALL_DEAL_CLOSE_DELETE');
-    if (!canDeleteCloseDeal) throw new Error('Você não tem permissão para editar comissão');
+    const canDeleteCloseDeal = await checkUserPermission(
+      userId,
+      "ALL_DEAL_CLOSE_DELETE",
+    );
+    if (!canDeleteCloseDeal)
+      throw new Error("Você não tem permissão para editar comissão");
   } else {
-    const canDeleteCloseDeal = await checkUserPermission(userId, 'DEAL_CLOSE_DELETE');
-    if (!canDeleteCloseDeal) throw new Error('Você não tem permissão para editar comissão');
+    const canDeleteCloseDeal = await checkUserPermission(
+      userId,
+      "DEAL_CLOSE_DELETE",
+    );
+    if (!canDeleteCloseDeal)
+      throw new Error("Você não tem permissão para editar comissão");
   }
-  if (dealShare.isPaid) throw new Error('Você não pode apagar uma comissão já paga.');
+  if (dealShare.isPaid)
+    throw new Error("Você não pode apagar uma comissão já paga.");
 
   return await prisma.$transaction([
-    prisma.dealShare.deleteMany({ where: { dealId, companyId: user.companyId } }),
+    prisma.dealShare.deleteMany({
+      where: { dealId, companyId: user.companyId },
+    }),
     prisma.deal.update({
       where: { id: dealId, companyId: user.companyId },
       data: {
-        status: 'POTENTIAL_CLIENTS',
+        status: "POTENTIAL_CLIENTS",
         commissionAmount: null,
         updatedBy: userId,
-      }
-    })
-  ])
+      },
+    }),
+  ]);
 }

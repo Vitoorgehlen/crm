@@ -1,36 +1,37 @@
 import { prisma } from "../prisma-client";
-import { checkUserPermission } from './rolePermissionRepository';
+import { checkUserPermission } from "./rolePermissionRepository";
 import { PLAN_CONFIG } from "../utils/plans";
 
 export async function getCommission(
   userId: number,
-  filters: { name?: string }
+  filters: { name?: string },
 ) {
-  const canReadDeal = await checkUserPermission(userId, 'DEAL_READ');
-  if (!canReadDeal) throw new Error('Você não tem permissão para visualizar as negociações');
+  const canReadDeal = await checkUserPermission(userId, "DEAL_READ");
+  if (!canReadDeal)
+    throw new Error("Você não tem permissão para visualizar as negociações");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { companyId: true }
+    select: { companyId: true },
   });
 
-  if (!user) throw new Error('Usuário não encontrado');
+  if (!user) throw new Error("Usuário não encontrado");
 
   const where: any = {
     companyId: user.companyId,
     DealShare: {
-      some: { userId }
+      some: { userId },
     },
-    status: { in: ['CLOSED', 'FINISHED']}
-  }
+    status: { in: ["CLOSED", "FINISHED"] },
+  };
 
   if (filters?.name) {
     where.client = {
       name: {
         contains: filters.name,
-        mode: 'insensitive'
-      }
-    }
+        mode: "insensitive",
+      },
+    };
   }
 
   return prisma.deal.findMany({
@@ -41,13 +42,12 @@ export async function getCommission(
       DealShare: {
         where: { userId },
         include: {
-          user: {select: {id: true, name: true }}
-        }
-      }
-
+          user: { select: { id: true, name: true } },
+        },
+      },
     },
     orderBy: {
-      createdAt: 'desc',
+      createdAt: "desc",
     },
   });
 }
@@ -61,11 +61,11 @@ export async function getChartCommissions(userId: number) {
     where: {
       userId,
       isPaid: true,
-      paidAt : {
+      paidAt: {
         gte: startDate,
-        lte: endDate
-      }
-    }
+        lte: endDate,
+      },
+    },
   });
 
   const monthlyRevenue = Array.from({ length: 12 }, () => 0);
@@ -86,8 +86,18 @@ export async function getChartCommissions(userId: number) {
   }
 
   const months = [
-    "Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-    "Jul", "Ago", "Set", "Out", "Nov", "Dez",
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
   ];
 
   return monthlyRevenue.map((value, index) => ({
@@ -97,18 +107,21 @@ export async function getChartCommissions(userId: number) {
 }
 
 export async function getCompanyRevenue(userId: number) {
-  const canReadCommissions = await checkUserPermission(userId, 'EXPENSE_READ');
-  if (!canReadCommissions) throw new Error('Você não tem permissão para visualizar as comissões da empresa');
+  const canReadCommissions = await checkUserPermission(userId, "EXPENSE_READ");
+  if (!canReadCommissions)
+    throw new Error(
+      "Você não tem permissão para visualizar as comissões da empresa",
+    );
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado');
+  if (!user) throw new Error("Usuário não encontrado");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-  if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   const endDate = new Date();
   const startDate = new Date();
@@ -121,9 +134,9 @@ export async function getCompanyRevenue(userId: number) {
       isPaid: true,
       paidAt: {
         gte: startDate,
-        lte: endDate
-      }
-    }
+        lte: endDate,
+      },
+    },
   });
 
   const companyIncome = await prisma.expense.findMany({
@@ -131,11 +144,11 @@ export async function getCompanyRevenue(userId: number) {
       companyId: user.companyId,
       isIncome: true,
       isPaid: true,
-      newDueDate : {
+      newDueDate: {
         gte: startDate,
-        lte: endDate
-      }
-    }
+        lte: endDate,
+      },
+    },
   });
 
   const monthlyRevenue = Array.from({ length: 12 }, () => 0);
@@ -166,8 +179,18 @@ export async function getCompanyRevenue(userId: number) {
   }
 
   const months = [
-    'Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun',
-    'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'
+    "Jan",
+    "Fev",
+    "Mar",
+    "Abr",
+    "Mai",
+    "Jun",
+    "Jul",
+    "Ago",
+    "Set",
+    "Out",
+    "Nov",
+    "Dez",
   ];
 
   return monthlyRevenue.map((value, index) => ({

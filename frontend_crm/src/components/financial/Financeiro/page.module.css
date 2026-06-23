@@ -54,6 +54,59 @@
   gap: 10px;
 }
 
+.btnAutoPayment {
+  display: flex;
+}
+.btnWindows {
+  display: flex;
+  align-items: center;
+  border: none;
+  background: transparent;
+  gap: 10px;
+  transition: opacity 0.2s ease;
+  padding-left: 10px;
+  color: var(--textBase);
+}
+
+.btnWindows:hover {
+  color: var(--primaryText);
+}
+
+.btnSlide {
+  position: relative;
+  width: 36px;
+  height: 19px;
+  border-radius: 999px;
+  border: 1px solid var(--textBase);
+  transition: border-color 0.25s ease;
+  overflow: hidden;
+}
+
+.slide {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+
+  background-color: var(--textBase);
+
+  transition:
+    transform 0.25s ease,
+    background-color 0.25s ease;
+}
+
+.btnSlideActive .slide {
+  transform: translateX(16px);
+  background-color: var(--primaryColor);
+}
+
+.btnWindows:hover .btnSlide {
+  border-color: var(--primaryColor);
+}
+
 .tableContainer {
   width: 100%;
   overflow-x: auto;
@@ -72,7 +125,7 @@
   align-items: center;
   text-align: center;
   gap: 5px;
-  justify-content: space-around;
+  justify-content: space-between;
   width: 100%;
   color: var(--textBase);
   margin-bottom: 10px;

@@ -103,7 +103,6 @@ export default function ClosedDeal({
   const [docCostValue, setDocCostValue] = useState<number>(0);
   const [docCostNote, setDocCostNote] = useState("");
   const [docCost, setDocCost] = useState<Array<DocumentationCost>>([]);
-  const [docCostTotal, setDocCostTotal] = useState<number>(0);
 
   const [showClientPopup, setShowClientPopup] = useState(false);
   const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
@@ -128,6 +127,10 @@ export default function ClosedDeal({
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const docCostTotal = useMemo(() => {
+    return docCost.reduce((sum, item) => sum + Number(item.value ?? 0), 0);
+  }, [docCost]);
 
   const totalPercentage = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.percentage ?? 0), 0);
@@ -704,14 +707,6 @@ export default function ClosedDeal({
   }, [API, isOpen, deal?.id, token, calculateStepPosition]);
 
   useEffect(() => {
-    const total = docCost.reduce(
-      (sum: number, item: DocumentationCost) => sum + Number(item.value ?? 0),
-      0,
-    );
-    setDocCostTotal(total);
-  }, [docCost]);
-
-  useEffect(() => {
     fetchDocs();
   }, [fetchDocs]);
 
@@ -1244,7 +1239,7 @@ export default function ClosedDeal({
                     <span>Editando</span>
                   </>
                 ) : (
-                  <div>
+                  <div className={styles.addDocContainer}>
                     <div className={styles.divAddDoc}>
                       <input
                         type="text"

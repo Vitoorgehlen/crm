@@ -127,6 +127,17 @@
   color: var(--primaryColor);
 }
 
+.selectYear,
+.selectMonth {
+  width: 100%;
+  text-align: center;
+  color: var(--textBase);
+}
+
+.selectYear {
+  margin-top: 20px;
+}
+
 .pendingSection {
   display: flex;
   flex-direction: column;

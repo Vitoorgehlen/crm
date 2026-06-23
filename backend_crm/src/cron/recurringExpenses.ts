@@ -1,26 +1,26 @@
-import { recurrenceTypes } from '@prisma/client';
-import { prisma } from '../prisma-client';
+import { recurrenceTypes } from "@prisma/client";
+import { prisma } from "../prisma-client";
 
 function shouldGenerate(
   recurrenceType: recurrenceTypes,
   monthsFromStart: number,
 ) {
   switch (recurrenceType) {
-    case 'WEEKLY':
-    case 'BIWEEKLY':
-    case 'MONTHLY':
+    case "WEEKLY":
+    case "BIWEEKLY":
+    case "MONTHLY":
       return true;
 
-    case 'BIMONTHLY':
+    case "BIMONTHLY":
       return monthsFromStart % 2 === 0;
 
-    case 'QUARTERLY':
+    case "QUARTERLY":
       return monthsFromStart % 3 === 0;
 
-    case 'SEMIANNUAL':
+    case "SEMIANNUAL":
       return monthsFromStart % 6 === 0;
 
-    case 'YEARLY':
+    case "YEARLY":
       return monthsFromStart % 12 === 0;
 
     default:
@@ -62,11 +62,7 @@ function generateMonthlyDate(
 ): Date {
   const desiredDay = originalDate.getDate();
 
-  const lastDayOfMonth = new Date(
-    targetYear,
-    targetMonth + 1,
-    0,
-  ).getDate();
+  const lastDayOfMonth = new Date(targetYear, targetMonth + 1, 0).getDate();
 
   return new Date(
     targetYear,
@@ -96,14 +92,12 @@ export async function generateRecurringExpenses() {
         parentExpenseId: null,
         isRecurringActive: true,
         recurrenceType: {
-          not: 'NONE',
+          not: "NONE",
         },
       },
     });
 
-    console.log(
-      `[CRON] Encontradas ${recurringExpenses.length} recorrências`,
-    );
+    console.log(`[CRON] Encontradas ${recurringExpenses.length} recorrências`);
 
     for (const expense of recurringExpenses) {
       try {
@@ -123,12 +117,7 @@ export async function generateRecurringExpenses() {
           continue;
         }
 
-        if (
-          !shouldGenerate(
-            expense.recurrenceType,
-            monthsDiff,
-          )
-        ) {
+        if (!shouldGenerate(expense.recurrenceType, monthsDiff)) {
           skippedCount++;
           continue;
         }
@@ -136,7 +125,7 @@ export async function generateRecurringExpenses() {
         let dueDates: Date[] = [];
 
         switch (expense.recurrenceType) {
-          case 'WEEKLY':
+          case "WEEKLY":
             dueDates = generateWeeklyExpensesForMonth(
               startDate,
               currentMonth,
@@ -145,7 +134,7 @@ export async function generateRecurringExpenses() {
             );
             break;
 
-          case 'BIWEEKLY':
+          case "BIWEEKLY":
             dueDates = generateWeeklyExpensesForMonth(
               startDate,
               currentMonth,
@@ -156,11 +145,7 @@ export async function generateRecurringExpenses() {
 
           default:
             dueDates = [
-              generateMonthlyDate(
-                startDate,
-                currentMonth,
-                currentYear,
-              ),
+              generateMonthlyDate(startDate, currentMonth, currentYear),
             ];
             break;
         }
@@ -185,7 +170,7 @@ export async function generateRecurringExpenses() {
               value: expense.value,
               isIncome: expense.isIncome,
 
-              recurrenceType: 'NONE',
+              recurrenceType: "NONE",
               isRecurringActive: false,
 
               isPaid: false,
@@ -202,14 +187,11 @@ export async function generateRecurringExpenses() {
           createdCount++;
 
           console.log(
-            `[CRON] Criada: ${expense.label} - ${dueDate.toISOString().split('T')[0]}`,
+            `[CRON] Criada: ${expense.label} - ${dueDate.toISOString().split("T")[0]}`,
           );
         }
       } catch (error) {
-        console.error(
-          `[CRON] Erro ao processar despesa ${expense.id}`,
-          error,
-        );
+        console.error(`[CRON] Erro ao processar despesa ${expense.id}`, error);
       }
     }
 
@@ -222,7 +204,7 @@ export async function generateRecurringExpenses() {
       skippedCount,
     };
   } catch (error) {
-    console.error('[CRON] Erro fatal', error);
+    console.error("[CRON] Erro fatal", error);
     throw error;
   }
 }

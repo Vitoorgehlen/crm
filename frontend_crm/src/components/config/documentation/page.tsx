@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 import styles from "./page.module.css";
 import { docsNames, type Documentation } from "@/types";
+import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -146,38 +147,42 @@ export default function Documentation() {
             <p>{doc.label}</p>
             <div className={styles.inputAndPercent}>
               <div className={styles.inputWrapper}>
-                <input
-                  type="text"
-                  className={`form-base ${
-                    doc.type === "percent"
-                      ? styles.inputPercent
-                      : styles.inputValue
-                  }`}
-                  value={
-                    docValues[doc.key] !== undefined
-                      ? doc.type === "percent"
+                {doc.type === "percent" ? (
+                  <input
+                    type="text"
+                    className={`form-base ${styles.inputPercent}`}
+                    value={
+                      docValues[doc.key] !== undefined
                         ? docValues[doc.key].toLocaleString("pt-BR", {
                             minimumFractionDigits: 2,
                             maximumFractionDigits: 2,
                           })
-                        : docValues[doc.key].toLocaleString("pt-BR", {
-                            style: "currency",
-                            currency: "BRL",
-                          })
-                      : ""
-                  }
-                  onChange={(e) => {
-                    const raw = e.target.value.replace(/\D/g, "");
-                    const numeric = Number(raw) / 100;
-
-                    if (doc.type === "percent" && numeric > 100) return;
-
-                    setDocValues((prev) => ({
-                      ...prev,
-                      [doc.key]: numeric,
-                    }));
-                  }}
-                />
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const raw = e.target.value.replace(/\D/g, "");
+                      const numeric = Number(raw) / 100;
+                      if (numeric > 100) return;
+                      setDocValues((prev) => ({
+                        ...prev,
+                        [doc.key]: numeric,
+                      }));
+                    }}
+                  />
+                ) : (
+                  <CurrencyInput
+                    value={docValues[doc.key] || 0}
+                    onChange={(val) => {
+                      setDocValues((prev) => ({
+                        ...prev,
+                        [doc.key]: val,
+                      }));
+                    }}
+                    className={`form-base ${styles.inputValue}`}
+                    max={99999999.99}
+                    min={0}
+                  />
+                )}
                 {doc.type === "percent" && (
                   <span className={styles.suffix}>%</span>
                 )}

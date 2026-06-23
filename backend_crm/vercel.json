@@ -8,6 +8,10 @@
     {
       "path": "/generate-recurring-expenses",
       "schedule": "0 0 1 * *"
+    },
+    {
+      "path": "/auto-payments-expenses",
+      "schedule": "0 3 * * *"
     }
   ]
 }

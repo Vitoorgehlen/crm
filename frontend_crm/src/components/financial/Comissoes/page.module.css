@@ -207,6 +207,17 @@
   background: var(--cardBackground);
 }
 
+.selectYear,
+.selectMonth {
+  width: 100%;
+  text-align: center;
+  color: var(--textBase);
+}
+
+.selectYear {
+  margin-top: 20px;
+}
+
 .pendingSection {
   width: 35%;
   color: var(--primaryText);

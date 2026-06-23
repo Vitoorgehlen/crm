@@ -1,198 +1,152 @@
-import { docsNames } from "@/types";
-
 interface DocValues {
   [key: string]: number;
 }
 
 export function sumDocs(
-    docValues: DocValues,
-    paymentMethod: string,
-    downPaymentValue: number,
-    subsidyValue: number,
-    cashValue: number,
-    fgtsValue: number,
-    financingValue: number,
-    creditLetterValue: number,) {
+  docValues: DocValues,
+  paymentMethod: string,
+  downPaymentValue: number,
+  subsidyValue: number,
+  cashValue: number,
+  fgtsValue: number,
+  financingValue: number,
+  creditLetterValue: number,
+) {
   if (!docValues) return;
-
   const updatedDocs = [];
-
-  const propertyRegistry = docsNames.find(
-    (doc) => doc.key === "PROPERTY_REGISTRY",
+  const down = Number(downPaymentValue) || 0;
+  const subsidy = Number(subsidyValue) || 0;
+  const cash = Number(cashValue) || 0;
+  const fgts = Number(fgtsValue) || 0;
+  const financing = Number(financingValue) || 0;
+  const credit = Number(creditLetterValue) || 0;
+  const total = getTotal(
+    paymentMethod,
+    down,
+    subsidy,
+    cash,
+    fgts,
+    financing,
+    credit,
   );
-  if (propertyRegistry) {
-    const value = docValues[propertyRegistry.key] || 0;
+
+  const RegistryValue = docValues["PROPERTY_REGISTRY"] || 0;
+  updatedDocs.push({
+    label: "Matrícula",
+    description: "Pode variar muito!!",
+    value: RegistryValue,
+  });
+
+  if (paymentMethod === "FINANCING") {
+    const engineeringValue = docValues["ENGINEERING"] || 0;
+    updatedDocs.push({
+      label: "Engenharia",
+      description: "Fixo.",
+      value: engineeringValue,
+    });
+
+    const percentSBPE = docValues["DEED_FINANCED_SBPE"] || 0;
+    const minDeedSBPE = docValues["DEED_FINANCED_MIN_SBPE"] || 0;
+    const deedSBPE = deedFinanced("SBPE", percentSBPE, minDeedSBPE, financing);
+    updatedDocs.push(deedSBPE);
+
+    const percentMCMV = docValues["DEED_FINANCED_MCMV"] || 0;
+    const minDeedMCMV = docValues["DEED_FINANCED_MIN_MCMV"] || 0;
+    const deedMCMV = deedFinanced("MCMV", percentMCMV, minDeedMCMV, financing);
+    updatedDocs.push(deedMCMV);
+  }
+
+  if (paymentMethod === "CASH") {
+    const value = ((docValues["DEED_CASH"] || 0) / 100) * (cash + fgts + down);
 
     updatedDocs.push({
-      label: "Matrícula",
-      description: "Pode variar muito!!",
+      label: "Escritura",
+      description: `${docValues["DEED_CASH"] || 0}% do valor total.`,
       value,
     });
   }
 
-  if (paymentMethod === "FINANCING") {
-    const engineering = docsNames.find((doc) => doc.key === "ENGINEERING");
-    if (engineering) {
-      const value = docValues[engineering.key] || 0;
-
-      updatedDocs.push({
-        label: engineering.label,
-        description: "Fixo.",
-        value,
-      });
-    }
-
-    const financingSbpe = docsNames.find(
-      (doc) => doc.key === "DEED_FINANCED_SBPE",
-    );
-    const financingSbpeMin = docsNames.find(
-      (doc) => doc.key === "DEED_FINANCED_MIN_SBPE",
-    );
-    if (financingSbpe && financingSbpeMin) {
-      const value =
-        ((docValues[financingSbpe.key] || 0) / 100) *
-        (Number(financingValue) || 0);
-      const minValue = docValues[financingSbpeMin.key] || 0;
-
-      updatedDocs.push({
-        label: "Financiar SBPE",
-        description: `${(docValues[financingSbpe.key] || 0)}% do valor financiado. Mínimo: R$${(docValues[financingSbpeMin.key] || 0).toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}.`,
-        value: value < minValue ? minValue : value,
-      });
-    }
-
-    const financing = docsNames.find(
-      (doc) => doc.key === "DEED_FINANCED_MCMV",
-    );
-    const financingMin = docsNames.find(
-      (doc) => doc.key === "DEED_FINANCED_MIN_MCMV",
-    );
-    if (financing && financingMin) {
-      const value =
-        ((docValues[financing.key] || 0) / 100) *
-        (Number(financingValue) || 0);
-      const minValue = docValues[financingMin.key] || 0;
-
-      updatedDocs.push({
-        label: "Financiar MCMV",
-        description: `${(docValues[financing.key] || 0)}% do valor financiado. Mínimo: R$${(docValues[financingMin.key] || 0).toLocaleString("pt-BR", {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}.`,
-        value: value < minValue ? minValue : value,
-      });
-    }
+  if (paymentMethod === "CREDIT_LETTER") {
+    updatedDocs.push({
+      label: "Escritura",
+      description: "Verificar com administradora da carta de crédito.",
+      value: 0,
+    });
   }
 
-  if (paymentMethod === "CASH") {
-    const cash = docsNames.find((doc) => doc.key === "DEED_CASH");
-    if (cash) {
-      const value =
-        ((docValues[cash.key] || 0) / 100) *
-        ((Number(cashValue) || 0) +
-          (Number(fgtsValue) || 0) +
-          (Number(downPaymentValue) || 0));
-
-      updatedDocs.push({
-        label: "Escritura",
-        description: `${(docValues[cash.key] || 0)}% do valor total.`,
-        value,
-      });
-    }
-  }
-
-  const itbiCash = docsNames.find((doc) => doc.key === "ITBI_CASH");
-  let value = 0;
+  let itbiCash = 0;
   let financedItbi = 0;
-  if (itbiCash) {
-    const payment = ((Number(cashValue) || 0) +
-    (Number(downPaymentValue) || 0) +
-    (Number(fgtsValue) || 0) +
-    (Number(subsidyValue) || 0))
-    
-    value = ((docValues[itbiCash.key] || 0) / 100) * payment;
-    
-    let itbiDescription = `${(docValues[itbiCash.key] || 0)}% do valor total.`
-    if (paymentMethod !== "CASH") {
-      const itbiFinanced = docsNames.find(
-        (doc) => doc.key === "ITBI_FINANCED",
-      );
-      if (itbiFinanced) {
-        const value =
-          ((docValues[itbiFinanced.key] || 0) / 100) *
-          (Number(financingValue) || 0);
-        financedItbi = value;
-        itbiDescription = `${(docValues[itbiCash.key] || 0)}% da entrada + ${(docValues[itbiFinanced.key] || 0)}% do valor financiado.`
-      }
-      
-      // ENTRADA MÍNIMA DE 20%
-      const minimumPayment = (Number(financingValue) || 0) * 1.25 - (Number(financingValue) || 0);
-      if ( minimumPayment > payment) {
-        value = ((docValues[itbiCash.key] || 0) / 100) * minimumPayment;
-      }
-    }
-    updatedDocs.push({
-      label: "ITBI",
-      description: itbiDescription,
-      value: value + financedItbi + 50,
-    });
-  }
+  let downForItbi = down + fgts;
+  const percentITBICash = (docValues["ITBI_CASH"] || 0) / 100;
+  const percentITBIFinancing = (docValues["ITBI_FINANCED"] || 0) / 100;
+  let itbiDescription = `${docValues["ITBI_CASH"] || 0}% do valor total.`;
 
-  const registrationValue = docsNames.find(
-    (doc) => doc.key === "REGISTRATION",
-  );
-  if (registrationValue) {
-    const value =
-      ((docValues[registrationValue.key] || 0) / 100) *
-      (Number(getTotal(
-                      paymentMethod,
-                      downPaymentValue,
-                      subsidyValue,
-                      cashValue,
-                      fgtsValue,
-                      financingValue,
-                      creditLetterValue,
-                    )) || 0);
+  if (paymentMethod !== "CASH") {
+    const minimumPayment = (financing / 0.8) * 0.2;
+    if (total < 250000) downForItbi += subsidy;
+    if (downForItbi < minimumPayment) downForItbi = minimumPayment;
 
-    updatedDocs.push({
-      label: "Registro",
-      description: `${(docValues[registrationValue.key] || 0)}% do valor total.`,
-      value: value,
-    });
-  }
+    itbiCash = minimumPayment * percentITBICash;
+    financedItbi = financing * percentITBIFinancing;
+    itbiDescription = `${docValues["ITBI_CASH"] || 0}% da entrada + ${docValues["ITBI_FINANCED"] || 0}% do valor financiado.`;
+  } else itbiCash = total * percentITBICash;
 
-  return(updatedDocs);
+  updatedDocs.push({
+    label: "ITBI",
+    description: itbiDescription,
+    value: itbiCash + financedItbi + 50,
+  });
+
+  let totalForRegistration = downForItbi;
+  const percentRegistration = (docValues["REGISTRATION"] || 0) / 100;
+
+  if (paymentMethod === "CASH") totalForRegistration += cash;
+  if (paymentMethod === "FINANCING") totalForRegistration += financing;
+  if (paymentMethod === "CREDIT_LETTER") totalForRegistration += credit;
+
+  updatedDocs.push({
+    label: "Registro",
+    description: `${docValues["REGISTRATION"] || 0}% do valor total.`,
+    value: totalForRegistration * percentRegistration,
+  });
+
+  return updatedDocs;
+}
+
+function deedFinanced(
+  type: string,
+  percent: number,
+  min: number,
+  financing: number,
+) {
+  const value = ((Number(percent) || 0) / 100) * (Number(financing) || 0);
+
+  return {
+    label: `Financiar ${type}`,
+    description: `
+        ${percent || 0}% do valor financiado. 
+          Mínimo: R$${(min || 0).toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2,
+          })}.`,
+    value: value < min ? min : value,
+  };
 }
 
 export function getTotal(
   paymentMethod: string,
-      downPaymentValue: number,
-      subsidyValue: number,
-      cashValue: number,
-      fgtsValue: number,
-      financingValue: number,
-      creditLetterValue: number) {
-    if (paymentMethod === "CASH") {
-      return (cashValue || 0) + (fgtsValue || 0) + (downPaymentValue || 0);
-    }
+  downPaymentValue: number,
+  subsidyValue: number,
+  cashValue: number,
+  fgtsValue: number,
+  financingValue: number,
+  creditLetterValue: number,
+) {
+  let total = downPaymentValue + fgtsValue;
 
-    if (paymentMethod === "FINANCING") {
-      return (
-        (downPaymentValue || 0) +
-        (subsidyValue || 0) +
-        (fgtsValue || 0) +
-        (financingValue || 0)
-      );
-    }
+  if (paymentMethod === "CASH") total += cashValue;
+  if (paymentMethod === "FINANCING") total += subsidyValue + financingValue;
+  if (paymentMethod === "CREDIT_LETTER") total += creditLetterValue;
 
-    if (paymentMethod === "CREDIT_LETTER") {
-      return (
-        (downPaymentValue || 0) + (fgtsValue || 0) + (creditLetterValue || 0)
-      );
-    }
-
-    return 0;
-  }
+  return total;
+}

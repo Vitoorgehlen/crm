@@ -1,24 +1,25 @@
 import { prisma } from "../prisma-client";
-import { Prisma } from '@prisma/client';
-import { checkUserPermission } from './rolePermissionRepository';
+import { Prisma } from "@prisma/client";
+import { checkUserPermission } from "./rolePermissionRepository";
 import { PLAN_CONFIG } from "../utils/plans";
 
 export async function addExpense(
   data: Prisma.ExpenseUncheckedCreateInput,
-  userId: number
+  userId: number,
 ) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
-  const canCreateExpense = await checkUserPermission(userId, 'EXPENSE_CREATE');
-  if (!canCreateExpense) throw new Error('Você não tem permissão para criar despesa');
+  const canCreateExpense = await checkUserPermission(userId, "EXPENSE_CREATE");
+  if (!canCreateExpense)
+    throw new Error("Você não tem permissão para criar despesa");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-  if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   return prisma.$transaction(async (tx) => {
     const createdCompany = await tx.client.findFirst({
@@ -26,26 +27,29 @@ export async function addExpense(
       select: { createdAt: true },
     });
 
-    if (!createdCompany) throw new Error('Erro ao buscar despesas');
+    if (!createdCompany) throw new Error("Erro ao buscar despesas");
 
     const companyCreatedAt = new Date(createdCompany.createdAt);
     const dueDate = new Date(data.newDueDate);
 
-    const companyYearMonth = companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
+    const companyYearMonth =
+      companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
     const dueYearMonth = dueDate.getFullYear() * 100 + dueDate.getMonth();
 
     if (dueYearMonth < companyYearMonth)
-      throw new Error(`Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`);
-    const isPaid = data.isIncome || data.recurrenceType === 'NONE';
+      throw new Error(
+        `Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}`,
+      );
+    const isPaid = data.isIncome || data.recurrenceType === "NONE";
 
     const dueDates: Date[] = [];
     const startDate = new Date(data.newDueDate);
 
     if (
-      data.recurrenceType === 'WEEKLY' ||
-      data.recurrenceType === 'BIWEEKLY'
+      data.recurrenceType === "WEEKLY" ||
+      data.recurrenceType === "BIWEEKLY"
     ) {
-      const increment = data.recurrenceType === 'WEEKLY' ? 7 : 14;
+      const increment = data.recurrenceType === "WEEKLY" ? 7 : 14;
       let currentDate = new Date(startDate);
 
       while (currentDate.getMonth() === startDate.getMonth()) {
@@ -84,7 +88,7 @@ export async function addExpense(
         },
       });
 
-      newExpense.push(expense)
+      newExpense.push(expense);
     }
 
     let movement = null;
@@ -93,72 +97,74 @@ export async function addExpense(
       movement = await tx.financialMovement.create({
         data: {
           companyId: user.companyId,
-          type: data.isIncome ? 'INCOME' : 'EXPENSE',
+          type: data.isIncome ? "INCOME" : "EXPENSE",
           description: data.label,
           amount: data.value,
           expenseId: newExpense[0].id,
           createdBy: userId,
           updatedBy: userId,
-        }
+        },
       });
     }
 
-    return {newExpense, movement}
-  })
+    return { newExpense, movement };
+  });
 }
 
 export async function getExpense(userId: number, month: number, year: number) {
-    const user = await prisma.user.findUnique({
-      where: { id : userId },
-      select: { company: { select: { plan: true } }, companyId: true }
-    });
-    if (!user) throw new Error('Empresa não encontrada');
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { company: { select: { plan: true } }, companyId: true },
+  });
+  if (!user) throw new Error("Empresa não encontrada");
 
-    const canUpdateExpense = await checkUserPermission(userId, 'EXPENSE_READ');
-    if (!canUpdateExpense) throw new Error('Você não tem permissão para ler as despesas');
+  const canUpdateExpense = await checkUserPermission(userId, "EXPENSE_READ");
+  if (!canUpdateExpense)
+    throw new Error("Você não tem permissão para ler as despesas");
 
-    const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-    if (!hasTeamDeals)
-      throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
-    const startDate = new Date(year, month - 1, 1);
-    const endDate = new Date(year, month, 1);
+  const startDate = new Date(year, month - 1, 1);
+  const endDate = new Date(year, month, 1);
 
-    return prisma.expense.findMany({
-      where: {
-        companyId: user.companyId,
-        newDueDate: {
-          gte: startDate,
-          lt: endDate,
-        }
+  return prisma.expense.findMany({
+    where: {
+      companyId: user.companyId,
+      newDueDate: {
+        gte: startDate,
+        lt: endDate,
       },
-      include: {
-        creator: {
-          select: {
-            name: true,
-          }
-        }
+    },
+    include: {
+      creator: {
+        select: {
+          name: true,
+        },
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 }
 
 export async function getExpenseRange(userId: number) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    select: { company: { select: { plan: true } }, companyId: true },
   });
 
-  if (!user?.companyId) throw new Error('Empresa não encontrada');
+  if (!user?.companyId) throw new Error("Empresa não encontrada");
 
-  const canUpdateExpense = await checkUserPermission(userId, 'EXPENSE_READ');
-  if (!canUpdateExpense) throw new Error('Você não tem permissão para ler as despesas');
+  const canUpdateExpense = await checkUserPermission(userId, "EXPENSE_READ");
+  if (!canUpdateExpense)
+    throw new Error("Você não tem permissão para ler as despesas");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-  if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   const createdCompany = await prisma.client.findFirst({
     where: { companyId: user.companyId },
@@ -167,26 +173,27 @@ export async function getExpenseRange(userId: number) {
 
   const lastExpense = await prisma.expense.findFirst({
     where: { companyId: user.companyId },
-    orderBy: { newDueDate: 'desc'},
+    orderBy: { newDueDate: "desc" },
     select: { newDueDate: true },
   });
 
-  return {createdCompany, lastExpense}
+  return { createdCompany, lastExpense };
 }
 
 export async function getRecurringExpense(userId: number) {
   const user = await prisma.user.findUnique({
-    where: { id : userId },
-    select: { company: { select: { plan: true } }, companyId: true }
+    where: { id: userId },
+    select: { company: { select: { plan: true } }, companyId: true },
   });
-  if (!user) throw new Error('Empresa não encontrada');
+  if (!user) throw new Error("Empresa não encontrada");
 
-  const canUpdateExpense = await checkUserPermission(userId, 'EXPENSE_READ');
-  if (!canUpdateExpense) throw new Error('Você não tem permissão para ler as despesas');
+  const canUpdateExpense = await checkUserPermission(userId, "EXPENSE_READ");
+  if (!canUpdateExpense)
+    throw new Error("Você não tem permissão para ler as despesas");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-  if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   return prisma.expense.findMany({
     where: {
@@ -202,7 +209,7 @@ export async function getRecurringExpense(userId: number) {
       },
       childExpenses: {
         orderBy: {
-          newDueDate: 'desc',
+          newDueDate: "desc",
         },
         take: 1,
         select: {
@@ -222,7 +229,7 @@ export async function updateExpense(
   userId: number,
 ) {
   const expense = await prisma.expense.findUnique({ where: { id } });
-  if (!expense) throw new Error('Despesa não encontrada.');
+  if (!expense) throw new Error("Despesa não encontrada.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -232,29 +239,23 @@ export async function updateExpense(
     },
   });
 
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
   if (expense.companyId !== user.companyId)
-    throw new Error('Você não pode editar despesa para essa empresa.');
+    throw new Error("Você não pode editar despesa para essa empresa.");
 
-  const canUpdateExpense = await checkUserPermission(
-    userId,
-    'EXPENSE_UPDATE',
-  );
+  const canUpdateExpense = await checkUserPermission(userId, "EXPENSE_UPDATE");
 
   if (!canUpdateExpense)
-    throw new Error('Você não tem permissão para editar despesas');
+    throw new Error("Você não tem permissão para editar despesas");
 
   const hasTeamDeals =
     PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
 
-  if (!hasTeamDeals)
-    throw new Error(
-      'Seu plano não possui acesso a despesas',
-    );
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   if (expense.isIncome !== data.isIncome)
-    throw new Error('Não é permitido alterar o tipo da movimentação');
+    throw new Error("Não é permitido alterar o tipo da movimentação");
 
   const parsedNewDueDate =
     data.newDueDate instanceof Date
@@ -263,7 +264,8 @@ export async function updateExpense(
         ? new Date(String(data.newDueDate))
         : expense.newDueDate;
 
-  const newValue = data.value !== undefined ? Number(data.value) : expense.value.toNumber();
+  const newValue =
+    data.value !== undefined ? Number(data.value) : expense.value.toNumber();
 
   const newIsPaid = expense.isIncome
     ? true
@@ -272,9 +274,7 @@ export async function updateExpense(
       : expense.isPaid;
 
   const description =
-    typeof data.label === 'string'
-      ? data.label
-      : expense.label;
+    typeof data.label === "string" ? data.label : expense.label;
 
   return prisma.$transaction(async (tx) => {
     const createdCompany = await tx.client.findFirst({
@@ -282,30 +282,35 @@ export async function updateExpense(
       select: { createdAt: true },
     });
 
-    if (!createdCompany) throw new Error('Erro ao buscar despesas');
+    if (!createdCompany) throw new Error("Erro ao buscar despesas");
 
     const companyCreatedAt = new Date(createdCompany.createdAt);
     const dueDate = new Date(parsedNewDueDate);
 
-    const companyYearMonth = companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
+    const companyYearMonth =
+      companyCreatedAt.getFullYear() * 100 + companyCreatedAt.getMonth();
     const dueYearMonth = dueDate.getFullYear() * 100 + dueDate.getMonth();
 
     if (dueYearMonth < companyYearMonth)
-      throw new Error(`Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}`);
+      throw new Error(
+        `Você só pode salvar despesas a partir de ${companyCreatedAt.toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}`,
+      );
 
     const updatedExpense = await tx.expense.update({
       where: { id },
       data: {
         ...data,
         isPaid: newIsPaid,
-        isRecurringActive: data.recurrenceType !== 'NONE',
+        isRecurringActive: data.recurrenceType !== "NONE",
         newDueDate: parsedNewDueDate,
         updatedBy: userId,
       },
     });
 
     let updatedMovement;
-    const movement = await tx.financialMovement.findUnique({ where: { expenseId: expense.id }});
+    const movement = await tx.financialMovement.findUnique({
+      where: { expenseId: expense.id },
+    });
     if (newIsPaid) {
       if (movement) {
         updatedMovement = await tx.financialMovement.update({
@@ -313,14 +318,14 @@ export async function updateExpense(
           data: {
             description,
             amount: newValue,
-            updatedBy: userId
-          }
+            updatedBy: userId,
+          },
         });
       } else {
         updatedMovement = await tx.financialMovement.create({
           data: {
             companyId: user.companyId,
-            type: expense.isIncome ? 'INCOME' : 'EXPENSE',
+            type: expense.isIncome ? "INCOME" : "EXPENSE",
             description,
             amount: newValue,
             expenseId: expense.id,
@@ -332,7 +337,7 @@ export async function updateExpense(
     } else {
       if (movement) {
         updatedMovement = await tx.financialMovement.delete({
-          where: { expenseId: expense.id }
+          where: { expenseId: expense.id },
         });
       }
     }
@@ -354,11 +359,15 @@ export async function updateExpense(
       });
 
       const recurrenceType = data.recurrenceType ?? expense.recurrenceType;
-      const startDate = parsedNewDueDate instanceof Date
-        ? parsedNewDueDate
-        : (expense.newDueDate instanceof Date ? expense.newDueDate : new Date());      const dueDates: Date[] = [];
+      const startDate =
+        parsedNewDueDate instanceof Date
+          ? parsedNewDueDate
+          : expense.newDueDate instanceof Date
+            ? expense.newDueDate
+            : new Date();
+      const dueDates: Date[] = [];
 
-      if (recurrenceType === 'WEEKLY') {
+      if (recurrenceType === "WEEKLY") {
         let current = new Date(startDate);
 
         while (current.getMonth() === startDate.getMonth()) {
@@ -367,7 +376,7 @@ export async function updateExpense(
         }
       }
 
-      if (recurrenceType === 'BIWEEKLY') {
+      if (recurrenceType === "BIWEEKLY") {
         let current = new Date(startDate);
 
         while (current.getMonth() === startDate.getMonth()) {
@@ -376,10 +385,7 @@ export async function updateExpense(
         }
       }
 
-      if (
-        recurrenceType === 'WEEKLY' ||
-        recurrenceType === 'BIWEEKLY'
-      ) {
+      if (recurrenceType === "WEEKLY" || recurrenceType === "BIWEEKLY") {
         for (let i = 1; i < dueDates.length; i++) {
           await tx.expense.create({
             data: {
@@ -411,10 +417,10 @@ export async function updateExpense(
 export async function updateRecurringStatus(
   id: number,
   isRecurringActive: boolean,
-  userId: number
+  userId: number,
 ) {
   const expense = await prisma.expense.findUnique({ where: { id } });
-  if (!expense) throw new Error('Despesa não encontrada.');
+  if (!expense) throw new Error("Despesa não encontrada.");
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -424,66 +430,61 @@ export async function updateRecurringStatus(
     },
   });
 
-  if (!user) throw new Error('Usuário não encontrado.');
+  if (!user) throw new Error("Usuário não encontrado.");
 
   if (expense.companyId !== user.companyId)
-    throw new Error('Você não pode editar despesa para essa empresa.');
+    throw new Error("Você não pode editar despesa para essa empresa.");
 
-  const canUpdateExpense = await checkUserPermission(
-    userId,
-    'EXPENSE_UPDATE',
-  );
+  const canUpdateExpense = await checkUserPermission(userId, "EXPENSE_UPDATE");
 
   if (!canUpdateExpense)
-    throw new Error('Você não tem permissão para editar despesas');
+    throw new Error("Você não tem permissão para editar despesas");
 
   const hasTeamDeals =
     PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
 
-  if (!hasTeamDeals)
-    throw new Error(
-      'Seu plano não possui acesso a despesas',
-    );
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   return await prisma.expense.update({
     where: { id },
-    data: { isRecurringActive }
-  })
+    data: { isRecurringActive },
+  });
 }
 
-export async function deleteExpense(
-  id: number,
-  userId: number
- ) {
+export async function deleteExpense(id: number, userId: number) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { company: { select: { plan: true } }, companyId: true }
-  })
-  if (!user) throw new Error('Usuário não encontrado.');
+    select: { company: { select: { plan: true } }, companyId: true },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
 
   const expense = await prisma.expense.findUnique({
     where: { id, companyId: user.companyId },
   });
-  if (!expense) throw new Error('Despesa não encontrada.');
+  if (!expense) throw new Error("Despesa não encontrada.");
 
-  if (expense.companyId !== user.companyId) throw new Error('Você não pode apagar despesas desta empresa.');
+  if (expense.companyId !== user.companyId)
+    throw new Error("Você não pode apagar despesas desta empresa.");
 
-  const canDeleteExpense = await checkUserPermission(userId, 'EXPENSE_DELETE');
-  if (!canDeleteExpense) throw new Error('Você não tem permissão para apagar despesas');
+  const canDeleteExpense = await checkUserPermission(userId, "EXPENSE_DELETE");
+  if (!canDeleteExpense)
+    throw new Error("Você não tem permissão para apagar despesas");
 
-  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
-  if (!hasTeamDeals)
-    throw new Error('Seu plano não possui acesso a despesas');
+  const hasTeamDeals =
+    PLAN_CONFIG[user.company.plan].features.EXPENSE_DASHBOARD;
+  if (!hasTeamDeals) throw new Error("Seu plano não possui acesso a despesas");
 
   return prisma.$transaction(async (tx) => {
     const deletedExpense = await prisma.expense.delete({ where: { id } });
 
     let deletedMovements;
-    const movement = await tx.financialMovement.findUnique({ where: { expenseId: expense.id }});
+    const movement = await tx.financialMovement.findUnique({
+      where: { expenseId: expense.id },
+    });
     if (movement) {
       deletedMovements = await tx.financialMovement.delete({
-          where: { expenseId: expense.id }
-        });
+        where: { expenseId: expense.id },
+      });
     }
 
     return { deletedExpense, deletedMovements };

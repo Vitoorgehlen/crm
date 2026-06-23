@@ -1,17 +1,13 @@
-import { Router } from 'express';
-import { sendEmail } from '../utils/sendEmail';
+import { Router } from "express";
+import { sendEmail } from "../utils/sendEmail";
 
 const router = Router();
 
-router.post('/contact', async (req, res) => {
+router.post("/contact", async (req, res) => {
   const { subject, html } = req.body;
 
   try {
-    await sendEmail(
-      "vitorgehlencorretor@gmail.com",
-      subject,
-      html
-    );
+    await sendEmail("vitorgehlencorretor@gmail.com", subject, html);
 
     res.json({
       message: "Mensagem enviada com sucesso.",

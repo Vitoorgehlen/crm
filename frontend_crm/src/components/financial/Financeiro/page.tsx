@@ -18,12 +18,15 @@ import CustomSelect, { Option } from "@/components/Tools/Select/CustomSelect";
 import CustomDatePicker from "@/components/Tools/DatePicker/DayPicker/DayPicker";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
+import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function ExpenseCard() {
   const router = useRouter();
-  const { token, isLoading } = useAuth();
+  const { token, isLoading, permissions } = useAuth();
+
+  const [autoPayment, setAutoPayment] = useState(true);
 
   const [isOpenIncome, setIsOpenIncome] = useState(false);
   const [isOpenExpense, setIsOpenExpense] = useState(false);
@@ -110,6 +113,28 @@ export default function ExpenseCard() {
   function real(v: number | undefined | null): string {
     if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
     return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+
+  async function handleAutoPayment() {
+    try {
+      const res = await fetch(`${API}/auto-payment`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ autoPayment: !autoPayment }),
+      });
+
+      const data = await res.json();
+      setAutoPayment(data.autoPayExpenses);
+
+      if (!res.ok)
+        throw new Error(data.error || "Erro editar pagamento automatico");
+    } catch (err: unknown) {
+      console.error(err);
+      fetchAutoPayment();
+    }
   }
 
   async function handleAddExpense(income: boolean = false) {
@@ -242,6 +267,25 @@ export default function ExpenseCard() {
       );
     }
   }
+
+  const fetchAutoPayment = useCallback(async () => {
+    try {
+      const res = await fetch(`${API}/auto-payment/`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Erro buscar pagamento automatico");
+      const data = await res.json();
+      setAutoPayment(data);
+    } catch (err) {
+      console.error(err);
+      setError("Erro ao ler pagamento automatico.");
+    }
+  }, [token]);
 
   const fetchFirstExpense = useCallback(async () => {
     try {
@@ -429,6 +473,7 @@ export default function ExpenseCard() {
     fetchExpense();
     fetchRecurringExpense();
     fetchFirstExpense();
+    fetchAutoPayment();
   }, [
     isLoading,
     token,
@@ -436,6 +481,7 @@ export default function ExpenseCard() {
     fetchExpense,
     fetchRecurringExpense,
     fetchFirstExpense,
+    fetchAutoPayment,
   ]);
 
   useEffect(() => {
@@ -495,6 +541,7 @@ export default function ExpenseCard() {
                   </div>
                 </div>
               </div>
+
               <div className={`glass ${styles.tableContainer}`}>
                 <table className={`glass ${styles.dealsTable}`}>
                   <thead>
@@ -692,11 +739,38 @@ export default function ExpenseCard() {
             {(!error || expenses.length > 0) && !initialLoading ? (
               <div className={`glass ${styles.cashStatsCardExpense}`}>
                 <div className={styles.infoCardExpense}>
+                  {permissions.includes("EXPENSE_UPDATE") && (
+                    <Tooltip
+                      label={`${!autoPayment ? "Habilitar" : "Desabilitar"} pagamento no vencimento`}
+                    >
+                      <div className={styles.btnAutoPayment}>
+                        <button
+                          className={styles.btnWindows}
+                          onClick={() => handleAutoPayment()}
+                        >
+                          <div
+                            className={`glass ${styles.btnSlide} ${autoPayment && styles.btnSlideActive}`}
+                          >
+                            <div className={styles.slide} />
+                          </div>
+                        </button>
+
+                        <button
+                          className={styles.btnWindows}
+                          onClick={() => handleAutoPayment()}
+                        >
+                          <span>Auto-pagamento</span>
+                        </button>
+                      </div>
+                    </Tooltip>
+                  )}
+
                   {selected ? (
                     <h5>{getMonthName}</h5>
                   ) : (
                     <h5>Selecione um mês</h5>
                   )}
+
                   <CustomSelect
                     options={options}
                     value={selected}
@@ -719,6 +793,11 @@ export default function ExpenseCard() {
                         <th></th>
                       </tr>
                     </thead>
+
+                    {errorExpenseEdit && (
+                      <p className="error">{errorExpenseEdit}</p>
+                    )}
+
                     <tbody>
                       {expenses
                         .slice()
