@@ -32,17 +32,17 @@ export async function addUser(
     throw new Error("Você não tem permissão para criar usuários.");
 
   const limitUsers = await prisma.company.findUnique({
-    where: { id: creator.companyId },
+    where: { id: creator.companyId, isActive: true },
     select: {
       maxUsers: true,
-      users: true,
+      users: { where: { isActive: true } },
     },
   });
 
   const sumUsers = limitUsers?.users.length;
-  if (sumUsers && limitUsers?.maxUsers && sumUsers >= limitUsers?.maxUsers) {
+  if (sumUsers && limitUsers?.maxUsers && sumUsers >= limitUsers?.maxUsers)
     throw new Error("O limite de usuários já foi atingido.");
-  }
+
   if (!isEmail(data.email)) throw new Error("Email inválido.");
 
   return prisma.user.create({
@@ -77,6 +77,13 @@ export async function getUser(id: number) {
 export async function getMe(id: number) {
   return prisma.user.findUnique({
     where: { id },
+    include: {
+      company: {
+        select: {
+          maxUsers: true,
+        },
+      },
+    },
   });
 }
 
@@ -152,10 +159,11 @@ export async function updateTeamUser(
   return updatedUser;
 }
 
-export async function deleteTeamMember(
+export async function isActiveTeamMember(
   requesterId: number,
   requesterRole: UserRole,
   targetId: number,
+  data: Partial<Prisma.UserUpdateInput>,
 ) {
   const user = await prisma.user.findUnique({
     where: { id: requesterId },
@@ -163,14 +171,23 @@ export async function deleteTeamMember(
   });
   if (!user) throw new Error("Usuário não encontrado.");
 
+  const targetUser = await prisma.user.findUnique({
+    where: { id: targetId, companyId: user.companyId },
+  });
+  if (!targetUser) throw new Error("Usuário não pertence a mesma empresa.");
+
   const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.ROLE_SYSTEM;
   if (!hasTeamDeals)
     throw new Error("Seu plano não possui acesso a negociações em equipe");
 
-  if (requesterRole !== "ADMIN")
-    throw new Error("Apenas administradores podem remover usuários");
+  if (requesterRole !== "ADMIN") {
+    const hasAccess = await checkUserPermission(requesterId, "USER_DESACTIVE");
+    if (!hasAccess)
+      throw new Error("Você não tem permissão para editar o usuário.");
+  }
 
-  return await prisma.user.delete({
-    where: { id: targetId, companyId: user.companyId },
+  return await prisma.user.update({
+    where: { id: targetId },
+    data: { isActive: data.isActive },
   });
 }

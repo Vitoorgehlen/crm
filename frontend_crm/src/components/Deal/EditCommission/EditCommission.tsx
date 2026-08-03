@@ -3,10 +3,7 @@
 import { CommissionSplit } from "@/types";
 import { MdClose, MdOutlineAddCircle, MdCheckBox } from "react-icons/md";
 import { IoRemoveCircle } from "react-icons/io5";
-import { GiCheckMark } from "react-icons/gi";
-
 import styles from "./EditCommission.module.css";
-
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 
@@ -28,7 +25,6 @@ interface EditCommissionProps {
   onRemoveSplit: (index: number) => void;
   onUpdateSplit: (index: number, patch: Partial<CommissionSplit>) => void;
   computedAmountFor: (index: number) => number;
-  onUpdateDealShare: (split: CommissionSplit) => Promise<void>;
   onSubmit: () => Promise<void>;
   onClose: () => void;
 }
@@ -47,7 +43,6 @@ export default function EditCommission({
   computedAmountFor,
   totalPercentage,
   totalAmounts,
-  onUpdateDealShare,
   onSubmit,
   onClose,
 }: EditCommissionProps) {
@@ -222,35 +217,7 @@ export default function EditCommission({
                       />
                     </div>
                   )}
-                  <div className={styles.underline}>
-                    <p>Recebido:</p>
-                    <CurrencyInput
-                      className={`form-base ${styles.form} ${styles.formCash}`}
-                      placeholder="Recebido"
-                      value={Number(s.received ?? 0)}
-                      onChange={(numeric) => {
-                        const maxAllowed =
-                          splitMethod === "percentage"
-                            ? computedAmountFor(i)
-                            : (s.amount ?? 0);
 
-                        onUpdateSplit(i, {
-                          received: Math.min(numeric, maxAllowed),
-                        });
-                      }}
-                    />
-                  </div>
-
-                  <button
-                    className={styles.removeSplit}
-                    type="button"
-                    onClick={() => onRemoveSplit(i)}
-                  >
-                    <IoRemoveCircle />
-                  </button>
-                </div>
-
-                <div className={styles.line}>
                   <input
                     type="text"
                     className={`form-base ${styles.form}`}
@@ -262,31 +229,12 @@ export default function EditCommission({
                       })
                     }
                   />
-
                   <button
-                    className={`btn-action glass ${
-                      s.isPaid ? styles.btnPaidActive : styles.btnPaid
-                    }`}
+                    className={styles.removeSplit}
                     type="button"
-                    onClick={() => {
-                      const total =
-                        splitMethod === "percentage"
-                          ? computedAmountFor(i)
-                          : (splits[i].amount ?? 0);
-
-                      const updated = {
-                        ...splits[i],
-                        received: s.isPaid ? 0 : total,
-                        isPaid: !s.isPaid,
-                      };
-
-                      onUpdateSplit(i, updated);
-                      onUpdateDealShare(updated);
-                    }}
+                    onClick={() => onRemoveSplit(i)}
                   >
-                    <GiCheckMark />
-
-                    {s.isPaid ? "Recebido" : "Receber"}
+                    <IoRemoveCircle />
                   </button>
                 </div>
               </div>

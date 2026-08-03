@@ -276,33 +276,41 @@ export default function ClientsForm({
               className={`form-base ${styles.form}`}
               placeholder="Contato (opcional)"
               value={phone}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const input = e.target;
-                let value = input.value.replace(/\D/g, "");
+              onChange={(e) => {
+                const digits = e.target.value.replace(/\D/g, "").slice(0, 11);
 
-                if (value.length > 11) value = value.slice(0, 11);
+                let formatted = "";
 
-                const nativeEvent = e.nativeEvent as InputEvent;
-                const isDeleting =
-                  nativeEvent.inputType === "deleteContentBackward";
+                switch (digits.length) {
+                  case 0:
+                    formatted = "";
+                    break;
 
-                if (!isDeleting) {
-                  if (value.length > 6) {
-                    value = value.replace(
-                      /^(\d{2})(\d)(\d{4})(\d{0,4}).*/,
-                      "($1) $2 $3-$4",
-                    );
-                  } else if (value.length > 2) {
-                    value = value.replace(
-                      /^(\d{2})(\d{0,1})(\d{0,4}).*/,
-                      "($1) $2 $3",
-                    );
-                  } else if (value.length > 0) {
-                    value = value.replace(/^(\d{0,2}).*/, "($1");
-                  }
+                  case 1:
+                  case 2:
+                  case 3:
+                  case 4:
+                    formatted = digits;
+                    break;
+
+                  case 5:
+                  case 6:
+                  case 7:
+                  case 8:
+                    formatted = `${digits.slice(0, 4)}-${digits.slice(4)}`;
+                    break;
+
+                  case 9:
+                  case 10:
+                    formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+                    break;
+
+                  case 11:
+                    formatted = `(${digits.slice(0, 2)}) ${digits.slice(2, 3)} ${digits.slice(3, 7)}-${digits.slice(7)}`;
+                    break;
                 }
 
-                setPhone(value);
+                setPhone(formatted);
               }}
             />
           </div>

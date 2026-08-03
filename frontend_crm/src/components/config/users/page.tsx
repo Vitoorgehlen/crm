@@ -21,7 +21,6 @@ export default function ConfigUsers({
   const router = useRouter();
   const { token, isLoading } = useAuth();
 
-  const [user, setUser] = useState<User | null>(null);
   const [company, setCompany] = useState<any>(null);
   const [userToEdit, setUserToEdit] = useState<User | null>(null);
 
@@ -73,23 +72,6 @@ export default function ConfigUsers({
       return;
     }
 
-    async function fetchMe() {
-      setLoading(true);
-      try {
-        const res = await fetch(`${API}/me`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || "Erro ao buscar Usuário");
-        setUser(data);
-      } catch (err: unknown) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
     async function fetchCompany() {
       setLoading(true);
       try {
@@ -113,7 +95,6 @@ export default function ConfigUsers({
       setNewRole(u?.role || "");
     }
 
-    fetchMe();
     fetchCompany();
   }, [isLoading, token, router, u]);
 
@@ -302,7 +283,10 @@ export default function ConfigUsers({
           return;
         }
 
-        if ((company.users?.length || 0) >= company.maxUsers) {
+        const activeUsers =
+          company.users?.filter((user: User) => user.isActive).length ?? 0;
+
+        if (activeUsers >= company.maxUsers) {
           setError("Você atingiu o limite máximo de usuários");
           return;
         }

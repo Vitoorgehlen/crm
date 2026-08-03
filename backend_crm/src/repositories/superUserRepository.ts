@@ -17,7 +17,10 @@ export async function addUserAdmin(data: {
     if (!company) throw new Error("Empresa não encontrada");
 
     const userCount = await tx.user.count({
-      where: { companyId: data.companyId },
+      where: {
+        companyId: data.companyId,
+        isActive: true,
+      },
     });
     if (company.maxUsers && userCount >= company.maxUsers) {
       throw new Error("Limite máximo de usuários atingidos");

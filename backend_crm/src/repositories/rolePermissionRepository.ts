@@ -6,6 +6,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
   ADMIN: [
     "USER_CREATE",
     "USER_UPDATE",
+    "USER_DESACTIVE",
     "DEAL_CREATE",
     "DEAL_READ",
     "DEAL_UPDATE",

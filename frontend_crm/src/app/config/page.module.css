@@ -67,6 +67,11 @@
   justify-content: center;
 }
 
+.contentConfig p {
+  color: var(--textBase);
+  margin-bottom: 10px;
+}
+
 .createUser {
   display: flex;
   margin: 20px 0 10px 0;
@@ -111,6 +116,13 @@
   color: var(--primaryText);
 }
 
+.desactiveUser h5 {
+  color: var(--textBase);
+}
+
+.desactiveUser .boxClose span {
+  color: var(--errorColor);
+}
 .btnsUser {
   display: flex;
   flex-direction: column;
@@ -138,7 +150,7 @@
   background: var(--mainBg);
 }
 
-.btnDeleteUser:hover {
+.btnDesactive:hover {
   color: var(--errorColor);
   border: 1px solid var(--errorColor);
 }

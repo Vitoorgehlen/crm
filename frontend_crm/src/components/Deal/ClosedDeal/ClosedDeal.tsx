@@ -1146,7 +1146,6 @@ export default function ClosedDeal({
                   computedAmountFor={computedAmountFor}
                   totalPercentage={totalPercentage}
                   totalAmounts={totalAmounts}
-                  onUpdateDealShare={updateDealShare}
                   onSubmit={() => handleSubmit()}
                   onClose={() => setEditCommission(false)}
                 />

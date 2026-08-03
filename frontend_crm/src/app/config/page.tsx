@@ -3,7 +3,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { MdOutlinePowerOff, MdOutlineEdit } from "react-icons/md";
+import {
+  MdOutlinePowerOff,
+  MdOutlineEdit,
+  MdClose,
+  MdCheck,
+} from "react-icons/md";
 import { GrConfigure } from "react-icons/gr";
 
 import {
@@ -14,12 +19,13 @@ import {
 } from "react-icons/fa";
 
 import styles from "./page.module.css";
-import { User, RoleLabels, DeleteContext } from "@/types";
+import { User, RoleLabels } from "@/types";
 import ConfigUsers from "@/components/config/users/page";
 import Permissions from "@/components/config/permissions/page";
 import EditMe from "@/components/config/editMe/page";
 import Documentation from "@/components/config/documentation/page";
 import Tooltip from "@/components/Tools/Tooltip/Tooltip";
+import WarningDeal from "@/components/Warning/DefaultWarning";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -33,6 +39,8 @@ export default function Config() {
 
   const [isOpenCreateUsers, setIsOpenCreateUsers] = useState(false);
   const [isOpenEditUsers, setIsOpenEditUsers] = useState(false);
+  const [isOpenWarning, setIsOpenWarning] = useState(false);
+
   const [userEdit, setUserEdit] = useState<User | null>(null);
 
   const [user, setUser] = useState<User | null>(null);
@@ -86,6 +94,35 @@ export default function Config() {
       setLoading(false);
     }
   }, [token]);
+
+  const disableUser = async (id: number) => {
+    setLoading(true);
+    const newStatus = !userEdit?.isActive;
+
+    try {
+      const res = await fetch(`${API}/isActiveUsers/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ isActive: newStatus }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok)
+        throw new Error(data.error || "Erro ao buscar editar usuários");
+
+      setUsers((prev) =>
+        prev.map((u) => (u.id === id ? { ...u, isActive: newStatus } : u)),
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   async function handleLogout() {
     if (loading) return;
@@ -206,6 +243,11 @@ export default function Config() {
                   <h5>Criar usuário</h5>
                   <FaUserPlus />
                 </button>
+                <p>
+                  Máximo de usuários ativos permitidos:{" "}
+                  {user?.company?.maxUsers}
+                </p>
+
                 <div className={styles.userList}>
                   {users.length === 0 ? (
                     <p>Nenhum usuário encontrado</p>
@@ -214,7 +256,10 @@ export default function Config() {
                       .slice()
                       .reverse()
                       .map((u) => (
-                        <div key={u.id} className={`glass ${styles.editUser}`}>
+                        <div
+                          key={u.id}
+                          className={`glass ${styles.editUser} ${!u.isActive && styles.desactiveUser}`}
+                        >
                           {u.role === "ADMIN" ? (
                             <div className={styles.editUserLabels}>
                               <div className={styles.boxClose}>
@@ -230,7 +275,10 @@ export default function Config() {
                             <>
                               <div className={styles.editUserLabels}>
                                 <div className={styles.boxClose}>
-                                  <h5>{u.name}</h5>
+                                  <h5>
+                                    {u.name}{" "}
+                                    {!u.isActive && <span> - Desativado</span>}
+                                  </h5>
                                 </div>
                                 <div className={styles.box}>
                                   <p>{u.email}</p>
@@ -256,6 +304,21 @@ export default function Config() {
                                 >
                                   <MdOutlineEdit />
                                 </button>
+
+                                <Tooltip
+                                  label={`${u.isActive ? "Desativar" : "Ativar"} usuário`}
+                                >
+                                  <button
+                                    type="button"
+                                    className={`btn-action glass ${styles.btnEditUser} ${u.isActive && styles.btnDesactive}`}
+                                    onClick={() => {
+                                      setIsOpenWarning(true);
+                                      setUserEdit(u);
+                                    }}
+                                  >
+                                    {u.isActive ? <MdClose /> : <MdCheck />}
+                                  </button>
+                                </Tooltip>
                               </div>
                             </>
                           )}
@@ -298,6 +361,25 @@ export default function Config() {
             mode="create"
             onUpdate={() => handleUpdate()}
             onClose={() => setIsOpenCreateUsers(false)}
+          />
+        )}
+
+        {isOpenWarning && userEdit && (
+          <WarningDeal
+            message={`Deseja ${userEdit.isActive ? "desativar" : "ativar"} o usuário`}
+            name={userEdit.name}
+            onClose={() => {
+              setIsOpenWarning(false);
+              setUserEdit(null);
+            }}
+            onConfirm={async () => {
+              if (!userEdit) return;
+
+              await disableUser(userEdit.id);
+
+              setIsOpenWarning(false);
+              setUserEdit(null);
+            }}
           />
         )}
 

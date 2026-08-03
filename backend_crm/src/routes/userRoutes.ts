@@ -1,7 +1,7 @@
 import { Router, Request, Response } from "express";
 import {
+  isActiveTeamMember,
   addUser,
-  deleteTeamMember,
   getMe,
   getUser,
   updateTeamUser,
@@ -104,7 +104,7 @@ router.put("/users/:id", loginRequired, async (req: Request, res: Response) => {
   }
 });
 
-router.delete("/users/:id", loginRequired, async (req, res) => {
+router.put("/isActiveUsers/:id", loginRequired, async (req, res) => {
   const { user } = req as AuthenticatedRequest;
   const { id: userId, role: userRole } = user;
   if (!userId || !userRole)
@@ -115,9 +115,11 @@ router.delete("/users/:id", loginRequired, async (req, res) => {
   const id = Number(req.params.id);
   if (!id || isNaN(id)) return res.status(400).json({ error: "ID inválido" });
 
+  const data = req.body;
+
   try {
-    const deletedUser = await deleteTeamMember(userId, userRole, id);
-    return res.status(200).json(deletedUser);
+    const isActiveUser = await isActiveTeamMember(userId, userRole, id, data);
+    return res.status(200).json(isActiveUser);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Erro ao atualizar o usuário" });

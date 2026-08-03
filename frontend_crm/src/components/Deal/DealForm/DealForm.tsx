@@ -75,6 +75,10 @@ export default function DealForm({
   const [financingValue, setFinancingValue] = useState<number>(0);
   const [creditLetterValue, setCreditLetterValue] = useState<number>(0);
 
+  const totalFinancing = downPaymentValue + fgtsValue + financingValue;
+
+  const hasSubsidy = totalFinancing > 50000 && totalFinancing < 250000;
+
   const [deleteContext, setDeleteContext] = useState<DeleteContext>(null);
   const [hovering, setHovering] = useState(false);
   const [docValues, setDocValues] = useState<Record<string, number>>({});
@@ -602,6 +606,12 @@ export default function DealForm({
     fetchNote();
   }, [isOpen, deal?.id, token]);
 
+  useEffect(() => {
+    if (!hasSubsidy) {
+      setSubsidyValue(0);
+    }
+  }, [hasSubsidy]);
+
   if (!isOpen) return null;
 
   return (
@@ -837,16 +847,14 @@ export default function DealForm({
                         value={financingValue}
                         onChange={setFinancingValue}
                       />
-                      {downPaymentValue + fgtsValue + financingValue > 50000 &&
-                        downPaymentValue + fgtsValue + financingValue <
-                          250000 && (
-                          <CurrencyInput
-                            className={`form-base ${styles.payment}`}
-                            placeholder="Valor de subsídio"
-                            value={subsidyValue}
-                            onChange={setSubsidyValue}
-                          />
-                        )}
+                      {hasSubsidy && (
+                        <CurrencyInput
+                          className={`form-base ${styles.payment}`}
+                          placeholder="Valor de subsídio"
+                          value={subsidyValue}
+                          onChange={setSubsidyValue}
+                        />
+                      )}
                     </>
                   )}
 

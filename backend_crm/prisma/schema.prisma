@@ -50,6 +50,7 @@ model User {
   password     String
   name         String?
   role         UserRole
+  isActive     Boolean  @default(true)
   supervisorId Int?
   amount       Decimal  @db.Decimal(10, 2)
 
@@ -129,6 +130,7 @@ model RolePermission {
 enum Permission {
   USER_CREATE
   USER_UPDATE
+  USER_DESACTIVE
 
   DEAL_CREATE
   DEAL_READ
