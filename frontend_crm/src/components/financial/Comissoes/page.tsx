@@ -60,14 +60,25 @@ export default function CommissionCard({ deals, mode }: CommissionCardProps) {
     return Math.max(...dates);
   }
 
+  function isDealPending(deal: Deal): boolean {
+    return (deal.DealShare ?? []).some((share) => {
+      const amount = Number(share.amount) || 0;
+      const received = Number(share.received) || 0;
+
+      return received < amount;
+    });
+  }
+
   const { paidDeals, pendingDeals } = useMemo(() => {
     const paid: Deal[] = [];
     const pend: Deal[] = [];
 
     for (const d of deals) {
-      const ts = getDealPaidTimestamp(d);
-      if (ts !== null) paid.push(d);
-      else pend.push(d);
+      if (isDealPending(d)) {
+        pend.push(d);
+      } else {
+        paid.push(d);
+      }
     }
 
     return { paidDeals: paid, pendingDeals: pend };
@@ -704,7 +715,7 @@ export default function CommissionCard({ deals, mode }: CommissionCardProps) {
             )}
           </div>
 
-          {!initialLoading && pendingDeals.length > 1 && (
+          {!initialLoading && pendingDeals.length >= 1 && (
             <div className={`glass ${styles.pendingSection}`}>
               <h4>A receber</h4>
               <div className={styles.pendingList}>
