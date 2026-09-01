@@ -75,8 +75,6 @@ export default function Register() {
     (option) => option.value === selectedPeriod?.value,
   );
 
-  const lastPeriod = Math.max(...periodOptions.map((option) => option.months));
-
   function verify() {
     const newErrors: { field: string; label: string }[] = [];
 

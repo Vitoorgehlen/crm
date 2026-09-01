@@ -15,9 +15,11 @@ router.get("/commissions", loginRequired, async (req, res) => {
   if (!userId) return res.status(400).json({ error: "Usuário inválido." });
 
   const name = String(req.query.name || "").trim();
+  const company = req.query.company === "true";
+  const team = req.query.team === "true";
 
   try {
-    const deal = await getCommission(userId, { name });
+    const deal = await getCommission(userId, { name, company, team });
     res.json(deal);
   } catch (err) {
     console.log(err);

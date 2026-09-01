@@ -10,7 +10,6 @@ import ClientsForm from "@/components/clients/ClientForm";
 import { useQueryState } from "nuqs";
 import HeaderPage from "@/components/searchbar/page";
 import { FaArrowAltCircleLeft, FaArrowAltCircleRight } from "react-icons/fa";
-import { IoCloseOutline } from "react-icons/io5";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -221,17 +220,6 @@ export default function Clients() {
         />
 
         <div>
-          {clientId && (
-            <div className={styles.btnUncheck}>
-              <button
-                className={`btn-action glass ${styles.uncheck}`}
-                onClick={() => router.push("/clientes")}
-              >
-                <IoCloseOutline />
-              </button>
-            </div>
-          )}
-
           {error ? (
             <div className={styles.noItens}>
               <h3>⚠️ Erro ao carregar clientes</h3>
@@ -255,16 +243,28 @@ export default function Clients() {
             </div>
           ) : (
             <div className={styles.clientList}>
-              <button
-                type="button"
-                className={`glass ${styles.addClient}`}
-                onClick={openCreate}
-              >
-                <div className={styles.clientInfos}>
-                  <h4>+</h4>
-                  <p>Adicionar cliente</p>
-                </div>
-              </button>
+              {clientId ? (
+                <button
+                  type="button"
+                  className={`glass ${styles.addClient} ${styles.uncheck}`}
+                  onClick={() => router.push("/clientes")}
+                >
+                  <div className={styles.clientInfos}>
+                    <p>Mostrar todos</p>
+                  </div>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className={`glass ${styles.addClient}`}
+                  onClick={openCreate}
+                >
+                  <div className={styles.clientInfos}>
+                    <h4>+</h4>
+                    <p>Adicionar cliente</p>
+                  </div>
+                </button>
+              )}
               {clients.map((client, index) => {
                 return (
                   <button
@@ -302,7 +302,7 @@ export default function Clients() {
                 );
               })}
 
-              {total > 1 && (
+              {!clientId && total > 1 && (
                 <div className={styles.pagination}>
                   <button
                     className={`

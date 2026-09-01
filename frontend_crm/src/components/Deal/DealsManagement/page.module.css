@@ -147,6 +147,10 @@ span .currentPage {
   text-align: center;
 }
 
+.btnStar {
+  min-width: 13px;
+}
+
 .btnPriority {
   text-align: start;
   color: var(--primaryColor);

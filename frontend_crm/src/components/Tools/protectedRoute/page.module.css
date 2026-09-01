@@ -8,22 +8,6 @@
   background-color: var(--mainBg);
 }
 
-.spinner {
-  top: 50%;
-  left: 50%;
-
-  transform: translate(-50%, -50%);
-
-  color: var(--primaryColor);
-  font-size: 48px;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.loading l-infinity {
+  transform: rotate(90deg);
 }

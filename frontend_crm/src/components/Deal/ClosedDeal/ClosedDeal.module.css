@@ -400,7 +400,7 @@
 .divAddDoc {
   display: flex;
   gap: 3px;
-  margin-top: 3px;
+  margin: 3px 0;
 }
 
 .addNoteForm {

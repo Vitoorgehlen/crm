@@ -14,16 +14,45 @@ import { GrCompliance } from "react-icons/gr";
 import { MdOutlineQueryStats } from "react-icons/md";
 
 import { useAuth } from "@/contexts/AuthContext";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Logo from "@/utils/Logo";
 
 const Sidebar = () => {
   const pathname = usePathname();
-  const { permissions, planRules } = useAuth();
+
+  const { token, permissions, planRules } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
+  const [deleteRequestsCount, setDeleteRequestsCount] = useState(undefined);
 
   const expensePlan = planRules?.includes("EXPENSE_DASHBOARD");
   const requestPlan = planRules?.includes("DELETE_REQUESTS");
+
+  const fetchDeleteRequest = async () => {
+    if (!permissions.includes("ALL_DEAL_DELETE")) return;
+    try {
+      const res = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/delete-requests/count`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+
+      const data = await res.json();
+      if (!res.ok)
+        throw new Error(
+          data.error || "Erro ao buscar a solicitações de exclusão",
+        );
+      setDeleteRequestsCount(data);
+    } catch (err: unknown) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (!token || !requestPlan) return;
+
+    fetchDeleteRequest();
+  }, [token, requestPlan, pathname]);
 
   return (
     <>
@@ -138,6 +167,11 @@ const Sidebar = () => {
                   className={`${pathname === "/requisicoes" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
                 >
                   <FiUserX className={styles.logos} />
+                  {pathname !== "/requisicoes" && deleteRequestsCount !== 0 && (
+                    <p className={styles.requestDelete}>
+                      {deleteRequestsCount}
+                    </p>
+                  )}
                   <p className={`linkText ${styles.linkText}`}>Requisições</p>
                 </div>
               </Link>

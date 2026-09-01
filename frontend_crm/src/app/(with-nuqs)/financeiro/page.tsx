@@ -9,6 +9,8 @@ import { Deal } from "@/types/index";
 import { BsFileEarmarkPlus } from "react-icons/bs";
 import { FaCashRegister } from "react-icons/fa";
 import { BsCashCoin } from "react-icons/bs";
+import { HiMiniUserGroup } from "react-icons/hi2";
+import { FaPeopleRoof } from "react-icons/fa6";
 
 import ExpenseCard from "@/components/financial/Financeiro/page";
 import CommissionCard from "@/components/financial/Comissoes/page";
@@ -34,6 +36,8 @@ export default function Commissions() {
     defaultValue: "commission",
   });
   const isOpenCommission = tab === "commission";
+  const isOpenTeamCommission = tab === "team-commission";
+  const isOpenCompanyCommission = tab === "company-commission";
   const isOpenExpense = tab === "expense";
 
   const lastDay = new Date();
@@ -111,171 +115,103 @@ export default function Commissions() {
       .sort((a, b) => a + b);
   }, [groupedByYearMonth]);
 
-  const statsCash = useMemo(() => {
-    let total = 0;
-    let totalReceived = 0;
-    let totalToReceive = 0;
+  // const statsCash = useMemo(() => {
+  //   let total = 0;
+  //   let totalReceived = 0;
+  //   let totalToReceive = 0;
 
-    const yearlyStats: Record<
-      number,
-      {
-        total: number;
-        received: number;
-        toReceived: number;
-      }
-    > = {};
+  //   const yearlyStats: Record<
+  //     number,
+  //     {
+  //       total: number;
+  //       received: number;
+  //       toReceived: number;
+  //     }
+  //   > = {};
 
-    const monthlyStats: Record<
-      number,
-      Record<
-        number,
-        {
-          total: number;
-          received: number;
-          toReceived: number;
-        }
-      >
-    > = {};
+  //   const monthlyStats: Record<
+  //     number,
+  //     Record<
+  //       number,
+  //       {
+  //         total: number;
+  //         received: number;
+  //         toReceived: number;
+  //       }
+  //     >
+  //   > = {};
 
-    const ensureYear = (y: number) => {
-      if (!yearlyStats[y]) {
-        yearlyStats[y] = { total: 0, received: 0, toReceived: 0 };
-      }
-      if (!monthlyStats[y]) {
-        monthlyStats[y] = {};
-      }
-      return yearlyStats[y];
-    };
-
-    const ensureMonth = (y: number, m: number) => {
-      if (!monthlyStats[y]) monthlyStats[y] = {};
-      if (!monthlyStats[y][m]) {
-        monthlyStats[y][m] = { total: 0, received: 0, toReceived: 0 };
-      }
-
-      return monthlyStats[y][m];
-    };
-
-    for (const deal of deals) {
-      if (!deal.DealShare || deal.DealShare.length === 0) continue;
-
-      const endDate = new Date(String(deal.updatedAt));
-      const dealYear = endDate.getFullYear();
-      ensureYear(dealYear);
-
-      for (const share of deal.DealShare) {
-        const amount = Number(share.amount) || 0;
-        const received = Number(share.received) || 0;
-        const toReceive = amount - received;
-
-        total += amount;
-        totalReceived += received;
-        totalToReceive += toReceive;
-
-        const dateStr =
-          share.paidAt ?? deal.updatedAt ?? deal.createdAt ?? null;
-        const date = dateStr ? new Date(dateStr) : endDate;
-        const year = date.getFullYear();
-        const month = date.getMonth();
-        const ystat = ensureYear(year);
-        const mstat = ensureMonth(year, month);
-
-        ystat.total += amount;
-        ystat.received += received;
-        ystat.toReceived += toReceive;
-
-        mstat.total += amount;
-        mstat.received += received;
-        mstat.toReceived += toReceive;
-      }
-    }
-
-    return {
-      total,
-      totalReceived,
-      totalToReceive,
-      yearlyStats,
-      monthlyStats,
-    };
-  }, [deals]);
-
-  // const selectedYearStats = useMemo(() => {
-  //   const currentYear = new Date().getFullYear();
-  //   const currentMonth = new Date().getMonth();
-  //   const year = Number(selectedYear) || new Date().getFullYear();
-  //   const stats = statsCash.yearlyStats[year] || {
-  //     total: 0,
-  //     received: 0,
-  //     toReceived: 0,
-  //     dealsFinish: 0,
-  //     dealsToFinish: 0,
+  //   const ensureYear = (y: number) => {
+  //     if (!yearlyStats[y]) {
+  //       yearlyStats[y] = { total: 0, received: 0, toReceived: 0 };
+  //     }
+  //     if (!monthlyStats[y]) {
+  //       monthlyStats[y] = {};
+  //     }
+  //     return yearlyStats[y];
   //   };
 
-  //   const lastYearStats = statsCash.yearlyStats[year - 1] || {
-  //     total: 0,
-  //     received: 0,
-  //     toReceived: 0,
-  //     dealsFinish: 0,
-  //     dealsToFinish: 0,
+  //   const ensureMonth = (y: number, m: number) => {
+  //     if (!monthlyStats[y]) monthlyStats[y] = {};
+  //     if (!monthlyStats[y][m]) {
+  //       monthlyStats[y][m] = { total: 0, received: 0, toReceived: 0 };
+  //     }
+
+  //     return monthlyStats[y][m];
   //   };
 
-  //   const comparStats =
-  //     lastYearStats.total > 0
-  //       ? (Number(stats.total) * 100) / Number(lastYearStats.total)
-  //       : 0;
+  //   for (const deal of deals) {
+  //     if (!deal.DealShare || deal.DealShare.length === 0) continue;
 
-  //   let comparStatsFair = 0;
+  //     const endDate = new Date(String(deal.updatedAt));
+  //     const dealYear = endDate.getFullYear();
+  //     ensureYear(dealYear);
 
-  //   if (currentYear === year) {
-  //     let currentYearSum = 0;
-  //     let lastYearSum = 0;
-  //     for (let month = 0; month <= currentMonth; month++) {
-  //       const currentMonthData = statsCash.monthlyStats[year]?.[month] || {
-  //         total: 0,
-  //         received: 0,
-  //         toReceived: 0,
-  //         dealsFinish: 0,
-  //         dealsToFinish: 0,
-  //       };
-  //       const lastMonthData = statsCash.monthlyStats[year - 1]?.[month] || {
-  //         total: 0,
-  //         received: 0,
-  //         toReceived: 0,
-  //         dealsFinish: 0,
-  //         dealsToFinish: 0,
-  //       };
+  //     for (const share of deal.DealShare) {
+  //       const amount = Number(share.amount) || 0;
+  //       const received = Number(share.received) || 0;
+  //       const toReceive = amount - received;
 
-  //       currentYearSum += Number(currentMonthData.total || 0);
-  //       lastYearSum += Number(lastMonthData.total || 0);
+  //       total += amount;
+  //       totalReceived += received;
+  //       totalToReceive += toReceive;
 
-  //       comparStatsFair =
-  //         lastYearSum > 0 ? (currentYearSum * 100) / lastYearSum : 0;
+  //       const dateStr =
+  //         share.paidAt ?? deal.updatedAt ?? deal.createdAt ?? null;
+  //       const date = dateStr ? new Date(dateStr) : endDate;
+  //       const year = date.getFullYear();
+  //       const month = date.getMonth();
+  //       const ystat = ensureYear(year);
+  //       const mstat = ensureMonth(year, month);
+
+  //       ystat.total += amount;
+  //       ystat.received += received;
+  //       ystat.toReceived += toReceive;
+
+  //       mstat.total += amount;
+  //       mstat.received += received;
+  //       mstat.toReceived += toReceive;
   //     }
   //   }
 
-  //   const isCurrentYear = year === new Date().getFullYear();
-  //   const monthsInYear = isCurrentYear ? new Date().getMonth() + 1 : 12;
-  //   const monthAverage = stats.received / Math.max(1, monthsInYear);
-
   //   return {
-  //     year,
-  //     total: stats.total,
-  //     received: stats.received,
-  //     toReceived: stats.toReceived,
-  //     comparStats,
-  //     comparStatsFair,
-  //     monthAverage,
+  //     total,
+  //     totalReceived,
+  //     totalToReceive,
+  //     yearlyStats,
+  //     monthlyStats,
   //   };
-  // }, [statsCash.yearlyStats, statsCash.monthlyStats, selectedYear]);
+  // }, [deals]);
 
   const fetchDealsData = useCallback(async () => {
     if (!token) return;
 
     try {
-      const basePath = "/commissions";
       const params = new URLSearchParams();
+      if (isOpenCompanyCommission) params.set("company", "true");
+      if (isOpenTeamCommission) params.set("team", "true");
 
-      const url = `${API!}${basePath}${
+      const url = `${API!}/commissions${
         params.toString() ? `?${params.toString()}` : ""
       }`;
 
@@ -293,7 +229,7 @@ export default function Commissions() {
     } catch (err: unknown) {
       console.error(err);
     }
-  }, [token]);
+  }, [token, isOpenCommission, isOpenCompanyCommission, isOpenTeamCommission]);
 
   useEffect(() => {
     if (isLoading) return;
@@ -318,7 +254,12 @@ export default function Commissions() {
       <main className={styles.main}>
         <div className={styles.headerContent}>
           <div className={styles.title}>
-            <h3>{isOpenCommission ? "Comissões" : "Financeiro"}</h3>
+            <h3>{isOpenExpense ? "Despesas" : "Comissões"}</h3>
+            <h5>{isOpenCommission && "próprias"}</h5>
+            <h5>{isOpenTeamCommission && "da equipe"}</h5>
+            <h5>
+              {(isOpenCompanyCommission || isOpenExpense) && "da empresa"}
+            </h5>
           </div>
           <div className={styles.headerIcons}>
             <Tooltip label={"Suas comissões"}>
@@ -336,7 +277,39 @@ export default function Commissions() {
             </Tooltip>
 
             {permissions.includes("EXPENSE_READ") && expensePlan && (
-              <Tooltip label={"Financeiro"}>
+              <Tooltip label={"Comissões da equipe"}>
+                <button
+                  className={`btn-action glass ${styles.btn}
+                ${isOpenTeamCommission && styles.btnActive}
+              }`}
+                  onClick={() => {
+                    setTab("team-commission");
+                  }}
+                  type="button"
+                >
+                  <HiMiniUserGroup />
+                </button>
+              </Tooltip>
+            )}
+
+            {permissions.includes("EXPENSE_READ") && expensePlan && (
+              <Tooltip label={"Comissões da empresa"}>
+                <button
+                  className={`btn-action glass ${styles.btn}
+                ${isOpenCompanyCommission && styles.btnActive}
+              }`}
+                  onClick={() => {
+                    setTab("company-commission");
+                  }}
+                  type="button"
+                >
+                  <FaPeopleRoof />
+                </button>
+              </Tooltip>
+            )}
+
+            {permissions.includes("EXPENSE_READ") && expensePlan && (
+              <Tooltip label={"Despesas"}>
                 <button
                   className={`btn-action glass ${styles.btn}
                 ${isOpenExpense && styles.btnActive}
@@ -379,7 +352,15 @@ export default function Commissions() {
           )}
         </div>
         <div className={styles.cardBox}>
-          {isOpenCommission && <CommissionCard deals={deals} />}
+          {isOpenCommission && (
+            <CommissionCard deals={deals} mode={"default"} />
+          )}
+          {isOpenCompanyCommission && (
+            <CommissionCard deals={deals} mode={"company"} />
+          )}
+          {isOpenTeamCommission && (
+            <CommissionCard deals={deals} mode={"team"} />
+          )}
           {isOpenExpense && expensePlan && <ExpenseCard />}
         </div>
       </main>

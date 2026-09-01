@@ -686,57 +686,54 @@ export default function FinishDeal({
                 {docCost.map((doc) => (
                   <div key={doc.id} className={styles.item}>
                     {isOpenDocCost === doc.id ? (
-                      <>
-                        <input
-                          type="text"
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Documentação"
-                          value={docCostLabel}
-                          onChange={(e) => setDocCostLabel(e.target.value)}
-                        />
-                        <input
-                          type="text"
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Documentação"
-                          value={real(docCostValue)}
-                          onChange={(e) => {
-                            let numeric =
-                              Number(e.target.value.replace(/\D/g, "")) / 100;
-
-                            if (numeric >= 99999999.99) numeric = 99999999.99;
-                            setDocCostValue(numeric);
-                          }}
-                        />
-                        <input
-                          type="text"
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Obs"
-                          value={docCostNote}
-                          onChange={(e) => setDocCostNote(e.target.value)}
-                        />
-
-                        <div className={styles.btnsNote}>
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => handleEditDocCost(doc.id)}
-                          >
-                            <FaCheck />
-                          </button>
-                          <button
-                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenDocCost(undefined);
-                              setDocCostLabel("");
-                              setDocCostValue(0);
-                              setDocCostNote("");
-                            }}
-                          >
-                            <FaTimes />
-                          </button>
+                      <div className={styles.addDocContainer}>
+                        <div className={styles.divAddDoc}>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Documentação"
+                            value={docCostLabel}
+                            onChange={(e) => setDocCostLabel(e.target.value)}
+                          />
+                          <CurrencyInput
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Documentação"
+                            value={docCostValue}
+                            onChange={setDocCostValue}
+                          />
                         </div>
-                      </>
+                        <div className={styles.divAddDoc}>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Obs"
+                            value={docCostNote}
+                            onChange={(e) => setDocCostNote(e.target.value)}
+                          />
+
+                          <div className={styles.editDocBtns}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => handleEditDocCost(doc.id)}
+                            >
+                              <FaCheck />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenDocCost(undefined);
+                                setDocCostLabel("");
+                                setDocCostValue(0);
+                                setDocCostNote("");
+                              }}
+                            >
+                              <FaTimes />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <div className={styles.doc}>
                         <div className={styles.titleDoc}>

@@ -5,6 +5,7 @@ import {
   getBirthdayClients,
   getClientById,
   getClientDeletedRequest,
+  getDeleteRequestsCount,
   getMyClients,
   getTeamClients,
   updateClient,
@@ -80,6 +81,19 @@ router.get("/clients-deleted-request", loginRequired, async (req, res) => {
 
   try {
     const deal = await getClientDeletedRequest(userId);
+    res.json(deal);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro ao buscar negócio." });
+  }
+});
+
+router.get("/delete-requests/count", loginRequired, async (req, res) => {
+  const { user } = req as AuthenticatedRequest;
+  const { id: userId } = user;
+
+  try {
+    const deal = await getDeleteRequestsCount(userId);
     res.json(deal);
   } catch (err) {
     console.log(err);

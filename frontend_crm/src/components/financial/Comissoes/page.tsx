@@ -9,9 +9,14 @@ import { RiSave3Fill, RiPencilFill, RiEraserFill } from "react-icons/ri";
 import { MdCancel } from "react-icons/md";
 import { formatDateForFinish } from "@/utils/dateUtils";
 
+type CommissionCardProps = {
+  deals: Deal[];
+  mode: "default" | "company" | "team";
+};
+
 const API = process.env.NEXT_PUBLIC_API_URL;
 
-export default function CommissionCard({ deals }: any) {
+export default function CommissionCard({ deals, mode }: CommissionCardProps) {
   const router = useRouter();
   const { token, isLoading } = useAuth();
 
@@ -425,82 +430,85 @@ export default function CommissionCard({ deals }: any) {
       <main className={styles.main}>
         <div className={styles.boxSteps}>
           <div className={`glass ${styles.cashStatsCard}`}>
-            <div className={styles.cardGoal}>
-              {selectedYear === new Date().getFullYear() ? (
-                <div className={styles.infoCard}>
-                  <strong>Meta anual:</strong>
-                  {annualGoal !== undefined ? (
-                    <>
-                      {editGoal ? (
-                        <button
-                          type="button"
-                          className={styles.btnGoal}
-                          onClick={() => handleEditGoal(annualGoal, false)}
-                        >
-                          <RiSave3Fill />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={styles.btnGoal}
-                          onClick={() => setEditGoal(true)}
-                        >
-                          <RiPencilFill />
-                        </button>
-                      )}
+            {mode === "default" && (
+              <div className={styles.cardGoal}>
+                {selectedYear === new Date().getFullYear() ? (
+                  <div className={styles.infoCard}>
+                    <strong>Meta anual:</strong>
+                    {annualGoal !== undefined ? (
+                      <>
+                        {editGoal ? (
+                          <button
+                            type="button"
+                            className={styles.btnGoal}
+                            onClick={() => handleEditGoal(annualGoal, false)}
+                          >
+                            <RiSave3Fill />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={styles.btnGoal}
+                            onClick={() => setEditGoal(true)}
+                          >
+                            <RiPencilFill />
+                          </button>
+                        )}
 
-                      {editGoal ? (
-                        <button
-                          type="button"
-                          className={`${styles.btnGoal} ${styles.btnDelGoal}`}
-                          onClick={() => setEditGoal(false)}
-                        >
-                          <MdCancel />
-                        </button>
-                      ) : (
-                        <button
-                          type="button"
-                          className={`${styles.btnGoal} ${styles.btnDelGoal}`}
-                          onClick={() => handleDeleteGoal(annualGoal)}
-                        >
-                          <RiEraserFill />
-                        </button>
-                      )}
-                    </>
-                  ) : (
-                    <button
-                      type="button"
-                      className={styles.btnGoal}
-                      onClick={() => handleAddGoal(false)}
-                    >
-                      <RiSave3Fill />
-                    </button>
-                  )}
-                </div>
-              ) : (
-                <div className={styles.infoCard}>
-                  <strong>Meta de {selectedYear}:</strong>
-                </div>
-              )}
-              {(editGoal || annualGoal === undefined) &&
-              selectedYear === new Date().getFullYear() ? (
-                <input
-                  type="text"
-                  className="glass"
-                  value={real(Number(annualGoalValue))}
-                  onChange={(e) => {
-                    let numeric =
-                      Number(e.target.value.replace(/\D/g, "")) / 100;
+                        {editGoal ? (
+                          <button
+                            type="button"
+                            className={`${styles.btnGoal} ${styles.btnDelGoal}`}
+                            onClick={() => setEditGoal(false)}
+                          >
+                            <MdCancel />
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            className={`${styles.btnGoal} ${styles.btnDelGoal}`}
+                            onClick={() => handleDeleteGoal(annualGoal)}
+                          >
+                            <RiEraserFill />
+                          </button>
+                        )}
+                      </>
+                    ) : (
+                      <button
+                        type="button"
+                        className={styles.btnGoal}
+                        onClick={() => handleAddGoal(false)}
+                      >
+                        <RiSave3Fill />
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className={styles.infoCard}>
+                    <strong>Meta de {selectedYear}:</strong>
+                  </div>
+                )}
 
-                    if (numeric >= 99999999.99) numeric = 99999999.99;
-                    setAnnualGoalValue(numeric);
-                  }}
-                />
-              ) : (
-                <p>{real(Number(annualGoalValue))}</p>
-              )}
-            </div>
-            {annualGoalValue > 0 && (
+                {(editGoal || annualGoal === undefined) &&
+                selectedYear === new Date().getFullYear() ? (
+                  <input
+                    type="text"
+                    className="glass"
+                    value={real(Number(annualGoalValue))}
+                    onChange={(e) => {
+                      let numeric =
+                        Number(e.target.value.replace(/\D/g, "")) / 100;
+
+                      if (numeric >= 99999999.99) numeric = 99999999.99;
+                      setAnnualGoalValue(numeric);
+                    }}
+                  />
+                ) : (
+                  <p>{real(Number(annualGoalValue))}</p>
+                )}
+              </div>
+            )}
+            {annualGoalValue > 0 && mode === "default" && (
               <>
                 {annualGoalValue - selectedYearStats.total > 0 && (
                   <div className={styles.card}>
@@ -667,7 +675,13 @@ export default function CommissionCard({ deals }: any) {
                               {d.DealShare?.map((share) => (
                                 <div key={share.id}>
                                   <p>
-                                    <strong>Recebido:</strong>{" "}
+                                    <strong>
+                                      {mode === "team"
+                                        ? share.userId === null
+                                          ? "Recebido pela empresa:"
+                                          : `Recebido por ${share.user?.name ?? "usuário"}:`
+                                        : "Recebido:"}
+                                    </strong>{" "}
                                     {real(Number(share.amount))}
                                   </p>
                                 </div>
@@ -713,16 +727,27 @@ export default function CommissionCard({ deals }: any) {
                           {translateDealStep(d.currentStep)}
                         </p>
                         <div>
-                          {d.DealShare?.map((share) => (
+                          {d.DealShare?.map((share, index) => (
                             <div key={share.id} className={styles.lines}>
                               <span>
-                                <strong>Total:</strong>{" "}
+                                {mode === "team"
+                                  ? share.userId === null
+                                    ? "Comissão total da empresa:"
+                                    : `Comissão total de ${share.user?.name ?? "usuário"}:`
+                                  : "Comissão total:"}
                                 {real(Number(share.amount))}
                               </span>
                               <span>
-                                <strong>Recebido:</strong>{" "}
+                                <strong>
+                                  {mode === "team"
+                                    ? share.userId === null
+                                      ? "Recebido pela empresa:"
+                                      : `Recebido por ${share.user?.name ?? "usuário"}:`
+                                    : "Recebido:"}
+                                </strong>{" "}
                                 {real(Number(share.received))}
                               </span>
+                              {index < (d.DealShare?.length ?? 0) - 1 && <br />}
                             </div>
                           ))}
                         </div>

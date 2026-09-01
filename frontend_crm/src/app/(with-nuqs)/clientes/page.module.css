@@ -99,20 +99,9 @@ span .currentPage {
   color: var(--primaryText);
 }
 
-.btnUncheck {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  color: var(--errorColor);
-}
-
-.uncheck {
-  color: var(--errorColor);
-}
-
 .uncheck:hover {
-  color: var(--primaryText);
-  background-color: var(--errorColor);
+  color: var(--errorColor);
+  border: 1px solid var(--errorColor);
 }
 
 .noItens {

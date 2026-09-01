@@ -4,8 +4,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useRouter, usePathname } from "next/navigation";
 import { ReactNode, useEffect, useMemo } from "react";
 import styles from "./page.module.css";
-import { AiOutlineLoading3Quarters } from "react-icons/ai";
-import Logo from "@/utils/Logo";
 
 export default function ProtectedRoute({ children }: { children: ReactNode }) {
   const { token, userType, isLoading } = useAuth();
@@ -56,10 +54,23 @@ export default function ProtectedRoute({ children }: { children: ReactNode }) {
     }
   }, [SUPaths, authPages, token, userType, isLoading, pathname, router]);
 
+  useEffect(() => {
+    import("ldrs").then(({ infinity }) => {
+      infinity.register();
+    });
+  }, []);
+
   if (isLoading) {
     return (
       <div className={styles.loading}>
-        <AiOutlineLoading3Quarters className={styles.spinner} />
+        <l-infinity
+          size="120"
+          stroke="5"
+          stroke-length="0.9"
+          bg-opacity="0"
+          speed="2.5"
+          color="var(--textBase)"
+        />
       </div>
     );
   }

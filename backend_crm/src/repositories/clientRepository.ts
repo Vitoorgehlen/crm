@@ -146,6 +146,42 @@ export async function getClientDeletedRequest(userId: number) {
   });
 }
 
+export async function getDeleteRequestsCount(userId: number) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      company: { select: { plan: true } },
+      companyId: true,
+    },
+  });
+  if (!user) throw new Error("Usuário não encontrado.");
+
+  const hasTeamDeals = PLAN_CONFIG[user.company.plan].features.DELETE_REQUESTS;
+  if (!hasTeamDeals)
+    throw new Error("Seu plano não possui acesso a requisições");
+
+  const canReadClient = await checkUserPermission(userId, "ALL_DEAL_DELETE");
+  if (!canReadClient)
+    throw new Error("Você não tem permissão para ver os clientes.");
+
+  const clients = await prisma.client.count({
+    where: {
+      companyId: user.companyId,
+      deleteRequest: true,
+    },
+  });
+
+  const deals = await prisma.deal.count({
+    where: {
+      companyId: user.companyId,
+      deleteRequest: true,
+    },
+  });
+
+  const countRequest = clients + deals >= 100 ? "99+" : clients + deals;
+  return countRequest;
+}
+
 export async function getMyClients(
   userId: number,
   search: string,

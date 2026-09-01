@@ -28,6 +28,15 @@
   color: var(--primaryText);
 }
 
+.titleRequest {
+  margin-left: 0;
+  padding: 0;
+}
+
+.titleRequest span {
+  color: var(--textBase);
+}
+
 .headerIcons {
   display: flex;
   flex-direction: row;
@@ -62,7 +71,7 @@
 .deleteItem {
   display: flex;
   justify-content: space-between;
-  margin: 20px 0;
+  margin: 5px 0;
   width: 80%;
   max-width: 850px;
   padding: 10px;

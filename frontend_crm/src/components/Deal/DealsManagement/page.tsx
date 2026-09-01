@@ -534,16 +534,18 @@ export default function DealList({
                   ) : (
                     <>
                       <div className={styles.dealList}>
-                        <button
-                          type="button"
-                          className={`glass ${styles.addDeal}`}
-                          onClick={() => openCreate(statusObj.dbValue)}
-                        >
-                          <div className={styles.dealInfos}>
-                            <h4>+</h4>
-                            <p>Negociações</p>
-                          </div>
-                        </button>
+                        {selectedStatusDeal === "POTENTIAL_CLIENTS" && (
+                          <button
+                            type="button"
+                            className={`glass ${styles.addDeal}`}
+                            onClick={() => openCreate(statusObj.dbValue)}
+                          >
+                            <div className={styles.dealInfos}>
+                              <h4>+</h4>
+                              <p>Negociações</p>
+                            </div>
+                          </button>
+                        )}
                         {currentDeals
                           .slice()
                           .sort(
@@ -562,9 +564,11 @@ export default function DealList({
                               <div className={styles.dealInfos}>
                                 <div className={styles.dealHeader}>
                                   {deal.client?.isPriority ? (
-                                    <IoStar className={styles.btnPriority} />
+                                    <IoStar
+                                      className={`${styles.btnStar} ${styles.btnPriority}`}
+                                    />
                                   ) : (
-                                    <IoStarOutline />
+                                    <IoStarOutline className={styles.btnStar} />
                                   )}
 
                                   <h5>

@@ -3,22 +3,18 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
-import { FaUserEdit, FaUsersCog } from "react-icons/fa";
 
 import styles from "./page.module.css";
 import { ClientDeletedRequest, Deal, DeleteContext } from "@/types";
 import { formatDateForCards } from "@/utils/dateUtils";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import WarningClient from "@/components/Warning/ClientWarning";
-import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
 export default function DeleteRequest() {
   const router = useRouter();
   const { token, permissions, isLoading } = useAuth();
-  const [isRequestClient, setIsRequestClient] = useState(true);
-  const [isRequestDeal, setIsRequestDeal] = useState(false);
 
   const [deleteContextDeal, setDeleteContextDeal] =
     useState<DeleteContext>(null);
@@ -209,192 +205,168 @@ export default function DeleteRequest() {
           <main className={styles.main}>
             <div className={styles.headerContent}>
               <div className={styles.title}>
-                <h3>Apagar</h3>
-                <h5>{isRequestClient ? " Clientes" : " Negociações"}</h5>
-              </div>
-              <div className={styles.headerIcons}>
-                <Tooltip label={"Apagar cliente"}>
-                  <button
-                    className={`${
-                      isRequestClient && "btn-action-active"
-                    } btn-action glass`}
-                    onClick={() => {
-                      setIsRequestClient(true);
-                      setIsRequestDeal(false);
-                    }}
-                  >
-                    <FaUserEdit />
-                  </button>
-                </Tooltip>
-
-                <Tooltip label={"Apagar negociação"}>
-                  <button
-                    className={`${
-                      isRequestDeal && "btn-action-active"
-                    } btn-action glass`}
-                    onClick={() => {
-                      setIsRequestClient(false);
-                      setIsRequestDeal(true);
-                    }}
-                  >
-                    <FaUsersCog />
-                  </button>
-                </Tooltip>
+                <h3>Requisições</h3>
+                <h5>de exclusão</h5>
               </div>
             </div>
 
             <div className={styles.content}>
-              {isRequestClient && (
-                <div className={styles.list}>
-                  {clientRequest.length === 0 ? (
-                    <p>Nenhum cliente para apagar</p>
-                  ) : (
-                    clientRequest
-                      .slice()
-                      .reverse()
-                      .map((c) => (
-                        <div
-                          key={c.id}
-                          className={`glass ${styles.deleteItem}`}
-                          onClick={() =>
-                            router.push(`/clientes?team=true&clientId=${c.id}`)
+              <div className={`${styles.title} ${styles.titleRequest}`}>
+                <h3>Cliente{clientRequest.length >= 2 && "s"}</h3>
+                <span>
+                  {clientRequest.length} solicitaç
+                  {clientRequest.length === 1 ? "ão" : "ões"}
+                </span>
+              </div>
+
+              <div className={styles.list}>
+                {clientRequest.length === 0 ? (
+                  <p>Nenhum cliente para apagar</p>
+                ) : (
+                  clientRequest
+                    .slice()
+                    .reverse()
+                    .map((c) => (
+                      <div
+                        key={c.id}
+                        className={`glass ${styles.deleteItem}`}
+                        onClick={() =>
+                          router.push(`/clientes?team=true&clientId=${c.id}`)
+                        }
+                      >
+                        <div className={styles.deleteItemLabels}>
+                          <div className={styles.titleCard}>
+                            <h5>{c.name || "Cliente não encontrado"}</h5>
+                          </div>
+                          <div className={styles.box}>
+                            <p>Negociações ativas:</p>
+                            <p>{c.deals?.length ?? 0}</p>
+                          </div>
+                          <div className={styles.box}>
+                            <p>
+                              Solicitação feita por: {c.deleteRequester?.name}
+                            </p>
+                          </div>
+                          <div className={styles.box}>
+                            <span>{formatDateForCards(c.deleteRequestAt)}</span>
+                          </div>
+                        </div>
+                        <div className={styles.boxBtns}>
+                          <button
+                            className={styles.btnDel}
+                            type="button"
+                            onClick={async (e) => {
+                              if (!c) return;
+
+                              e.stopPropagation();
+                              const deals = await fetchDealByClient(c);
+
+                              setDealsToDelete(deals);
+
+                              setDeleteContextClient({
+                                message:
+                                  "Tem certeza que deseja excluir o cliente",
+                                name: c.name ?? "",
+                                onConfirm: () => approvedRequestClient(c),
+                              });
+
+                              setShowDeleteModalClient(true);
+                            }}
+                          >
+                            Apagar
+                          </button>
+                          <button
+                            className={`${styles.btnDel} ${styles.btnCancel}`}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              rejectedRequestClient(c);
+                            }}
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                )}
+              </div>
+
+              <div className={`${styles.title} ${styles.titleRequest}`}>
+                <h3>Negociaç{dealRequest.length >= 2 ? "ões" : "ão"}</h3>
+                <span>
+                  {dealRequest.length} solicitaç
+                  {dealRequest.length === 1 ? "ão" : "ões"}
+                </span>
+              </div>
+              <div className={styles.list}>
+                {dealRequest.length === 0 ? (
+                  <p>Nenhuma negociação para apagar</p>
+                ) : (
+                  dealRequest
+                    .slice()
+                    .reverse()
+                    .map((d) => (
+                      <div
+                        key={d.id}
+                        className={`glass ${styles.deleteItem}`}
+                        onClick={() => {
+                          if (d.status === "POTENTIAL_CLIENTS") {
+                            router.push(
+                              `/negociacoes?team=true&dealId=${d.id}`,
+                            );
+                          } else {
+                            router.push(`/arquivados?team=true&dealId=${d.id}`);
                           }
-                        >
-                          <div className={styles.deleteItemLabels}>
-                            <div className={styles.titleCard}>
-                              <h5>{c.name || "Cliente não encontrado"}</h5>
-                            </div>
-                            <div className={styles.box}>
-                              <p>Negociações ativas:</p>
-                              <p>{c.deals?.length ?? 0}</p>
-                            </div>
-                            <div className={styles.box}>
-                              <p>
-                                Solicitação feita por: {c.deleteRequester?.name}
-                              </p>
-                            </div>
-                            <div className={styles.box}>
-                              <span>
-                                {formatDateForCards(c.deleteRequestAt)}
-                              </span>
-                            </div>
+                        }}
+                      >
+                        <div className={styles.deleteItemLabels}>
+                          <div className={styles.titleCard}>
+                            <h5>
+                              {d.client?.name || "Negociação não encontrada"}
+                            </h5>
                           </div>
-                          <div className={styles.boxBtns}>
-                            <button
-                              className={styles.btnDel}
-                              type="button"
-                              onClick={async (e) => {
-                                if (!c) return;
-
-                                e.stopPropagation();
-                                const deals = await fetchDealByClient(c);
-
-                                setDealsToDelete(deals);
-
-                                setDeleteContextClient({
-                                  message:
-                                    "Tem certeza que deseja excluir o cliente",
-                                  name: c.name ?? "",
-                                  onConfirm: () => approvedRequestClient(c),
-                                });
-
-                                setShowDeleteModalClient(true);
-                              }}
-                            >
-                              Apagar
-                            </button>
-                            <button
-                              className={`${styles.btnDel} ${styles.btnCancel}`}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                rejectedRequestClient(c);
-                              }}
-                            >
-                              Cancelar
-                            </button>
+                          <div className={styles.box}>
+                            <p>
+                              Solicitação feita por: {d.deleteRequester?.name}
+                            </p>
+                          </div>
+                          <div className={styles.box}>
+                            <span>{formatDateForCards(d.deleteRequestAt)}</span>
                           </div>
                         </div>
-                      ))
-                  )}
-                </div>
-              )}
+                        <div className={styles.boxBtns}>
+                          <button
+                            className={styles.btnDel}
+                            type="button"
+                            onClick={async (e) => {
+                              if (!d) return;
 
-              {isRequestDeal && (
-                <div className={styles.list}>
-                  {dealRequest.length === 0 ? (
-                    <p>Nenhuma negociação para apagar</p>
-                  ) : (
-                    dealRequest
-                      .slice()
-                      .reverse()
-                      .map((d) => (
-                        <div
-                          key={d.id}
-                          className={`glass ${styles.deleteItem}`}
-                          onClick={() => {
-                            if (d.status === "POTENTIAL_CLIENTS") {
-                              router.push(
-                                `/negociacoes?team=true&dealId=${d.id}`,
-                              );
-                            } else {
-                              router.push(
-                                `/arquivados?team=true&dealId=${d.id}`,
-                              );
-                            }
-                          }}
-                        >
-                          <div className={styles.deleteItemLabels}>
-                            <div className={styles.titleCard}>
-                              <h5>
-                                {d.client?.name || "Negociação não encontrada"}
-                              </h5>
-                            </div>
-                            <div className={styles.box}>
-                              <p>
-                                Solicitação feita por: {d.deleteRequester?.name}
-                              </p>
-                            </div>
-                            <div className={styles.box}>
-                              <span>
-                                {formatDateForCards(d.deleteRequestAt)}
-                              </span>
-                            </div>
-                          </div>
-                          <div className={styles.boxBtns}>
-                            <button
-                              className={styles.btnDel}
-                              type="button"
-                              onClick={async (e) => {
-                                if (!d) return;
-
-                                e.stopPropagation();
-                                setDeleteContextDeal({
-                                  message:
-                                    "Tem certeza que deseja excluir a negociação com",
-                                  name: d.client?.name ?? "",
-                                  onConfirm: () => approvedRequestDeal(d),
-                                });
-                              }}
-                            >
-                              Apagar
-                            </button>
-                            <button
-                              className={`${styles.btnDel} ${styles.btnCancel}`}
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                rejectedRequestDeal(d);
-                              }}
-                            >
-                              Cancelar
-                            </button>
-                          </div>
+                              e.stopPropagation();
+                              setDeleteContextDeal({
+                                message:
+                                  "Tem certeza que deseja excluir a negociação com",
+                                name: d.client?.name ?? "",
+                                onConfirm: () => approvedRequestDeal(d),
+                              });
+                            }}
+                          >
+                            Apagar
+                          </button>
+                          <button
+                            className={`${styles.btnDel} ${styles.btnCancel}`}
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              rejectedRequestDeal(d);
+                            }}
+                          >
+                            Cancelar
+                          </button>
                         </div>
-                      ))
-                  )}
-                </div>
-              )}
+                      </div>
+                    ))
+                )}
+              </div>
             </div>
           </main>
 

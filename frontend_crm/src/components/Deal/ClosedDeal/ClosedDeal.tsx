@@ -1211,25 +1211,6 @@ export default function ClosedDeal({
             <div className={styles.docCostSection}>
               <div className={styles.titleDocs}>
                 <h5>Valor de documentação</h5>
-                <div
-                  onMouseEnter={() => {
-                    setShowPopup(true);
-                    sumDocs(
-                      docValues,
-                      paymentMethod,
-                      downPaymentValue,
-                      subsidyValue,
-                      cashValue,
-                      fgtsValue,
-                      financingValue,
-                      creditLetterValue,
-                    );
-                  }}
-                  onMouseLeave={() => setShowPopup(false)}
-                  className={styles.btnDocValue2}
-                >
-                  <BsCashCoin className={styles.btnDocValue} />
-                </div>
               </div>
 
               <div className={styles.addDoc}>
@@ -1282,51 +1263,54 @@ export default function ClosedDeal({
                 {docCost.map((doc) => (
                   <div key={doc.id} className={styles.item}>
                     {isOpenDocCost === doc.id ? (
-                      <>
-                        <input
-                          type="text"
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Documentação"
-                          value={docCostLabel}
-                          onChange={(e) => setDocCostLabel(e.target.value)}
-                        />
-                        <CurrencyInput
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Documentação"
-                          value={docCostValue}
-                          onChange={setDocCostValue}
-                        />
-
-                        <input
-                          type="text"
-                          className={`form-base ${styles.addNoteForm}`}
-                          placeholder="Obs"
-                          value={docCostNote}
-                          onChange={(e) => setDocCostNote(e.target.value)}
-                        />
-
-                        <div className={styles.btnsNote}>
-                          <button
-                            className={styles.btnEditDocValue}
-                            type="button"
-                            onClick={() => handleEditDocCost(doc.id)}
-                          >
-                            <FaCheck />
-                          </button>
-                          <button
-                            className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
-                            type="button"
-                            onClick={() => {
-                              setIsOpenDocCost(undefined);
-                              setDocCostLabel("");
-                              setDocCostValue(0);
-                              setDocCostNote("");
-                            }}
-                          >
-                            <FaTimes />
-                          </button>
+                      <div className={styles.addDocContainer}>
+                        <div className={styles.divAddDoc}>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Documentação"
+                            value={docCostLabel}
+                            onChange={(e) => setDocCostLabel(e.target.value)}
+                          />
+                          <CurrencyInput
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Documentação"
+                            value={docCostValue}
+                            onChange={setDocCostValue}
+                          />
                         </div>
-                      </>
+                        <div className={styles.divAddDoc}>
+                          <input
+                            type="text"
+                            className={`form-base ${styles.addNoteForm}`}
+                            placeholder="Obs"
+                            value={docCostNote}
+                            onChange={(e) => setDocCostNote(e.target.value)}
+                          />
+
+                          <div className={styles.editDocBtns}>
+                            <button
+                              className={styles.btnEditDocValue}
+                              type="button"
+                              onClick={() => handleEditDocCost(doc.id)}
+                            >
+                              <FaCheck />
+                            </button>
+                            <button
+                              className={`${styles.btnEditDocValue} ${styles.btnDelDocValue}`}
+                              type="button"
+                              onClick={() => {
+                                setIsOpenDocCost(undefined);
+                                setDocCostLabel("");
+                                setDocCostValue(0);
+                                setDocCostNote("");
+                              }}
+                            >
+                              <FaTimes />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     ) : (
                       <div className={styles.doc}>
                         <div className={styles.titleDoc}>
@@ -1376,6 +1360,7 @@ export default function ClosedDeal({
               </div>
               <p className={styles.docCost}>Total: {real(docCostTotal)}</p>
             </div>
+
             <div className={styles.noteSection}>
               <h5>Notas</h5>
               <div className={styles.addNote}>

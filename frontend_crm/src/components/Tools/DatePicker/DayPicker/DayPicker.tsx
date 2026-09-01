@@ -58,8 +58,28 @@ export default function DayPicker({
       popperPlacement="bottom-end"
       locale={ptBR}
       dateFormat="dd/MM/yyyy"
-      onKeyDown={(e) => e.preventDefault()}
-      onFocus={(e) => e.target.blur()}
+      // onKeyDown={(e) => e.preventDefault()}
+      // onFocus={(e) => e.target.blur()}
+      onChangeRaw={(e) => {
+        if (!e) return;
+
+        const input = e.target;
+
+        if (!(input instanceof HTMLInputElement)) return;
+
+        let value = input.value.replace(/\D/g, "");
+
+        value = value.slice(0, 8);
+
+        if (value.length > 4) {
+          value = `${value.slice(0, 2)}/${value.slice(2, 4)}/${value.slice(4)}`;
+        } else if (value.length > 2) {
+          value = `${value.slice(0, 2)}/${value.slice(2)}`;
+        }
+
+        input.value = value;
+      }}
+      showYearDropdown={false}
       renderCustomHeader={({ date, changeYear, changeMonth }) => (
         <div
           className={styles.customHeaderSelect}
