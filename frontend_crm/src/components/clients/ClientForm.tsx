@@ -2,8 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { Client, ClientFormProps, Deal } from "@/types/index";
-import { formatDateForCards } from "@/utils/dateUtils";
+import {
+  Client,
+  ClientFormProps,
+  ClientStatus,
+  Deal,
+  DealStatus,
+} from "@/types/index";
+import { formatDateForCards, formatDateForFinish } from "@/utils/dateUtils";
 import { MdClose } from "react-icons/md";
 import { IoStar, IoStarOutline } from "react-icons/io5";
 
@@ -13,6 +19,7 @@ import { parseISO } from "date-fns";
 import { format } from "date-fns";
 import WarningClient from "../Warning/ClientWarning";
 import CancelDelete from "../Warning/CancelDelete";
+import Link from "next/link";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -23,7 +30,7 @@ export default function ClientsForm({
   onSubmit,
   onDelete,
 }: ClientFormProps) {
-  const { token } = useAuth();
+  const { token, userId } = useAuth();
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -40,6 +47,11 @@ export default function ClientsForm({
   );
   const [hovering, setHovering] = useState(false);
   const [error, setError] = useState("");
+
+  function real(v: number | undefined | null): string {
+    if (typeof v !== "number" || !Number.isFinite(v)) return "R$ 0,00";
+    return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -454,6 +466,64 @@ export default function ClientsForm({
             setDealsToDelete(null);
           }}
         />
+      )}
+
+      {client?.deals && client.deals.length >= 1 && (
+        <div className={styles.cardsDeals}>
+          <p>
+            O cliente possui: {client.deals.length} negociaç
+            {client.deals.length > 1 ? "ões" : "ão"}
+          </p>
+
+          <div className={styles.cardsDealsGrid}>
+            {client?.deals?.map((deal) => (
+              <Link
+                key={deal.id}
+                className={`${styles.cardDeal} ${deal.deleteRequest && styles.deleteDeal}`}
+                href={`/${DealStatus[deal.status].route}?dealId=${deal.id}${
+                  Number(deal.createdBy) !== Number(userId) ? "&team=true" : ""
+                }`}
+              >
+                {deal.deleteRequest && <h5>Solicitada a exclusão</h5>}
+                <p>
+                  A negociação está na pasta:{" "}
+                  <strong>{DealStatus[deal.status].label}</strong>
+                </p>
+                <p>
+                  Status:{" "}
+                  <strong>
+                    {deal.statusClient
+                      ? ClientStatus[deal.statusClient].label
+                      : "—"}
+                  </strong>
+                </p>
+                <p>
+                  Valor do imóvel:{" "}
+                  <strong>R$ {real(Number(deal.propertyValue))}</strong>
+                </p>
+                <p>
+                  Negociação criada em:{" "}
+                  <strong>{formatDateForFinish(deal.createdAt)}</strong>
+                </p>
+                {deal.closedAt && (
+                  <p>
+                    Negociação fechada em:{" "}
+                    <strong>{formatDateForFinish(deal.closedAt)}</strong>
+                  </p>
+                )}
+                {deal.closedAt &&
+                  (deal.finalizedAt ? (
+                    <p>
+                      Negociação concluída em:{" "}
+                      <strong>{formatDateForFinish(deal.finalizedAt)}</strong>
+                    </p>
+                  ) : (
+                    <p>Negociação em andamento.</p>
+                  ))}
+              </Link>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

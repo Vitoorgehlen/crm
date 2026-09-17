@@ -16,6 +16,18 @@ export type Client = {
   creator?: {
     name: string;
   };
+
+  deals?: {
+    id: number;
+    status: DealStatus;
+    statusClient?: ClientStatus | null;
+    propertyValue?: number | null;
+    createdAt: string;
+    closedAt?: string | null;
+    finalizedAt?: string | null;
+    deleteRequest?: boolean;
+    createdBy: number;
+  }[];
 };
 
 export type ClientDeletedRequest = {
@@ -698,18 +710,22 @@ export const DealStatus = {
   OLD_CLIENTS: {
     dbValue: "OLD_CLIENTS",
     label: "Arquivado",
+    route: "arquivados",
   },
   POTENTIAL_CLIENTS: {
     dbValue: "POTENTIAL_CLIENTS",
     label: "Em potencial",
+    route: "negociacoes",
   },
   CLOSED: {
     dbValue: "CLOSED",
     label: "Fechado",
+    route: "fechados",
   },
   FINISHED: {
     dbValue: "FINISHED",
     label: "Finalizado",
+    route: "finalizados",
   },
 } as const;
 export type DealStatus = keyof typeof DealStatus;

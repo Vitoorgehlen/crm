@@ -187,6 +187,7 @@ export async function getMyClients(
   search: string,
   page: number,
   limit: number,
+  showDeals: boolean,
   clientId?: number,
 ) {
   const where: any = {
@@ -201,8 +202,28 @@ export async function getMyClients(
     const data = await prisma.client.findMany({
       where: { id: clientId },
       include: {
-        creator: { select: { name: true, email: true } },
-        updater: { select: { name: true, email: true } },
+        //! NÃO LEMBRO POR QUE TINHA O EMAIL E TIREI, TOMARA QUE NÃO QUEBRE
+        // creator: { select: { name: true, email: true } },
+        // updater: { select: { name: true, email: true } },
+        creator: { select: { name: true } },
+        updater: { select: { name: true } },
+        ...(showDeals && {
+          deals: {
+            select: {
+              id: true,
+              status: true,
+              statusClient: true,
+              propertyValue: true,
+              createdAt: true,
+              closedAt: true,
+              finalizedAt: true,
+              deleteRequest: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        }),
       },
     });
 
@@ -232,8 +253,27 @@ export async function getMyClients(
       take: limit,
       orderBy: [{ isPriority: "desc" }, { createdAt: "desc" }],
       include: {
-        creator: { select: { name: true, email: true } },
-        updater: { select: { name: true, email: true } },
+        //! NÃO LEMBRO POR QUE TINHA O EMAIL E TIREI, TOMARA QUE NÃO QUEBRE
+        // creator: { select: { name: true, email: true } },
+        // updater: { select: { name: true, email: true } },
+        creator: { select: { name: true } },
+        updater: { select: { name: true } },
+        ...(showDeals && {
+          deals: {
+            select: {
+              id: true,
+              status: true,
+              statusClient: true,
+              propertyValue: true,
+              createdAt: true,
+              closedAt: true,
+              finalizedAt: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        }),
       },
     });
 
@@ -249,6 +289,7 @@ export async function getTeamClients(
   page: number,
   limit: number,
   selectedUser: number | null,
+  showDeals: boolean,
   clientId?: number,
 ) {
   const canReadClient = await checkUserPermission(userId, "ALL_DEAL_READ");
@@ -288,8 +329,29 @@ export async function getTeamClients(
       const data = await prisma.client.findMany({
         where: { id: clientId },
         include: {
-          creator: { select: { name: true, email: true } },
-          updater: { select: { name: true, email: true } },
+          //! NÃO LEMBRO POR QUE TINHA O EMAIL E TIREI, TOMARA QUE NÃO QUEBRE
+          // creator: { select: { name: true, email: true } },
+          // updater: { select: { name: true, email: true } },
+          creator: { select: { name: true } },
+          updater: { select: { name: true } },
+          ...(showDeals && {
+            deals: {
+              select: {
+                id: true,
+                status: true,
+                statusClient: true,
+                propertyValue: true,
+                createdAt: true,
+                closedAt: true,
+                finalizedAt: true,
+                deleteRequest: true,
+                createdBy: true,
+              },
+              orderBy: {
+                createdAt: "desc",
+              },
+            },
+          }),
         },
       });
 
@@ -319,8 +381,29 @@ export async function getTeamClients(
       take: limit,
       orderBy: [{ isPriority: "desc" }, { createdAt: "desc" }],
       include: {
+        //! NÃO LEMBRO POR QUE TINHA O EMAIL E TIREI, TOMARA QUE NÃO QUEBRE
+        // creator: { select: { name: true, email: true } },
+        // updater: { select: { name: true, email: true } },
         creator: { select: { name: true } },
         updater: { select: { name: true } },
+        ...(showDeals && {
+          deals: {
+            select: {
+              id: true,
+              status: true,
+              statusClient: true,
+              propertyValue: true,
+              createdAt: true,
+              closedAt: true,
+              finalizedAt: true,
+              deleteRequest: true,
+              createdBy: true,
+            },
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
+        }),
       },
     });
 

@@ -6,6 +6,7 @@
   height: 100vh;
   background: rgba(0, 0, 0, 0.6);
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   z-index: 999;
@@ -189,6 +190,63 @@
   text-align: center;
   color: var(--textBase);
   font-size: 10px;
+}
+
+.cardsDeals {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  margin-top: 10px;
+  padding: 15px 20px;
+  color: var(--textBase);
+  background-color: var(--sidebarBg);
+  border-radius: 10px;
+  backdrop-filter: blur(7px);
+}
+
+.cardsDealsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 350px));
+  justify-content: center;
+  width: 100%;
+  margin-top: 10px;
+  gap: 15px;
+}
+
+.cardDeal {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border-radius: 10px;
+  padding: 5px;
+  gap: 1px;
+  background-color: var(--mainBg);
+  border: 1px solid transparent;
+  text-decoration: none;
+  color: var(--textBase);
+  cursor: pointer;
+}
+
+.cardDeal:hover {
+  border: 1px solid var(--primaryColor);
+}
+
+.deleteDeal {
+  border: 1px solid var(--errorColor);
+}
+
+.deleteDeal h5 {
+  color: var(--errorColor);
+}
+
+.cardsDeals strong {
+  color: var(--primaryText);
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 @media (max-width: 768px) {

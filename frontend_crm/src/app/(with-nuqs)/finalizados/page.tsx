@@ -36,6 +36,8 @@ export default function FinishDeals() {
     defaultValue: "",
   });
 
+  const [dealId] = useQueryState("dealId");
+
   const [teamDeals, setTeamDeals] = useQueryState("team", {
     defaultValue: false,
     parse: (v) => v === "true",
@@ -362,6 +364,7 @@ export default function FinishDeals() {
       params.append("teamDeals", teamDeals ? "true" : "false");
       const hasTeamDeals = planRules?.includes("TEAM_DEALS");
       if (teamDeals && userId && hasTeamDeals) params.append("userId", userId);
+      if (dealId) params.append("dealId", dealId);
 
       const url = `${API}/deals-finished?${params.toString()}`;
 
@@ -380,7 +383,7 @@ export default function FinishDeals() {
     } finally {
       setInitialIsLoadind(false);
     }
-  }, [token, search, teamDeals, selectedYear, userId, progressDeals]);
+  }, [token, search, teamDeals, selectedYear, userId, progressDeals, dealId]);
 
   const fetchDealsYears = useCallback(async () => {
     if (!token) {
@@ -455,6 +458,17 @@ export default function FinishDeals() {
     router,
     selectedYear,
   ]);
+
+  useEffect(() => {
+    if (!dealId || deals.length === 0) return;
+
+    const deal = deals.find((d) => String(d.id) === dealId);
+
+    if (deal) {
+      setSelectedDeal(deal);
+      setIsCloseOpen(true);
+    }
+  }, [dealId, deals]);
 
   return (
     <div className={styles.page}>

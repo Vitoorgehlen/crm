@@ -108,10 +108,18 @@ router.get("/clients", loginRequired, async (req, res) => {
   const search = String(req.query.search || "").trim();
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 50);
+  const showDeals = req.query.showDeals === "true";
   const clientId = req.query.clientId ? Number(req.query.clientId) : undefined;
 
   try {
-    const deal = await getMyClients(userId, search, page, limit, clientId);
+    const deal = await getMyClients(
+      userId,
+      search,
+      page,
+      limit,
+      showDeals,
+      clientId,
+    );
     res.json(deal);
   } catch (err) {
     console.log(err);
@@ -128,6 +136,7 @@ router.get("/team-clients", loginRequired, async (req, res) => {
   const search = String(req.query.search || "").trim();
   const page = Number(req.query.page || 1);
   const limit = Number(req.query.limit || 50);
+  const showDeals = req.query.showDeals === "true";
   const clientId = req.query.clientId ? Number(req.query.clientId) : undefined;
 
   try {
@@ -137,6 +146,7 @@ router.get("/team-clients", loginRequired, async (req, res) => {
       page,
       limit,
       selectedUserId,
+      showDeals,
       clientId,
     );
     res.json(deal);

@@ -62,6 +62,7 @@ export default function Deals() {
   const [userId, setUserId] = useQueryState("userId", {
     defaultValue: "",
   });
+  const [dealId] = useQueryState("dealId");
 
   const selectedUser = users.find((u) => String(u.id) === userId) || null;
 
@@ -385,6 +386,7 @@ export default function Deals() {
           page: pageToFetch,
           status: "CLOSED",
           paymentMethod,
+          dealId: dealId ? String(dealId) : undefined,
         });
 
         setDealsByMethod((prev) => ({
@@ -505,6 +507,17 @@ export default function Deals() {
     fetchUsers,
     router,
   ]);
+
+  useEffect(() => {
+    if (!dealId) return;
+
+    const deal = findDealById(Number(dealId));
+
+    if (deal) {
+      setSelectedDeal(deal);
+      setIsCloseOpen(true);
+    }
+  }, [dealId, dealsByMethod]);
 
   useEffect(() => {
     const handleResize = () => {

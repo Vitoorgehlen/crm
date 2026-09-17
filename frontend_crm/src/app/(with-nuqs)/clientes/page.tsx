@@ -59,6 +59,7 @@ export default function Clients() {
         if (search.trim()) params.append("search", search.trim());
         params.append("page", String(pageToFetch));
         params.append("limit", String(limit));
+        params.append("showDeals", String(true));
         if (teamClients && selectedUser)
           params.append("userId", String(selectedUser.id));
         if (clientId) params.append("clientId", clientId);
