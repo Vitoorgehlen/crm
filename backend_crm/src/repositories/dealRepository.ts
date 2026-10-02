@@ -130,21 +130,19 @@ export async function getDeals(
   };
 
   if (filter?.search && filter.search.trim()) {
-    where.client = {
-      OR: [
-        {
-          name: {
-            contains: filter.search,
-            mode: "insensitive",
-          },
-        },
-        {
-          phone: {
-            contains: filter.search,
-            mode: "insensitive",
-          },
-        },
-      ],
+    const matchingDealIds: { id: number }[] = await prisma.$queryRaw`
+    SELECT d.id
+    FROM "Deal" d
+    JOIN "Client" c ON c.id = d."clientId"
+    WHERE d."createdBy" = ${userId}
+      AND (
+        unaccent(c.name) ILIKE unaccent(${"%" + filter.search + "%"})
+        OR unaccent(c.phone) ILIKE unaccent(${"%" + filter.search + "%"})
+      )
+  `;
+
+    where.id = {
+      in: matchingDealIds.map((deal) => deal.id),
     };
   }
 
@@ -296,11 +294,19 @@ export async function getFinishedDealsYears(
   else where.status = { in: ["FINISHED"] };
 
   if (filter?.search && filter.search.trim()) {
-    where.client = {
-      OR: [
-        { name: { contains: filter.search, mode: "insensitive" } },
-        { phone: { contains: filter.search, mode: "insensitive" } },
-      ],
+    const matchingDealIds: { id: number }[] = await prisma.$queryRaw`
+    SELECT d.id
+    FROM "Deal" d
+    JOIN "Client" c ON c.id = d."clientId"
+    WHERE d."closedAt" IS NOT NULL
+      AND (
+        unaccent(c.name) ILIKE unaccent(${"%" + filter.search + "%"})
+        OR unaccent(c.phone) ILIKE unaccent(${"%" + filter.search + "%"})
+      )
+  `;
+
+    where.id = {
+      in: matchingDealIds.map((deal) => deal.id),
     };
   }
 
@@ -400,7 +406,12 @@ export async function getTotalDealsOfYear(
 
         ${
           search
-            ? Prisma.sql`AND c."name" ILIKE ${"%" + search + "%"}`
+            ? Prisma.sql`
+      AND (
+        unaccent(c."name") ILIKE unaccent(${"%" + search + "%"})
+        OR unaccent(c."phone") ILIKE unaccent(${"%" + search + "%"})
+      )
+    `
             : Prisma.sql``
         }
 
@@ -499,21 +510,19 @@ export async function getTeamDeals(
     }
 
     if (filter?.search && filter.search.trim()) {
-      where.client = {
-        OR: [
-          {
-            name: {
-              contains: filter.search,
-              mode: "insensitive",
-            },
-          },
-          {
-            phone: {
-              contains: filter.search,
-              mode: "insensitive",
-            },
-          },
-        ],
+      const matchingDealIds: { id: number }[] = await tx.$queryRaw`
+    SELECT d.id
+    FROM "Deal" d
+    JOIN "Client" c ON c.id = d."clientId"
+    WHERE d."companyId" = ${user.companyId}
+      AND (
+        unaccent(c.name) ILIKE unaccent(${"%" + filter.search + "%"})
+        OR unaccent(c.phone) ILIKE unaccent(${"%" + filter.search + "%"})
+      )
+  `;
+
+      where.id = {
+        in: matchingDealIds.map((deal) => deal.id),
       };
     }
 

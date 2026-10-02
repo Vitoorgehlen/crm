@@ -162,19 +162,12 @@ export default function FinishDeals() {
   }
 
   const filteredDeals = useMemo(() => {
-    const q = (search ?? "").trim().toLocaleLowerCase();
-    const onlyFinished = deals.filter((d) => {
-      const s = (d.status ?? "").toString().toUpperCase();
-      return s === "FINISHED" || s === "CLOSED";
-    });
+    return deals.filter((d) => {
+      const status = (d.status ?? "").toString().toUpperCase();
 
-    if (!q) return onlyFinished;
-
-    return onlyFinished.filter((d) => {
-      const clientName = (d.client?.name ?? "").toString().toLowerCase();
-      return clientName.includes(q);
+      return status === "FINISHED" || status === "CLOSED";
     });
-  }, [deals, search]);
+  }, [deals]);
 
   const groupedByYearMonth = useMemo(() => {
     const acc: Record<number, Record<number, Deal[]>> = {};
@@ -474,7 +467,7 @@ export default function FinishDeals() {
     <div className={styles.page}>
       <main className={styles.main}>
         <HeaderPage
-          title="Negociações em finalizadas"
+          title="Negociações finalizadas"
           search={search}
           setSearch={setSearch}
           teamMode={teamDeals}

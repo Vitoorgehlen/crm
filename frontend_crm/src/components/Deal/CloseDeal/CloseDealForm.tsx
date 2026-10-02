@@ -19,6 +19,7 @@ import {
 } from "react-icons/md";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
+import { shouldShowSubsidy } from "@/constants/subsidyRules";
 
 export default function CloseDealForm({
   isOpen,
@@ -103,6 +104,14 @@ export default function CloseDealForm({
   const [error, setError] = useState<string | null>(null);
 
   const [isMouseDownInside, setIsMouseDownInside] = useState(false);
+
+  const showSubsidy = shouldShowSubsidy({
+    paymentMethod,
+    propertyValue,
+    downPaymentValue,
+    fgtsValue,
+    financingValue,
+  });
 
   const totalPercentage = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.percentage ?? 0), 0);
@@ -608,9 +617,7 @@ export default function CloseDealForm({
             </div>
           )}
 
-          {paymentMethod === "FINANCING" &&
-            downPaymentValue + fgtsValue + financingValue > 50000 &&
-            propertyValue < 250000 &&
+          {showSubsidy &&
             downPaymentValue + fgtsValue + financingValue < 250000 && (
               <div className={styles.payment}>
                 <p>Subsídio</p>

@@ -231,20 +231,17 @@ export async function getMyClients(
 
     return { data, total };
   } else if (search) {
-    where.OR = [
-      {
-        name: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
-      {
-        phone: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
-    ];
+    const matchingIds: { id: number }[] = await prisma.$queryRaw`
+    SELECT id FROM "Client"
+    WHERE "createdBy" = ${userId}
+      AND (
+        unaccent(name) ILIKE unaccent(${"%" + search + "%"})
+        OR unaccent(phone) ILIKE unaccent(${"%" + search + "%"})
+      )
+  `;
+
+    console.log("MATCHING IDS:", matchingIds);
+    where.id = { in: matchingIds.map((r) => r.id) };
   }
   return prisma.$transaction(async (tx) => {
     const data = await tx.client.findMany({
@@ -359,20 +356,26 @@ export async function getTeamClients(
 
       return { data, total };
     } else if (search) {
-      where.OR = [
-        {
-          name: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-        {
-          phone: {
-            contains: search,
-            mode: "insensitive",
-          },
-        },
-      ];
+      const ids: { id: number }[] =
+        selectedUser !== null
+          ? await prisma.$queryRaw`
+          SELECT id FROM "Client"
+          WHERE "createdBy" = ${selectedUser}
+            AND (
+              unaccent(name) ILIKE unaccent(${"%" + search + "%"})
+              OR unaccent(phone) ILIKE unaccent(${"%" + search + "%"})
+            )
+        `
+          : await prisma.$queryRaw`
+          SELECT id FROM "Client"
+          WHERE "companyId" = ${company.companyId}
+            AND (
+              unaccent(name) ILIKE unaccent(${"%" + search + "%"})
+              OR unaccent(phone) ILIKE unaccent(${"%" + search + "%"})
+            )
+        `;
+
+      where.id = { in: ids.map((r) => r.id) };
     }
 
     const data = await tx.client.findMany({

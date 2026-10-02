@@ -30,6 +30,7 @@ import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import EditCommission from "../EditCommission/EditCommission";
+import { shouldShowSubsidy } from "@/constants/subsidyRules";
 
 export default function ClosedDeal({
   isOpen,
@@ -139,6 +140,14 @@ export default function ClosedDeal({
   const totalAmounts = useMemo(() => {
     return splits.reduce((acc, s) => acc + (s.amount ?? 0), 0);
   }, [splits]);
+
+  const showSubsidy = shouldShowSubsidy({
+    paymentMethod,
+    propertyValue,
+    downPaymentValue,
+    fgtsValue,
+    financingValue,
+  });
 
   const paymentMethodOptions = useMemo(() => {
     return Object.entries(PaymentMethod).map(([key, { label }]) => ({
@@ -914,19 +923,17 @@ export default function ClosedDeal({
                     />
                   </div>
 
-                  {propertyValue < 250000 &&
-                    downPaymentValue + fgtsValue + financingValue > 50000 &&
-                    downPaymentValue + fgtsValue + financingValue < 250000 && (
-                      <div className={styles.payment}>
-                        <p>Subsídio</p>
-                        <CurrencyInput
-                          className={`form-base ${styles.form}`}
-                          placeholder="Valor de subsídio"
-                          value={subsidyValue}
-                          onChange={setSubsidyValue}
-                        />
-                      </div>
-                    )}
+                  {showSubsidy && (
+                    <div className={styles.payment}>
+                      <p>Subsídio</p>
+                      <CurrencyInput
+                        className={`form-base ${styles.form}`}
+                        placeholder="Valor de subsídio"
+                        value={subsidyValue}
+                        onChange={setSubsidyValue}
+                      />
+                    </div>
+                  )}
                 </>
               )}
               {paymentMethod === "CREDIT_LETTER" && (
@@ -1211,6 +1218,27 @@ export default function ClosedDeal({
             <div className={styles.docCostSection}>
               <div className={styles.titleDocs}>
                 <h5>Valor de documentação</h5>
+
+                <div
+                  onMouseEnter={() => {
+                    setShowPopup(true);
+                    sumDocs(
+                      docValues,
+                      paymentMethod,
+                      downPaymentValue,
+                      subsidyValue,
+                      cashValue,
+                      fgtsValue,
+                      financingValue,
+                      creditLetterValue,
+                    );
+                  }}
+                  onMouseLeave={() => {
+                    setShowPopup(false);
+                  }}
+                >
+                  <BsCashCoin className={styles.btnDocValue} />
+                </div>
               </div>
 
               <div className={styles.addDoc}>

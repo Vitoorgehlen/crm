@@ -32,6 +32,7 @@ import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import CurrencyInput from "@/components/Tools/InputValue/CurrencyInput";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 import Callback from "@/components/Schedule/CallbackPopup/Callback";
+import { shouldShowSubsidy } from "@/constants/subsidyRules";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
 
@@ -96,6 +97,13 @@ export default function DealForm({
     "read" | "addNote" | "save" | "del" | null
   >(null);
   const [error, setError] = useState("");
+
+  const showSubsidy = shouldShowSubsidy({
+    paymentMethod,
+    downPaymentValue,
+    fgtsValue,
+    financingValue,
+  });
 
   const clientOptions = useMemo(() => {
     return clients.map((client) => ({
@@ -812,9 +820,7 @@ export default function DealForm({
                   {paymentMethod === "FINANCING" && (
                     <>
                       <p>Financiamento</p>
-                      {downPaymentValue + fgtsValue + financingValue > 50000 &&
-                        downPaymentValue + fgtsValue + financingValue <
-                          250000 && <p>Subsídio</p>}
+                      {showSubsidy && <p>Subsídio</p>}
                     </>
                   )}
                   {paymentMethod === "CREDIT_LETTER" && (
