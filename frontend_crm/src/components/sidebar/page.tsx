@@ -5,6 +5,7 @@ import styles from "./page.module.css";
 import { usePathname } from "next/navigation";
 import { TiContacts } from "react-icons/ti";
 import { TbSettings, TbContract, TbHomeSearch } from "react-icons/tb";
+import { LiaFileContractSolid } from "react-icons/lia";
 import { RxHamburgerMenu } from "react-icons/rx";
 import { IoMdClose } from "react-icons/io";
 import { FaRegFolderOpen } from "react-icons/fa";
@@ -173,6 +174,16 @@ const Sidebar = () => {
                     </p>
                   )}
                   <p className={`linkText ${styles.linkText}`}>Requisições</p>
+                </div>
+              </Link>
+            )}
+            {permissions.includes("ALL_DEAL_DELETE") && expensePlan && (
+              <Link href="/contrato" onClick={() => setIsOpen(false)}>
+                <div
+                  className={`${pathname === "/contrato" && styles.active} ${styles.icons} ${styles.hoverUnderline}`}
+                >
+                  <LiaFileContractSolid className={styles.logos} />
+                  <p className={`linkText ${styles.linkText}`}>Contrato</p>
                 </div>
               </Link>
             )}

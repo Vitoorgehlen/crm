@@ -822,3 +822,90 @@ export const TaskPriority = {
 export type TaskPriority = keyof typeof TaskPriority;
 
 export type DroppableId = `${PaymentMethod}-${DealStepType}`;
+
+export type PersonType = "SINGULAR_M" | "SINGULAR_F" | "PLURAL_M" | "PLURAL_F";
+export type PersonContext = "seller" | "buyer";
+export type PartyValues = {
+  buyer: Record<PersonType, string>;
+  seller: Record<PersonType, string>;
+};
+
+type ConditionalContent = {
+  content: JSONContent[];
+  openStart: number;
+  openEnd: number;
+};
+
+export type ContractVariableData = {
+  id: string;
+  label: string;
+  variableType: string;
+  options: string[];
+  content?: ConditionalContent | null;
+};
+
+import type { JSONContent } from "@tiptap/core";
+
+export type ContractStatus = "DRAFT" | "FINALIZED" | "SIGNED";
+
+export type SavedContract = {
+  id: number;
+  name: string;
+  content: JSONContent;
+  creator: { name: string } | null;
+  updater: { name: string } | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GeneratedContractResponse = SavedContract &
+  GeneratedMetadata & {
+    creator: { name: string } | null;
+    updater: { name: string } | null;
+    createdAt: string;
+    updatedAt: string;
+  };
+
+export type GeneratedMetadata = {
+  templateId: number;
+  dealId: number | null;
+  sellerType: PersonType;
+  buyerType: PersonType;
+  status: ContractStatus;
+};
+
+type ContractBaseProps = {
+  contractId: number | null;
+  contractName: string | null;
+  contractContent: JSONContent | null;
+
+  onBack: () => void;
+  onDeleted: (contractId: number) => void;
+};
+
+export type ContractProps =
+  | (ContractBaseProps & {
+      mode: "template";
+
+      createdBy: string;
+      updatedBy: string;
+      createdAt: string;
+      updatedAt: string;
+
+      onSaved: (saved: SavedContract) => void;
+    })
+  | (ContractBaseProps & {
+      mode: "generated";
+      templateId: number;
+      dealId: number | null;
+      sellerType: PersonType;
+      buyerType: PersonType;
+      status: ContractStatus;
+
+      createdBy: string;
+      updatedBy: string;
+      createdAt: string;
+      updatedAt: string;
+
+      onSaved: (contract: GeneratedContractResponse) => void;
+    });

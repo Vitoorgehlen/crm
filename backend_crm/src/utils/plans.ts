@@ -17,6 +17,7 @@ export const PLAN_CONFIG = {
       ROLE_SYSTEM: false,
       EDITABLE_PERMISSIONS: false,
       DELETE_REQUESTS: false,
+      GENERATEDCONTRACT: false,
     },
   },
 
@@ -36,6 +37,7 @@ export const PLAN_CONFIG = {
       ROLE_SYSTEM: false,
       EDITABLE_PERMISSIONS: false,
       DELETE_REQUESTS: false,
+      GENERATEDCONTRACT: false,
     },
   },
 
@@ -55,6 +57,7 @@ export const PLAN_CONFIG = {
       ROLE_SYSTEM: true,
       EDITABLE_PERMISSIONS: true,
       DELETE_REQUESTS: true,
+      GENERATEDCONTRACT: false,
     },
   },
 
@@ -74,6 +77,7 @@ export const PLAN_CONFIG = {
       ROLE_SYSTEM: true,
       EDITABLE_PERMISSIONS: true,
       DELETE_REQUESTS: true,
+      GENERATEDCONTRACT: true,
     },
   },
 } as const;

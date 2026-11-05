@@ -23,6 +23,10 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "EXPENSE_READ",
     "EXPENSE_UPDATE",
     "EXPENSE_DELETE",
+    "CONTRACT_CREATE",
+    "CONTRACT_READ",
+    "CONTRACT_UPDATE",
+    "CONTRACT_DELETE",
   ],
   MANAGER: [
     "USER_UPDATE",
@@ -37,6 +41,7 @@ const DEFAULT_ROLE_PERMISSIONS: Record<UserRole, Permission[]> = {
     "DEAL_CLOSE",
     "DEAL_CLOSE_DELETE",
     "ALL_DEAL_CLOSE",
+    "CONTRACT_READ",
   ],
   BROKER: ["DEAL_CREATE", "DEAL_READ", "DEAL_UPDATE", "DEAL_CLOSE"],
   ASSISTANT: [

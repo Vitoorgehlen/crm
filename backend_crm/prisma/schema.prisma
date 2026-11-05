@@ -34,6 +34,9 @@ model Company {
   documentationValuesCustom DocumentationValueCustom[]
   financialMovements        FinancialMovement[]
   goals                     Goals[]
+  contractTemplates         ContractTemplate[]
+  generatedContracts        GeneratedContract[]
+  contractVariables         ContractVariable[]
 }
 
 enum SubscriptionPlan {
@@ -92,7 +95,7 @@ model User {
   createdExpenses Expense[] @relation("createdExpenses")
   updatedExpenses Expense[] @relation("updatedExpenses")
 
-  // Commissions
+  // Tasks
   tasks Tasks[] @relation("UserTasks")
 
   // Financial Movement
@@ -105,6 +108,14 @@ model User {
   expenses           Expense[]
   financialMovements FinancialMovement[]
   goals              Goals[]
+
+  // Contracts Template
+  templateContractsCreated ContractTemplate[] @relation("UserTemplateContractsCreated")
+  templateContractsUpdated ContractTemplate[] @relation("UserTemplateContractsUpdated")
+
+  // Contracts Generated
+  generatedContractsCreated GeneratedContract[] @relation("UserGeneratedContractsCreated")
+  generatedContractsUpdated GeneratedContract[] @relation("UserGeneratedContractsUpdated")
 }
 
 enum UserRole {
@@ -151,6 +162,11 @@ enum Permission {
   EXPENSE_READ
   EXPENSE_UPDATE
   EXPENSE_DELETE
+
+  CONTRACT_CREATE
+  CONTRACT_READ
+  CONTRACT_UPDATE
+  CONTRACT_DELETE
 }
 
 model Client {
@@ -220,12 +236,13 @@ model Deal {
   updater         User  @relation("UserDealsUpdates", fields: [updatedBy], references: [id], onDelete: Cascade)
   deleteRequester User? @relation("DealDeleteRequestUser", fields: [deleteRequestBy], references: [id])
 
-  notes             Note[]
-  schedule          Schedule[]
-  documentationCost DocumentationCost[]
-  DealShare         DealShare[]
-  User              User?               @relation(fields: [userId], references: [id])
-  userId            Int?
+  notes              Note[]
+  schedule           Schedule[]
+  documentationCost  DocumentationCost[]
+  DealShare          DealShare[]
+  User               User?               @relation(fields: [userId], references: [id])
+  userId             Int?
+  generatedContracts GeneratedContract[]
 }
 
 enum PaymentMethod {
@@ -473,4 +490,102 @@ model NotePad {
   user   User? @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([slot, userId])
+}
+
+model ContractTemplate {
+  id        Int    @id @default(autoincrement())
+  companyId Int
+  name      String
+  content   Json
+
+  createdBy Int?
+  updatedBy Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  creator User? @relation("UserTemplateContractsCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater User? @relation("UserTemplateContractsUpdated", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  generatedContracts GeneratedContract[]
+
+  // Variáveis utilizadas por este modelo
+  variables ContractVariable[] @relation("TemplateContractVariables")
+
+  @@index([companyId])
+  @@index([createdBy])
+  @@index([updatedBy])
+}
+
+enum ContractPersonType {
+  SINGULAR_M
+  SINGULAR_F
+  PLURAL_M
+  PLURAL_F
+}
+
+enum GeneratedContractStatus {
+  DRAFT
+  FINALIZED
+  SIGNED
+}
+
+model GeneratedContract {
+  id         Int    @id @default(autoincrement())
+  companyId  Int
+  dealId     Int?
+  templateId Int?
+  name       String
+  content    Json
+
+  sellerType ContractPersonType @default(SINGULAR_M)
+  buyerType  ContractPersonType @default(SINGULAR_M)
+
+  status      GeneratedContractStatus @default(DRAFT)
+  createdBy   Int
+  updatedBy   Int
+  finalizedAt DateTime?
+  signedAt    DateTime?
+  createdAt   DateTime                @default(now())
+  updatedAt   DateTime                @updatedAt
+
+  company  Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  deal     Deal?             @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  template ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
+
+  creator User? @relation("UserGeneratedContractsCreated", fields: [createdBy], references: [id], onDelete: SetNull)
+  updater User? @relation("UserGeneratedContractsUpdated", fields: [updatedBy], references: [id], onDelete: SetNull)
+
+  // Variáveis utilizadas neste contrato
+  variables ContractVariable[] @relation("GeneratedContractVariables")
+
+  @@index([companyId, dealId])
+  @@index([templateId])
+  @@index([createdBy])
+}
+
+enum ContractVariableType {
+  party
+  conditional
+}
+
+model ContractVariable {
+  id           Int                  @id @default(autoincrement())
+  companyId    Int
+  label        String
+  variableType ContractVariableType
+  options      Json                 @default("[]")
+  content      Json?
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  // Modelos que utilizam esta variável
+  templates ContractTemplate[] @relation("TemplateContractVariables")
+
+  // Contratos gerados que utilizam esta variável
+  generatedContracts GeneratedContract[] @relation("GeneratedContractVariables")
+
+  @@index([companyId])
 }

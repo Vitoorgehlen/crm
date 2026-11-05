@@ -224,6 +224,24 @@ input:hover {
   cursor: auto;
 }
 
+.contract-variable {
+  display: inline;
+  padding: 1px 3px;
+  border-radius: 3px;
+  background-color: transparent !important;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: text;
+  transition: background-color 0.15s ease;
+}
+
+.contract-variable:hover {
+  background-color: var(--mainBg) !important;
+  color: var(--primaryColor) !important;
+  cursor: default;
+}
+
 button,
 a,
 div[role="button"] {

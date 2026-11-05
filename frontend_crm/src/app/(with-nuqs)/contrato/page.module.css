@@ -1,0 +1,110 @@
+.page {
+  overflow-x: clip;
+}
+
+.main {
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  padding: 0 10px;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.headerContent {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 auto;
+  width: 100%;
+  gap: 20px;
+}
+
+.title {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 20px 30px;
+  color: var(--primaryText);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  width: 90%;
+  gap: 20px;
+}
+
+.contracts {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 10px;
+  gap: 15px;
+  color: var(--primaryText);
+}
+
+.folders {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, 100px);
+  justify-content: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.folders button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 140px;
+  background-color: var(--primaryText);
+  border: 1px solid var(--mainBg);
+  font-weight: 600;
+  color: var(--mainBg);
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.folders button:hover {
+  background-color: var(--primaryColor);
+  border: 1px solid var(--primaryColor);
+  color: var(--mainBg);
+}
+
+.folders .addContract {
+  background-color: var(--mainBg);
+  border: 1px solid var(--primaryColor);
+  color: var(--primaryColor);
+}
+
+.folders .back {
+  background-color: var(--mainBg);
+  border: 1px solid var(--errorColor);
+  color: var(--errorColor);
+}
+
+.folders .back:hover {
+  background-color: var(--errorColor);
+  border: 1px solid var(--errorColor);
+  color: var(--mainBg);
+}
+
+.noDefault {
+  width: 300px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.icon {
+  font-size: 25px;
+}

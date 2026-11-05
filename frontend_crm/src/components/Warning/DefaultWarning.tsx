@@ -11,6 +11,7 @@ type WarningCardProps = {
   name?: string;
   cancelDelete?: boolean;
   onClose: () => void;
+  onCancel?: () => void;
   onConfirm: () => Promise<void> | void;
 };
 
@@ -19,6 +20,7 @@ export default function WarningDeal({
   name,
   cancelDelete = false,
   onClose,
+  onCancel,
   onConfirm,
 }: WarningCardProps) {
   const [loading, setLoading] = useState<"confirm" | "cancel" | null>(null);
@@ -72,7 +74,7 @@ export default function WarningDeal({
             <button
               type="button"
               className={`btn-action glass ${styles.btnDeal} ${cancelDelete ? styles.btnDelete : styles.btnUpdate}`}
-              onClick={onClose}
+              onClick={onCancel ?? onClose}
             >
               Não
             </button>

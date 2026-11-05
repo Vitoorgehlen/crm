@@ -21,6 +21,9 @@ import financialMovementRoutes from "./routes/financialMovementRoutes";
 import tokenRoutes from "./routes/tokenRoutes";
 import resetPassword from "./routes/resetPasswordRoutes";
 import contactRoutes from "./routes/contactRoutes";
+import contractValiablesRoutes from "./routes/contractVariablesRoutes";
+import contractTemplateRoutes from "./routes/contractTemplateRoutes";
+import contractGeneratedRoutes from "./routes/contractGeneratedRoutes";
 
 const clientUrl = process.env.CLIENT_URL;
 class App {
@@ -64,6 +67,9 @@ class App {
     this.app.use("/", tokenRoutes);
     this.app.use("/", resetPassword);
     this.app.use("/", contactRoutes);
+    this.app.use("/", contractValiablesRoutes);
+    this.app.use("/", contractTemplateRoutes);
+    this.app.use("/", contractGeneratedRoutes);
   }
 }
 
