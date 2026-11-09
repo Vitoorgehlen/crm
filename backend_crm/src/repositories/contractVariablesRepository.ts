@@ -353,6 +353,13 @@ export async function deleteVariable(
     );
   }
 
+  if (templateId === undefined && generatedContractId === undefined) {
+    throw new ContractVariableError(
+      400,
+      "Informe o modelo ou contrato de onde deseja remover a variável.",
+    );
+  }
+
   return prisma.$transaction(async (tx) => {
     const variable = await tx.contractVariable.findFirst({
       where: {
@@ -365,54 +372,45 @@ export async function deleteVariable(
       throw new ContractVariableError(404, "Variável não encontrada.");
     }
 
-    // Variáveis condicionais são removidas individualmente
-    // de cada modelo ou contrato.
-    if (variable.variableType === "conditional") {
-      const hasTemplate = templateId !== undefined;
-      const hasGeneratedContract = generatedContractId !== undefined;
+    // Remoção de variável vinculada a um modelo.
+    if (templateId !== undefined) {
+      const template = await tx.contractTemplate.findFirst({
+        where: {
+          id: templateId,
+          companyId,
+        },
+        select: { id: true },
+      });
 
-      if (hasTemplate === hasGeneratedContract) {
+      if (!template) {
         throw new ContractVariableError(
-          400,
-          "Informe o modelo ou contrato de onde deseja remover a variável.",
+          404,
+          "Modelo de contrato não encontrado.",
         );
       }
 
-      if (templateId !== undefined) {
-        const template = await tx.contractTemplate.findFirst({
-          where: {
-            id: templateId,
-            companyId,
+      const linkedVariable = await tx.contractVariable.findFirst({
+        where: {
+          id,
+          companyId,
+          templates: {
+            some: { id: templateId },
           },
-          select: { id: true },
-        });
+        },
+        select: { id: true },
+      });
 
-        if (!template) {
-          throw new ContractVariableError(
-            404,
-            "Modelo de contrato não encontrado.",
-          );
-        }
+      // Variáveis condicionais precisam estar vinculadas ao modelo.
+      // Variáveis party podem ser compartilhadas pela empresa.
+      if (!linkedVariable && variable.variableType === "conditional") {
+        throw new ContractVariableError(
+          404,
+          "Variável não encontrada neste modelo.",
+        );
+      }
 
-        const linkedVariable = await tx.contractVariable.findFirst({
-          where: {
-            id,
-            companyId,
-            templates: {
-              some: { id: templateId },
-            },
-          },
-          select: { id: true },
-        });
-
-        if (!linkedVariable) {
-          throw new ContractVariableError(
-            404,
-            "Variável não encontrada neste modelo.",
-          );
-        }
-
-        // Remove somente o vínculo com este modelo.
+      // Desconecta somente quando existe vínculo.
+      if (linkedVariable) {
         await tx.contractVariable.update({
           where: { id },
           data: {
@@ -422,42 +420,44 @@ export async function deleteVariable(
           },
         });
       }
+    }
 
-      if (generatedContractId !== undefined) {
-        const contract = await tx.generatedContract.findFirst({
-          where: {
-            id: generatedContractId,
-            companyId,
+    // Remoção de variável vinculada a um contrato gerado.
+    if (generatedContractId !== undefined) {
+      const contract = await tx.generatedContract.findFirst({
+        where: {
+          id: generatedContractId,
+          companyId,
+        },
+        select: { id: true },
+      });
+
+      if (!contract) {
+        throw new ContractVariableError(404, "Contrato gerado não encontrado.");
+      }
+
+      const linkedVariable = await tx.contractVariable.findFirst({
+        where: {
+          id,
+          companyId,
+          generatedContracts: {
+            some: { id: generatedContractId },
           },
-          select: { id: true },
-        });
+        },
+        select: { id: true },
+      });
 
-        if (!contract) {
-          throw new ContractVariableError(
-            404,
-            "Contrato gerado não encontrado.",
-          );
-        }
+      // Variáveis condicionais precisam estar vinculadas ao contrato.
+      // Variáveis party podem ser compartilhadas pela empresa.
+      if (!linkedVariable && variable.variableType === "conditional") {
+        throw new ContractVariableError(
+          404,
+          "Variável não encontrada neste contrato.",
+        );
+      }
 
-        const linkedVariable = await tx.contractVariable.findFirst({
-          where: {
-            id,
-            companyId,
-            generatedContracts: {
-              some: { id: generatedContractId },
-            },
-          },
-          select: { id: true },
-        });
-
-        if (!linkedVariable) {
-          throw new ContractVariableError(
-            404,
-            "Variável não encontrada neste contrato.",
-          );
-        }
-
-        // Remove somente o vínculo com este contrato.
+      // Desconecta somente quando existe vínculo.
+      if (linkedVariable) {
         await tx.contractVariable.update({
           where: { id },
           data: {
@@ -467,41 +467,10 @@ export async function deleteVariable(
           },
         });
       }
-
-      // Exclui o registro somente se não houver mais vínculos.
-      await deleteOrphanVariables(tx, [id], companyId);
-
-      return variable;
     }
 
-    // Variáveis party são compartilhadas pela empresa.
-    // Não podem ser removidas de apenas um modelo.
-    if (templateId !== undefined || generatedContractId !== undefined) {
-      throw new ContractVariableError(
-        400,
-        "Variáveis party são compartilhadas pela empresa.",
-      );
-    }
-
-    const deleted = await tx.contractVariable.deleteMany({
-      where: {
-        id,
-        companyId,
-        templates: {
-          none: {},
-        },
-        generatedContracts: {
-          none: {},
-        },
-      },
-    });
-
-    if (deleted.count === 0) {
-      throw new ContractVariableError(
-        409,
-        "Não é possível excluir esta variável porque ela está sendo utilizada em um contrato ou modelo.",
-      );
-    }
+    // Exclui o registro somente se não houver mais vínculos.
+    await deleteOrphanVariables(tx, [id], companyId);
 
     return variable;
   });
