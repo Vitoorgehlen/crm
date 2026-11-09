@@ -19,14 +19,13 @@ type ProtectedRange = {
 export const conditionalProtectionKey = new PluginKey(
   "conditionalVariableProtection",
 );
-// Localiza os trechos protegidos dentro do documento.
+
 function getConditionalProtectedRanges(doc: ProseMirrorNode): ProtectedRange[] {
   const ranges: ProtectedRange[] = [];
 
   doc.descendants((node, pos) => {
     if (!node.isInline) return;
 
-    // IDs das marcas condicionais presentes no nó.
     const markIds = node.marks
       .filter((mark) => mark.type.name === "conditionalVariable")
       .map((mark) => {
@@ -35,7 +34,6 @@ function getConditionalProtectedRanges(doc: ProseMirrorNode): ProtectedRange[] {
         return id == null ? `__missing_${pos}` : String(id);
       });
 
-    // IDs das condicionais associadas aos nós contractVariable.
     const attrIds =
       node.type.name === "contractVariable" &&
       Array.isArray(node.attrs.conditionalVariables)
@@ -56,7 +54,6 @@ function getConditionalProtectedRanges(doc: ProseMirrorNode): ProtectedRange[] {
     });
   });
 
-  // Ordena os intervalos.
   ranges.sort((a, b) => a.from - b.from || a.to - b.to);
 
   const merged: ProtectedRange[] = [];
@@ -69,10 +66,7 @@ function getConditionalProtectedRanges(doc: ProseMirrorNode): ProtectedRange[] {
       continue;
     }
 
-    // Intervalos que realmente se sobrepõem.
     const overlaps = range.from < previous.to;
-
-    // Intervalos contíguos que pertencem à mesma condicional.
     const sameConditionalAtBoundary =
       range.from === previous.to &&
       range.conditionalIds.some((id) => previous.conditionalIds.includes(id));
@@ -83,30 +77,20 @@ function getConditionalProtectedRanges(doc: ProseMirrorNode): ProtectedRange[] {
       previous.conditionalIds = [
         ...new Set([...previous.conditionalIds, ...range.conditionalIds]),
       ];
-    } else {
-      // Condicionais diferentes permanecem separadas.
-      // O espaço entre elas pode receber texto.
-      merged.push({ ...range });
-    }
+    } else merged.push({ ...range });
   }
 
   return merged;
 }
 
-// Verifica se uma alteração modifica algum trecho protegido.
 function touchesProtectedRange(
   from: number,
   to: number,
   ranges: ProtectedRange[],
 ): boolean {
   return ranges.some((range) => {
-    // Inserção: bloqueia somente quando acontece dentro do trecho.
-    // Assim, ainda é possível escrever antes ou depois da variável.
-    if (from === to) {
-      return from > range.from && from < range.to;
-    }
+    if (from === to) return from > range.from && from < range.to;
 
-    // Exclusão ou substituição de texto.
     return from < range.to && to > range.from;
   });
 }
@@ -157,6 +141,17 @@ export const ContractVariable = Node.create({
       displayText: { default: "" },
       optionIndex: { default: 0 },
       conditionalVariables: { default: [] },
+
+      textTransform: {
+        default: null,
+
+        parseHTML: (element) => element.getAttribute("data-text-transform"),
+
+        renderHTML: (attributes) =>
+          attributes.textTransform
+            ? { "data-text-transform": attributes.textTransform }
+            : {},
+      },
     };
   },
 
@@ -215,24 +210,26 @@ export const ContractVariable = Node.create({
         }
         return false;
       },
+
       ArrowRight: ({ editor }) => {
         const { selection } = editor.state;
         if (
           selection instanceof NodeSelection &&
           selection.node.type.name === "contractVariable"
-        ) {
+        )
           return editor.chain().focus().setTextSelection(selection.to).run();
-        }
+
         return false;
       },
+
       ArrowLeft: ({ editor }) => {
         const { selection } = editor.state;
         if (
           selection instanceof NodeSelection &&
           selection.node.type.name === "contractVariable"
-        ) {
+        )
           return editor.chain().focus().setTextSelection(selection.from).run();
-        }
+
         return false;
       },
     };
@@ -242,8 +239,6 @@ export const ContractVariable = Node.create({
     return [
       new Plugin({
         props: {
-          // Clique na metade esquerda → cursor ANTES.
-          // Clique na metade direita → cursor DEPOIS.
           handleClick(view, _pos, event) {
             const target = event.target as HTMLElement;
             const varEl = target.closest(
@@ -322,11 +317,7 @@ export const ConditionalVariable = Mark.create({
   },
 
   parseHTML() {
-    return [
-      {
-        tag: "span[data-conditional-variable]",
-      },
-    ];
+    return [{ tag: "span[data-conditional-variable]" }];
   },
 
   renderHTML({ mark, HTMLAttributes }) {
@@ -342,7 +333,6 @@ export const ConditionalVariable = Mark.create({
     ];
   },
 
-  // Impede a modificação do conteúdo protegido.
   addProseMirrorPlugins() {
     return [
       new Plugin({
@@ -352,33 +342,23 @@ export const ConditionalVariable = Mark.create({
           if (
             transaction.getMeta(conditionalProtectionKey) ===
             "remove-conditional"
-          ) {
+          )
             return true;
-          }
 
-          if (!transaction.docChanged) {
-            return true;
-          }
+          if (!transaction.docChanged) return true;
 
           for (let index = 0; index < transaction.steps.length; index++) {
             const step = transaction.steps[index];
 
-            // Verifica somente operações de inserção,
-            // exclusão ou substituição de conteúdo.
             if (
               !(step instanceof ReplaceStep) &&
               !(step instanceof ReplaceAroundStep)
-            ) {
+            )
               continue;
-            }
 
-            // Cada operação pode usar posições diferentes
-            // após as etapas anteriores da transação.
             const docBeforeStep = transaction.docs[index];
 
-            if (!docBeforeStep) {
-              continue;
-            }
+            if (!docBeforeStep) continue;
 
             const protectedRanges =
               getConditionalProtectedRanges(docBeforeStep);
@@ -393,9 +373,7 @@ export const ConditionalVariable = Mark.create({
                   touchesProtectedRange(step.gapTo, step.to, protectedRanges)
                 : touchesProtectedRange(step.from, step.to, protectedRanges);
 
-            if (touchesProtected) {
-              return false;
-            }
+            if (touchesProtected) return false;
           }
 
           return true;

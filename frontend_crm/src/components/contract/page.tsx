@@ -3,6 +3,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/AuthContext";
+
+import { useEditor, useEditorState, EditorContent } from "@tiptap/react";
+import type { JSONContent } from "@tiptap/core";
+import StarterKit from "@tiptap/starter-kit";
+import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
+import { TextStyleKit } from "@tiptap/extension-text-style";
+import { TextSelection } from "@tiptap/pm/state";
+import { PaginationPlus } from "tiptap-pagination-plus";
+import {
+  Fragment,
+  Slice,
+  type Node as ProseMirrorNode,
+} from "@tiptap/pm/model";
+
 import {
   ConditionalVariable,
   ContractVariable,
@@ -12,15 +27,15 @@ import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 import WarningDeal from "@/components/Warning/DefaultWarning";
 
-import { useEditor, useEditorState, EditorContent } from "@tiptap/react";
-import type { JSONContent } from "@tiptap/core";
-import { Fragment, Slice } from "@tiptap/pm/model";
-import StarterKit from "@tiptap/starter-kit";
-import Underline from "@tiptap/extension-underline";
-import TextAlign from "@tiptap/extension-text-align";
-import { TextStyleKit } from "@tiptap/extension-text-style";
-import { TextSelection } from "@tiptap/pm/state";
-import { PaginationPlus } from "tiptap-pagination-plus";
+import {
+  ContractProps,
+  ContractStatus,
+  ContractVariableData,
+  PartyValues,
+  PERSON_TYPE_OPTIONS,
+  PersonContext,
+  PersonType,
+} from "@/types";
 
 import {
   BsJustify,
@@ -32,25 +47,18 @@ import { IoPrintSharp } from "react-icons/io5";
 import {
   FaCircleCheck,
   FaCircleXmark,
-  FaRegTrashCan,
   FaSquareRootVariable,
 } from "react-icons/fa6";
-
-import { FaTrashAlt } from "react-icons/fa";
+import { FaPen, FaTrashAlt } from "react-icons/fa";
 import { HiVariable } from "react-icons/hi2";
 import { IoIosSave } from "react-icons/io";
 import { IoReturnUpBackOutline } from "react-icons/io5";
+
 import styles from "./page.module.css";
-import {
-  ContractProps,
-  ContractStatus,
-  ContractVariableData,
-  PartyValues,
-  PersonContext,
-  PersonType,
-} from "@/types";
 
 const API = process.env.NEXT_PUBLIC_API_URL;
+
+type TextTransform = "uppercase" | "capitalize" | "lowercase";
 
 export default function ContractEditor(props: ContractProps) {
   const { contractId, contractName, contractContent, onBack, onDeleted } =
@@ -59,66 +67,66 @@ export default function ContractEditor(props: ContractProps) {
   const { token, isLoading } = useAuth();
 
   const [name, setName] = useState(contractName ?? "");
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
-  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-
   const [status, setStatus] = useState<ContractStatus>(
     props.mode === "generated" ? props.status : "DRAFT",
   );
   const [sellerType, setSellerType] = useState<PersonType>(
     props.mode === "generated" ? props.sellerType : "SINGULAR_M",
   );
-
   const [buyerType, setBuyerType] = useState<PersonType>(
     props.mode === "generated" ? props.buyerType : "SINGULAR_M",
   );
-  const [personContext, setPersonContext] = useState<PersonContext>("seller");
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
-  const [isOpenVariables, setIsOpenVariables] = useState(false);
+  const [personContext, setPersonContext] = useState<PersonContext>("seller");
   const [cardPosition, setCardPosition] = useState({ top: 0 });
+
   const [variables, setVariables] = useState<ContractVariableData[]>([]);
   const [selectedVariableId, setSelectedVariableId] = useState("");
   const [conditionalVersion, setConditionalVersion] = useState(0);
+  const [variableType, setVariableType] = useState<"party" | "conditional">(
+    "party",
+  );
+  const [newVariableName, setNewVariableName] = useState("");
+  const [conditionalText, setConditionalText] = useState("");
   const [hasTextSelection, setHasTextSelection] = useState(false);
+  const [editingVariableId, setEditingVariableId] = useState<string | null>(
+    null,
+  );
   const [variableToDelete, setVariableToDelete] = useState<{
     id: string;
     label: string;
   } | null>(null);
 
+  const [isOpenVariables, setIsOpenVariables] = useState(false);
   const [isOpenCreateVariables, setIsOpenCreateVariables] = useState(false);
-  const [isOpenCreateConditional, setOpenIsCreateConditional] = useState(false);
-
-  const [variableType, setVariableType] = useState<"party" | "conditional">(
-    "party",
-  );
-  const [newVariableName, setNewVariableName] = useState("");
-  const personTypes: { value: PersonType; label: string }[] = [
-    { value: "SINGULAR_M", label: "Comprador" },
-    { value: "SINGULAR_F", label: "Compradora" },
-    { value: "PLURAL_M", label: "Compradores" },
-    { value: "PLURAL_F", label: "Compradoras" },
-  ];
+  const [isOpenCreateConditional, setIsOpenCreateConditional] = useState(false);
 
   const partyOptions = {
-    buyer: personTypes,
-    seller: personTypes.map((option) => ({
+    buyer: PERSON_TYPE_OPTIONS,
+    seller: PERSON_TYPE_OPTIONS.map((option) => ({
       ...option,
       label: option.label.replace("Comprador", "Vendedor"),
     })),
   };
 
-  const emptyPartyValues = {
-    buyer: Object.fromEntries(personTypes.map(({ value }) => [value, ""])),
-    seller: Object.fromEntries(personTypes.map(({ value }) => [value, ""])),
-  } as PartyValues;
-
-  const [partyValues, setPartyValues] = useState<PartyValues>(emptyPartyValues);
-
   const contextOptions: { value: PersonContext; label: string }[] = [
     { value: "seller", label: getPersonLabel("seller") },
     { value: "buyer", label: getPersonLabel("buyer") },
   ];
+
+  const emptyPartyValues = {
+    buyer: Object.fromEntries(
+      PERSON_TYPE_OPTIONS.map(({ value }) => [value, ""]),
+    ),
+    seller: Object.fromEntries(
+      PERSON_TYPE_OPTIONS.map(({ value }) => [value, ""]),
+    ),
+  } as PartyValues;
+
+  const [partyValues, setPartyValues] = useState<PartyValues>(emptyPartyValues);
 
   const statusOptions: {
     label: string;
@@ -148,9 +156,15 @@ export default function ContractEditor(props: ContractProps) {
   function resetVariables() {
     setNewVariableName("");
     setPartyValues(emptyPartyValues);
+    setEditingVariableId(null);
+
+    setConditionalText("");
+    setVariableType("party");
+
+    conditionalSelectionRef.current = null;
 
     setIsOpenCreateVariables(false);
-    setOpenIsCreateConditional(false);
+    setIsOpenCreateConditional(false);
     setIsOpenVariables(false);
   }
 
@@ -159,128 +173,6 @@ export default function ContractEditor(props: ContractProps) {
     const options = partyOptions[context];
 
     return options.find((option) => option.value === personType)?.label ?? "";
-  }
-
-  function applyTextColor(color: string) {
-    if (!editor) return;
-
-    editor
-      .chain()
-      .focus()
-      .command(({ tr, state }) => {
-        const textStyleType = state.schema.marks.textStyle;
-
-        if (!textStyleType) return false;
-
-        const { from, to, empty } = state.selection;
-
-        if (empty) {
-          const currentMarks =
-            state.storedMarks ?? state.selection.$from.marks();
-
-          const currentStyle = currentMarks.find(
-            (mark) => mark.type === textStyleType,
-          );
-
-          tr.addStoredMark(
-            textStyleType.create({
-              ...(currentStyle?.attrs ?? {}),
-              color,
-            }),
-          );
-
-          return true;
-        }
-
-        state.doc.nodesBetween(from, to, (node, pos) => {
-          if (!node.isText && node.type.name !== "contractVariable") {
-            return;
-          }
-
-          const start = Math.max(from, pos);
-          const end = Math.min(to, pos + node.nodeSize);
-
-          if (start >= end) return;
-
-          const currentStyle = node.marks.find(
-            (mark) => mark.type === textStyleType,
-          );
-
-          tr.addMark(
-            start,
-            end,
-            textStyleType.create({
-              ...(currentStyle?.attrs ?? {}),
-              color,
-            }),
-          );
-        });
-
-        return true;
-      })
-      .run();
-  }
-
-  function applyFontSize(fontSize: string) {
-    if (!editor) return;
-
-    editor
-      .chain()
-      .focus()
-      .command(({ tr, state }) => {
-        const textStyleType = state.schema.marks.textStyle;
-
-        if (!textStyleType) return false;
-
-        const { from, to, empty } = state.selection;
-
-        // Quando não existe seleção, aplica ao próximo texto digitado.
-        if (empty) {
-          const currentMarks =
-            state.storedMarks ?? state.selection.$from.marks();
-
-          const currentStyle = currentMarks.find(
-            (mark) => mark.type === textStyleType,
-          );
-
-          tr.addStoredMark(
-            textStyleType.create({
-              ...(currentStyle?.attrs ?? {}),
-              fontSize,
-            }),
-          );
-
-          return true;
-        }
-
-        // Aplica tanto aos textos quanto aos nós contractVariable.
-        state.doc.nodesBetween(from, to, (node, pos) => {
-          if (!node.isText && node.type.name !== "contractVariable") {
-            return;
-          }
-
-          const start = Math.max(from, pos);
-          const end = Math.min(to, pos + node.nodeSize);
-
-          if (start >= end) return;
-
-          const currentStyle = node.marks.find(
-            (mark) => mark.type === textStyleType,
-          );
-
-          tr.addMark(
-            start,
-            end,
-            textStyleType.create({
-              ...(currentStyle?.attrs ?? {}),
-              fontSize,
-            }),
-          );
-        });
-
-        return true;
-      })
-      .run();
   }
 
   const variableInsert = (variableId: string) => {
@@ -305,11 +197,15 @@ export default function ContractEditor(props: ContractProps) {
       .run();
   };
 
-  function refreshVariables(context: PersonContext, personType: PersonType) {
+  function refreshVariables(
+    context: PersonContext,
+    personType: PersonType,
+    variableList: ContractVariableData[] = variables,
+  ) {
     if (!editor) return;
 
     const variablesById = new Map(
-      variables.map((variable) => [String(variable.id), variable]),
+      variableList.map((variable) => [String(variable.id), variable]),
     );
 
     const options = partyOptions[context];
@@ -342,16 +238,30 @@ export default function ContractEditor(props: ContractProps) {
         if (!variable || variable.variableType !== "party") return;
 
         const optionIndex = index + (context === "buyer" ? 4 : 0);
-        const displayText = variable.options[optionIndex] ?? variable.label;
 
-        if (node.attrs.displayText === displayText) return;
+        const originalDisplayText =
+          variable.options[optionIndex] ?? variable.label;
 
+        const textTransform = node.attrs.textTransform as TextTransform | null;
+
+        const displayText = textTransform
+          ? transformTextCase(originalDisplayText, textTransform)
+          : originalDisplayText;
+        const variableName = variable.label;
+
+        if (
+          node.attrs.displayText === displayText &&
+          node.attrs.variableName === variableName
+        ) {
+          return;
+        }
         tr.setNodeMarkup(
           pos,
           undefined,
           {
             ...node.attrs,
             displayText,
+            variableName,
           },
           node.marks,
         );
@@ -389,12 +299,12 @@ export default function ContractEditor(props: ContractProps) {
       top: rect.bottom + 3,
     });
 
+    setSelectedVariableId("");
     setIsOpenVariables(true);
   }
 
   function openCreateConditionalVariable() {
     if (!editor) return;
-
     const { from, to } = editor.state.selection;
 
     if (from === to) {
@@ -424,7 +334,7 @@ export default function ContractEditor(props: ContractProps) {
       return;
     }
 
-    conditionalSelectionRef.current = {
+    const savedSelection = {
       from,
       to,
       text,
@@ -436,8 +346,12 @@ export default function ContractEditor(props: ContractProps) {
     };
 
     resetVariables();
+
+    conditionalSelectionRef.current = savedSelection;
+
     setVariableType("conditional");
-    setOpenIsCreateConditional(true);
+    setConditionalText(text);
+    setIsOpenCreateConditional(true);
   }
 
   function toggleConditionalVariable(variableId: string) {
@@ -516,59 +430,6 @@ export default function ContractEditor(props: ContractProps) {
     setConditionalVersion((prev) => prev + 1);
   }
 
-  function addConditionalToContent(
-    nodes: JSONContent[],
-    conditionalId: string,
-    variableName: string,
-  ): JSONContent[] {
-    return nodes.map((node) => {
-      const updatedNode: JSONContent = { ...node };
-
-      if (node.type === "contractVariable") {
-        const attrs = node.attrs ?? {};
-
-        const current = Array.isArray(attrs.conditionalVariables)
-          ? (attrs.conditionalVariables as string[])
-          : [];
-
-        updatedNode.attrs = {
-          ...attrs,
-          conditionalVariables: current.includes(conditionalId)
-            ? current
-            : [...current, conditionalId],
-        };
-      }
-
-      if (node.type === "text") {
-        const marks = (node.marks ?? []).filter(
-          (mark) => mark.type !== "conditionalVariable",
-        );
-
-        updatedNode.marks = [
-          ...marks,
-          {
-            type: "conditionalVariable",
-            attrs: {
-              variableId: conditionalId,
-              variableName,
-              enabled: false,
-            },
-          },
-        ];
-      }
-
-      if (node.content?.length) {
-        updatedNode.content = addConditionalToContent(
-          node.content,
-          conditionalId,
-          variableName,
-        );
-      }
-
-      return updatedNode;
-    });
-  }
-
   function insertConditionalAtCursor(variable: ContractVariableData) {
     if (!editor) return;
 
@@ -633,6 +494,230 @@ export default function ContractEditor(props: ContractProps) {
     }
   }
 
+  function editConditionalVariable(variable: ContractVariableData) {
+    if (!variable.content?.content?.length) {
+      setError(
+        "Esta variável condicional não possui conteúdo estruturado salvo.",
+      );
+      return;
+    }
+
+    conditionalSelectionRef.current = {
+      from: 0,
+      to: 0,
+      text: variable.options[0] ?? variable.label,
+      content: variable.content,
+    };
+
+    setEditingVariableId(String(variable.id));
+    setNewVariableName(variable.label);
+    setVariableType("conditional");
+    setConditionalText(variable.options[0] ?? variable.label);
+
+    setError("");
+
+    setIsOpenVariables(false);
+    setIsOpenCreateVariables(false);
+    setIsOpenCreateConditional(true);
+  }
+
+  function refreshConditionalVariableContent(variable: ContractVariableData) {
+    if (!editor || !variable.content?.content?.length) return;
+
+    const conditionalId = `conditional.${variable.id}`;
+    const doc = editor.state.doc;
+
+    const ranges: { from: number; to: number }[] = [];
+
+    doc.descendants((node, pos) => {
+      if (!node.isText && node.type.name !== "contractVariable") {
+        return;
+      }
+
+      const hasMark = node.marks.some(
+        (mark) =>
+          mark.type.name === "conditionalVariable" &&
+          mark.attrs.variableId === conditionalId,
+      );
+
+      const hasAttribute =
+        node.type.name === "contractVariable" &&
+        Array.isArray(node.attrs.conditionalVariables) &&
+        node.attrs.conditionalVariables.includes(conditionalId);
+
+      if (!hasMark && !hasAttribute) return;
+
+      const from = pos;
+      const to = pos + node.nodeSize;
+
+      const previous = ranges[ranges.length - 1];
+
+      const gap = previous ? from - previous.to : -1;
+
+      const sameRange =
+        previous &&
+        (gap <= 0 ||
+          (gap === 2 && doc.textBetween(previous.to, from, "") === ""));
+
+      if (previous && sameRange) {
+        previous.to = Math.max(previous.to, to);
+      } else {
+        ranges.push({ from, to });
+      }
+    });
+
+    if (ranges.length === 0) return;
+
+    const content = addConditionalToContent(
+      variable.content.content,
+      conditionalId,
+      variable.label,
+    );
+
+    const fragment = Fragment.fromJSON(editor.schema, content);
+
+    const slice = new Slice(
+      fragment,
+      variable.content.openStart,
+      variable.content.openEnd,
+    );
+
+    const tr = editor.state.tr;
+
+    for (const range of [...ranges].reverse()) {
+      tr.replaceRange(range.from, range.to, slice);
+    }
+
+    tr.setMeta(conditionalProtectionKey, "remove-conditional");
+
+    if (tr.docChanged) {
+      editor.view.dispatch(tr.scrollIntoView());
+    }
+  }
+
+  function removeVariableFromEditor(variableId: string) {
+    if (!editor) return;
+
+    const variable = variables.find((item) => String(item.id) === variableId);
+
+    const isConditional = variable?.variableType === "conditional";
+    const conditionalId = `conditional.${variableId}`;
+
+    const ranges: {
+      from: number;
+      to: number;
+    }[] = [];
+
+    editor.state.doc.descendants((node, pos) => {
+      let shouldRemove = false;
+
+      if (isConditional) {
+        const hasConditionalMark = node.marks.some(
+          (mark) =>
+            mark.type.name === "conditionalVariable" &&
+            mark.attrs.variableId === conditionalId,
+        );
+
+        const hasConditionalAttribute =
+          node.type.name === "contractVariable" &&
+          Array.isArray(node.attrs.conditionalVariables) &&
+          node.attrs.conditionalVariables.includes(conditionalId);
+
+        shouldRemove = hasConditionalMark || hasConditionalAttribute;
+      } else {
+        if (node.type.name !== "contractVariable") return;
+
+        const [context, nodeId] = String(node.attrs.variableId ?? "").split(
+          ".",
+        );
+
+        shouldRemove =
+          nodeId === variableId &&
+          (context === "seller" || context === "buyer");
+      }
+
+      if (!shouldRemove) return;
+
+      const from = pos;
+      const to = pos + node.nodeSize;
+
+      const previous = ranges[ranges.length - 1];
+
+      if (previous && from <= previous.to) {
+        previous.to = Math.max(previous.to, to);
+      } else {
+        ranges.push({ from, to });
+      }
+    });
+
+    if (ranges.length === 0) return;
+
+    const tr = editor.state.tr;
+
+    for (const range of [...ranges].reverse()) {
+      tr.delete(range.from, range.to);
+    }
+
+    tr.setMeta(conditionalProtectionKey, "remove-conditional");
+
+    if (tr.docChanged) {
+      editor.view.dispatch(tr.scrollIntoView());
+    }
+  }
+
+  function addConditionalToContent(
+    nodes: JSONContent[],
+    conditionalId: string,
+    variableName: string,
+  ): JSONContent[] {
+    return nodes.map((node) => {
+      const updatedNode: JSONContent = { ...node };
+
+      if (node.type === "contractVariable") {
+        const attrs = node.attrs ?? {};
+
+        const current = Array.isArray(attrs.conditionalVariables)
+          ? (attrs.conditionalVariables as string[])
+          : [];
+
+        updatedNode.attrs = {
+          ...attrs,
+          conditionalVariables: current.includes(conditionalId)
+            ? current
+            : [...current, conditionalId],
+        };
+      }
+
+      if (node.type === "text") {
+        const marks = (node.marks ?? []).filter(
+          (mark) => mark.type !== "conditionalVariable",
+        );
+
+        updatedNode.marks = [
+          ...marks,
+          {
+            type: "conditionalVariable",
+            attrs: {
+              variableId: conditionalId,
+              variableName,
+              enabled: false,
+            },
+          },
+        ];
+      }
+
+      if (node.content?.length) {
+        updatedNode.content = addConditionalToContent(
+          node.content,
+          conditionalId,
+          variableName,
+        );
+      }
+
+      return updatedNode;
+    });
+  }
+
   function isConditionalVariableEnabled(variableId: string): boolean {
     if (!editor) return false;
 
@@ -673,11 +758,10 @@ export default function ContractEditor(props: ContractProps) {
 
     try {
       setError("");
-      removeConditionalFromEditor(variableId);
+      removeVariableFromEditor(variableId);
 
       const saved = await handleSaveContract(contractId);
-      if (!saved)
-        throw new Error("Não foi possível salvar a remoção da condicional.");
+      if (!saved) return;
 
       const params = new URLSearchParams({
         ...(props.mode === "template"
@@ -699,9 +783,7 @@ export default function ContractEditor(props: ContractProps) {
 
       const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data?.error || "Erro ao remover variável.");
-      }
+      if (!res.ok) throw new Error(data?.error || "Erro ao remover variável.");
 
       await fetchVariable();
 
@@ -722,9 +804,18 @@ export default function ContractEditor(props: ContractProps) {
   async function handleSaveContract(
     contractId: number | null,
   ): Promise<boolean> {
-    if (!editor || !token) return false;
+    if (!editor) {
+      console.error("[SAVE] Editor indisponível.");
+      return false;
+    }
+
+    if (!token) {
+      console.error("[SAVE] Token indisponível.");
+      return false;
+    }
 
     if (!name.trim()) {
+      console.error("[SAVE] Nome do contrato vazio.");
       setError("Escolha um nome para o contrato.");
       return false;
     }
@@ -740,9 +831,7 @@ export default function ContractEditor(props: ContractProps) {
           ? {
               name: name.trim(),
               content,
-
               ...(contractId === null ? { templateId: props.templateId } : {}),
-
               dealId: props.dealId,
               sellerType,
               buyerType,
@@ -753,24 +842,22 @@ export default function ContractEditor(props: ContractProps) {
               content,
             };
 
-      const res = await fetch(
-        `${API}/${resource}${contractId !== null ? `/${contractId}` : ""}`,
-        {
-          method: contractId !== null ? "PUT" : "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(payload),
+      const url = `${API}/${resource}${contractId !== null ? `/${contractId}` : ""}`;
+
+      const res = await fetch(url, {
+        method: contractId !== null ? "PUT" : "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json();
 
       if (!res.ok) {
         throw new Error(data?.error || "Erro ao salvar contrato.");
       }
-
       const savedId = data.id ?? contractId;
 
       if (savedId === null) {
@@ -792,23 +879,30 @@ export default function ContractEditor(props: ContractProps) {
 
       setHasUnsavedChanges(false);
 
-      if (props.mode === "generated") {
-        await props.onSaved({
-          ...data,
-          id: savedId,
-          name: data.name ?? payload.name,
-          content: data.content ?? content,
-        });
-      } else {
-        await props.onSaved({
-          id: savedId,
-          name: data.name ?? payload.name,
-          content: data.content ?? content,
-          creator: data.creator ?? null,
-          updater: data.updater ?? null,
-          createdAt: data.createdAt ?? new Date().toISOString(),
-          updatedAt: data.updatedAt ?? new Date().toISOString(),
-        });
+      try {
+        if (props.mode === "generated") {
+          await props.onSaved({
+            ...data,
+            id: savedId,
+            name: data.name ?? payload.name,
+            content: data.content ?? content,
+          });
+        } else {
+          await props.onSaved({
+            id: savedId,
+            name: data.name ?? payload.name,
+            content: data.content ?? content,
+            creator: data.creator ?? null,
+            updater: data.updater ?? null,
+            createdAt: data.createdAt ?? new Date().toISOString(),
+            updatedAt: data.updatedAt ?? new Date().toISOString(),
+          });
+        }
+      } catch (callbackError) {
+        console.error(
+          "Contrato salvo, mas houve um erro ao atualizar o componente pai:",
+          callbackError,
+        );
       }
 
       setError("");
@@ -854,61 +948,220 @@ export default function ContractEditor(props: ContractProps) {
     }
   }
 
-  function removeConditionalFromEditor(variableId: string) {
+  function transformTextCase(
+    text: string,
+    transform: TextTransform,
+    capitalizationState?: { applied: boolean },
+  ): string {
+    if (transform === "uppercase") {
+      return text.toLocaleUpperCase("pt-BR");
+    }
+
+    if (transform === "lowercase") {
+      return text.toLocaleLowerCase("pt-BR");
+    }
+
+    const lowerText = text.toLocaleLowerCase("pt-BR");
+
+    return lowerText.replace(/\p{L}/u, (letter) => {
+      if (capitalizationState?.applied) {
+        return letter;
+      }
+
+      if (capitalizationState) {
+        capitalizationState.applied = true;
+      }
+
+      return letter.toLocaleUpperCase("pt-BR");
+    });
+  }
+
+  function applyTextTransform(transform: TextTransform) {
     if (!editor) return;
 
-    const conditionalId = `conditional.${variableId}`;
-
-    const ranges: {
-      from: number;
-      to: number;
-    }[] = [];
-
-    // Localiza todos os textos e variáveis pertencentes à condicional.
-    editor.state.doc.descendants((node, pos) => {
-      const hasConditionalMark = node.marks.some(
-        (mark) =>
-          mark.type.name === "conditionalVariable" &&
-          mark.attrs.variableId === conditionalId,
-      );
-
-      const hasConditionalAttribute =
-        node.type.name === "contractVariable" &&
-        Array.isArray(node.attrs.conditionalVariables) &&
-        node.attrs.conditionalVariables.includes(conditionalId);
-
-      if (!hasConditionalMark && !hasConditionalAttribute) {
-        return;
-      }
-
-      const from = pos;
-      const to = pos + node.nodeSize;
-
-      const previous = ranges[ranges.length - 1];
-
-      // Agrupa trechos adjacentes para evitar operações desnecessárias.
-      if (previous && from <= previous.to) {
-        previous.to = Math.max(previous.to, to);
-      } else {
-        ranges.push({ from, to });
-      }
-    });
-
-    if (ranges.length === 0) return;
-
-    const tr = editor.state.tr;
-
-    // Exclui de trás para frente para não deslocar as posições restantes.
-    for (const range of [...ranges].reverse()) {
-      tr.delete(range.from, range.to);
+    if (editor.state.selection.empty) {
+      setError("Selecione um trecho do texto primeiro.");
+      return;
     }
 
-    // Autoriza esta exclusão, mesmo estando dentro de uma área protegida.
-    tr.setMeta(conditionalProtectionKey, "remove-conditional");
+    setError("");
 
-    if (tr.docChanged) {
-      editor.view.dispatch(tr.scrollIntoView());
+    editor
+      .chain()
+      .focus()
+      .command(({ tr, state }) => {
+        type TransformOperation =
+          | {
+              kind: "text";
+              from: number;
+              to: number;
+              originalText: string;
+              marks: ProseMirrorNode["marks"];
+              transformedText?: string;
+            }
+          | {
+              kind: "variable";
+              pos: number;
+              attrs: ProseMirrorNode["attrs"];
+              marks: ProseMirrorNode["marks"];
+              transformedText?: string;
+              variableTransform?: TextTransform;
+            };
+
+        const { from, to } = state.selection;
+
+        const operations: TransformOperation[] = [];
+
+        // Localiza os textos e variáveis selecionados.
+        state.doc.nodesBetween(from, to, (node, pos) => {
+          if (node.isText) {
+            const start = Math.max(from, pos);
+            const end = Math.min(to, pos + node.nodeSize);
+
+            if (start >= end) return;
+
+            operations.push({
+              kind: "text",
+              from: start,
+              to: end,
+              originalText: (node.text ?? "").slice(start - pos, end - pos),
+              marks: node.marks,
+            });
+
+            return;
+          }
+
+          if (node.type.name === "contractVariable") {
+            operations.push({
+              kind: "variable",
+              pos,
+              attrs: node.attrs,
+              marks: node.marks,
+            });
+          }
+        });
+
+        if (operations.length === 0) return false;
+
+        // Ordena os elementos na ordem original do documento.
+        operations.sort((a, b) => {
+          const posA = a.kind === "text" ? a.from : a.pos;
+          const posB = b.kind === "text" ? b.from : b.pos;
+
+          return posA - posB;
+        });
+
+        // Permite que Aa seja aplicado ao trecho inteiro,
+        // mesmo quando ele possui diferentes formatações.
+        const capitalizationState = { applied: false };
+
+        for (const operation of operations) {
+          if (operation.kind === "text") {
+            operation.transformedText = transformTextCase(
+              operation.originalText,
+              transform,
+              capitalizationState,
+            );
+          } else {
+            const alreadyCapitalized = capitalizationState.applied;
+
+            operation.transformedText = transformTextCase(
+              String(operation.attrs.displayText ?? ""),
+              transform,
+              capitalizationState,
+            );
+
+            operation.variableTransform =
+              transform === "capitalize"
+                ? alreadyCapitalized
+                  ? "lowercase"
+                  : "capitalize"
+                : transform;
+          }
+        }
+
+        // Aplica as alterações de trás para frente,
+        // evitando deslocamento das posições do documento.
+        for (const operation of [...operations].reverse()) {
+          if (operation.kind === "text") {
+            if (operation.transformedText === operation.originalText) {
+              continue;
+            }
+
+            tr.replaceWith(
+              operation.from,
+              operation.to,
+              state.schema.text(
+                operation.transformedText ?? "",
+                operation.marks,
+              ),
+            );
+          } else {
+            tr.setNodeMarkup(
+              operation.pos,
+              undefined,
+              {
+                ...operation.attrs,
+                displayText: operation.transformedText,
+                textTransform: operation.variableTransform,
+              },
+              operation.marks,
+            );
+          }
+        }
+
+        return true;
+      })
+      .run();
+  }
+
+  function findFirstTextNode(nodes: JSONContent[]): JSONContent | undefined {
+    for (const node of nodes) {
+      if (node.type === "text") {
+        return node;
+      }
+
+      if (node.content?.length) {
+        const found = findFirstTextNode(node.content);
+
+        if (found) return found;
+      }
     }
+
+    return undefined;
+  }
+
+  function buildConditionalContent(
+    text: string,
+    source: {
+      content: JSONContent[];
+      openStart: number;
+      openEnd: number;
+    },
+  ) {
+    const firstParagraph = source.content.find(
+      (node) => node.type === "paragraph",
+    );
+
+    const firstText = findFirstTextNode(source.content);
+
+    return {
+      content: [
+        {
+          type: "paragraph",
+          ...(firstParagraph?.attrs ? { attrs: firstParagraph.attrs } : {}),
+          content: [
+            {
+              type: "text",
+              text,
+              ...(firstText?.marks?.length ? { marks: firstText.marks } : {}),
+            },
+          ],
+        },
+      ],
+      openStart: source.openStart,
+      openEnd: source.openEnd,
+    };
   }
 
   const variablesRef = useRef<ContractVariableData[]>([]);
@@ -979,8 +1232,8 @@ export default function ContractEditor(props: ContractProps) {
 
         marginTop: 95,
         marginBottom: 95,
-        marginLeft: 95,
-        marginRight: 95,
+        marginLeft: 94.5,
+        marginRight: 94.5,
 
         contentMarginTop: 0,
         contentMarginBottom: 0,
@@ -1037,7 +1290,8 @@ export default function ContractEditor(props: ContractProps) {
   const createVariable = useCallback(async () => {
     if (!token) return;
 
-    if (props.contractId === null) {
+    const isEditing = editingVariableId !== null;
+    if (!isEditing && props.contractId === null) {
       setError(
         props.mode === "template"
           ? "Salve o modelo antes de criar variáveis."
@@ -1067,8 +1321,7 @@ export default function ContractEditor(props: ContractProps) {
         return;
       }
     } else {
-      const selectedText = conditionalSelectionRef.current?.text;
-
+      const selectedText = conditionalText.trim();
       if (!selectedText) {
         setError("Selecione um trecho do contrato primeiro.");
         return;
@@ -1080,31 +1333,49 @@ export default function ContractEditor(props: ContractProps) {
     const conditionalSelection =
       variableType === "conditional" ? conditionalSelectionRef.current : null;
 
+    const conditionalContent =
+      variableType === "conditional" && conditionalSelection
+        ? isEditing
+          ? buildConditionalContent(
+              conditionalText.trim(),
+              conditionalSelection.content,
+            )
+          : conditionalSelection.content
+        : undefined;
+
     const variableOwner =
       props.mode === "template"
         ? { templateId: props.contractId }
         : { generatedContractId: props.contractId };
 
-    const payload = {
-      label,
-      variableType,
-      options,
-      ...variableOwner,
-
-      ...(conditionalSelection
-        ? { content: conditionalSelection.content }
-        : {}),
-    };
+    const payload = isEditing
+      ? {
+          label,
+          options,
+          ...(conditionalContent ? { content: conditionalContent } : {}),
+        }
+      : {
+          label,
+          variableType,
+          options,
+          ...variableOwner,
+          ...(conditionalContent ? { content: conditionalContent } : {}),
+        };
 
     try {
-      const res = await fetch(`${API}/variables`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+      const res = await fetch(
+        isEditing
+          ? `${API}/variables/${editingVariableId}`
+          : `${API}/variables`,
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const data = await res.json();
 
@@ -1113,7 +1384,7 @@ export default function ContractEditor(props: ContractProps) {
         return;
       }
 
-      if (variableType === "conditional") {
+      if (variableType === "conditional" && !isEditing) {
         const selection = conditionalSelectionRef.current;
 
         if (!editor || !selection || !data.id) {
@@ -1173,9 +1444,32 @@ export default function ContractEditor(props: ContractProps) {
         conditionalSelectionRef.current = null;
       }
 
-      await fetchVariable();
+      if (isEditing) {
+        const updatedVariable = data as ContractVariableData;
+
+        const nextVariables = variables.map((variable) =>
+          String(variable.id) === editingVariableId
+            ? updatedVariable
+            : variable,
+        );
+
+        setVariables(nextVariables);
+
+        if (updatedVariable.variableType === "conditional") {
+          refreshConditionalVariableContent(updatedVariable);
+        } else {
+          refreshVariables("seller", sellerType, nextVariables);
+          refreshVariables("buyer", buyerType, nextVariables);
+        }
+      } else {
+        await fetchVariable();
+      }
+
       resetVariables();
-      if (variableType === "party") setIsOpenVariables(true);
+
+      if (variableType === "party") {
+        setIsOpenVariables(true);
+      }
     } catch (err) {
       console.error(err);
       setError("Erro ao conectar com o servidor.");
@@ -1187,6 +1481,13 @@ export default function ContractEditor(props: ContractProps) {
     variableType,
     partyValues,
     fetchVariable,
+    editingVariableId,
+    variables,
+    sellerType,
+    buyerType,
+    props.contractId,
+    props.mode,
+    conditionalText,
   ]);
 
   useEffect(() => {
@@ -1227,6 +1528,23 @@ export default function ContractEditor(props: ContractProps) {
       editor.off("update", updateUnsavedChanges);
     };
   }, [editor, name, status, sellerType, buyerType, props.mode]);
+
+  useEffect(() => {
+    const nextName = contractName ?? "";
+
+    setName(nextName);
+
+    savedMetadataRef.current = JSON.stringify({
+      name: nextName.trim(),
+      ...(props.mode === "generated"
+        ? {
+            status: props.status,
+            sellerType: props.sellerType,
+            buyerType: props.buyerType,
+          }
+        : {}),
+    });
+  }, [contractId, contractName]);
 
   useEffect(() => {
     if (!editor) return;
@@ -1355,11 +1673,8 @@ export default function ContractEditor(props: ContractProps) {
       if (
         variablesPanelRef.current &&
         !variablesPanelRef.current.contains(event.target as Node)
-      ) {
-        setIsOpenVariables(false);
-        setIsOpenCreateVariables(false);
-        setOpenIsCreateConditional(false);
-      }
+      )
+        resetVariables();
     }
 
     document.addEventListener("mousedown", handleClickOutside);
@@ -1436,7 +1751,7 @@ export default function ContractEditor(props: ContractProps) {
                     onClick={() => setShowDeleteWarning(true)}
                     className={styles.back}
                   >
-                    <FaRegTrashCan />
+                    <FaTrashAlt />
                     Apagar contrato
                   </button>
                 )}
@@ -1532,6 +1847,13 @@ export default function ContractEditor(props: ContractProps) {
 
                       <button
                         type="button"
+                        className={styles.editConditional}
+                        onClick={() => editConditionalVariable(variable)}
+                      >
+                        <FaPen />
+                      </button>
+                      <button
+                        type="button"
                         className={styles.deleteConditional}
                         onClick={() =>
                           setVariableToDelete({
@@ -1563,7 +1885,28 @@ export default function ContractEditor(props: ContractProps) {
                   <div className={styles.variableCreateColumn}>
                     <p>Trecho selecionado:</p>
 
-                    <p>{conditionalSelectionRef.current?.text}</p>
+                    {editingVariableId ? (
+                      <input
+                        type="text"
+                        placeholder="Variável condicional"
+                        className={`form-base ${styles.form}`}
+                        value={conditionalText}
+                        onChange={(event) => {
+                          const text = event.target.value;
+
+                          setConditionalText(text);
+
+                          if (conditionalSelectionRef.current) {
+                            conditionalSelectionRef.current = {
+                              ...conditionalSelectionRef.current,
+                              text,
+                            };
+                          }
+                        }}
+                      />
+                    ) : (
+                      <p>{conditionalSelectionRef.current?.text}</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -1572,7 +1915,7 @@ export default function ContractEditor(props: ContractProps) {
                   <button
                     type="button"
                     className={`${styles.variableBtn} ${styles.visibleBtn} ${styles.cancelCreate}`}
-                    onClick={() => setOpenIsCreateConditional(false)}
+                    onClick={resetVariables}
                   >
                     Cancelar
                   </button>
@@ -1638,12 +1981,45 @@ export default function ContractEditor(props: ContractProps) {
 
               <span className={styles.separator} />
 
+              <Tooltip label="Maiúsculas">
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => applyTextTransform("uppercase")}
+                >
+                  <strong>AA</strong>
+                </button>
+              </Tooltip>
+
+              <Tooltip label="Primeira letra maiúscula">
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => applyTextTransform("capitalize")}
+                >
+                  <strong>Aa</strong>
+                </button>
+              </Tooltip>
+
+              <Tooltip label="Minúsculas">
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => applyTextTransform("lowercase")}
+                >
+                  <strong>aa</strong>
+                </button>
+              </Tooltip>
+
+              <span className={styles.separator} />
+
               <Tooltip label="Tamanho da fonte">
                 <select
                   value={toolbarState?.fontSize ?? "12px"}
                   className={styles.fontSizeSelect}
                   onChange={(e) => {
-                    applyFontSize(e.target.value);
+                    if (!editor) return;
+                    editor.chain().focus().setFontSize(e.target.value).run();
                   }}
                 >
                   <option value="10px">10 px</option>
@@ -1670,7 +2046,10 @@ export default function ContractEditor(props: ContractProps) {
                       }`}
                       style={{ backgroundColor: color }}
                       onMouseDown={(e) => e.preventDefault()}
-                      onClick={() => applyTextColor(color)}
+                      onClick={() => {
+                        if (!editor) return;
+                        editor.chain().focus().setColor(color).run();
+                      }}
                     />
                   ))}
                 </div>
@@ -1694,8 +2073,6 @@ export default function ContractEditor(props: ContractProps) {
                   type="button"
                   onMouseDown={(event) => event.preventDefault()}
                   onClick={() => {
-                    console.log(JSON.stringify(editor.getJSON(), null, 2));
-
                     editor.chain().focus().setTextAlign("center").run();
                   }}
                 >
@@ -1775,49 +2152,53 @@ export default function ContractEditor(props: ContractProps) {
               </Tooltip>
             </div>
 
-            <div
-              className={styles.editorContainer}
-              onMouseDownCapture={(event) => {
-                if (event.button !== 0) return;
+            <div className={styles.editorViewport}>
+              <div className={styles.editorCanvas}>
+                <div
+                  className={styles.editorContainer}
+                  onMouseDownCapture={(event) => {
+                    if (event.button !== 0) return;
 
-                const target = event.target as HTMLElement;
+                    const target = event.target as HTMLElement;
 
-                if (target.closest(".ProseMirror")) return;
+                    if (target.closest(".ProseMirror")) return;
 
-                const view = editor.view;
-                const rect = view.dom.getBoundingClientRect();
+                    const view = editor.view;
+                    const rect = view.dom.getBoundingClientRect();
 
-                if (!rect.width || !rect.height) return;
+                    if (!rect.width || !rect.height) return;
 
-                const left = Math.max(
-                  rect.left + 1,
-                  Math.min(event.clientX, rect.right - 1),
-                );
+                    const left = Math.max(
+                      rect.left + 1,
+                      Math.min(event.clientX, rect.right - 1),
+                    );
 
-                const top = Math.max(
-                  rect.top + 1,
-                  Math.min(event.clientY, rect.bottom - 1),
-                );
+                    const top = Math.max(
+                      rect.top + 1,
+                      Math.min(event.clientY, rect.bottom - 1),
+                    );
 
-                const result = view.posAtCoords({ left, top });
+                    const result = view.posAtCoords({ left, top });
 
-                if (!result) return;
+                    if (!result) return;
 
-                event.preventDefault();
+                    event.preventDefault();
 
-                const selection = TextSelection.near(
-                  view.state.doc.resolve(result.pos),
-                  1,
-                );
+                    const selection = TextSelection.near(
+                      view.state.doc.resolve(result.pos),
+                      1,
+                    );
 
-                view.dispatch(
-                  view.state.tr.setSelection(selection).scrollIntoView(),
-                );
+                    view.dispatch(
+                      view.state.tr.setSelection(selection).scrollIntoView(),
+                    );
 
-                view.focus();
-              }}
-            >
-              <EditorContent editor={editor} className={styles.editor} />
+                    view.focus();
+                  }}
+                >
+                  <EditorContent editor={editor} className={styles.editor} />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -1875,7 +2256,7 @@ export default function ContractEditor(props: ContractProps) {
 
               {variables.find(
                 (item) => String(item.id) === selectedVariableId,
-              ) && (
+              ) ? (
                 <span className={styles.variableSpan}>
                   Prévia:{" "}
                   <strong className={styles.variableBold}>
@@ -1887,31 +2268,96 @@ export default function ContractEditor(props: ContractProps) {
                     )}
                   </strong>
                 </span>
+              ) : (
+                <span className={styles.variableSpan} />
               )}
 
               <div className={styles.variablesBtns}>
-                <button
-                  type="button"
-                  className={`${styles.variableBtn} ${styles.createVariable}`}
-                  onClick={() => {
-                    setIsOpenCreateVariables(true);
-                    setOpenIsCreateConditional(false);
-                    setIsOpenVariables(false);
-                    setVariableType("party");
-                    setNewVariableName("");
-                  }}
-                >
-                  + Criar nova
-                </button>
+                {selectedVariableId === "" ? (
+                  <button
+                    type="button"
+                    className={`${styles.variableBtn} ${styles.createVariable}`}
+                    onClick={() => {
+                      setIsOpenCreateVariables(true);
+                      setIsOpenCreateConditional(false);
+                      setIsOpenVariables(false);
+                      setVariableType("party");
+                      setNewVariableName("");
+                    }}
+                  >
+                    + Criar nova
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className={`${styles.variableBtn} ${styles.delBtn}`}
+                      onClick={() => {
+                        const variable = variables.find(
+                          (item) => String(item.id) === selectedVariableId,
+                        );
+
+                        if (!variable) return;
+
+                        setVariableToDelete({
+                          id: selectedVariableId,
+                          label: variable.label,
+                        });
+                        setIsOpenVariables(false);
+                      }}
+                    >
+                      Excluir
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.variableBtn} ${styles.visibleBtn}`}
+                      onClick={() => {
+                        const variable = variables.find(
+                          (item) => String(item.id) === selectedVariableId,
+                        );
+
+                        if (!variable || variable.variableType !== "party")
+                          return;
+
+                        const options = variable.options;
+
+                        setEditingVariableId(String(variable.id));
+                        setNewVariableName(variable.label);
+
+                        setPartyValues({
+                          seller: {
+                            SINGULAR_M: options[0] ?? "",
+                            SINGULAR_F: options[1] ?? "",
+                            PLURAL_M: options[2] ?? "",
+                            PLURAL_F: options[3] ?? "",
+                          },
+                          buyer: {
+                            SINGULAR_M: options[4] ?? "",
+                            SINGULAR_F: options[5] ?? "",
+                            PLURAL_M: options[6] ?? "",
+                            PLURAL_F: options[7] ?? "",
+                          },
+                        });
+
+                        setVariableType("party");
+                        setIsOpenCreateConditional(false);
+                        setIsOpenVariables(false);
+                        setIsOpenCreateVariables(true);
+                      }}
+                    >
+                      Editar
+                    </button>
+                  </>
+                )}
 
                 <button
                   type="button"
                   className={`${styles.variableBtn} ${
-                    selectedVariableId !== "" && styles.visibleBtn
+                    selectedVariableId !== "" && styles.createVariable
                   }`}
                   onClick={() => variableInsert(selectedVariableId)}
                 >
-                  Inserir ao contrato
+                  {selectedVariableId !== "" ? "Inserir" : "Inserir ao texto"}
                 </button>
               </div>
             </div>
@@ -2046,6 +2492,18 @@ export default function ContractEditor(props: ContractProps) {
                 } else {
                   onBack();
                 }
+              }}
+            />
+          )}
+
+          {variableToDelete && (
+            <WarningDeal
+              message="Deseja realmente apagar a variável"
+              name={variableToDelete.label}
+              onClose={() => setVariableToDelete(null)}
+              onConfirm={async () => {
+                await handleDeleteVariable(variableToDelete.id);
+                setVariableToDelete(null);
               }}
             />
           )}

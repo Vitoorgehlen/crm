@@ -824,6 +824,14 @@ export type TaskPriority = keyof typeof TaskPriority;
 export type DroppableId = `${PaymentMethod}-${DealStepType}`;
 
 export type PersonType = "SINGULAR_M" | "SINGULAR_F" | "PLURAL_M" | "PLURAL_F";
+
+export const PERSON_TYPE_OPTIONS: { value: PersonType; label: string }[] = [
+  { value: "SINGULAR_M", label: "Comprador" },
+  { value: "SINGULAR_F", label: "Compradora" },
+  { value: "PLURAL_M", label: "Compradores" },
+  { value: "PLURAL_F", label: "Compradoras" },
+];
+
 export type PersonContext = "seller" | "buyer";
 export type PartyValues = {
   buyer: Record<PersonType, string>;

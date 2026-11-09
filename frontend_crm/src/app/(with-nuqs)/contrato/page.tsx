@@ -269,7 +269,7 @@ export default function Contrato() {
               </div>
             </div>
 
-            {contractsDefault.length > 0 && (
+            {(contractsDefault.length > 0 || generated.length > 0) && (
               <div className={`glass ${styles.contracts}`}>
                 <h4>Particulares</h4>
                 {isChoosingTemplate && (

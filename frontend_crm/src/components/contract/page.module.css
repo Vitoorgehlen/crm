@@ -23,7 +23,13 @@
 .contractHeader {
   display: flex;
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
   justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .back {
@@ -47,12 +53,17 @@
 .contractInfo {
   width: 100%;
   max-width: 1000px;
+  min-width: 0;
+  box-sizing: border-box;
+
   display: flex;
   flex-direction: column;
-  align-items: start;
+  align-items: flex-start;
   justify-content: center;
+
   padding: 15px;
   gap: 5px;
+
   background-color: var(--secondaryBg);
   color: var(--textBase);
 }
@@ -65,11 +76,16 @@
 
 .personsInfos {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+
   display: flex;
   justify-content: space-between;
   align-items: center;
+
   padding: 0 20px;
-  gap: 5px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .footer,
@@ -135,10 +151,15 @@
   gap: 5px;
 }
 
+.editConditional,
 .deleteConditional {
   color: var(--textBase);
   border: none;
   cursor: pointer;
+}
+
+.editConditional:hover {
+  color: var(--primaryColor);
 }
 
 .deleteConditional:hover {
@@ -147,8 +168,37 @@
 
 .word {
   width: 100%;
-  max-width: 210mm;
+  max-width: 794px;
+  box-sizing: border-box;
   margin: 0 auto;
+  padding: 0;
+}
+
+.editorViewport {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  position: relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+.editorCanvas {
+  width: 794px;
+  transform-origin: top left;
+}
+
+.editorContainer {
+  width: 794px;
+  min-width: 794px;
+  max-width: none;
+  min-height: unset;
+  box-sizing: border-box;
+  padding: 0;
+  margin: 0;
+  background: whitesmoke;
+  border: none;
+  box-shadow: none;
+  overflow: visible;
 }
 
 .toolbar {
@@ -301,22 +351,23 @@
 }
 
 .editor :global(.tiptap span[style*="color"]:not([style*="font-size"])) {
-  font-size: inherit;
+  font-size: inherit !important;
   font-weight: inherit;
-}
-
-.editor :global(.tiptap p) {
-  font-size: 12px;
-  font-weight: 400;
-}
-
-.editorContainer :global(.ProseMirror) {
-  cursor: text;
 }
 
 .editor :global(.tiptap p) {
   margin-top: 0;
   margin-bottom: 0;
+  font-size: 12px;
+  font-weight: 400;
+}
+
+.editor :global(.tiptap span) {
+  font-weight: 400;
+}
+
+.editorContainer :global(.ProseMirror) {
+  cursor: text;
 }
 
 .editor :global(.tiptap h1),
@@ -328,6 +379,10 @@
 .editor :global(.tiptap ul),
 .editor :global(.tiptap ol) {
   padding-left: 24px;
+}
+
+.printDocument span {
+  font-weight: inherit !important;
 }
 
 .variablePanel {
@@ -412,6 +467,19 @@
   cursor: pointer;
 }
 
+.delBtn {
+  border: 1px solid var(--errorColor);
+  color: var(--errorColor);
+  background-color: var(--mainBg);
+  opacity: 1;
+}
+
+.delBtn:hover {
+  border: 1px solid var(--mainBg);
+  color: var(--mainBg);
+  background-color: var(--errorColor);
+}
+
 .cancelCreate {
   border: 1px solid var(--errorColor);
   color: var(--errorColor);
@@ -469,11 +537,6 @@
   min-height: 80px;
 }
 
-/* .description {
-  color: #6b6c70;
-  margin: 8px 0 20px;
-} */
-
 .colorControl {
   display: flex;
   align-items: center;
@@ -516,6 +579,26 @@
 }
 
 @media (max-width: 768px) {
+  .contractInfo {
+    padding: 10px;
+  }
+
+  .contractHeader {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .personsInfos {
+    padding: 0;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .personInfos {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
   .headerContent {
     display: flex;
     flex-direction: column;
@@ -530,10 +613,20 @@
 }
 
 @media screen and (max-width: 850px) {
-  .editorContainer {
-    margin-left: 0;
-    margin-right: 0;
-    zoom: 0.8;
+  .main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .word {
+    width: 100%;
+    max-width: 794px;
+    padding: 0;
+    margin: 0 auto;
+  }
+
+  .editorViewport {
+    overflow-x: auto;
   }
 
   .personInfos {
@@ -552,7 +645,7 @@
 
   @bottom-right {
     content: "Página " counter(page) " / " counter(pages);
-    font-size: 9pt;
+    font-size: 9px;
     color: #6b6c70;
   }
 }
@@ -595,7 +688,7 @@
     background: #ffffff !important;
     color: #000000 !important;
     font-family: Arial, sans-serif !important;
-    font-size: 12pt !important;
+    font-size: 12px !important;
     line-height: 1.5 !important;
     overflow: visible !important;
   }
@@ -668,8 +761,17 @@
   font-size: inherit;
   font-weight: inherit;
 }
+.editor :global(.conditional-variable-enabled):hover {
+  background-color: var(--primaryColor);
+  cursor: default;
+}
 
 /* Na impressão, elimina completamente o conteúdo desativado */
 .printDocument :global(.conditional-variable-disabled) {
   display: none !important;
+}
+.printDocument :global(.conditional-variable-enabled) {
+  display: inline !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
 }
