@@ -555,9 +555,8 @@ model GeneratedContract {
   deal     Deal?             @relation(fields: [dealId], references: [id], onDelete: SetNull)
   template ContractTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
-  creator User? @relation("UserGeneratedContractsCreated", fields: [createdBy], references: [id], onDelete: SetNull)
-  updater User? @relation("UserGeneratedContractsUpdated", fields: [updatedBy], references: [id], onDelete: SetNull)
-
+  creator   User               @relation("UserGeneratedContractsCreated", fields: [createdBy], references: [id], onDelete: Restrict)
+  updater   User               @relation("UserGeneratedContractsUpdated", fields: [updatedBy], references: [id], onDelete: Restrict)
   // Variáveis utilizadas neste contrato
   variables ContractVariable[] @relation("GeneratedContractVariables")
 
