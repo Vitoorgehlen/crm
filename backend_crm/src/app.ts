@@ -42,8 +42,18 @@ class App {
         credentials: true,
       }),
     );
-    this.app.use(express.urlencoded({ extended: true }));
-    this.app.use(express.json());
+    this.app.use(
+      express.urlencoded({
+        extended: true,
+        limit: "768kb",
+      }),
+    );
+
+    this.app.use(
+      express.json({
+        limit: "768kb",
+      }),
+    );
   }
 
   routes() {

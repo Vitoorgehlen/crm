@@ -22,7 +22,7 @@ import {
   ConditionalVariable,
   ContractVariable,
   conditionalProtectionKey,
-} from "@/components/config/contractVariables/ContractVariable";
+} from "@/utils/ContractVariable";
 import CustomSelect from "@/components/Tools/Select/CustomSelect";
 import Tooltip from "@/components/Tools/Tooltip/Tooltip";
 import WarningDeal from "@/components/Warning/DefaultWarning";
@@ -49,7 +49,7 @@ import {
   FaCircleXmark,
   FaSquareRootVariable,
 } from "react-icons/fa6";
-import { FaPen, FaTrashAlt } from "react-icons/fa";
+import { FaEraser, FaPen, FaTrashAlt } from "react-icons/fa";
 import { HiVariable } from "react-icons/hi2";
 import { IoIosSave } from "react-icons/io";
 import { IoReturnUpBackOutline } from "react-icons/io5";
@@ -151,7 +151,20 @@ export default function ContractEditor(props: ContractProps) {
     return props.templateId > 0 ? `templateId=${props.templateId}` : null;
   })();
 
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  function getVariableDescription(
+    variable: ContractVariableData,
+    context: PersonContext,
+  ): string {
+    const offset = context === "buyer" ? 4 : 0;
+
+    return variable.options
+      .slice(offset, offset + 4)
+      .filter((option) => option.trim() !== "")
+      .join(" / ");
+  }
 
   function resetVariables() {
     setNewVariableName("");
@@ -239,8 +252,9 @@ export default function ContractEditor(props: ContractProps) {
 
         const optionIndex = index + (context === "buyer" ? 4 : 0);
 
-        const originalDisplayText =
-          variable.options[optionIndex] ?? variable.label;
+        const originalDisplayText = (
+          variable.options[optionIndex] ?? variable.label
+        ).trim();
 
         const textTransform = node.attrs.textTransform as TextTransform | null;
 
@@ -804,6 +818,8 @@ export default function ContractEditor(props: ContractProps) {
   async function handleSaveContract(
     contractId: number | null,
   ): Promise<boolean> {
+    setSuccess("");
+
     if (!editor) {
       console.error("[SAVE] Editor indisponível.");
       return false;
@@ -841,6 +857,17 @@ export default function ContractEditor(props: ContractProps) {
               name: name.trim(),
               content,
             };
+
+      const requestBody = JSON.stringify(payload);
+      const requestSize = new TextEncoder().encode(requestBody).byteLength;
+      if (requestSize > 768 * 1024) {
+        const sizeInMB = (requestSize / 1024).toFixed(2);
+        setError(
+          `Seu arquivo está com ${sizeInMB} MB e ultrapassa o limite permitido de 768kb.`,
+        );
+
+        return false;
+      }
 
       const url = `${API}/${resource}${contractId !== null ? `/${contractId}` : ""}`;
 
@@ -899,6 +926,7 @@ export default function ContractEditor(props: ContractProps) {
           });
         }
       } catch (callbackError) {
+        setSuccess("");
         console.error(
           "Contrato salvo, mas houve um erro ao atualizar o componente pai:",
           callbackError,
@@ -906,6 +934,7 @@ export default function ContractEditor(props: ContractProps) {
       }
 
       setError("");
+      setSuccess("Contrato salvo com sucesso!");
 
       return true;
     } catch (err) {
@@ -1012,7 +1041,6 @@ export default function ContractEditor(props: ContractProps) {
 
         const operations: TransformOperation[] = [];
 
-        // Localiza os textos e variáveis selecionados.
         state.doc.nodesBetween(from, to, (node, pos) => {
           if (node.isText) {
             const start = Math.max(from, pos);
@@ -1043,7 +1071,6 @@ export default function ContractEditor(props: ContractProps) {
 
         if (operations.length === 0) return false;
 
-        // Ordena os elementos na ordem original do documento.
         operations.sort((a, b) => {
           const posA = a.kind === "text" ? a.from : a.pos;
           const posB = b.kind === "text" ? b.from : b.pos;
@@ -1051,8 +1078,6 @@ export default function ContractEditor(props: ContractProps) {
           return posA - posB;
         });
 
-        // Permite que Aa seja aplicado ao trecho inteiro,
-        // mesmo quando ele possui diferentes formatações.
         const capitalizationState = { applied: false };
 
         for (const operation of operations) {
@@ -1080,8 +1105,6 @@ export default function ContractEditor(props: ContractProps) {
           }
         }
 
-        // Aplica as alterações de trás para frente,
-        // evitando deslocamento das posições do documento.
         for (const operation of [...operations].reverse()) {
           if (operation.kind === "text") {
             if (operation.transformedText === operation.originalText) {
@@ -1164,12 +1187,124 @@ export default function ContractEditor(props: ContractProps) {
     };
   }
 
+  function resetTextFormatting() {
+    if (!editor) return;
+
+    const { state, view } = editor;
+    const { from, to, empty } = state.selection;
+    const tr = state.tr;
+
+    setError("");
+    setSuccess("");
+
+    const preserveConditionalMarks = (marks: typeof state.storedMarks) =>
+      marks?.filter((mark) => mark.type.name === "conditionalVariable") ?? [];
+
+    if (empty) {
+      tr.setStoredMarks(
+        preserveConditionalMarks(
+          state.storedMarks ?? state.selection.$from.marks(),
+        ),
+      );
+
+      view.dispatch(tr);
+      view.focus();
+      return;
+    }
+
+    state.doc.nodesBetween(from, to, (node, pos) => {
+      if (node.type.name === "paragraph" || node.type.name === "heading") {
+        if (node.attrs.textAlign) {
+          tr.setNodeMarkup(
+            pos,
+            undefined,
+            {
+              ...node.attrs,
+              textAlign: null,
+            },
+            node.marks,
+          );
+        }
+      }
+
+      if (!node.isInline) return;
+
+      if (node.isText) {
+        const start = Math.max(from, pos);
+        const end = Math.min(to, pos + node.nodeSize);
+
+        if (start >= end) return;
+
+        node.marks.forEach((mark) => {
+          if (mark.type.name === "conditionalVariable") return;
+
+          tr.removeMark(start, end, mark.type);
+        });
+
+        return;
+      }
+
+      const preservedMarks = node.marks.filter(
+        (mark) => mark.type.name === "conditionalVariable",
+      );
+
+      if (node.type.name === "contractVariable") {
+        const [context, variableId] = String(node.attrs.variableId ?? "").split(
+          ".",
+        );
+
+        const variable = variables.find(
+          (item) => String(item.id) === variableId,
+        );
+
+        const displayText =
+          variable?.variableType === "party" &&
+          (context === "seller" || context === "buyer")
+            ? getVariableText(variable, context)
+            : undefined;
+
+        const attrs = {
+          ...node.attrs,
+          textTransform: null,
+          ...(displayText !== undefined ? { displayText } : {}),
+        };
+
+        tr.setNodeMarkup(pos, undefined, attrs, preservedMarks);
+
+        return;
+      }
+
+      if (node.marks.some((mark) => mark.type.name !== "conditionalVariable")) {
+        tr.setNodeMarkup(pos, undefined, node.attrs, preservedMarks);
+      }
+    });
+
+    tr.setStoredMarks(
+      preserveConditionalMarks(
+        state.storedMarks ?? state.selection.$from.marks(),
+      ),
+    );
+
+    view.dispatch(tr.scrollIntoView());
+    view.focus();
+  }
+
+  const partyVariableOptions = variables
+    .filter((variable) => variable.variableType === "party")
+    .map((variable) => ({
+      value: String(variable.id),
+      label: variable.label,
+      description: getVariableDescription(variable, personContext),
+    }));
+
   const variablesRef = useRef<ContractVariableData[]>([]);
   const variablesPanelRef = useRef<HTMLDivElement>(null);
   const variablesButtonRef = useRef<HTMLButtonElement>(null);
   const savedContentRef = useRef<string>("");
   const contentInitializedRef = useRef(false);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
+  const successRef = useRef<HTMLParagraphElement>(null);
+  const errorRef = useRef<HTMLParagraphElement>(null);
 
   const conditionalSelectionRef = useRef<{
     from: number;
@@ -1181,6 +1316,7 @@ export default function ContractEditor(props: ContractProps) {
       openEnd: number;
     };
   } | null>(null);
+
   const lastTextSelectionRef = useRef<{
     from: number;
     to: number;
@@ -1246,14 +1382,45 @@ export default function ContractEditor(props: ContractProps) {
 
   const toolbarState = useEditorState({
     editor,
-    selector: ({ editor }) => ({
-      bold: editor?.isActive("bold") ?? false,
-      italic: editor?.isActive("italic") ?? false,
-      underline: editor?.isActive("underline") ?? false,
+    selector: ({ editor }) => {
+      if (!editor) {
+        return {
+          bold: false,
+          italic: false,
+          underline: false,
+          fontSize: "12px",
+          color: "#141519",
+        };
+      }
 
-      fontSize: editor?.getAttributes("textStyle").fontSize ?? "12px",
-      color: editor?.getAttributes("textStyle").color ?? "#141519",
-    }),
+      const { selection, doc } = editor.state;
+
+      const fontSizes = new Set<string>();
+
+      if (selection.empty) {
+        fontSizes.add(editor.getAttributes("textStyle").fontSize ?? "12px");
+      } else {
+        doc.nodesBetween(selection.from, selection.to, (node) => {
+          if (!node.isInline) return;
+
+          const textStyle = node.marks.find(
+            (mark) => mark.type.name === "textStyle",
+          );
+
+          fontSizes.add(textStyle?.attrs.fontSize ?? "12px");
+        });
+      }
+
+      return {
+        bold: editor.isActive("bold"),
+        italic: editor.isActive("italic"),
+        underline: editor.isActive("underline"),
+
+        fontSize: fontSizes.size > 1 ? "" : ([...fontSizes][0] ?? "12px"),
+
+        color: editor.getAttributes("textStyle").color ?? "#141519",
+      };
+    },
   });
 
   const fetchVariable = useCallback(async () => {
@@ -1465,9 +1632,11 @@ export default function ContractEditor(props: ContractProps) {
         await fetchVariable();
       }
 
+      const savedVariableId = String(data.id ?? editingVariableId ?? "");
       resetVariables();
 
       if (variableType === "party") {
+        setSelectedVariableId(savedVariableId);
         setIsOpenVariables(true);
       }
     } catch (err) {
@@ -1489,6 +1658,24 @@ export default function ContractEditor(props: ContractProps) {
     props.mode,
     conditionalText,
   ]);
+
+  useEffect(() => {
+    if (!success) return;
+
+    successRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [success]);
+
+  useEffect(() => {
+    if (!error) return;
+
+    errorRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+  }, [error]);
 
   useEffect(() => {
     variablesRef.current = variables;
@@ -1700,7 +1887,6 @@ export default function ContractEditor(props: ContractProps) {
       const currentContent = JSON.stringify(editor.getJSON());
       const incomingContent = JSON.stringify(nextContent);
 
-      // Evita recriar os NodeViews se o conteúdo já estiver atualizado
       if (currentContent !== incomingContent) {
         editor.commands.setContent(nextContent, {
           emitUpdate: false,
@@ -1763,9 +1949,17 @@ export default function ContractEditor(props: ContractProps) {
                 onChange={(event) => setName(event.target.value)}
                 placeholder="Nome do contrato"
               />
-              <p className="error">{error}</p>
+              <p ref={errorRef} className="error" role="alert">
+                {error}
+              </p>
 
-              <p>Ajuste os dados dos promitentes e da negociação abaixo</p>
+              <p ref={successRef} className={styles.saveSuccess} role="alert">
+                {success}
+              </p>
+
+              {!success && !error && (
+                <p>Ajuste os dados dos promitentes e da negociação abaixo</p>
+              )}
               <div className={styles.personsInfos}>
                 <div className={styles.personInfos}>
                   <h4>Promitente</h4>
@@ -1877,6 +2071,7 @@ export default function ContractEditor(props: ContractProps) {
                       placeholder="Ex: Imóvel financiado"
                       className={`form-base ${styles.form}`}
                       value={newVariableName}
+                      maxLength={30}
                       onChange={(event) =>
                         setNewVariableName(event.target.value)
                       }
@@ -1976,6 +2171,17 @@ export default function ContractEditor(props: ContractProps) {
                   onClick={() => editor.chain().focus().toggleUnderline().run()}
                 >
                   <u>U</u>
+                </button>
+              </Tooltip>
+
+              <span className={styles.separator} />
+              <Tooltip label="Limpar toda a formatação">
+                <button
+                  type="button"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={resetTextFormatting}
+                >
+                  <FaEraser />
                 </button>
               </Tooltip>
 
@@ -2231,21 +2437,12 @@ export default function ContractEditor(props: ContractProps) {
               <div className={styles.variableLine}>
                 <span>Variável</span>
                 <CustomSelect<string>
-                  options={variables
-                    .filter((variable) => variable.variableType === "party")
-                    .map((variable) => ({
-                      value: String(variable.id),
-                      label: variable.label,
-                    }))}
+                  options={partyVariableOptions}
+                  solidBg={true}
                   value={
-                    variables
-                      .filter((variable) => variable.variableType === "party")
-                      .map((variable) => ({
-                        value: String(variable.id),
-                        label: variable.label,
-                      }))
-                      .find((option) => option.value === selectedVariableId) ??
-                    null
+                    partyVariableOptions.find(
+                      (option) => option.value === selectedVariableId,
+                    ) ?? null
                   }
                   onChange={(option) => {
                     if (!option) return;
@@ -2381,6 +2578,7 @@ export default function ContractEditor(props: ContractProps) {
                   placeholder="Nomeie essa variável"
                   className={`form-base ${styles.form}`}
                   value={newVariableName}
+                  maxLength={23}
                   onChange={(event) => setNewVariableName(event.target.value)}
                 />
               </div>
@@ -2400,6 +2598,7 @@ export default function ContractEditor(props: ContractProps) {
                         placeholder={person.label}
                         className={`form-base ${styles.form}`}
                         value={partyValues.buyer[person.value]}
+                        maxLength={35}
                         onChange={(event) => {
                           setPartyValues((prev) => ({
                             ...prev,

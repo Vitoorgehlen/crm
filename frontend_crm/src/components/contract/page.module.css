@@ -407,6 +407,7 @@
 .createVariablePanel {
   width: auto;
   height: auto;
+  max-height: 325px;
 }
 
 .variableLine {
@@ -576,6 +577,38 @@
   background: var(--mainBg);
   border-bottom: 1px dashed var(--primaryColor);
   border-radius: 2px;
+}
+
+.editor :global(.tiptap .contract-variable) {
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.saveSuccess {
+  color: var(--successColor);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  margin: 0;
+  padding: 0 !important;
+  animation: fadeIn 0.2s ease;
+}
+
+.editor :global(.tiptap) {
+  width: 100%;
+  min-height: unset;
+  box-sizing: border-box;
+  outline: none;
+  cursor: text;
+
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #141519;
+
+  overflow-wrap: break-word;
 }
 
 @media (max-width: 768px) {

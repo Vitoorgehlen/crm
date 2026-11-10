@@ -25,6 +25,16 @@
   overflow: hidden;
 }
 
+.solidOption {
+  background: var(--mainBg) !important;
+}
+
+.solidOption.optionFocused,
+.solidOption.optionSelected {
+  background: var(--secondaryBg) !important;
+  color: var(--primaryColor) !important;
+}
+
 /* cada opção */
 .option {
   cursor: pointer;
@@ -88,4 +98,18 @@
 .placeholder {
   font-size: 15px !important;
   font-weight: 100 !important;
+}
+
+.optionContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.optionDescription {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--textBase);
+  line-height: 1.4;
+  white-space: normal;
 }

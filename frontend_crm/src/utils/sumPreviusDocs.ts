@@ -82,12 +82,15 @@ export function sumDocs(
   let itbiDescription = `${docValues["ITBI_CASH"] || 0}% do valor total.`;
 
   if (paymentMethod !== "CASH") {
-    const minimumPayment = (financing / 0.8) * 0.2;
-    if (total < 250000) downForItbi += subsidy;
-    if (downForItbi < minimumPayment) downForItbi = minimumPayment;
+    const minimumPayment = financing * 0.25;
 
-    itbiCash = minimumPayment * percentITBICash;
+    if (total < 250000) downForItbi += subsidy;
+
+    downForItbi = Math.max(downForItbi, minimumPayment);
+
+    itbiCash = downForItbi * percentITBICash;
     financedItbi = financing * percentITBIFinancing;
+
     itbiDescription = `${docValues["ITBI_CASH"] || 0}% da entrada + ${docValues["ITBI_FINANCED"] || 0}% do valor financiado.`;
   } else itbiCash = total * percentITBICash;
 

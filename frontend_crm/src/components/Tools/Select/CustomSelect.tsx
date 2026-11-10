@@ -6,6 +6,7 @@ import styles from "./select.module.css";
 export interface Option<T = unknown> {
   value: T;
   label: string;
+  description?: string;
 }
 
 interface CustomSelectProps<T> {
@@ -14,6 +15,7 @@ interface CustomSelectProps<T> {
   onChange: (value: Option<T> | null) => void;
   isDisabled?: boolean;
   placeholder?: string;
+  solidBg?: boolean;
 }
 
 export default function CustomSelect<T>({
@@ -22,6 +24,7 @@ export default function CustomSelect<T>({
   onChange,
   isDisabled,
   placeholder,
+  solidBg = false,
 }: CustomSelectProps<T>) {
   return (
     <Select<Option<T>, false>
@@ -30,9 +33,26 @@ export default function CustomSelect<T>({
       onChange={(option) => onChange(option as Option<T> | null)}
       isDisabled={isDisabled}
       placeholder={placeholder}
-      className={styles.container}
+      className={`${styles.container} ${solidBg && styles.solidBg}`}
       menuPortalTarget={typeof window !== "undefined" ? document.body : null}
       menuPosition="fixed"
+      formatOptionLabel={(option, { context }) => {
+        if (context === "value") {
+          return option.label;
+        }
+
+        return (
+          <div className={styles.optionContent}>
+            <span className={styles.optionLabel}>{option.label}</span>
+
+            {option.description && (
+              <span className={styles.optionDescription}>
+                {option.description}
+              </span>
+            )}
+          </div>
+        );
+      }}
       styles={{
         menuPortal: (base) => ({
           ...base,
@@ -53,6 +73,7 @@ export default function CustomSelect<T>({
 
           return `
     ${styles.option}
+    ${solidBg ? styles.solidOption : ""}
     ${state.isFocused ? styles.optionFocused : ""}
     ${state.isSelected ? styles.optionSelected : ""}
     ${isFirst && state.isSelected ? styles.firstSelected : ""}
